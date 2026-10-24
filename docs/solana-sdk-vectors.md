@@ -20,6 +20,8 @@ yarn solana:sdk-vectors
 
 ## 参考基准与证明边界
 
+2026-10-25 实时核对 FESOL-57：该需求明确要求 gmx-solana v0.10.0 model 生成器及复杂业务数学基准。本工具的 Python apply_factor 向量仅为基础能力，不满足该生成器要求，也不能作为 FESOL-57 完成证据。
+
 参考契约为 `floor(value * factor / 10^20)`，value/factor 为 u128，结果超出 u128 返回 undefined。JavaScript 运行器只解析固定向量和比较结果，不自行实现这个公式作为期望。
 
 固定数据：[apply-factor.json](../tools/solana-sdk-vectors/apply-factor.json)。独立生成器：[generate.py](../tools/solana-sdk-vectors/generate.py)，仅用 Python 任意精度整数乘法和整除，无 SDK/RPC 依赖。复核而不改写仓库文件：
