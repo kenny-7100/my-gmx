@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "agent:evidence": "node scripts/agent-evidence.mjs",
+    "test:agent-evidence": "node --test scripts/agent-evidence.test.mjs",
     "solana:alt-preflight": "tsx scripts/solana-alt-preflight.mjs",
     "solana:transaction-evidence": "node scripts/solana-transaction-evidence.mjs",
     "test:solana-transaction-evidence": "node --test scripts/solana-transaction-evidence.test.mjs",
