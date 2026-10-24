@@ -1,19 +1,24 @@
 import { expect, test as base } from "@playwright/test";
 
-export const test = base.extend<{ diagnostics: void }, { chainId: number }>({
+export const test = base.extend<{ diagnostics: void }, { chainId: number; productionPreview: boolean }>({
   // Avalanche projects override this.
   chainId: [42161, { option: true, scope: "worker" }],
-  context: async ({ context, chainId }, use) => {
-    await context.addInitScript((network) => {
-      if (window.top !== window || !/^https?:$/.test(location.protocol)) return;
-      if (!localStorage.getItem("regression-initialized")) {
-        localStorage.setItem("production-preview", "true");
-        localStorage.setItem("SELECTED_NETWORK", String(network));
-        localStorage.setItem("SELECTED_SETTLEMENT_CHAIN_ID", String(network));
-        localStorage.setItem("LANGUAGE_KEY", "en");
-        localStorage.setItem("regression-initialized", "true");
-      }
-    }, chainId);
+  productionPreview: [true, { option: true, scope: "worker" }],
+  context: async ({ context, chainId, productionPreview }, use) => {
+    await context.addInitScript(
+      ({ network, preview }) => {
+        if (window.top !== window || !/^https?:$/.test(location.protocol)) return;
+        if (!localStorage.getItem("regression-initialized")) {
+          if (preview) localStorage.setItem("production-preview", "true");
+          else localStorage.removeItem("production-preview");
+          localStorage.setItem("SELECTED_NETWORK", String(network));
+          localStorage.setItem("SELECTED_SETTLEMENT_CHAIN_ID", String(network));
+          localStorage.setItem("LANGUAGE_KEY", "en");
+          localStorage.setItem("regression-initialized", "true");
+        }
+      },
+      { network: chainId, preview: productionPreview }
+    );
     await use(context);
   },
   diagnostics: [
