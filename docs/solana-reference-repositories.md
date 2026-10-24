@@ -75,4 +75,6 @@ git -C gmx-adrs show origin/adr-0015-solana-gmx-api:adr/0015-serve-solana-data-t
 
 执行用户授权的 push 时，除 `gmx-prompts` 外，必须明确选择对应的 `my-` remote，不能依据 upstream 自动推送到 `origin`。个人 remote 尚未配置时，先向用户确认目标；本次 clone 不包含创建 GitHub 镜像的授权。
 
-新增 7 个目录都是独立嵌套 Git 仓库，未注册为主项目子模块，核验时也未被主项目忽略，因此会显示为未跟踪目录。主项目提交前应先确认它们的管理方式，避免 `git add .` 意外将其记录为 gitlink。不要擅自创建子模块、修改忽略规则或提交参考仓库内容。
+新增 7 个目录都是独立嵌套 Git 仓库，已在提交 `567331a4d4` 中以 gitlink（模式 `160000`）记录，但未配置对应的 `.gitmodules` 条目。因此重新 clone 主项目不会自动得到这些参考仓库的源码；需要时按上表地址分别 clone。用户明确要求 `push` 时，按根 `AGENTS.md` 直接暂存、提交和推送，不再为这些目录请求确认。
+
+本地主项目已通过 `git config --local commit.gpgsign false` 关闭提交签名，避免自动提交时等待 GPG 口令。这是 `.git/config` 中的本地设置，不随 push 共享，也不适用于其他仓库；换机器或重新 clone 后需重新核实。
