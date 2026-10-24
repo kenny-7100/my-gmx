@@ -12,6 +12,7 @@
 | [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例 |
 | [Agent 统一只读预检](agent-preflight.md) | 按任务选择 RPC/keeper/样例 API/可选钱包检查，统一状态、退出码和本地版本证据；不自动启动服务 |
 | [Solana SDK 与程序版本证据预检](solana-runtime-preflight.md) | A14：核对本地 SDK/WASM 完整性，记录 Mainnet 程序部署 slot、权限和完整程序区指纹；不构建或判断业务兼容 |
+| [Solana Mainnet 交易回执证据](solana-transaction-evidence.md) | A12：显式签名查询 finalized 状态与完整回执，核对身份/结果并绑定源码与摘要；不推断 keeper 订单执行 |
 | [Solana ALT 资源预检](solana-alt-preflight.md) | A05：现有 Mainnet 地址查找表的批量读取、生命周期、authority、完整地址与摘要；不创建或修改表 |
 | [本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md) | 手动启动、前端与 Agent 调用、fallback key/Origin 转发、方法限制及验证边界 |
 | [keeper 只读预检](keeper-preflight.md) | A02 真实价格、图表与开关预检；本地 `solanaTrading` 覆盖配置、环境边界及真实交易前置 |
