@@ -1,6 +1,6 @@
 # 自动化工具沉淀约定
 
-更新日期：2026-10-24。用户已授权 Agent 在实际协作中主动发现、实现并积累有复用价值的自动化能力，减少重复推理、人工操作、执行时间和成本。
+更新日期：2026-10-25。用户已授权 Agent 在实际协作中主动发现、实现并积累有复用价值的自动化能力，减少重复推理、人工操作、执行时间和成本。
 
 ## 何时沉淀
 
@@ -36,3 +36,5 @@
 已沉淀 [keeper 只读预检](keeper-preflight.md)：`yarn keeper:preflight` 复用现有 Arbitrum keeper/代币配置，显式设置已验证的 User-Agent，检查五种基础资产价格（最大年龄 30 秒）、三种非稳定币的 24h/1m K 线与 `solanaTrading`。验证入口为 `yarn test:keeper-preflight`；真实请求发现主端点和两个备用端点均缺少交易开关，正确返回 `blocked` / 退出 2，不伪装成整体通过。工具不启动服务、不发送交易，不自动切换上游。
 
 已沉淀[本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md)：通过现有 fallback key 和固定上游 Origin 为 Agent/本地前端提供统一 HTTP 入口，拒绝交易发送；手动启动 `yarn solana:rpc-proxy`，不自动启动前端。单元验证入口为 `yarn test:solana-rpc-proxy`，真实只读验收为 `yarn solana:rpc-proxy:verify`（需先启动代理）；2026-10-24 经用户授权已通过 handler、真实读取、100 账户、订单扫描及本地浏览器 CORS 验收。前端统一 URL 配置已加入，当前分支尚无 Solana RPC client 消费它；跟踪状态见 [A01 实施清单](agent-acceptance-infrastructure.md)。
+
+已沉淀[本地 Solana API 样例验收服务](solana-api-local.md)：`yarn solana:api-local start` 在隔离环境中运行已有 gmx-api Solana 入口，`yarn solana:api-local verify` 检查 14 项健康、样例、动态时间戳、地址错误、404 和 CORS 行为，输出 sample 模式、预期源码 SHA/dirty 和文件摘要。无需钱包或后端凭据；不自动安装依赖、启动前端或切换业务 host。实际使用前按文档准备锁定依赖，完成后关闭自启服务。

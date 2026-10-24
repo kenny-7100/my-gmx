@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "solana:api-local": "node scripts/solana-api-local.mjs",
     "agent:wallet": "node scripts/agent-wallet.mjs",
     "test:agent-wallet": "node --test scripts/agent-wallet.test.mjs scripts/agent-wallet-balance.test.mjs",
     "keeper:preflight": "tsx scripts/keeper-preflight.ts",

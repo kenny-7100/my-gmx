@@ -1,6 +1,6 @@
 # 编码与自审规范
 
-核验日期：2026-10-24。编码与自我代码审查以本地 `gmx-prompts` 的相关规范为依据。本页提供入口和重点，不替代原文；后续工作应阅读当前版本及其引用资料。
+核验日期：2026-10-25。编码与自我代码审查以本地 `gmx-prompts` 的相关规范为依据。本页提供入口和重点，不替代原文；后续工作应阅读当前版本及其引用资料。
 
 ## 执行前的环境检查与顺序
 
@@ -13,6 +13,8 @@
 5. **keeper 相关验收先检查真实依赖。** 开展已授权的价格展示、价格计算或 Solana 交易验收前，先按[keeper 只读预检](keeper-preflight.md)运行 `yarn keeper:preflight`。默认请求头已处理确认过的 User-Agent 访问差异；查看逐项价格与 flags 结果。用户已批准本地开发用 `VITE_APP_SOLANA_TRADING_OVERRIDE=true/false` 模拟开关，使用时在报告中注明；预检仍检查真实接口，`blocked` 不作为真实交易前置通过，不能因真实开关缺失阻挡已授权 mock 范围的开发。
 
 6. **资金相关验收先核实网络和余额。** 在已获授权的 Solana 只读验收中，按[本地钱包说明](agent-wallet.md#mainnet-余额预检与执行顺序)先启动既有代理并运行 `yarn agent:wallet balances --network solana-mainnet`，成功后再判断具体需求的资金与账户前置条件。读取失败先诊断代理或上游，不把错误当零余额；Devnet 当前暂缓，不自动换公共 RPC。该预检不授予签名或发送权限。
+
+7. **样例 API 验收先使用现有 Solana launch mode。** 已获本地服务验收授权时，按[本地 Solana API 说明](solana-api-local.md#执行前准备与顺序)先核实源码与锁定依赖，再运行 `yarn solana:api-local start`，待服务就绪后执行 `yarn solana:api-local verify`。无需准备 EVM 数据库或 RPC；遇到 immutable 安装的 cacheKey 差异先核对文档中的压缩配置，不删除锁文件或升级依赖。样例通过不代表 reviewed contract 或真实链上数据通过。
 
 完整前端构建命令（工作目录：主仓库根目录；仅在已获构建授权、机器资源允许时执行）：
 

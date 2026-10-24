@@ -12,6 +12,7 @@
 | [本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md) | 手动启动、前端与 Agent 调用、fallback key/Origin 转发、方法限制及验证边界 |
 | [keeper 只读预检](keeper-preflight.md) | A02 真实价格、图表与开关预检；本地 `solanaTrading` 覆盖配置、环境边界及真实交易前置 |
 | [本地 Agent 验收钱包](agent-wallet.md) | A05：助记词配置、固定 EVM/Solana 地址、Mainnet 原生 SOL 余额预检与失败诊断；已通过自动测试和真实只读验收，Devnet 暂缓 |
+| [本地 Solana API 样例验收服务](solana-api-local.md) | A08：启动现有 gmx-api 样例模式、检查样例和 HTTP 行为、记录源码证据；不依赖钱包、数据库或 RPC |
 | [Solana 迁移参考仓库](solana-reference-repositories.md) | 查找仓库用途、协议与 SDK 资料、ADR-0015 分支、版本注意事项和 remote 规则 |
 | [旧 Solana 后端参考说明](gmtrade-web-backend-reference.md) | 查阅源码快照的结构、数据流、接口、精度及缺失依赖，理解其与 GMX 目标架构的区别 |
 | [文档维护约定](documentation-maintenance.md) | 主动沉淀协作知识，把环境排障经验提升为执行前置，维护索引及接手资料 |
