@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "agent:acceptance": "node scripts/agent-acceptance.mjs",
+    "test:agent-acceptance": "node --test scripts/agent-acceptance.test.mjs",
     "solana:sdk-vectors": "tsx scripts/solana-sdk-vectors.mjs",
     "test:solana-sdk-vectors": "tsx --test scripts/solana-sdk-vectors.test.mjs",
     "solana:index-preflight": "node scripts/solana-index-preflight.mjs",

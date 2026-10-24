@@ -9,7 +9,7 @@
 | [需求推荐与就绪核验](solana-next-task.md) | 综合 Linear、GitHub PR、最新上游代码和实际前置，推荐下一条迁移需求 |
 | [Solana 迁移实际进度评估](solana-progress.md) | 跨仓库取证、去重与工作量估算，输出两个进度口径及中英文简述 |
 | [Agent 验收基础设施调研与实施清单](agent-acceptance-infrastructure.md) | RPC、keeper、API、钱包等验收条件与实施记录；A01/A02 访问工具已完成；下一项 A03 待实际部署入口，含就绪复核、验收条件与协调清单 |
-| [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例 |
+| [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；新增 Markdown 工作表一致性检查，拒绝错误汇总与无效证据引用 |
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
 | [Solana 统计索引只读预检](solana-index-preflight.md) | A16：核实实际 volume 索引的 GraphQL 契约、高度和最新事件年龄；不推断处理延迟或历史完整性 |
 | [Agent 本地 PR 预览定位](agent-preview.md) | A09/A14：复用 CI 解析器，从实时 PR head 定位成功部署的不可变 URL；不打开页面或执行 UI 测试 |
