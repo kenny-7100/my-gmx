@@ -1,0 +1,85 @@
+[package]
+name = "gmtrade-web-backend"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "gmtrade-web-backend"
+path = "src/main.rs"
+
+[features]
+nightly-candles-read-pool = []
+nightly = ["nightly-candles-read-pool"]
+
+[dependencies]
+gmsol-keeper-client = { path = "../gmsol-keeper-client" }
+gmsol-sqd-client = { path = "../gmsol-sqd-client" }
+# price-candle GraphQL candle fallback (keeper-priced markets the Data Engine +
+# Arbitrum lack, e.g. USDMXN/WTI/precious metals); same `candles(indexToken,...)`
+# query the frontend uses for those markets. Endpoint empty -> disabled.
+gmsol-price-candle-client = { path = "../gmsol-price-candle-client" }
+gmsol-sdk = { workspace = true, features = ["client", "chainlink"] }
+anchor-spl = { workspace = true, features = [
+    "token",
+    "token_2022",
+] }
+solana-account-decoder = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+axum = { workspace = true, features = ["ws", "multipart"] }
+tower.workspace = true
+tower-http = { workspace = true, features = ["cors", "trace"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+figment = { workspace = true, features = ["toml", "env", "json"] }
+tracing.workspace = true
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+eyre.workspace = true
+clap = { workspace = true, features = ["derive"] }
+moka = { workspace = true, features = ["future"] }
+time = { workspace = true, features = ["parsing"] }
+arc-swap.workspace = true
+redis = { workspace = true, features = [
+    "tokio-comp",
+    "cluster",
+    "cluster-async",
+    "tokio-native-tls-comp",
+] }
+futures-util.workspace = true
+# marin (order-keeper) graphql-ws subscription client (O1). The `tungstenite`
+# feature provides the `Connection` impl for a `tokio_tungstenite` WebSocket
+# stream (same transport the `xtask` keeper-api playground proves against marin),
+# so we hand a connected `tokio_tungstenite::WebSocketStream` to `Client::build`.
+graphql-ws-client = { workspace = true, features = ["tungstenite"] }
+tokio-tungstenite = { workspace = true, features = [
+    "url",
+    "rustls-tls-native-roots",
+] }
+# Needed to install a rustls crypto provider at startup: both `ring` and
+# `aws-lc-rs` are in the dep tree, so rustls has no unambiguous default and the
+# tokio-tungstenite (marin graphql-ws) TLS handshake panics without one.
+rustls = { version = "0.23", default-features = false, features = ["ring"] }
+url.workspace = true
+aws-sdk-s3.workspace = true
+aws-config.workspace = true
+async-trait.workspace = true
+rand.workspace = true
+# Chainlink Data Engine candle client (C2a) — direct HTTP to the auth Lambda +
+# Data Engine history endpoint, replacing the old Go web-api candle dependency.
+# `stream` enables `bytes_stream()` for the SSE price stream (live forming candle).
+reqwest = { workspace = true, features = ["json", "rustls-tls", "stream"] }
+# Lazily gunzip the vendored phuslu/iploc IPv6 table for the GeoIP `x-user-country`
+# middleware (see `src/geoip`). Already in the workspace lock (1.1.2).
+flate2 = "1"
+# Hex-encode on-chain Chainlink Data Streams feed pubkeys into feed-id strings
+# (see `src/sources/token_map.rs::fetch_chainlink_feeds`). Already in the lock (0.4.3).
+hex = "0.4"
+metrics = { workspace = true }
+metrics-exporter-dogstatsd = { workspace = true }
+metrics-exporter-prometheus = { workspace = true }
+
+[dev-dependencies]
+figment = { workspace = true, features = ["toml", "env", "json", "test"] }
+# `test-util` provides tokio's paused/auto-advancing test clock (`start_paused`),
+# used by the B1 stall-timeout tests to fire the timeout deterministically
+# without real sleeping. (`full` does NOT include `test-util`.)
+tokio = { workspace = true, features = ["full", "test-util"] }

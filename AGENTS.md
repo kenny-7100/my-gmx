@@ -2,7 +2,7 @@
 
 本次集成的核心原则是在现有 GMX 架构和统一数据流下支持 Solana，复用主项目的前端组件、状态管理、交互及业务体系，降低长期维护成本。链特有能力应在现有架构边界内适配，不另建并行的 Solana 应用或业务数据流。
 
-`gmx-solana-interface` 和用户后续提供的旧 Solana 后端仅用于理解资源、接口和行为，不直接迁移其架构或业务体系，也不将其作为目标实现的长期依赖。旧前端后续会废弃；旧后端可能废弃，目前尚未提供，不能与现有 `gmx-api` 混淆。详见[集成原则](docs/solana-reference-repositories.md#核心集成原则)。
+`gmx-solana-interface` 和旧 Solana 后端 `gmtrade-web-backend/` 仅用于理解资源、接口和行为，不直接迁移其架构或业务体系，也不将其作为目标实现的长期依赖。旧前端后续会废弃，旧后端可能废弃。后端已作为源码快照收录，并非现有 `gmx-api`；用途和缺失依赖见[后端参考说明](docs/gmtrade-web-backend-reference.md)。详见[集成原则](docs/solana-reference-repositories.md#核心集成原则)。
 
 ## Solana 迁移
 
