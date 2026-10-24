@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "solana:alt-preflight": "tsx scripts/solana-alt-preflight.mjs",
+    "test:solana-alt-preflight": "tsx --test scripts/solana-alt-preflight.test.mjs",
     "solana:runtime-preflight": "tsx scripts/solana-runtime-preflight.mjs",
     "test:solana-runtime-preflight": "tsx --test scripts/solana-runtime-preflight.test.mjs",
     "agent:preflight": "node scripts/agent-preflight.mjs",
