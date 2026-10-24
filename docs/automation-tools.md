@@ -30,3 +30,5 @@
 优先更新已有工具和文档，避免同一任务出现多套近似脚本。遇到接口或项目结构变化时，同步修正当前任务涉及的工具及说明，不让旧检查产生错误信心。
 
 已沉淀 [Linear 需求工具](linear-requirements.md)：复用同一入口完成 FESOL 实时查询、全量快照、筛选和差异比较，避免每次由 Agent 手工翻页、统计及比对。脚本为 `scripts/linear-requirements.mjs`，验证入口为 `yarn test:linear-tools`。
+
+已沉淀[本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md)：通过现有 fallback key 和固定上游 Origin 为 Agent/本地前端提供统一 HTTP 入口，拒绝交易发送；手动启动 `yarn solana:rpc-proxy`，不自动启动前端。单元验证入口为 `yarn test:solana-rpc-proxy`，真实只读验收为 `yarn solana:rpc-proxy:verify`（需先启动代理）；2026-10-24 经用户授权已通过 handler、真实读取、100 账户、订单扫描及本地浏览器 CORS 验收。前端统一 URL 配置已加入，当前分支尚无 Solana RPC client 消费它；跟踪状态见 [A01 实施清单](agent-acceptance-infrastructure.md)。

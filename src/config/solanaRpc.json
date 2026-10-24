@@ -1,0 +1,6 @@
+{
+  "localUrl": "http://127.0.0.1:3030",
+  "upstreamHost": "https://solana-mainnet.g.alchemy.com/v2",
+  "fallbackKey": "alch_RCUyAwn71kwGwf3IeEyMp",
+  "upstreamOrigin": "https://app.gmx.io"
+}
