@@ -19,6 +19,8 @@
 
 需求开发遵循 [分支与 PR 交付流程](docs/linear-development-workflow.md)：一条 Linear 需求对应一个独立分支，开发从 `solana-integration` 创建，最终交付必须基于最新 `origin/release` 且只包含当前需求改动，严禁混入个人开发基础改动。用户自行维护 `solana-integration` 与上游的同步。PR 向上游 `release` 提出并保持 Draft，附英文 Summary、Linear 链接和英文自测结果表格；提出后按 gmx-prompts 审查，用户明确同意前不转 Ready 或请求 reviewer。
 
+项目 skill 位于 `.agents/skills/`：需求查询与复盘使用 `gmx-linear-requirements`，需求开发及 Draft PR 交付使用 `gmx-solana-task-delivery`；详细资料仍维护在 `docs/`，skill 不扩大任务或操作授权。这些 skill 属于个人开发基础，不随业务需求交付上游。
+
 ## 工程规范
 
 1. 编码和自我代码审查必须参考 `gmx-prompts`：开发看 `skills/gmx-interface-dev/SKILL.md`，前端及 SDK 自审看 `skills/gmx-interface-review/SKILL.md`，Solana 改动同时看 `skills/gmx-solana/SKILL.md`，测试看 `skills/gmx-tests/SKILL.md`；涉及 API 审查时看 `skills/gmx-api-review/SKILL.md`。按入口阅读相关规范与审查细则，不能仅凭通用经验检查。
