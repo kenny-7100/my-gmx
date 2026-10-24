@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "solana:alt-preflight": "tsx scripts/solana-alt-preflight.mjs",
+    "solana:transaction-evidence": "node scripts/solana-transaction-evidence.mjs",
+    "test:solana-transaction-evidence": "node --test scripts/solana-transaction-evidence.test.mjs",
     "test:solana-alt-preflight": "tsx --test scripts/solana-alt-preflight.test.mjs",
     "solana:runtime-preflight": "tsx scripts/solana-runtime-preflight.mjs",
     "test:solana-runtime-preflight": "tsx --test scripts/solana-runtime-preflight.test.mjs",

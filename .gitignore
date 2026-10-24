@@ -71,3 +71,4 @@ claude.md
 /.local/acceptance/solana-runtime/
 /.local/acceptance/solana-alt/
 /.local/acceptance/requirements/
+/.local/acceptance/solana-transaction/

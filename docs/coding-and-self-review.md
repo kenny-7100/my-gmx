@@ -22,6 +22,8 @@
 
 10. **依赖 ALT 的验收先核实表资源。** 在已获授权的交易构建/模拟相关工作中，按[ALT 预检说明](solana-alt-preflight.md)通过已启动代理运行 `yarn solana:alt-preflight`，先看生命周期、实际生效地址和 authority，再核对该笔交易的表成员与索引；blocked/failed 不能当作资源 ready。无 ALT 依赖的任务无需运行；不自动创建、替换或修改表。
 
+11. **已有 Solana 签名先核实链上回执。** 在已获授权的交易结果只读验收中，按[回执证据说明](solana-transaction-evidence.md)显式提供 Mainnet 和当前流程产生的签名，核对 finalized 状态、身份和 meta.err 后再进行订单/API 验证。blocked 不当作成功，transaction-failed 保留回执并排障；创建交易成功不代表 keeper 已执行。没有签名的单元/样例验收不运行此项，不自动签名或发送交易。
+
 完整前端构建命令（工作目录：主仓库根目录；仅在已获构建授权、机器资源允许时执行）：
 
 ```sh
