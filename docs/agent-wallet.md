@@ -97,7 +97,7 @@ yarn agent:wallet tokens --network solana-mainnet
 | Devnet 网络与余额 | 按用户决定暂缓 | 四个现有 Alchemy key 均未启用 Devnet；不阻挡本轮 Mainnet 工具建设，不自动改用公共 RPC |
 | Mainnet 代币账户盘点 | 已实现并通过真实验收 | 两种程序读取、精确金额、归属/状态与错误边界；真实 RPC 对照和停服验证 |
 | 本地签名、发送与确认 | 待实施，未获实际交易授权 | 复用项目交易构建与校验；明确网络、允许操作及预算后逐项实施和验收；现有代理禁止广播 |
-| 业务账户样本与恢复 | 待准备 | 持仓、挂单、ALT 及准备/清理方式仍按 A05/A12/A13 逐项完善 |
+| 业务账户样本与恢复 | 待准备 | ALT 已有[独立只读预检](solana-alt-preflight.md)，持仓、挂单及准备/清理方式仍按 A05/A12/A13 逐项完善 |
 
 公开测试仅使用公开向量和临时配置文件，不读取用户 `.env.local`。相关规范：[自动化工具沉淀约定](automation-tools.md)、[基础设施清单](agent-acceptance-infrastructure.md)。
 
