@@ -32,7 +32,7 @@
 - 每份报告写明仓库、commit、dirty 和测试时相关文件的身份。dirty=true 时提供相关文件摘要或补丁范围；源码版本、本地产物和线上部署分开记录。仅凭 HEAD 不能还原未提交修改。
 - 默认原始产物放在 `.local/acceptance/requirements/<issue>/`，沿用现有工具输出，不建平行业务 runner。文件被 Git 忽略，其他机器不保证存在；在共享 Markdown 中保留命令、时间、版本、结果、关键公开摘要和证明边界，明确原始文件可用性。需要移交原始证据时按项目批准渠道归档，不能声称本地路径是共享附件。
 - 已有 Solana 签名时，按[交易回执证据](solana-transaction-evidence.md)记录 finalized 结果和完整回执摘要，仍将 keeper 执行/最终持仓列为独立条件；不靠交易成功直接推断订单成交。
-- 移交已有工具 JSON 报告时，按[证据包说明](agent-evidence.md)显式选取文件并打包，在工作表保存 manifestSha256；接收后离线验证并单独比对摘要。保留原始观察时间和状态，不把包完整性通过当业务验收通过。
+- 移交已有工具 JSON 报告时，按[证据包说明](agent-evidence.md)显式选取文件并打包，在可信交接记录保存 manifestSha256；工作表本身也归档时按证据包文档显式绑定，冻结后不写回包摘要，接收后离线验证并单独比对。保留原始观察时间和状态，不把包完整性通过当业务验收通过。
 - 不记录助记词、私钥、配置文件内容、完整带凭据 URL 或钱包会话。公开地址和公开文件摘要可记录。不得整份拷贝环境变量到报告。
 - 需求 updatedAt、相关代码/配置/产物、依赖版本或目标环境变化时，重新判断哪些证据失效；历史 passed 保留日期，不自动沿用为本次结果。先比较范围再重跑必要项，不要求无关检查全量重跑。
 
@@ -74,7 +74,7 @@ yarn agent:acceptance --file docs/acceptance/FESOL-55.md
 | 1 | 工作表不合法/不一致/读取失败，或合法工作表的需求结论为 failed；由 JSON 字段区分 |
 | 2 | 工作表一致，但需求结论为 blocked、partial 或 not-run |
 
-JSON 中 `scope: acceptance-worksheet-consistency` 与 `status` 仅表示内部检查结果；`requirementAcceptance` 为按所列条件计算的结论。合法的 failed 工作表仍可有 `status: passed`，但退出 1；消费者应同时查看 scope、requirementAcceptance 和退出码。`requirementCoverage`、`evidenceSufficiency` 固定为 not-evaluated：工具不验证需求映射完整性、原始产物存在/摘要真实性、数据新鲜度、版本有效性或业务正确性，也不替代实时 Linear 核对。报告包含本次检查时间、工作表与检查器 SHA-256，不能把检查时间当历史证据执行时间。此报告尚未纳入工具证据包支持范围。
+JSON 中 `scope: acceptance-worksheet-consistency` 与 `status` 仅表示内部检查结果；`requirementAcceptance` 为按所列条件计算的结论。合法的 failed 工作表仍可有 `status: passed`，但退出 1；消费者应同时查看 scope、requirementAcceptance 和退出码。`requirementCoverage`、`evidenceSufficiency` 固定为 not-evaluated：工具不验证需求映射完整性、原始产物存在/摘要真实性、数据新鲜度、版本有效性或业务正确性，也不替代实时 Linear 核对。报告包含本次检查时间、工作表与检查器 SHA-256，不能把检查时间当历史证据执行时间。此报告可按[工作表移交说明](agent-evidence.md#工作表与检查报告一起移交)，与对应 Markdown 显式绑定后进入证据包。
 
 FESOL-55 实例是历史工作表，适配本格式后仍为 partial，不视为本轮重新执行业务验收。新增条件、修改状态或证据后重新运行此命令；历史不受影响的原始执行不机械重跑。
 
