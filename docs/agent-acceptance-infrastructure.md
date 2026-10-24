@@ -2,7 +2,7 @@
 
 调研日期：2026-10-24。文档整理日期：2026-10-24。
 
-本文为后续逐项建设 Agent 验收基础设施提供入口。用户已确认希望 Agent 参与大量后续需求的验收，并要求先广泛调研、形成清单，再逐项实施。本文中的建设方案与优先级是建议，尚未整体批准实施；保存文档不代表授权启动服务、浏览器、测试、构建、部署、发送交易或修改外部系统，具体执行继续遵循根目录 [AGENTS.md](../AGENTS.md)。
+本文为后续逐项建设 Agent 验收基础设施提供入口。用户已确认希望 Agent 参与大量后续需求的验收，并要求先广泛调研、形成清单，再逐项实施。本文中的建设方案与优先级是建议，尚未整体批准实施；用户随后已批准本地 Solana RPC 代理及前端 URL 入口这一项，实施状态见下文。保存文档不代表授权启动服务、浏览器、测试、构建、部署、发送交易或修改外部系统，具体执行继续遵循根目录 [AGENTS.md](../AGENTS.md)。
 
 ## 目标与结论
 
@@ -27,8 +27,8 @@
 
 | 编号 | 优先级 | 能力 | 2026-10-24 核验现状 | 建议建设与完成标准 | 对应需求 / 行为 | 前置与边界 | 实施状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| A01 | P0 | Agent 可访问的 Solana RPC | FESOL-60 已 Done，最新评论确认现有 Alchemy keys 已启用 Solana。本轮开发 key 的 `getSlot` 和单账户 `getMultipleAccounts` 均返回 403，带 localhost/生产 Origin 的 slot 请求也返回 403。 | 核实现有 Alchemy 配置与当前环境访问条件，明确浏览器、CLI、CI 的入口；轻量预检检查网络、slot、账户读取及所需方法权限。 | FESOL-89/96/51、95/56、64/65。 | 尚不能报告 Agent 已可用；403 原因未确定。涉及账号权限由资源所有者处理，不直接推断需更换供应商。 | 待推进 |
-| A02 | P0 | GMX keeper 价格与 UI flags 访问 | 配置中的 Arbitrum keeper 价格及 `/ui-flags/v2` 请求均返回 403。Solana 价格、K 线及交易开关依赖它。 | 明确开发机/CI 的访问条件；预检价格时间、资产覆盖、K 线和 `solanaTrading`，区分访问拒绝与数据缺失。 | FESOL-88/50/99；交易发送前检查；故障 banner。 | 未确认是来源、鉴权、网络还是其他限制。不能用 fixture 证明真实 keeper 可用。 | 待推进 |
+| A01 | P0 | Agent 可访问的 Solana RPC | 复核确认开发与 express key 未启用 Solana（403）；fallback、largeAccount 在项目生产 Origin 下的 `getSlot` 与程序账户 `getMultipleAccounts` 均为 200，不带 Origin 为白名单 403。详见下方复核记录。 | 核实现有 Alchemy 配置与当前环境访问条件，明确浏览器、CLI、CI 的入口；轻量预检检查网络、slot、账户读取及所需方法权限。 | FESOL-89/96/51、95/56、64/65。 | 已验证本地代理、浏览器 CORS、100 账户、订单扫描及模拟可达；业务 client、WebSocket、持续负载和 CI 不属于本次代理验收。 | 本地代理与 URL 入口验收通过 |
+| A02 | P0 | GMX keeper 价格与 UI flags 访问 | 复核确认 Python 默认 User-Agent 请求为 Cloudflare 1010 / HTTP 403，使用 `Mozilla/5.0` 后价格及 `/ui-flags/v2` 均为 200；本次主 Arbitrum flags 未包含 Solana 相关键。 | 明确开发机/CI 的访问条件；预检价格时间、资产覆盖、K 线和 `solanaTrading`，区分访问拒绝与数据缺失。 | FESOL-88/50/99；交易发送前检查；故障 banner。 | 已复现 User-Agent 差异；不证明所有客户端行为或完整数据新鲜度。交易开关仍需资源所有者准备，不能用 fixture 替代。 | 待推进 |
 | A03 | P0 | api-solana 地址与版本 | FESOL-62 评论确认 Cloud Run stub 已部署；上游 `solanaApp.ts` 仍返回样例。本轮 `solana.gmxapi.io/ping`、`/v1/markets/config` 为 404，`/v1/pairs` 为 200，符合 ADR 的域名切换前描述。 | 获取实际 `run.app` 地址、访问条件、部署版本及数据模式；前端预览可指向明确版本的 API。 | FESOL-52/97/98/100；后续 FESOL-64/65。 | 本轮未取得并实测 `run.app` 地址；pairs 正常不代表市场/持仓/订单可用。 | 待推进 |
 | A04 | P0 | 评审后的 API 契约与样例 | 已有市场、持仓、订单、费用折扣样例；FESOL-61 仍 Todo，FESOL-97/100 要求 reviewed samples。 | 固定契约版本、字段含义、精度、错误/缺失语义；parser、共享状态与 API 使用同一组契约检查，样例记录来源及预期结果。 | FESOL-61/97/98/100；共享状态与组件集成。 | 当前样例不自动等于已评审契约；样例验收不替代真实数据验收。 | 待推进 |
 | A05 | P0 | 验收钱包与账户状态 | FESOL-71 为 Todo，包含 SOL/USDC、签名访问、TP/SL 持仓、限价单、ALT 和 flags，阻塞多项验收。 | 准备只读账户样本及专用交易钱包；记录各场景余额、持仓、订单、准备和恢复方式，区分展示样本和可变交易状态。 | FESOL-61/65、56/19/59；余额刷新。 | 钱包所有者准备资金与签名访问；密钥仅放秘密配置，不写入对话、文档和报告。 | 待推进 |
@@ -44,6 +44,49 @@
 | A15 | P2 | 可重置本地协议环境 | 已有 Anchor、`start-localnet`、`setup-localnet`。依赖 Geyser 插件、程序 `.so`、Redis 连接及 keeper 角色；本机未发现所需插件/产物，Solana、Anchor、Rust CLI 未在 PATH 中发现。 | 先验证单个有限场景：启动、准备账户/市场、执行一种订单、读取结果、重置；成功后再决定日常使用范围。 | 边界条件、失败状态、精度及订单流程。 | 有脚本不等于开箱可用；需配套 keeper 执行、oracle、流动性与前端配置。CLI 检查不证明整台机器绝对未安装工具。 | 待推进 |
 | A16 | P2 | 历史与统计索引 | gmtrade-sqd 支持本地 Postgres、processor、GraphQL；Core Store 需 `SQD_PORTAL_API_KEY`，Core 与 GT 部署覆盖不同。 | 初期核实只读端点；相关需求实施时准备 replay 范围、索引进度检查和必要快照。 | Trades、Pools、Claims、Stats、GT 等后续范围。 | 不是首批市场/余额/下单验收的共同前置；Portal key/云权限由资源所有者配置。 | 待推进 |
 | A17 | P2 | 可观察性、升级与容量 | FESOL-66/67 为 Backlog，要求域名、5xx、陈旧数据、RPC 指标、程序升级及负载成本核验。 | 提供只读日志/指标入口，区分服务存活、数据新鲜度和业务可用性；记录升级引起的不兼容。 | 数据陈旧、程序升级、限流和性能验收。 | ping 成功不等于业务可用；负载测试另行授权，不混入轻量预检。 | 待推进 |
+
+## RPC 与 keeper 范围复核（2026-10-24）
+
+用户要求确认是否仅 Solana 返回 403，执行了同环境只读对照。key 从当前 `src/config/rpc.ts` 读取，不输出其值。EVM 使用 `eth_chainId`；Solana 使用 `getSlot`，并在可用 key 下读取 gmsol 程序账户。未发送交易、运行浏览器或修改服务配置。
+
+| 网络 | development（不带 Origin） | fallback（生产 Origin） | largeAccount（生产 Origin） | express（生产 Origin） |
+| --- | --- | --- | --- | --- |
+| Solana Mainnet | 403，网络未启用 | 200 | 200 | 403，网络未启用 |
+| Arbitrum Mainnet | 200（首轮网络错误后复测成功） | 200 | 200 | 200 |
+| Avalanche Mainnet | 200 | 200 | 200 | 200 |
+| MegaETH Mainnet | 200 | 200 | 200 | 200 |
+| Arbitrum Sepolia | 200 | 200 | 200 | 200 |
+| Base Mainnet | 200 | 200 | 200 | 200 |
+| Optimism Sepolia | 200 | 200 | 200 | 200 |
+| Ethereum Sepolia | 200 | 403，网络未启用 | 403，网络未启用 | 403，网络未启用 |
+| BNB Mainnet | 200 | 200 | 200 | 200 |
+| Ethereum Mainnet | 200 | 200 | 200 | 200 |
+
+生产 Origin 指 `https://app.gmx.io`，属于当前项目自己的来源。CLI 显式提供 Origin 的成功不能证明已完成浏览器 CORS 验收或取得独立服务端 key。development 的 Solana 请求不带 Origin、带 localhost 或生产 Origin 均为同一网络未启用错误。fallback、largeAccount、express 不带 Origin 的请求大多返回 `Unspecified origin not on whitelist.`；Ethereum Sepolia 等未开通网络则返回网络未启用。不能把全部 HTTP 403 归为同一故障。
+
+关键证据：
+
+- development / express 的 Solana 错误：`SOLANA_MAINNET is not enabled for this app.`，JSON-RPC code `-32600`。需要相应 Alchemy App 的资源所有者在 Dashboard 的 Networks 配置核实/启用；不是 Origin 改动可以解决的错误。
+- fallback / largeAccount 的 Solana `getSlot` 成功；`getMultipleAccounts` 读取程序 `Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo` 成功且 `executable: true`。说明现有供应商至少已有可读取 Solana 的入口，不需据此更换供应商。
+- 公共 Solana `getSlot`、Arbitrum 和 Ethereum 公共 RPC 的 `eth_chainId` 均为 200，仅作网络对照；未配置为应用入口，不改变项目不使用公共 Solana RPC 的约定。
+- keeper 以 `Mozilla/5.0` 请求时：Arbitrum、Avalanche、MegaETH 主机，以及两个 Arbitrum fallback 主机的 `/prices/tickers`、`/ui-flags/v2` 共 10 个请求均为 200。Arbitrum 主价格返回 116 条 ticker。
+- Arbitrum 主 keeper 的两个路径以 Python 默认 User-Agent 请求均为 403，响应 `error code: 1010`；同轮改为 `Mozilla/5.0` 均为 200，明确复现请求头相关差异。该结果不等于全面确定服务端防护规则。
+- Arbitrum 主 `/ui-flags/v2` 本轮返回的 JSON 未包含名称含 Solana 的键；接口可访问不等于 `solanaTrading` 已启用。
+
+范围限制：这是最小 HTTP 读取与链标识检查，未验收 `getProgramAccounts`、100 账户批量读取、simulation、历史查询、WebSocket、速率/费用、浏览器或 CI。两个首轮 EVM 请求发生网络错误，已对相应条件复测并如表记录，不将瞬时错误当作权限结论。A01/A02 的原始 403 记录保留在调研范围描述中，当前判断以本节和更新后的清单为准。
+
+## A01 已批准的本地代理方案与实施状态
+
+2026-10-24 用户确认不要求 Alchemy 负责人新增网络权限，并批准让本地前端与 Agent 共用本地 Solana RPC 代理。该决定替代“优先给 development key 开通 Solana”的实施建议；不修改其他 key 的权限和 EVM RPC 路径。
+
+- 实现入口：[代理说明](../tools/solana-rpc-proxy/README.md)、`yarn solana:rpc-proxy`。默认 `http://127.0.0.1:3030`，上游为 Alchemy Solana Mainnet，使用已有 fallback key 和已验证的生产 Origin。
+- 前端入口：`src/config/rpc.ts#getSolanaRpcUrl()` 在 Vite 开发模式返回本地代理，可用 `.env.development.local` 的 `VITE_APP_SOLANA_RPC_URL` 指定其他开发地址；构建后的预览/生产使用 fallback Alchemy 地址，忽略开发覆盖，不依赖本地代理。
+- 当前分支没有实际 Solana RPC client/余额读取模块；本次完成 URL 入口而未扩展业务范围。后续实现必须使用该入口，并遵循 Solana flag/动态加载规范；不能表述为钱包或交易流程已连通。
+- 无依赖 Node 子项目，默认只监听 loopback，浏览器只允许本地 Origin；方法白名单仅含读取和模拟，拒绝交易发送及含写操作的混合批次。不静默回退或自动重试。
+- 用户随后明确授权真实验收与修复后 push。已启动代理和本地前端，用浏览器导入统一入口并成功读取 slot 和批量查询；CLI getSlot、Mainnet genesis、100 账户批量读取、Order discriminator 扫描（209 个账户）通过。模拟方法返回预期的 `InvalidAccountForFee`；无交易发送，不能当作业务订单模拟成功。
+- 可复用验收：代理启动后执行 `yarn solana:rpc-proxy:verify`；该命令已通过，覆盖实际读取、批次、CORS 预检、来源/写方法拦截和上游错误。代理单元测试 3 项通过，完整前端测试 3013 项通过、1 项原有概率测试跳过（`src/lib/userAnalytics/getIsAddressInGroup.spec.ts`）。
+- `yarn build-sdk` 更新忽略的本地产物后，`yarn tscheck` 通过；无需修补业务类型。`yarn lint:ci` 通过。修复 `vite.config.ts` 的主项目测试发现和 tsconfig 扫描范围，避免嵌套参考仓库混入验收；没有通过安装旧项目依赖来掩盖问题。
+- 本次本地代理与前端 URL 入口范围已完成真实验收；实际业务 client、业务订单、WebSocket、持续负载和 CI 环境留在对应后续需求中，不扩大本次完成范围。生产构建以 `NODE_OPTIONS=--max-old-space-size=8192 yarn build` 成功；默认约 4 GiB 堆首次构建耗尽内存，重跑仅调整该进程内存，没有修改产物规则。
 
 ## 工具与服务选项
 
@@ -84,6 +127,8 @@
 | 日期 | 编号 | 实施结果与证据 | 遗留项 / 下一步 |
 | --- | --- | --- | --- |
 | 2026-10-24 | 全部 | 完成首轮调研及文档整理；尚未实施基础设施。接口结果与限制见上文。 | 等待用户逐项选择推进；执行时重新核验易变状态。 |
+| 2026-10-24 | A01/A02 | 完成 RPC/keeper 只读范围复核，确认网络启用、Origin 白名单及 User-Agent 三类差异；详见复核记录。 | 用户随后选择不新增权限，批准使用本地代理；后续仍需按完整验收标准核验，未修改 Alchemy 配置。 |
+| 2026-10-24 | A01 | 本地代理与 URL 入口真实验收通过：CLI、浏览器、100 账户、订单扫描、模拟可达、拦截及错误透传；已提供复用验收命令。完整前端测试、类型检查、lint 及 8 GiB 堆生产构建通过。 | 业务 client/订单、WebSocket、持续负载与 CI 不在本次代理范围内；后续按需求验证。 |
 
 ## 证据与查阅入口
 
