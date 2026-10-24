@@ -15,6 +15,8 @@
 5. 迁移改动应聚焦 Solana 集成，避免无关重构或组件改动。
 6. 查阅相关参考代码后，如果所需行为、数据契约或集成方式仍不明确，应先向用户澄清再实现。
 
+需求查阅与进度复盘遵循 [Linear 需求工具说明](docs/linear-requirements.md)：单条需求实施前实时核对，整体复盘按需同步本地快照，线上 Linear 为权威来源。 带 `GMTrade` 标签的需求属于仍在迭代的旧 `gmx-solana-interface`，仅供参考，不属于本次迁移需求；查阅和统计时核对标签及项目归属。
+
 ## 工程规范
 
 1. 编码和自我代码审查必须参考 `gmx-prompts`：开发看 `skills/gmx-interface-dev/SKILL.md`，前端及 SDK 自审看 `skills/gmx-interface-review/SKILL.md`，Solana 改动同时看 `skills/gmx-solana/SKILL.md`，测试看 `skills/gmx-tests/SKILL.md`；涉及 API 审查时看 `skills/gmx-api-review/SKILL.md`。按入口阅读相关规范与审查细则，不能仅凭通用经验检查。
