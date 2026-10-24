@@ -69,3 +69,4 @@ claude.md
 /.local/acceptance/agent-preflight/
 /.local/acceptance/agent-wallet/
 /.local/acceptance/solana-runtime/
+/.local/acceptance/solana-alt/
