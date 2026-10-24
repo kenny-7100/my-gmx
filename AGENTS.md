@@ -21,7 +21,9 @@
 
 推荐下一条需求前，必须结合实时 Linear、GitHub 相关 PR 及最新上游代码核验依赖、重复工作与独立交付条件，不能仅凭需求状态判断。流程见[需求推荐与就绪核验](docs/solana-next-task.md)。
 
-项目 skill 位于 `.agents/skills/`：需求查询与复盘使用 `gmx-linear-requirements`，下一条需求推荐使用 `gmx-solana-next-task`，需求开发及 Draft PR 交付使用 `gmx-solana-task-delivery`；详细资料仍维护在 `docs/`，skill 不扩大任务或操作授权。这些 skill 属于个人开发基础，不随业务需求交付上游。
+迁移实际进度评估使用 `gmx-solana-progress`：核验全量需求及跨仓库相关分支、PR 和代码，分别估算现有有效 Linear 需求工作量与完整迁移工作量进度，提供中英文简述；不能以 Done 条数代替实际进度。方法见[进度评估说明](docs/solana-progress.md)。
+
+项目 skill 位于 `.agents/skills/`：需求查询与复盘使用 `gmx-linear-requirements`，下一条需求推荐使用 `gmx-solana-next-task`，实际进度评估使用 `gmx-solana-progress`，需求开发及 Draft PR 交付使用 `gmx-solana-task-delivery`；详细资料仍维护在 `docs/`，skill 不扩大任务或操作授权。这些 skill 属于个人开发基础，不随业务需求交付上游。
 
 ## 工程规范
 
