@@ -1,6 +1,8 @@
 ## 迁移背景
 
-本项目正在将 Solana 支持集成到主项目中。`gmx-solana-interface` 子项目主要用于理解 Solana 相关资源和行为；具体实现必须遵循主项目现有的前端组件体系、架构、状态管理和交互体系。
+本次集成的核心原则是在现有 GMX 架构和统一数据流下支持 Solana，复用主项目的前端组件、状态管理、交互及业务体系，降低长期维护成本。链特有能力应在现有架构边界内适配，不另建并行的 Solana 应用或业务数据流。
+
+`gmx-solana-interface` 和用户后续提供的旧 Solana 后端仅用于理解资源、接口和行为，不直接迁移其架构或业务体系，也不将其作为目标实现的长期依赖。旧前端后续会废弃；旧后端可能废弃，目前尚未提供，不能与现有 `gmx-api` 混淆。详见[集成原则](docs/solana-reference-repositories.md#核心集成原则)。
 
 ## Solana 迁移
 
@@ -15,8 +17,8 @@
 
 ## 工程规范
 
-1. 编码风格、技术标准、开发实践和代码审查要求，参考 `gmx-prompts` 子项目。
-2. 实现或审查改动时，同时遵循 `gmx-prompts` 中的相关规范和本文件中的项目专属要求。
+1. 编码和自我代码审查必须参考 `gmx-prompts`：开发看 `skills/gmx-interface-dev/SKILL.md`，前端及 SDK 自审看 `skills/gmx-interface-review/SKILL.md`，Solana 改动同时看 `skills/gmx-solana/SKILL.md`，测试看 `skills/gmx-tests/SKILL.md`；涉及 API 审查时看 `skills/gmx-api-review/SKILL.md`。按入口阅读相关规范与审查细则，不能仅凭通用经验检查。
+2. 查阅入口和自审重点见 [编码与自审规范](docs/coding-and-self-review.md)。同时遵循本文件的项目专属要求；上游流程不得覆盖用户已确认的 push、语言、Git 操作及手动 UI 验证约定。
 
 ## 语言约定
 
