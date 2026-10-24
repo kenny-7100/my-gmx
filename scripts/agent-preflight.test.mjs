@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { interpretResult, runCommand, runPreflight, summarize } from "./agent-preflight.mjs";
+import { compareSource, interpretResult, runCommand, runPreflight, summarize } from "./agent-preflight.mjs";
 
 const source = { commit: "a".repeat(40), dirty: true, sha256: {} };
 const jsonResult = (data, exitCode = 0) => ({
@@ -116,4 +116,83 @@ test("subprocess timeout and nonzero exits cannot become passing checker results
   });
   assert.equal(failure.exitCode, 1);
   assert.equal(interpretResult("api", failure).code, "invalid-checker-report");
+});
+
+const sourceBaseline = {
+  schemaVersion: 1,
+  scope: "local-read-only-infrastructure",
+  status: "failed",
+  finishedAt: "2026-10-24T22:00:00.000Z",
+  selected: ["rpc"],
+  source: {
+    commit: "a".repeat(40),
+    dirty: false,
+    sha256: { "package.json": "a".repeat(64), "scripts/agent-preflight.mjs": "b".repeat(64) },
+  },
+};
+
+test("compares only recorded source fingerprints while preserving live and business uncertainty", async () => {
+  const original = sourceBaseline.source.sha256;
+  for (const [hashes, expected] of [
+    [original, { added: [], removed: [], changed: [], exitCode: 0 }],
+    [
+      { ...original, "package.json": "c".repeat(64) },
+      { added: [], removed: [], changed: ["package.json"], exitCode: 2 },
+    ],
+    [
+      { ...original, "yarn.lock": "d".repeat(64) },
+      { added: ["yarn.lock"], removed: [], changed: [], exitCode: 2 },
+    ],
+    [
+      { "package.json": original["package.json"] },
+      { added: [], removed: ["scripts/agent-preflight.mjs"], changed: [], exitCode: 2 },
+    ],
+  ]) {
+    const report = await compareSource({
+      baseline: sourceBaseline,
+      evidenceReader: async () => ({ commit: "c".repeat(40), dirty: true, sha256: hashes }),
+    });
+    for (const [key, value] of Object.entries(expected)) assert.deepEqual(report[key], value);
+    assert.equal(report.baseline.status, "failed");
+    assert.equal(report.status, expected.exitCode === 0 ? "passed" : "blocked");
+    assert.equal(report.requirementAcceptance, "not-evaluated");
+    assert.equal(report.liveEnvironment, "not-evaluated");
+  }
+});
+
+test("rejects unsupported baselines, unsafe keys and missing current source without running checks", async () => {
+  for (const changes of [
+    { schemaVersion: 2 },
+    { scope: "transaction-receipt" },
+    { status: "unknown" },
+    { finishedAt: "invalid" },
+    { selected: [] },
+    { selected: ["rpc", "rpc"] },
+    { selected: ["../.env.local"] },
+    { selected: "rpc" },
+    { source: { ...sourceBaseline.source, sha256: {} } },
+    { source: { ...sourceBaseline.source, sha256: { "../.env.local": "a".repeat(64) } } },
+    { source: { ...sourceBaseline.source, sha256: { "package.json": "unknown" } } },
+  ]) {
+    let read = false;
+    await assert.rejects(
+      compareSource({
+        baseline: { ...sourceBaseline, ...changes },
+        evidenceReader: async () => {
+          read = true;
+          return sourceBaseline.source;
+        },
+      })
+    );
+    assert.equal(read, false);
+  }
+  await assert.rejects(
+    compareSource({
+      baseline: sourceBaseline,
+      evidenceReader: async () => {
+        throw new Error("Missing source file");
+      },
+    })
+  );
+  await assert.rejects(compareSource({ baseline: sourceBaseline, evidenceReader: async () => ({}) }));
 });

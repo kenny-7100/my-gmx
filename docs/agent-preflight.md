@@ -55,7 +55,7 @@ RPC/钱包继续沿用其已有进程级 `SOLANA_RPC_PROXY_URL` 配置；统一�
 
 报告包含 schemaVersion、选定范围、开始/结束时间、仓库 SHA/dirty、检查器及相关配置/依赖文件 SHA-256、逐项耗时、状态和固定错误码。API 附带本地预期 API commit/dirty/文件摘要和 sample 标记；keeper 保留逐项检查状态；钱包仅保留公开地址、Mainnet、精确金额和 slot。不保存助记词、私钥、原始 stdout/stderr、上游响应正文或完整密钥 URL。
 
-本地文件摘要用于绑定本次检查所用的入口和关键配置；它不是完整工作区快照。dirty=true 时不能只凭 commit 复原全部修改。API 的预期源码也不是由服务器返回的云端部署版本，不能据此声称 A03 或整个 A14 已完成。
+历史报告复用前可按下文离线比较源码指纹。其本地文件摘要用于绑定本次检查所用的入口和关键配置；它不是完整工作区快照。dirty=true 时不能只凭 commit 复原全部修改。API 的预期源码也不是由服务器返回的云端部署版本，不能据此声称 A03 或整个 A14 已完成。
 
 子进程输出上限为 1 MiB，RPC/keeper/API/wallet 的整项执行时限分别为 240/90/100/60 秒，超限明确失败。这些时限位于原检查器逐请求超时之外，不会改写原检查器的检查逻辑。发生异常时保留失败项，按对应工具文档单独重跑诊断；统一报告不转发原始日志。它不应代替日志或业务验收证据。
 
@@ -84,3 +84,34 @@ yarn agent:preflight --checks rpc,keeper,api,wallet > .local/acceptance/agent-pr
 自动测试入口为 `yarn test:agent-preflight`，不读取实际助记词、不访问 RPC 或 keeper。子进程超时测试仅运行短暂的本地 Node 测试进程。未新增通用框架。
 
 最终复验中的三份报告均已校验检查器 SHA-256 与当前文件一致；本次自行启动的 RPC 代理和 API 服务已全部关闭，API checkout 无改动。完整前端测试退出 0，日志有 Browserslist 过期提示与 happy-dom teardown AbortError 输出，未产生失败测试；本轮未修改这些无关项目，也未运行 UI、浏览器、构建或部署。
+
+
+## 复用历史报告前比较源码指纹
+
+后续 Agent 想复用现有统一预检报告时，在主仓库根目录执行：
+
+```sh
+yarn agent:preflight --compare-source .local/acceptance/agent-preflight/all.json
+```
+
+该参数与 `--checks` 互斥；比较模式不运行 RPC/keeper/API/wallet 检查，不启动服务、不读取钱包、`.env` 或秘密配置、不访问网络。它只读取指定的普通 JSON 报告（最大 1 MiB、拒绝最终文件为符号链接），沿用当前工具对原 selected 检查项的固定采集计划读取关键源码，并执行只读 Git 查询。报告中的路径仅作为摘要键比较，不驱动文件读取；未知 selected、非法相对路径/摘要、错误 scope/schema、缺失或不可读文件都明确失败。
+
+| 退出码 | 本次源码比较含义 |
+| --- | --- |
+| 0 / passed | 当前固定采集集合与基线记录的摘要全部一致 |
+| 2 / blocked | 指纹或采集集合变化；先核对影响并决定哪些验收需要复跑，不自动执行 |
+| 3 / failed | 输入、参数、Git 或源码读取失败；不当成源码未变化 |
+
+比较报告的 scope 为 local-source-comparison，包含基线原状态/时间/commit/dirty、原检查选择、当前指纹及 added/removed/changed 文件列表。added/removed 指相对于基线的**采集集合**变化；当前固定计划要求的文件物理缺失时退出 3。commit 或 dirty 单独变化不改变摘要比较结论；文档等未纳入既有计划的变化不会机械触发全部预检。当前采集范围仍按本页原规则，不因此扩大为整个仓库、完整导入图、API 子仓库或 SDK/程序产物校验。
+
+`liveEnvironment` 与 `requirementAcceptance` 固定为 not-evaluated。即使基线原状态 failed/blocked，也可以得到源码比较 passed，原失败仍保留在 baseline.status 中。源码相同不证明历史价格、余额、flags、服务连通、部署和需求状态仍有效；这些按本次验收条件重新检查，不能据此跳过必要的真实数据验收。反之，源码变化只是要求复核，不直接证明业务失败。
+
+来源可信时才使用基线；收到证据包先按[证据包说明](agent-evidence.md)校验预期包摘要。归档比较时显式选择原基线与比较报告一起保存，报告可以进入既有证据包，不自动复制其引用路径。不要改写历史摘要来取得 passed；不能因为比较在当前时刻执行就刷新原报告的观察时间。
+
+隔离演练的环境经验：macOS 的临时路径可能经过 `/var` 到 `/private/var` 的符号链接，复制 CLI 后应先将临时目录解析成真实绝对路径再调用。否则本项目现有的 import.meta.url/main-entry 判断可能不触发，表现为退出 0 但没有 JSON。演练先断言退出码及 JSON 均存在；主仓库正常调用无需增加这一步。隔离目录的 Git 查询使用明确的 GIT_DIR/GIT_WORK_TREE 和 GIT_OPTIONAL_LOCKS=0，只读复用仓库身份，不初始化或改动真实索引。
+
+### 源码比较验收记录（2026-10-25）
+
+6 组统一预检测试（新增 2 组）通过，覆盖新增/移出/改变的指纹、commit/dirty 独立变化、原失败状态保留、未知检查项、不合法基线与读取失败。真实历史报告比较为 blocked，当前实际报告比较为 passed；隔离副本的无关文档不影响结果、RPC 配置变化为 blocked、缺文件为错误退出，业务源码没有被改动。非法输入、参数冲突及符号链接被拒绝。当前基线是未启动代理时生成的真实 RPC-only failed 报告，比较 passed 没有把它提升为环境 passed。比较报告打包及预期摘要验证通过，产物、摘要和工程结果见[清单进度](agent-acceptance-infrastructure.md#a14-历史预检源码复用判定进度2026-10-25)。
+
+工程验收通过：6 组统一预检测试与 6 组证据包回归、类型/ESLint/格式/语法检查；完整前端单元测试 3014 passed / 1 原有 skipped，退出 0；138 个本地文档链接与差异检查通过。

@@ -41,6 +41,7 @@ verify 不需要原始文件路径、RPC、钱包、API 或原报告中的源码
 | configured-mainnet-lookup-tables | ALT 预检 |
 | transaction-receipt | 交易回执证据 |
 | local-read-only-infrastructure | 统一只读预检 |
+| local-source-comparison | 对统一预检基线的本地源码指纹比较；不证明实时环境仍有效 |
 | github-pr-preview | PR 精确预览部署元数据（不证明页面功能） |
 | solana-statistics-index | Solana volume 索引契约、高度与最新事件年龄 |
 | real-wasm-reference-vectors | 真实 WASM 离线基础数值参考向量 |
