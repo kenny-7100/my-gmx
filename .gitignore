@@ -62,3 +62,6 @@ claude.md
 # Local Linear snapshots
 /.local/linear/
 /.local/solana-progress/
+
+# Local keeper preflight evidence
+/.local/acceptance/keeper/

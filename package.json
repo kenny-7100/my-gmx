@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "keeper:preflight": "tsx scripts/keeper-preflight.ts",
+    "test:keeper-preflight": "tsx --test scripts/keeper-preflight.test.ts",
     "solana:rpc-proxy": "node tools/solana-rpc-proxy/server.mjs",
     "solana:rpc-proxy:verify": "node tools/solana-rpc-proxy/verify.mjs",
     "test:solana-rpc-proxy": "node --test tools/solana-rpc-proxy/proxy.test.mjs",

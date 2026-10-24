@@ -1,11 +1,40 @@
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { ARBITRUM } from "config/chains";
 import { getOracleKeeperUrl } from "sdk/configs/oracleKeeper";
 
 import { fetchSolanaTradingEnabled } from "./fetchSolanaTradingEnabled";
 
-afterEach(() => vi.unstubAllGlobals());
+beforeEach(() => vi.stubEnv("VITE_APP_SOLANA_TRADING_OVERRIDE", undefined));
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
+});
+
+it("allows explicit overrides only in local development and rejects invalid development values", async () => {
+  const fetchMock = vi.fn();
+  vi.stubGlobal("fetch", fetchMock);
+  for (const dev of [true, false]) {
+    vi.stubEnv("DEV", dev);
+    for (const override of [undefined, "", "true", "false", "TRUE", "1"]) {
+      vi.stubEnv("VITE_APP_SOLANA_TRADING_OVERRIDE", override);
+      for (const remoteEnabled of [true, false]) {
+        fetchMock
+          .mockReset()
+          .mockImplementation(async () => Response.json({ solanaTrading: { enabled: remoteEnabled } }));
+        if (dev && override !== undefined && !["", "true", "false"].includes(override)) {
+          await expect(fetchSolanaTradingEnabled()).rejects.toThrow("VITE_APP_SOLANA_TRADING_OVERRIDE");
+          expect(fetchMock).not.toHaveBeenCalled();
+        } else {
+          const overridden = dev && (override === "true" || override === "false");
+          await expect(fetchSolanaTradingEnabled()).resolves.toBe(overridden ? override === "true" : remoteEnabled);
+          expect(fetchMock).toHaveBeenCalledTimes(overridden ? 0 : 1);
+        }
+      }
+    }
+  }
+});
 
 it("requires fresh explicit permission from the Arbitrum keeper on every read", async () => {
   const fetchMock = vi.fn();
