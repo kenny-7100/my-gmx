@@ -42,3 +42,5 @@
 已沉淀[Agent 统一只读预检](agent-preflight.md)：`yarn agent:preflight` 复用已有 RPC、keeper 和样例 API 检查；`--checks` 可显式选择钱包余额。输出统一 JSON、退出码、本地源码与配置摘要；单项失败不阻止其余检查，不启动服务或发送交易。状态/隔离测试入口为 `yarn test:agent-preflight`，真实数据模式、授权和前置仍遵循原工具。
 
 已沉淀[Solana SDK 与程序版本证据预检](solana-runtime-preflight.md)：`yarn solana:runtime-preflight --local-only` 核对已安装 SDK 和现有独立 WASM；默认模式经已启动的代理读取 Mainnet 程序部署证据，分段计算完整程序区摘要并核对前后元数据。测试入口为 `yarn test:solana-runtime-preflight`。不读取钱包、不构建/部署，不将文件指纹当作业务兼容证明。
+
+已沉淀[Solana ALT 资源预检](solana-alt-preflight.md)：`yarn solana:alt-preflight` 复用现有两张 Mainnet 表配置和 RPC 代理，批量读取后校验账户布局、生命周期与生效地址数，记录 authority、完整地址和摘要。测试入口 `yarn test:solana-alt-preflight`；不创建/修改表，不把表可读当作任意交易地址覆盖。
