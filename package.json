@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "agent:preview": "node scripts/agent-preview.mjs",
+    "test:agent-preview": "node --test scripts/agent-preview.test.mjs autotests/regression/ci/resolvePreview.test.cjs",
     "agent:evidence": "node scripts/agent-evidence.mjs",
     "test:agent-evidence": "node --test scripts/agent-evidence.test.mjs",
     "solana:alt-preflight": "tsx scripts/solana-alt-preflight.mjs",
