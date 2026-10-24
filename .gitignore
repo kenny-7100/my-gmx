@@ -66,3 +66,4 @@ claude.md
 # Local keeper preflight evidence
 /.local/acceptance/keeper/
 /.local/acceptance/solana-api-local/
+/.local/acceptance/agent-preflight/

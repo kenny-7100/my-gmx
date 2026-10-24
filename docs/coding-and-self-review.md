@@ -16,6 +16,8 @@
 
 7. **样例 API 验收先使用现有 Solana launch mode。** 已获本地服务验收授权时，按[本地 Solana API 说明](solana-api-local.md#执行前准备与顺序)先核实源码与锁定依赖，再运行 `yarn solana:api-local start`，待服务就绪后执行 `yarn solana:api-local verify`。无需准备 EVM 数据库或 RPC；遇到 immutable 安装的 cacheKey 差异先核对文档中的压缩配置，不删除锁文件或升级依赖。样例通过不代表 reviewed contract 或真实链上数据通过。
 
+8. **组合验收先选择依赖检查项。** 同一任务依赖多个已有通道时，按[统一预检说明](agent-preflight.md)先准备已获授权的服务，再运行 `yarn agent:preflight --checks ...`，查看逐项状态后进入业务验收。钱包必须显式选择；keeper 的真实 blocked 不因本地 mock 被改为 passed，未选择项也不能当作通过。单一通道或需自定义端点时仍可直接使用原工具，不重复运行两套相同检查。
+
 完整前端构建命令（工作目录：主仓库根目录；仅在已获构建授权、机器资源允许时执行）：
 
 ```sh
