@@ -52,7 +52,7 @@ async function rpcRequest({ rpcUrl, method, params, id, fetchImpl }) {
   return data.result;
 }
 
-export async function readSolanaMainnetBalance({ address, rpcUrl, fetchImpl = fetch }) {
+export async function connectSolanaMainnet({ rpcUrl, fetchImpl = fetch }) {
   if (!rpcUrl) {
     const config = JSON.parse(await readFile(new URL("../src/config/solanaRpc.json", import.meta.url), "utf8"));
     rpcUrl = process.env.SOLANA_RPC_PROXY_URL ?? config.localUrl;
@@ -70,13 +70,16 @@ export async function readSolanaMainnetBalance({ address, rpcUrl, fetchImpl = fe
   if (genesisHash !== MAINNET_GENESIS) {
     throw new WalletRpcError("wrong-network", "RPC genesis does not match Solana Mainnet. Balance was not requested.");
   }
-  const result = await rpcRequest({
-    rpcUrl,
-    method: "getBalance",
-    params: [address, { commitment: "confirmed" }],
-    id: 2,
-    fetchImpl,
-  });
+  return {
+    genesisHash,
+    rpcOrigin: parsedUrl.origin,
+    request: (method, params, id) => rpcRequest({ rpcUrl, method, params, id, fetchImpl }),
+  };
+}
+
+export async function readSolanaMainnetBalance({ address, rpcUrl, fetchImpl = fetch }) {
+  const { genesisHash, rpcOrigin, request } = await connectSolanaMainnet({ rpcUrl, fetchImpl });
+  const result = await request("getBalance", [address, { commitment: "confirmed" }], 2);
   requireValid(isU64(result?.value), "RPC balance must be an unsigned 64-bit integer in lamports.");
   requireValid(
     isU64(result?.context?.slot) && result.context.slot > 0n,
@@ -89,7 +92,7 @@ export async function readSolanaMainnetBalance({ address, rpcUrl, fetchImpl = fe
     checkedAt: new Date().toISOString(),
     network: "solana-mainnet",
     genesisHash,
-    rpcOrigin: parsedUrl.origin,
+    rpcOrigin,
     address,
     commitment: "confirmed",
     slot: result.context.slot.toString(),
