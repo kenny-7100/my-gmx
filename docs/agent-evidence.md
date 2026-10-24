@@ -37,6 +37,7 @@ verify 不需要原始文件路径、RPC、钱包、API 或原报告中的源码
 
 | scope | 来源 |
 | --- | --- |
+| solana-browser-prerequisites | 本地浏览器验收环境预检；仅准备状态，不证明服务或页面通过 |
 | local-artifacts / local-artifacts-and-mainnet-program | SDK/WASM 与程序指纹 |
 | configured-mainnet-lookup-tables | ALT 预检 |
 | transaction-receipt | 交易回执证据 |
