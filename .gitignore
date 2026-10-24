@@ -67,3 +67,4 @@ claude.md
 /.local/acceptance/keeper/
 /.local/acceptance/solana-api-local/
 /.local/acceptance/agent-preflight/
+/.local/acceptance/agent-wallet/
