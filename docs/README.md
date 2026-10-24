@@ -8,5 +8,6 @@
 | [旧 Solana 后端参考说明](gmtrade-web-backend-reference.md) | 查阅源码快照的结构、数据流、接口、精度及缺失依赖，理解其与 GMX 目标架构的区别 |
 | [文档维护约定](documentation-maintenance.md) | 主动沉淀协作知识，维护索引，编写便于后续 Agent 接手的资料 |
 | [编码与自审规范](coding-and-self-review.md) | 按任务查阅 gmx-prompts，执行编码、自审、测试筛选和跨仓库核验 |
+| [自动化工具沉淀约定](automation-tools.md) | 识别重复任务，复用和实现脚本、检查器等工具，记录验证结果和使用入口 |
 
 新增主题文档时更新本表。优先查找并更新已有主题，避免为同一结论创建多份说明。
