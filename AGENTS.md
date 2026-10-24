@@ -1,30 +1,32 @@
-## Migration background
+## 迁移背景
 
-This project is integrating Solana support into the main project. The `gmx-solana-interface` subproject is primarily a reference for understanding Solana-related resources and behavior; the implementation must follow the main project's existing frontend component, architecture, state management, and interaction system.
+本项目正在将 Solana 支持集成到主项目中。`gmx-solana-interface` 子项目主要用于理解 Solana 相关资源和行为；具体实现必须遵循主项目现有的前端组件体系、架构、状态管理和交互体系。
 
-## Solana migration
+## Solana 迁移
 
-1. Use `gmx-solana-interface` to understand Solana-related resources, data access, interfaces, and observable behavior; do not treat it as a source to be ported wholesale.
-2. Preserve the main project's existing architecture, frontend components, page structure, state management, interaction patterns, and business logic whenever implementing Solana support.
-3. For each Solana module, if the main project already provides an equivalent frontend component or module, reuse it. If the main project has no equivalent and a new frontend component or module is required, ask the user for confirmation before introducing it.
-4. Do not directly transplant the reference project's business logic, pages, or UI components. Reimplement only the required behavior using the main project's existing patterns and adapt reference data or interfaces to fit them.
-5. Keep migration changes focused on the Solana integration and avoid unrelated refactors or component changes.
-6. When the required behavior, data contract, or integration approach remains unclear after reviewing the relevant reference code, ask the user for clarification before implementing.
+参考仓库的用途、查阅顺序、版本注意事项和 remote 配置记录在 [docs/solana-reference-repositories.md](docs/solana-reference-repositories.md) 中。开展迁移工作前，先阅读相关条目。特别注意：需要查看 `gmx-adrs` 的 `origin/adr-0015-solana-gmx-api` 分支中的 ADR-0015；记录时该文档尚未进入默认分支。使用前应重新核实其提案及合并状态。
 
-## Engineering standards
+1. 使用 `gmx-solana-interface` 理解 Solana 相关资源、数据访问方式、接口和可观察行为，不要将其视为需要整体移植的源码。
+2. 实现 Solana 支持时，保留主项目现有的架构、前端组件、页面结构、状态管理、交互模式和业务逻辑。
+3. 对每个 Solana 模块，如果主项目已有对应的前端组件或模块，必须复用。如果主项目没有对应实现，且确实需要新增前端组件或模块，应先向用户确认再引入。
+4. 不要直接移植参考项目的业务逻辑、页面或 UI 组件。仅使用主项目现有模式重新实现所需行为，并适配参考数据或接口。
+5. 迁移改动应聚焦 Solana 集成，避免无关重构或组件改动。
+6. 查阅相关参考代码后，如果所需行为、数据契约或集成方式仍不明确，应先向用户澄清再实现。
 
-1. Refer to the `gmx-prompts` subproject for coding style, technical standards, development practices, and code review guidance.
-2. When implementing or reviewing changes, apply the relevant guidance from `gmx-prompts` together with the project-specific instructions in this file.
+## 工程规范
 
-## General instructions
+1. 编码风格、技术标准、开发实践和代码审查要求，参考 `gmx-prompts` 子项目。
+2. 实现或审查改动时，同时遵循 `gmx-prompts` 中的相关规范和本文件中的项目专属要求。
 
-1. Do not run side-effecting git commands unless explicitly requested. Inspection-only git commands are always allowed.
-2. If the user explicitly says `push`, automatically run `git add .`, create a commit with an appropriate commit message, and push the commit to the configured remote.
-3. Keep user-facing replies concise and accurate. Describe the essence of the issue clearly, in a way that is easy for humans to read.
-4. When solving a task, stay focused on the requested problem only. Do not make opportunistic optimizations, refactors, formatting changes, or unrelated edits.
-5. Do not automatically run UI tests, builds, or deployments, open browsers, or start local debug/development servers. UI testing, builds, deployments, and visual verification must be performed manually by the user unless explicitly requested.
-6. When requirements, context, or expected behavior are unclear, ask the user for clarification before implementing. Do not proceed based on assumptions or guesses.
-7. When requirements, context, or expected behavior are unclear, avoid listing multiple possibilities or providing long speculative explanations. Briefly state what is unclear and ask the user for clarification directly.
-8. Treat questions as requests for explanation or analysis by default. Only modify code, edit files, or run commands when the user clearly asks for action.
-9. Do not add speculative fallback logic to compensate for uncertainty. Prefer exposing errors clearly over silently masking them.
-10. Unless the user explicitly asks for a complete one-shot implementation, prefer incremental, test-friendly changes that are small, focused, and easy for humans to review and test.
+## 通用要求
+
+1. 未经用户明确要求，不要执行有副作用的 Git 命令。只读检查类 Git 命令始终允许执行。
+2. 用户明确要求 `push` 时，视为已授权将当前仓库的全部改动暂存、提交并推送。根据当前会话和改动简要总结一条 commit message，然后直接执行 `git add . && git commit -m 'xxx' && git push <个人 remote> HEAD`。不要额外开展代码审查、测试、构建、无关排查或修改，不要因未跟踪文件、嵌套仓库或提交范围再次请求确认；本条优先于参考文档中的提交前确认要求。仅在命令失败或缺少必要的推送目标时处理具体阻碍并简短说明。除 `gmx-prompts` 外，推送到个人的 `my-` remote，不得推送到上游 `origin`：主项目使用 `my-gmx`，`gmx-api` 使用 `my-gmx-api`，`gmx-solana-interface` 使用 `my-gmt`。其他仓库使用已配置的个人 `my-` remote；若未配置且用户未指定目标，再向用户确认。`gmx-prompts` 按其已有推送配置执行。
+3. 面向用户的回复应简洁、准确，清晰说明问题本质，便于理解。
+4. 解决任务时，仅聚焦用户要求的问题，不要顺带优化、重构、调整格式或修改无关内容。
+5. 不要自动运行 UI 测试、构建或部署，不要打开浏览器或启动本地调试、开发服务器。除非用户明确要求，否则 UI 测试、构建、部署和视觉验证应由用户手动完成。
+6. 需求、上下文或预期行为不明确时，应先向用户澄清再实现，不要基于假设或猜测推进。
+7. 需求、上下文或预期行为不明确时，不要罗列多种可能性或提供冗长的推测说明，应简短指出不明确之处并直接向用户提问。
+8. 默认将问题视为解释或分析请求。只有用户明确要求采取行动时，才修改代码、编辑文件或执行命令。
+9. 不要通过添加推测性的兜底逻辑来弥补不确定性。应清晰暴露错误，避免静默掩盖问题。
+10. 除非用户明确要求一次性完整实现，否则优先采用渐进式、便于测试的小范围改动，确保改动聚焦且易于人工审查和测试。
