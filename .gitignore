@@ -70,3 +70,4 @@ claude.md
 /.local/acceptance/agent-wallet/
 /.local/acceptance/solana-runtime/
 /.local/acceptance/solana-alt/
+/.local/acceptance/requirements/
