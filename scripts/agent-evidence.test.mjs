@@ -186,3 +186,20 @@ test("rejects missing or mismatched worksheet bindings before creating output", 
   await writeFile(path.join(f.outDir, "worksheet.md"), `${f.bytes.toString("utf8")}Extra text`);
   await assert.rejects(verifyEvidence({ dir: f.outDir }));
 });
+
+test("pins both package formats and rejects internally valid replacements", async (t) => {
+  for (const makeFixture of [fixture, worksheetFixture]) {
+    const f = await makeFixture(t);
+    const packed = await packEvidence(f);
+    const expectedManifestSha256 = packed.manifestSha256;
+    assert.equal(packed.manifestIdentity, "not-checked");
+    const matched = await verifyEvidence({ dir: f.outDir, expectedManifestSha256 });
+    assert.deepEqual(matched, { ...packed, manifestIdentity: "matched" });
+    const file = path.join(f.outDir, "manifest.json");
+    const manifest = JSON.parse(await readFile(file));
+    manifest.issue = "FESOL-71";
+    await writeFile(file, JSON.stringify(manifest));
+    assert.equal((await verifyEvidence({ dir: f.outDir })).manifestIdentity, "not-checked");
+    await assert.rejects(verifyEvidence({ dir: f.outDir, expectedManifestSha256 }));
+  }
+});
