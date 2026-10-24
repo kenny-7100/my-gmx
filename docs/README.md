@@ -11,7 +11,7 @@
 | [Agent 验收基础设施调研与实施清单](agent-acceptance-infrastructure.md) | RPC、keeper、API、钱包等验收条件与实施记录；A01/A02 访问工具已完成，真实交易前置单独跟踪 |
 | [本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md) | 手动启动、前端与 Agent 调用、fallback key/Origin 转发、方法限制及验证边界 |
 | [keeper 只读预检](keeper-preflight.md) | A02 真实价格、图表与开关预检；本地 `solanaTrading` 覆盖配置、环境边界及真实交易前置 |
-| [本地 Agent 验收钱包](agent-wallet.md) | A05 首步：`.env.local` 助记词配置、固定 EVM/Solana 派生路径及地址命令；已通过公开向量与实际配置验收 |
+| [本地 Agent 验收钱包](agent-wallet.md) | A05：助记词配置、固定 EVM/Solana 地址、Mainnet 原生 SOL 余额预检与失败诊断；已通过自动测试和真实只读验收，Devnet 暂缓 |
 | [Solana 迁移参考仓库](solana-reference-repositories.md) | 查找仓库用途、协议与 SDK 资料、ADR-0015 分支、版本注意事项和 remote 规则 |
 | [旧 Solana 后端参考说明](gmtrade-web-backend-reference.md) | 查阅源码快照的结构、数据流、接口、精度及缺失依赖，理解其与 GMX 目标架构的区别 |
 | [文档维护约定](documentation-maintenance.md) | 主动沉淀协作知识，把环境排障经验提升为执行前置，维护索引及接手资料 |

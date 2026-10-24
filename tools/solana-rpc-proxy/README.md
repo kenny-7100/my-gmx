@@ -36,7 +36,7 @@ SOLANA_RPC_PROXY_PORT=3031 yarn solana:rpc-proxy
 
 构建后的预览/生产环境忽略该开发覆盖，使用现有 Alchemy fallback 上游。EVM RPC 的 key 选择与地址不变。不要用现有 `isDevelopment()` 判断是否访问本地代理，该函数也会将部分远程预览识别为开发环境。
 
-当前分支尚无 Solana RPC client 或余额读取调用。本次提供统一 URL 入口，后续 Solana 读取模块必须使用 `getSolanaRpcUrl()`；没有为证明代理可用而新增钱包读取、轮询或 UI。入口本身不执行网络请求，不会在 Solana flag 关闭时自动读链。
+当前分支前端业务尚无 Solana RPC client 或余额读取调用；本地 Agent 的只读余额脚本见[钱包说明](../../docs/agent-wallet.md)。本次提供统一 URL 入口，后续 Solana 读取模块必须使用 `getSolanaRpcUrl()`；没有为证明代理可用而新增钱包读取、轮询或 UI。入口本身不执行网络请求，不会在 Solana flag 关闭时自动读链。
 
 ## 配置与边界
 

@@ -4,6 +4,8 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, parseEnv } from "node:util";
 
+import { readSolanaMainnetBalance, WalletRpcError } from "./agent-wallet-balance.mjs";
+
 const ENV_FILE = fileURLToPath(new URL("../.env.local", import.meta.url));
 const MNEMONIC_KEY = "AGENT_TEST_WALLET_MNEMONIC";
 const EVM_PATH = "m/44'/60'/0'/0/0";
@@ -81,11 +83,17 @@ export async function runCli({
   envFile = ENV_FILE,
   stdout = process.stdout,
   stderr = process.stderr,
+  fetchImpl = fetch,
+  rpcUrl,
 } = {}) {
   try {
     let parsed;
     try {
-      parsed = parseArgs({ args, allowPositionals: true, options: { help: { type: "boolean", short: "h" } } });
+      parsed = parseArgs({
+        args,
+        allowPositionals: true,
+        options: { help: { type: "boolean", short: "h" }, network: { type: "string" } },
+      });
     } catch {
       throw new WalletConfigError(
         "Invalid arguments. Use yarn agent:wallet --help. Never pass a mnemonic as an argument."
@@ -93,22 +101,45 @@ export async function runCli({
     }
     if (parsed.values.help) {
       stdout.write(
-        "Usage: yarn agent:wallet addresses\nReads AGENT_TEST_WALLET_MNEMONIC from root .env.local. Outputs public addresses only; no network access.\n"
+        "Usage: yarn agent:wallet addresses\n       yarn agent:wallet balances --network solana-mainnet\nReads AGENT_TEST_WALLET_MNEMONIC from root .env.local. Addresses are offline; balances use read-only RPC through the configured proxy. No signing or transaction sending.\n"
       );
       return 0;
     }
-    if (parsed.positionals.length !== 1 || parsed.positionals[0] !== "addresses") {
-      throw new WalletConfigError("Expected the addresses command. Use yarn agent:wallet --help.");
+    const command = parsed.positionals[0];
+    if (parsed.positionals.length !== 1 || !["addresses", "balances"].includes(command)) {
+      throw new WalletConfigError("Expected addresses or balances. Use yarn agent:wallet --help.");
     }
-    const report = deriveAddresses(await readMnemonic(envFile));
+    if (command === "balances" && parsed.values.network !== "solana-mainnet") {
+      throw new WalletConfigError(
+        "Balances require --network solana-mainnet. Devnet and EVM balance checks are not supported."
+      );
+    }
+    if (command === "addresses" && parsed.values.network !== undefined) {
+      throw new WalletConfigError("The addresses command does not accept --network.");
+    }
+    const addresses = deriveAddresses(await readMnemonic(envFile));
+    let report = addresses;
+    if (command === "balances") {
+      const wallet = addresses.wallets.find((wallet) => wallet.chain === "solana");
+      report = {
+        ...(await readSolanaMainnetBalance({ address: wallet.address, rpcUrl, fetchImpl })),
+        path: wallet.path,
+      };
+    }
     stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return 0;
   } catch (error) {
     stderr.write(
       `${JSON.stringify({
         status: "failed",
+        code:
+          error instanceof WalletRpcError
+            ? error.code
+            : error instanceof WalletConfigError
+              ? "configuration-error"
+              : "internal-error",
         message:
-          error instanceof WalletConfigError
+          error instanceof WalletConfigError || error instanceof WalletRpcError
             ? error.message
             : "Wallet derivation failed. No secret details were logged.",
       })}\n`

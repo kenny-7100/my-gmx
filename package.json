@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "agent:wallet": "node scripts/agent-wallet.mjs",
-    "test:agent-wallet": "node --test scripts/agent-wallet.test.mjs",
+    "test:agent-wallet": "node --test scripts/agent-wallet.test.mjs scripts/agent-wallet-balance.test.mjs",
     "keeper:preflight": "tsx scripts/keeper-preflight.ts",
     "test:keeper-preflight": "tsx --test scripts/keeper-preflight.test.ts",
     "solana:rpc-proxy": "node tools/solana-rpc-proxy/server.mjs",
