@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "solana:rpc-proxy": "node tools/solana-rpc-proxy/server.mjs",
+    "solana:rpc-proxy:verify": "node tools/solana-rpc-proxy/verify.mjs",
+    "test:solana-rpc-proxy": "node --test tools/solana-rpc-proxy/proxy.test.mjs",
     "linear": "node scripts/linear-requirements.mjs",
     "test:linear-tools": "node --test scripts/linear-requirements.test.mjs",
     "start": "yarn build:gmsol-sdk && VITE_APP_VERSION=$(git rev-parse HEAD) vite --port 3010 --host",
