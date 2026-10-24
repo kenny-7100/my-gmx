@@ -8,6 +8,7 @@ import { isDeepStrictEqual, parseArgs } from "node:util";
 import { checkWorksheet } from "./agent-acceptance.mjs";
 
 const SCOPES = new Set([
+  "solana-browser-prerequisites",
   "local-source-comparison",
   "acceptance-worksheet-consistency",
   "real-wasm-reference-vectors",
