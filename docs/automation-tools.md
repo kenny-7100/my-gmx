@@ -47,7 +47,7 @@
 
 已沉淀[Solana Mainnet 交易回执证据](solana-transaction-evidence.md)：`yarn solana:transaction-evidence --network solana-mainnet --signature <signature>` 复用既有代理读取 finalized 回执与历史签名状态，交叉核对身份/结果，保存精确整数、完整回执、内容摘要和工具源码身份。测试入口 `yarn test:solana-transaction-evidence`；未知/未 finalized/缺回执为 blocked，链上失败为 failed，不读取钱包或推断 keeper 执行。
 
-已沉淀[Agent 验收证据包](agent-evidence.md)：`yarn agent:evidence pack` 显式收集已有工具 JSON，保留原字节/状态/观察时间、生成文件清单及摘要；`verify` 在接收目录离线检查完整性，不依赖原路径或链上服务。测试入口 `yarn test:agent-evidence`；不重新执行验收、不脱敏或上传，包完整不代表业务通过。
+已沉淀[Agent 验收证据包](agent-evidence.md)：`yarn agent:evidence pack` 显式收集已有工具 JSON，保留原字节/状态/观察时间、生成文件清单及摘要；可用 `--worksheet` 绑定并携带工作表，`verify` 在接收目录离线检查完整性及其与报告的一致性，不依赖原路径或链上服务。测试入口 `yarn test:agent-evidence`；不重新执行验收、不脱敏或上传，包完整不代表业务通过。
 
 已沉淀[Agent 本地 PR 预览定位](agent-preview.md)：`yarn agent:preview --pr NUMBER [--expected-sha SHA]` 通过 gh 只读 API 复用 CI 的精确部署解析器，提供分页、版本/URL/检查链接与源码摘要。验证入口 `yarn test:agent-preview`；报告可加入证据包，不打开页面、构建、部署或运行 UI。
 
