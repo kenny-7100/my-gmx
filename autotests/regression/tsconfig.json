@@ -17,6 +17,7 @@
   "include": [
     "**/*.ts",
     "../../playwright-regression.config.ts",
+    "../../playwright-solana-readonly.config.ts",
     "../../playwright-funded-preflight.config.ts",
     "../../playwright-funded-harness.config.ts",
     "../../viem-override.d.ts"

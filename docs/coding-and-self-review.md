@@ -38,6 +38,8 @@
 
 18. **复用统一预检历史报告先比较相关源码。** 按[源码比较说明](agent-preflight.md#复用历史报告前比较源码指纹)执行 `yarn agent:preflight --compare-source REPORT.json`，变化时先核对影响范围，再选择需要复跑的项；不因无关 HEAD/文档变化机械重跑全部检查。比较通过不刷新历史数据有效期，也不把原 failed/blocked 改成通过；价格、余额、flags 和真实服务仍按当前验收要求检查。没有可复用报告时直接执行本次必要预检，无需先造基线。
 
+19. **Solana 开关页面验收先核实运行语义和依赖。** 按[本地只读冒烟说明](solana-browser-smoke.md)先检查锁定的 Playwright 包可解析、Chrome 已安装及 `--list`/类型检查；需要恢复依赖时用 `yarn install --immutable --mode=skip-build`，普通安装会触发 SDK 构建钩子。现有 fixture 默认 `production-preview=true`，会使零投放的手动 AB 开关被清除；新入口显式关闭该选项且限定本地 development。准备通过后仍需本地服务/UI 明确授权再运行，不将测试发现当页面通过。
+
 完整前端构建命令（工作目录：主仓库根目录；仅在已获构建授权、机器资源允许时执行）：
 
 ```sh
