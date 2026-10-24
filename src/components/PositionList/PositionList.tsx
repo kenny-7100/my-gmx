@@ -4,20 +4,17 @@ import { useMedia } from "react-use";
 
 import { useIsPositionsLoading, usePositionsInfoData } from "context/SyntheticsStateContext/hooks/globalsHooks";
 import { usePositionEditorPositionState } from "context/SyntheticsStateContext/hooks/positionEditorHooks";
-import { selectChainId, selectPositionsInfoError } from "context/SyntheticsStateContext/selectors/globalSelectors";
+import { selectChainId } from "context/SyntheticsStateContext/selectors/globalSelectors";
 import { selectPositionsInfoDataSortedByMarket } from "context/SyntheticsStateContext/selectors/positionsSelectors";
 import { selectShowPnlAfterFees } from "context/SyntheticsStateContext/selectors/settingsSelectors";
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import { PositionInfo } from "domain/synthetics/positions";
-import type { PositionsLifecycleFees } from "domain/synthetics/positions/lifetimeFees";
-import { usePositionsLifecycleFees } from "domain/synthetics/positions/usePositionsLifecycleFees";
 import { TradeMode } from "domain/synthetics/trade";
 import { getByKey } from "lib/objects";
 import { userAnalytics } from "lib/userAnalytics";
 import { SharePositionClickEvent } from "lib/userAnalytics/types";
 import useWallet from "lib/wallets/useWallet";
 
-import { AlertInfo } from "components/AlertInfo/AlertInfo";
 import { EmptyTableContent } from "components/EmptyTableContent/EmptyTableContent";
 import { OrderEditorContainer } from "components/OrderEditorContainer/OrderEditorContainer";
 import { PositionItem } from "components/PositionItem/PositionItem";
@@ -63,7 +60,6 @@ export function PositionList(p: Props) {
     () => sortPositionsByField(defaultPositions, orderBy, direction, showPnlAfterFees),
     [defaultPositions, orderBy, direction, showPnlAfterFees]
   );
-  const lifecycleFees = usePositionsLifecycleFees(chainId, positions);
 
   const handleSharePositionClick = useCallback((positionKey: string) => {
     userAnalytics.pushEvent<SharePositionClickEvent>({
@@ -77,33 +73,23 @@ export function PositionList(p: Props) {
   }, []);
   const [, setEditingPositionKey] = usePositionEditorPositionState();
   const isLoading = useIsPositionsLoading();
-  const positionsInfoError = useSelector(selectPositionsInfoError);
-  const hasCachedPositions = Object.keys(positionsInfoData ?? {}).length > 0;
-  const positionsEmptyText =
-    positionsInfoError && !hasCachedPositions ? (
-      <Trans>Could not load open positions</Trans>
-    ) : (
-      <Trans>No open positions</Trans>
-    );
   const isMobile = useMedia("(max-width: 1024px)");
 
   return (
     <div className="flex grow flex-col">
-      {positionsInfoError && hasCachedPositions && (
-        <AlertInfo type="warning" compact textColor="text-yellow-300">
-          <Trans>Could not refresh open positions. This list may be out of date.</Trans>
-        </AlertInfo>
-      )}
       {isMobile && (
         <>
-          <EmptyTableContent isLoading={isLoading} isEmpty={positions.length === 0} emptyText={positionsEmptyText} />
+          <EmptyTableContent
+            isLoading={isLoading}
+            isEmpty={positions.length === 0}
+            emptyText={<Trans>No open positions</Trans>}
+          />
           <div className="grid grid-cols-1 gap-8 min-[800px]:grid-cols-2">
             {!isLoading &&
               positions.map((position) => (
                 <PositionItemWrapper
                   key={position.key}
                   position={position}
-                  lifecycleFees={lifecycleFees}
                   onEditCollateralClick={setEditingPositionKey}
                   onClosePositionClick={onClosePositionClick}
                   onOrdersClick={onOrdersClick}
@@ -176,7 +162,6 @@ export function PositionList(p: Props) {
                   <PositionItemWrapper
                     key={position.key}
                     position={position}
-                    lifecycleFees={lifecycleFees}
                     onEditCollateralClick={setEditingPositionKey}
                     onClosePositionClick={onClosePositionClick}
                     onOrdersClick={onOrdersClick}
@@ -192,7 +177,11 @@ export function PositionList(p: Props) {
             </tbody>
           </Table>
 
-          <EmptyTableContent isLoading={isLoading} isEmpty={positions.length === 0} emptyText={positionsEmptyText} />
+          <EmptyTableContent
+            isLoading={isLoading}
+            isEmpty={positions.length === 0}
+            emptyText={<Trans>No open positions</Trans>}
+          />
         </TableScrollFadeContainer>
       )}
       {positionToShare && (
@@ -223,7 +212,6 @@ export function PositionList(p: Props) {
 const PositionItemWrapper = memo(
   ({
     position,
-    lifecycleFees,
     hideActions,
     isLarge,
     onClosePositionClick,
@@ -236,7 +224,6 @@ const PositionItemWrapper = memo(
     hideOrderActions,
   }: {
     position: PositionInfo;
-    lifecycleFees: PositionsLifecycleFees | undefined;
     onEditCollateralClick: (positionKey: string) => void;
     onClosePositionClick: (positionKey: string) => void;
     onOrdersClick: (positionKey: string, orderKey: string | undefined) => void;
@@ -281,7 +268,6 @@ const PositionItemWrapper = memo(
     return (
       <PositionItem
         position={position}
-        lifecycleFees={lifecycleFees}
         onEditCollateralClick={handleEditCollateralClick}
         onClosePositionClick={handleClosePositionClick}
         onOrdersClick={handleOrdersClick}
