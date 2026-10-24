@@ -20,7 +20,7 @@
 | 数据模式 | <unit-mock / sample / local-artifact / live-read / browser / live-transaction> |
 | 依赖身份 | <API source vs deployment / SDK and WASM hash / program deployment / network, only as needed> |
 | 开关与覆盖 | <real flags / local overrides / test mocks; no secrets> |
-| 原始证据 | <location / available locally or shared / retention limitations> |
+| 原始证据 | <location / available locally or shared / retention limitations / package manifestSha256 if transferred> |
 
 ## 条件映射
 
