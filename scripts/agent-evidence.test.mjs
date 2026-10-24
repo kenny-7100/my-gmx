@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { cp, mkdtemp, readFile, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+import { checkWorksheet } from "./agent-acceptance.mjs";
 import { packEvidence, verifyEvidence, runCli } from "./agent-evidence.mjs";
 
 async function fixture(t) {
@@ -130,4 +132,57 @@ test("rejects tampered bytes, conflicting manifests, missing and extra files and
   const link = path.join(f.dir, "link");
   await symlink(f.outDir, link);
   await assert.rejects(verifyEvidence({ dir: link }));
+});
+
+async function worksheetFixture(t) {
+  const f = await fixture(t);
+  const bytes = await readFile(new URL("../docs/acceptance/FESOL-55.md", import.meta.url));
+  const worksheet = path.join(f.dir, "acceptance.md");
+  await writeFile(worksheet, bytes);
+  const report = {
+    ...checkWorksheet(bytes.toString("utf8")),
+    checkedAt: "2026-10-24T22:08:04.000Z",
+    worksheetSha256: createHash("sha256").update(bytes).digest("hex"),
+    checkerSha256: createHash("sha256")
+      .update(await readFile(new URL("./agent-acceptance.mjs", import.meta.url)))
+      .digest("hex"),
+  };
+  await writeFile(f.file, JSON.stringify(report));
+  return { ...f, worksheet, report, bytes };
+}
+
+test("transfers the exact worksheet and bound report without upgrading partial acceptance", async (t) => {
+  const f = await worksheetFixture(t);
+  const result = await packEvidence(f);
+  assert.equal(result.worksheet.requirementAcceptance, "partial");
+  assert.equal(result.requirementAcceptance, "not-evaluated");
+  assert.deepEqual(await readFile(path.join(f.outDir, "worksheet.md")), f.bytes);
+  assert.deepEqual(JSON.parse(await readFile(path.join(f.outDir, "receipt.json"))), f.report);
+  const copy = path.join(f.dir, "transferred");
+  await cp(f.outDir, copy, { recursive: true });
+  await unlink(f.worksheet);
+  await unlink(f.file);
+  assert.deepEqual(await verifyEvidence({ dir: copy }), result);
+});
+
+test("rejects missing or mismatched worksheet bindings before creating output", async (t) => {
+  const f = await worksheetFixture(t);
+  await assert.rejects(packEvidence({ ...f, worksheet: undefined }));
+  await assert.rejects(packEvidence({ ...f, reports: [...f.reports, { name: "duplicate", file: f.file }] }));
+  for (const changes of [
+    { worksheetSha256: "0".repeat(64) },
+    { requirementAcceptance: "passed" },
+    { counts: { passed: 8 } },
+    { evidenceSufficiency: "passed" },
+    { checkerSha256: "unknown" },
+    { scope: "transaction-receipt" },
+  ]) {
+    await writeFile(f.file, JSON.stringify({ ...f.report, ...changes }));
+    await assert.rejects(packEvidence(f));
+  }
+  await assert.rejects(readFile(path.join(f.outDir, "manifest.json")));
+  await writeFile(f.file, JSON.stringify(f.report));
+  await packEvidence(f);
+  await writeFile(path.join(f.outDir, "worksheet.md"), `${f.bytes.toString("utf8")}Extra text`);
+  await assert.rejects(verifyEvidence({ dir: f.outDir }));
 });

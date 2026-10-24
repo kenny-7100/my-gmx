@@ -40,7 +40,7 @@ A01 已完成本地开发与 Agent 读取、模拟验证通道的建设及验收
 | A11 | P1 | 数值正确性基准 | FESOL-57/64/65 要求与 gmsol 模型或链上 view 对比；ADR 指出已发布 SDK 的清算参数参考限制；新增[真实 WASM 基础向量](solana-sdk-vectors.md)，独立 Python 期望对照 apply_factor。 | 建立带源码/程序版本、账户、价格、时间和容差的参考向量；API 与前端 SDK 对同一输入核验。 | FESOL-92/57/64/65；精度、funding、borrowing、PnL、清算价。 | 两端相互比较不足以证明正确，需独立且已核实的基准；基础向量不证明复杂业务数学或链上兼容。 | 部分完成（真实 WASM 与基础定点向量已验收；复杂数学基准待推进） |
 | A12 | P1 | 交易生命周期证据 | 已有[Mainnet 回执证据工具](solana-transaction-evidence.md)，核对 finalized 签名状态、完整回执与链上结果；交易确认不等于 keeper 已执行，协议事件由 FESOL-94 跟踪。 | 关联模拟、发送签名、订单账户、执行/取消交易、原因、最终持仓和 API 刷新；明确各阶段超时。 | FESOL-20/56/59/94。 | simulation 只检查创建阶段；账户消失或创建交易成功不能单独证明成交成功。 | 部分完成（基础回执证据已验收；订单/keeper/API 关联待完善） |
 | A13 | P1 | 少量真实交易自动验收 | EVM funded runner 已有预算、锁、日志、恢复、清理。A05 地址与 Mainnet SOL 余额工具已验收，尚无本地签名、发送命令或 Solana 自动交易 runner。 | 复用既有交易构建与校验，逐步提供模拟、签名、发送和确认入口；再验证开平仓、限价创建/修改/取消，记录恢复及链上结果。 | FESOL-56/19/59。 | Mainnet 原生 SOL 已核验，Devnet 按用户决定暂缓；需明确网络、可广播 RPC、其他协议依赖与交易授权。A01 代理仍禁止发送。 | 待推进（钱包地址前置已具备，签名/发送尚未实施） |
-| A14 | P1 | 预览版本与证据归档 | CI 已能定位精确 PR head 的 Cloudflare 预览并保存报告、截图、trace；统一预检可记录本地源码 SHA/dirty、检查器/配置与预期 API 样例摘要；另有[SDK/程序指纹检查](solana-runtime-preflight.md)，核对 WASM 并记录完整程序区摘要、部署 slot 和权限；新增[证据包](agent-evidence.md)用于离线移交与完整性校验。 | 补充前端 SHA、API 版本、SDK/WASM hash、程序版本/部署 slot、网络、flags、数据模式和交易签名。 | 所有需求。 | 记录具体版本；变化的预览别名和共享站点不足以绑定交付版本。 | 部分完成（本地预检、SDK/程序指纹、可移交证据包和 PR 预览定位已具备；部署内容/业务对应关系待完善） |
+| A14 | P1 | 预览版本与证据归档 | CI 已能定位精确 PR head 的 Cloudflare 预览并保存报告、截图、trace；统一预检可记录本地源码 SHA/dirty、检查器/配置与预期 API 样例摘要；另有[SDK/程序指纹检查](solana-runtime-preflight.md)，核对 WASM 并记录完整程序区摘要、部署 slot 和权限；新增[证据包](agent-evidence.md)用于离线移交与完整性校验。 | 补充前端 SHA、API 版本、SDK/WASM hash、程序版本/部署 slot、网络、flags、数据模式和交易签名。 | 所有需求。 | 记录具体版本；变化的预览别名和共享站点不足以绑定交付版本。 | 部分完成（本地预检、SDK/程序指纹、可移交证据包（含工作表绑定）和 PR 预览定位已具备；部署内容/业务对应关系待完善） |
 | A15 | P2 | 可重置本地协议环境 | 已有 Anchor、`start-localnet`、`setup-localnet`。依赖 Geyser 插件、程序 `.so`、Redis 连接及 keeper 角色；本机未发现所需插件/产物，Solana、Anchor、Rust CLI 未在 PATH 中发现。 | 先验证单个有限场景：启动、准备账户/市场、执行一种订单、读取结果、重置；成功后再决定日常使用范围。 | 边界条件、失败状态、精度及订单流程。 | 有脚本不等于开箱可用；需配套 keeper 执行、oracle、流动性与前端配置。CLI 检查不证明整台机器绝对未安装工具。 | 待推进 |
 | A16 | P2 | 历史与统计索引 | gmtrade-sqd 支持本地 Postgres、processor、GraphQL；Core Store 需 `SQD_PORTAL_API_KEY`，Core 与 GT 部署覆盖不同；已新增[现有 volume 索引预检](solana-index-preflight.md)，核实配置默认端点、契约、高度及最新事件年龄。 | 初期核实只读端点；相关需求实施时准备 replay 范围、索引进度检查和必要快照。 | Trades、Pools、Claims、Stats、GT 等后续范围。 | 不是首批市场/余额/下单验收的共同前置；Portal key/云权限由资源所有者配置；事件年龄不代表处理延迟。 | 部分完成（现有 volume 只读预检已验收；replay/完整性与其他领域待推进） |
 | A17 | P2 | 可观察性、升级与容量 | FESOL-66/67 为 Backlog，要求域名、5xx、陈旧数据、RPC 指标、程序升级及负载成本核验。 | 提供只读日志/指标入口，区分服务存活、数据新鲜度和业务可用性；记录升级引起的不兼容。 | 数据陈旧、程序升级、限流和性能验收。 | ping 成功不等于业务可用；负载测试另行授权，不混入轻量预检。 | 待推进 |
@@ -387,3 +387,23 @@ A02 之后建议推进 A03，确认实际 api-solana 部署地址、版本与数
 本轮结果：`yarn agent:acceptance --file docs/acceptance/FESOL-55.md` 返回一致性 passed、需求 partial、退出 2（1 passed / 5 partial / 2 not-run）；空模板和将实例结论篡改为 passed 的副本均拒绝、退出 1。工作表/检查器摘要与独立计算一致，未改写输入。3 组表驱动测试、类型检查、脚本 ESLint/格式/语法及完整前端单元测试（299 files / 3014 passed，1 原有 skipped，退出 0，123.04 秒）通过；针对脚本的单元测试单独运行，不计入前端数量。前端测试仍有已知 happy-dom teardown AbortError 日志，但最终退出 0，未改动无关代码。
 
 最终 CLI 演练产物在本机 `.local/acceptance/worksheet-consistency/final-kwounrdm/`，已按现有惯例忽略，不随仓库共享；`/tmp/gmx-worksheet-test-ci.log` 和 `/tmp/gmx-worksheet-tscheck.log` 为临时工程日志。共享入口及规则见[验收映射流程](agent-acceptance-workflow.md#工作表自动一致性检查)，后续 Agent 应对自己的工作表运行检查，不能将本轮检查时间当成历史业务证据时间。仅修改验收脚本、命令、文档和报告忽略规则；未改业务、启动服务、运行 UI/构建/部署或签名/发送交易。A03 等原有受阻项状态不变，本轮 A07 扩展范围已完成。
+
+
+## A07/A14 工作表与检查报告移交进度（2026-10-25）
+
+本轮已先推送上一轮改动（`86295c9af8`），跳过仍缺真实入口或需资源确认的项，补齐已就绪的工作表移交缺口：现有证据包尚不接受工作表检查报告，也不能携带对应 Markdown。扩展原有工具，显式绑定工作表字节、摘要、汇总结论与统计，不新增服务或业务实现。
+
+| 阶段 | 状态 | 验收条件 |
+| --- | --- | --- |
+| 就绪与范围 | 已完成 | 复用 checkWorksheet 与 agent:evidence，使用现有 FESOL-55 实例，无外部资源 |
+| 打包与离线绑定 | 已完成并验收 | 显式工作表与唯一对应报告，保留原始字节，复制后独立验证 |
+| 负面路径与兼容 | 已通过 | 缺失、错误绑定、篡改、额外文件被拒绝，旧包继续可验 |
+| 真实 CLI 演练 | 已通过 | FESOL-55 工作表和本次实际检查报告打包、复制、校验；原 partial 不变 |
+| 工程与交接 | 已完成并验收 | 适用工程检查通过，清单、索引与执行前顺序同步 |
+
+完成边界：包完整与工作表一致不证明原始业务证据充分、需求完整覆盖或当前环境可用；不读取表内引用文件或执行命令，不改变 Linear 状态。
+
+
+本轮真实演练产物位于本机 `.local/acceptance/evidence/worksheet-handoff-20261024T221837Z/`（被 Git 忽略，不随仓库共享）。使用本轮真实工作表检查报告生成版本 2 包，独立复制后从临时工作目录校验，删除演练输入副本不影响验证；工作表、报告及 checkedAt 原样保留，工作表结论仍 partial。manifestSha256 为 `1888258fc867b2de9a5eece71193ad083bb1bfd00dd8160f070ba3ab7a313656`，已在本包之外的此记录保存，接收时应单独核对。篡改/缺工作表、额外文件、错误报告绑定、修改统计后重算报告清单摘要、缺绑定输入六项均拒绝；版本 1 的 mainnet-resources 历史包用新工具校验通过。5 组证据包测试（新增 2 组）和 3 组工作表回归、类型、ESLint、格式及语法检查通过，完整前端回归 299 文件 / 3014 tests passed、1 原有 skipped，退出 0，耗时 118.50 秒；141 个本地文档链接及差异检查通过。本轮扩展已完成并验收，A14 整体仍部分完成。
+
+另以明确标记的合成工作表验证 blocked/failed 结论均能原样移交，包顶层仍 not-evaluated；这些仅为工具状态测试，不是 FESOL-55 的业务结果。工程日志为本机临时文件 `/tmp/gmx-worksheet-package-tscheck.log`、`/tmp/gmx-worksheet-package-test-ci.log`。本轮只修改既有验收工具、测试与协作文档，未启动服务、运行 UI/构建/部署、读取钱包或发送交易。
