@@ -74,3 +74,4 @@ claude.md
 /.local/acceptance/solana-transaction/
 /.local/acceptance/evidence/
 /.local/acceptance/preview/
+/.local/acceptance/solana-index/

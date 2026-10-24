@@ -50,3 +50,5 @@
 已沉淀[Agent 验收证据包](agent-evidence.md)：`yarn agent:evidence pack` 显式收集已有工具 JSON，保留原字节/状态/观察时间、生成文件清单及摘要；`verify` 在接收目录离线检查完整性，不依赖原路径或链上服务。测试入口 `yarn test:agent-evidence`；不重新执行验收、不脱敏或上传，包完整不代表业务通过。
 
 已沉淀[Agent 本地 PR 预览定位](agent-preview.md)：`yarn agent:preview --pr NUMBER [--expected-sha SHA]` 通过 gh 只读 API 复用 CI 的精确部署解析器，提供分页、版本/URL/检查链接与源码摘要。验证入口 `yarn test:agent-preview`；报告可加入证据包，不打开页面、构建、部署或运行 UI。
+
+已沉淀[Solana 统计索引只读预检](solana-index-preflight.md)：`yarn solana:index-preflight` 从现有 API 源码默认配置核实 SQD 端点/阈值，轻量检查 GraphQL 契约、高度与最新 volume 事件年龄。测试入口 `yarn test:solana-index-preflight`；支持证据包，不扫描全历史、不部署或自动切源，事件年龄不等于处理延迟。
