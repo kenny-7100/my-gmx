@@ -46,3 +46,5 @@
 已沉淀[Solana ALT 资源预检](solana-alt-preflight.md)：`yarn solana:alt-preflight` 复用现有两张 Mainnet 表配置和 RPC 代理，批量读取后校验账户布局、生命周期与生效地址数，记录 authority、完整地址和摘要。测试入口 `yarn test:solana-alt-preflight`；不创建/修改表，不把表可读当作任意交易地址覆盖。
 
 已沉淀[Solana Mainnet 交易回执证据](solana-transaction-evidence.md)：`yarn solana:transaction-evidence --network solana-mainnet --signature <signature>` 复用既有代理读取 finalized 回执与历史签名状态，交叉核对身份/结果，保存精确整数、完整回执、内容摘要和工具源码身份。测试入口 `yarn test:solana-transaction-evidence`；未知/未 finalized/缺回执为 blocked，链上失败为 failed，不读取钱包或推断 keeper 执行。
+
+已沉淀[Agent 验收证据包](agent-evidence.md)：`yarn agent:evidence pack` 显式收集已有工具 JSON，保留原字节/状态/观察时间、生成文件清单及摘要；`verify` 在接收目录离线检查完整性，不依赖原路径或链上服务。测试入口 `yarn test:agent-evidence`；不重新执行验收、不脱敏或上传，包完整不代表业务通过。
