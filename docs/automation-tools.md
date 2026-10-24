@@ -54,3 +54,5 @@
 已沉淀[Solana 统计索引只读预检](solana-index-preflight.md)：`yarn solana:index-preflight` 从现有 API 源码默认配置核实 SQD 端点/阈值，轻量检查 GraphQL 契约、高度与最新 volume 事件年龄。测试入口 `yarn test:solana-index-preflight`；支持证据包，不扫描全历史、不部署或自动切源，事件年龄不等于处理延迟。
 
 已沉淀[真实 SDK/WASM 基础向量](solana-sdk-vectors.md)：`yarn solana:sdk-vectors` 复用本地指纹检查后，实例化真实固定 WASM 并逐项对照独立 Python 整数生成的 apply_factor 参考值。测试入口 `yarn test:solana-sdk-vectors`；无 RPC/钱包/构建，不把基础数值结果当复杂业务计算或链上兼容证明。
+
+已沉淀[验收工作表一致性检查](agent-acceptance-workflow.md#工作表自动一致性检查)：`yarn agent:acceptance --file PATH.md` 直接读取既有 Markdown 条件/执行表，核对唯一编号、引用、执行结果和汇总状态，输出工作表/检查器摘要；验证入口 `yarn test:agent-acceptance`。不执行表内命令、不读取凭据或原始证据，不评判需求完整覆盖及证据充分性。

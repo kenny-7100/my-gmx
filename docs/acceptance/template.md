@@ -1,6 +1,6 @@
 # <ISSUE> 验收工作表
 
-状态：not-run。本文件是待复制填写的模板，不是执行结果。先阅读[验收流程](../agent-acceptance-workflow.md)，所有占位符替换后再形成有效报告。
+状态：not-run。本文件是待复制填写的模板，不是执行结果。先阅读[验收流程](../agent-acceptance-workflow.md)，所有占位符替换后再形成有效报告。填写后从仓库根目录运行 `yarn agent:acceptance --file PATH.md`；格式与退出码见流程。
 
 ## 来源与范围
 
@@ -24,13 +24,15 @@
 
 ## 条件映射
 
-逐项覆盖 Scope、Acceptance 和有效补充要求；每行写清可观察的通过标准。复合条件按需拆分，保留未执行的层次。
+保留表头，状态列仅填一个标准状态；证据列用 E 编号引用执行记录。逐项覆盖 Scope、Acceptance 和有效补充要求；每行写清可观察的通过标准。复合条件按需拆分，保留未执行的层次。
 
 | ID | 原要求与来源 | 环境/数据与预期 | 执行方法/命令 | 状态 | 证据及证明边界 | 剩余操作 |
 | --- | --- | --- | --- | --- | --- | --- |
 | R1 | <requirement and source section> | <setup and expected result> | <command or manual steps> | not-run | <evidence ID / no evidence yet> | <next action> |
 
 ## 执行记录
+
+退出码/结果只填数字或 `manual-passed`、`manual-failed`；没有执行记录时删除占位行，保留表头与分隔行。单元格内不使用管道字符。
 
 | 证据 ID | 时间 | 命令/操作 | 退出码/结果 | 原始产物及摘要 |
 | --- | --- | --- | --- | --- |
