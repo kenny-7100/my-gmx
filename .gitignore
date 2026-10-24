@@ -76,3 +76,4 @@ claude.md
 /.local/acceptance/preview/
 /.local/acceptance/solana-index/
 /.local/acceptance/sdk-vectors/
+/.local/acceptance/worksheet-consistency/
