@@ -12,4 +12,15 @@
 | [编码与自审规范](coding-and-self-review.md) | 按任务查阅 gmx-prompts，执行编码、自审、测试筛选和跨仓库核验 |
 | [自动化工具沉淀约定](automation-tools.md) | 识别重复任务，复用和实现脚本、检查器等工具，记录验证结果和使用入口 |
 
+## 项目 skill
+
+项目 skill 提供按需执行入口，详细规则、证据和限制仍以主题文档为来源。可直接用名称调用，也可由 Agent 按请求匹配；仅说 `push` 不触发交付流程。
+
+| Skill | 适用场景 | 详细资料 |
+| --- | --- | --- |
+| [gmx-linear-requirements](../.agents/skills/gmx-linear-requirements/SKILL.md) | 查询 FESOL、同步快照、复盘迁移进度，核对 GMTrade 标签 | [工具说明](linear-requirements.md) |
+| [gmx-solana-task-delivery](../.agents/skills/gmx-solana-task-delivery/SKILL.md) | 按授权阶段开发需求、隔离交付改动、创建及审查 Draft PR | [交付流程](linear-development-workflow.md) |
+
+Skill 放在仓库 `.agents/skills/` 中，属于个人开发基础，不进入业务 PR。首次真实交付后补充流程验收经验，不能把 skill 格式校验当成完整交付验收。若当前会话未显示新 skill，可在后续会话检查发现状态，必要时重新启动 Codex；入口文件仍可直接查阅。
+
 新增主题文档时更新本表。优先查找并更新已有主题，避免为同一结论创建多份说明。
