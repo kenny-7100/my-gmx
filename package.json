@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "solana:sdk-vectors": "tsx scripts/solana-sdk-vectors.mjs",
+    "test:solana-sdk-vectors": "tsx --test scripts/solana-sdk-vectors.test.mjs",
     "solana:index-preflight": "node scripts/solana-index-preflight.mjs",
     "test:solana-index-preflight": "node --test scripts/solana-index-preflight.test.mjs",
     "agent:preview": "node scripts/agent-preview.mjs",

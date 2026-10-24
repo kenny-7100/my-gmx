@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { isDeepStrictEqual, parseArgs } from "node:util";
 
 const SCOPES = new Set([
+  "real-wasm-reference-vectors",
   "solana-statistics-index",
   "github-pr-preview",
   "local-artifacts",
