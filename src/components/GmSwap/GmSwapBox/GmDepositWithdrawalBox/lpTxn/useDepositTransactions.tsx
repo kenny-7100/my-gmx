@@ -26,15 +26,15 @@ import { selectDepositWithdrawalAmounts } from "context/PoolsDetailsContext/sele
 import { selectPoolsDetailsParams } from "context/PoolsDetailsContext/selectors/selectPoolsDetailsParams";
 import { useSyntheticsEvents } from "context/SyntheticsEvents";
 import {
-  selectGmxAccountExpressFeeTokenAddress,
-  selectSettlementChainExpressFeeTokenAddress,
-} from "context/SyntheticsStateContext/selectors/expressSelectors";
-import {
   selectBlockTimestampData,
   selectChainId,
   selectSrcChainId,
   selectTokensData,
 } from "context/SyntheticsStateContext/selectors/globalSelectors";
+import {
+  selectGasPaymentTokenAddress,
+  selectGmxAccountGasPaymentTokenAddress,
+} from "context/SyntheticsStateContext/selectors/settingsSelectors";
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import {
   TokensBalancesUpdates,
@@ -80,8 +80,7 @@ import { useMultichainDepositExpressTxnParams } from "./useMultichainDepositExpr
 export const useDepositTransactions = ({
   shouldDisableValidation,
   technicalFees,
-  onSent,
-}: Pick<UseLpTransactionProps, "shouldDisableValidation" | "technicalFees" | "onSent">): {
+}: Pick<UseLpTransactionProps, "shouldDisableValidation" | "technicalFees">): {
   onCreateDeposit: () => Promise<void>;
   isLoading: boolean;
   error: Error | undefined;
@@ -155,20 +154,18 @@ export const useDepositTransactions = ({
     };
   }, [rawParams, technicalFees, isDeposit]);
 
-  const settlementChainGasPaymentTokenAddress = useSelector(selectSettlementChainExpressFeeTokenAddress);
-  const gmxAccountGasPaymentTokenAddress = useSelector(selectGmxAccountExpressFeeTokenAddress);
+  const settlementChainGasPaymentTokenAddress = useSelector(selectGasPaymentTokenAddress);
+  const gmxAccountGasPaymentTokenAddress = useSelector(selectGmxAccountGasPaymentTokenAddress);
   const gasPaymentTokenAddress =
     paySource === "gmxAccount" ? gmxAccountGasPaymentTokenAddress : settlementChainGasPaymentTokenAddress;
   const gasPaymentTokenAsCollateralAmount = useMemo((): bigint | undefined => {
-    if (longTokenAddress !== gasPaymentTokenAddress && shortTokenAddress !== gasPaymentTokenAddress) {
-      return undefined;
+    if (longTokenAddress === gasPaymentTokenAddress) {
+      return longTokenAmount;
     }
-
-    // same-collateral markets split the deposit between the long and the short token
-    return (
-      (longTokenAddress === gasPaymentTokenAddress ? longTokenAmount : 0n) +
-      (shortTokenAddress === gasPaymentTokenAddress ? shortTokenAmount : 0n)
-    );
+    if (shortTokenAddress === gasPaymentTokenAddress) {
+      return shortTokenAmount;
+    }
+    return undefined;
   }, [longTokenAddress, shortTokenAddress, longTokenAmount, shortTokenAmount, gasPaymentTokenAddress]);
 
   const multichainDepositExpressTxnParams = useMultichainDepositExpressTxnParams({
@@ -206,10 +203,6 @@ export const useDepositTransactions = ({
     if (isGlv) {
       return initGLVSwapMetricData({
         chainId,
-        srcChainId,
-        isExpress: paySource === "gmxAccount",
-        isExpress1CT: false,
-        isCollateralFromMultichain: paySource === "gmxAccount",
         longTokenAddress,
         shortTokenAddress,
         selectedMarketForGlv,
@@ -225,16 +218,11 @@ export const useDepositTransactions = ({
         marketName: selectedMarketInfoForGlv?.name,
         glvTokenUsd: glvTokenUsd,
         isFirstBuy,
-        rawParams,
       });
     }
 
     return initGMSwapMetricData({
       chainId,
-      srcChainId,
-      isExpress: paySource === "gmxAccount",
-      isExpress1CT: false,
-      isCollateralFromMultichain: paySource === "gmxAccount",
       longTokenAddress,
       shortTokenAddress,
       marketToken,
@@ -247,11 +235,8 @@ export const useDepositTransactions = ({
       marketTokenAmount,
       marketTokenUsd,
       isFirstBuy,
-      rawParams,
     });
   }, [
-    srcChainId,
-    paySource,
     chainId,
     glvInfo,
     params?.executionFee,
@@ -265,7 +250,6 @@ export const useDepositTransactions = ({
     marketToken,
     marketTokenAmount,
     marketTokenUsd,
-    rawParams,
     selectedMarketForGlv,
     selectedMarketInfoForGlv?.name,
     shortTokenAddress,
@@ -464,7 +448,6 @@ export const useDepositTransactions = ({
 
       return await promise
         .then(makeTxnSentMetricsHandler(metricData.metricId))
-        .then(onSent)
         .catch(makeTxnErrorMetricsHandler(metricData.metricId))
         .catch(makeUserAnalyticsOrderFailResultHandler(chainId, metricData.metricId));
     },
@@ -495,7 +478,6 @@ export const useDepositTransactions = ({
       blockTimestampData,
       shouldDisableValidation,
       setPendingTxns,
-      onSent,
     ]
   );
 
@@ -717,7 +699,6 @@ export const useDepositTransactions = ({
 
       return await promise
         .then(makeTxnSentMetricsHandler(metricData.metricId))
-        .then(onSent)
         .catch(makeTxnErrorMetricsHandler(metricData.metricId))
         .catch(makeUserAnalyticsOrderFailResultHandler(chainId, metricData.metricId));
     },
@@ -752,7 +733,6 @@ export const useDepositTransactions = ({
       shouldDisableValidation,
       blockTimestampData,
       setPendingTxns,
-      onSent,
     ]
   );
 
