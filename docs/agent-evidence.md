@@ -21,10 +21,11 @@ yarn agent:evidence pack --issue FESOL-71 \
 输出目录必须不存在。成功后目录包含 `manifest.json` 和三个命名 JSON 文件，可以整体复制到其他目录或机器。在有本仓库工具和 Node 22 的接收环境执行：
 
 ```sh
-yarn agent:evidence verify --dir /path/to/received-package
+yarn agent:evidence verify --dir /path/to/received-package \
+  --expected-manifest-sha256 EXPECTED_SHA256
 ```
 
-verify 不需要原始文件路径、RPC、钱包、API 或原报告中的源码 checkout。相同完整包得到相同 manifestSha256；将摘要单独保存在可信交接记录中，接收后对照。工作表自身已被打入包时，不能再把包摘要写回该工作表，否则会改变其字节并使已有报告绑定失效。离线验证不意味着命令可以在没有 Node/工具源码的机器直接运行。
+verify 不需要原始文件路径、RPC、钱包、API 或原报告中的源码 checkout。相同完整包得到相同 manifestSha256；将摘要单独保存在可信交接记录中，接收时用 `--expected-manifest-sha256` 自动比对（替换示例的 EXPECTED_SHA256）。工作表自身已被打入包时，不能再把包摘要写回该工作表，否则会改变其字节并使已有报告绑定失效。离线验证不意味着命令可以在没有 Node/工具源码的机器直接运行。
 
 两个命令成功退出 0，输出 JSON 的 `scope: evidence-package-integrity`、`status: passed` 仅表示文件与清单一致；所有包固定 `requirementAcceptance: not-evaluated`。原报告的 failed、blocked、not-run、partial 都原样保留，包完整时也可退出 0，不能将这个退出码当业务需求通过。失败退出 1，stderr 输出脱敏分类，无成功报告。
 
@@ -54,6 +55,10 @@ verify 比较每个报告与清单的原始字节摘要、字节数及提取元�
 ## 完整性与失败处理
 
 SHA-256 不是签名。若文件和清单被一起改写，重新计算的清单也可能通过内部一致性校验；必须与工作表或其他可信渠道单独保留的 manifestSha256 对照，才能发现整个包被替换。即便摘要一致，也不证明原报告真实或业务正确。工具不提供来源认证、自动上传、保密存储或长期托管服务。
+
+接收侧的 `verify --expected-manifest-sha256 SHA256` 要求严格的 64 位小写十六进制字符串；空值、空白、大写、长度错误或不匹配均退出 1，无成功报告。比较的是 manifest.json 原始字节的摘要，先匹配预期值，再继续验证包内所有文件；匹配不会绕过内部完整性或工作表一致性检查。参数仅用于 verify，误传给 pack 会在创建输出前失败。
+
+成功输出的 `manifestIdentity` 为 `matched`，表示本包与调用者提供的摘要匹配；未提供预期摘要时为 `not-checked`，只完成内部校验。原用法继续可用于本地结构诊断；接收交付物时应传入包外可信记录中的值。pack 也返回 not-checked，不能把刚从收到的包计算出的摘要反填参数，冒充独立身份验证。两种包格式均支持，无需重新打包；包的 schemaVersion 不变。匹配不是签名或来源认证，仍需核对预期值的来源。
 
 输入先全部读取和检查，再独占创建输出目录，不覆盖已有文件。文件系统写入中途失败可能留下不完整目录；verify 会拒绝缺清单或缺文件的包。不要把失败目录当成功产物，调查原因后选择新输出目录重做；工具不会自动删除用户文件。错误信息不输出输入内容或原始文件系统错误，结合命令参数和本页诊断格式、文件存在性、输出目录冲突与内容差异。
 
@@ -104,7 +109,7 @@ yarn agent:evidence verify --dir .local/acceptance/evidence/fesol-55-worksheet
 - verify 只需包及工具，不需源工作表、原始 JSON 路径或被引用的日志；复制到独立目录后仍可校验。只重新运行无副作用的工作表一致性逻辑，不执行表内命令、不读取表内原始证据路径，也不重查业务或链上数据。
 - 包的顶层 requirementAcceptance 始终为 not-evaluated；worksheet.requirementAcceptance 反映所列条件的原结论，partial/blocked/failed 不被提升为 passed。报告的原状态与观察时间保留，verify 不刷新历史 checkedAt。
 
-交接顺序为：**填写并冻结工作表 → 检查并确认结论 → 打包 → 将 manifestSha256 保存到包外的可信交接记录 → 接收侧校验并比对摘要**。不要在打包后修改被归档的工作表来填写包摘要，避免摘要自引用。确需更改工作表时，重新检查并创建新包，保留旧包和历史记录。
+交接顺序为：**填写并冻结工作表 → 检查并确认结论 → 打包 → 将 manifestSha256 保存到包外的可信交接记录 → 接收侧用 `--expected-manifest-sha256` 校验并比对摘要**。不要在打包后修改被归档的工作表来填写包摘要，避免摘要自引用。确需更改工作表时，重新检查并创建新包，保留旧包和历史记录。
 
 工作表绑定只证明包内字节与计算出的结构一致；不验证需求是否完整覆盖、证据真实/充分/新鲜，或 source/deployment 版本是否仍有效。与报告和清单一起伪造的工作表仍可能内部一致，不能替代包外摘要与来源核对。工具保留原始 Markdown，打包前同样需确认不含秘密。
 
@@ -114,3 +119,10 @@ yarn agent:evidence verify --dir .local/acceptance/evidence/fesol-55-worksheet
 FESOL-55 本轮真实检查报告及工作表成功打包；复制到临时目录、删除演练输入副本后，从临时工作目录独立校验通过。原字节、检查时间和 partial 结论保留；完整包摘要独立计算一致。六项负面演练均拒绝：缺/改工作表、额外文件、错误报告名、篡改统计并重算报告清单摘要、缺绑定输入。旧版本 1 历史包 mainnet-resources 继续可验。产物位置、包外摘要及工程结果见[清单进度](agent-acceptance-infrastructure.md#a07a14-工作表与检查报告移交进度2026-10-25)。
 
 工程验收已通过：5 组证据包测试（新增 2 组）及 3 组工作表回归、类型检查、脚本 ESLint/格式/语法、141 个本地文档链接与差异检查；完整前端单元测试 3014 passed / 1 原有 skipped，退出 0。blocked/failed 的额外合成状态演练也保持原结论，不将其作为真实业务验收结果。
+
+
+### 接收侧摘要比对验收（2026-10-25）
+
+使用此前已在包外文档记录摘要的版本 1 mainnet-resources 与版本 2 工作表包完成真实 CLI 验收：正确摘要 matched；错误摘要、另一份合法包、内部仍一致的清单替换均拒绝。六种非法摘要和 pack 误用参数均退出 1；未提供参数时明确 not-checked。包文件、原报告时间和 partial 结论不变；产物和工程结果见[清单进度](agent-acceptance-infrastructure.md#a14-接收侧预期摘要校验进度2026-10-25)。
+
+本轮工程检查通过：6 组证据包测试（新增 1 组）、3 组工作表回归、类型及脚本 ESLint/格式/语法；完整前端单元测试 3014 passed / 1 原有 skipped，退出 0；142 个本地文档链接与差异检查通过。
