@@ -31,6 +31,8 @@
 
 已沉淀 [Linear 需求工具](linear-requirements.md)：复用同一入口完成 FESOL 实时查询、全量快照、筛选和差异比较，避免每次由 Agent 手工翻页、统计及比对。脚本为 `scripts/linear-requirements.mjs`，验证入口为 `yarn test:linear-tools`。
 
+已实现[本地 Agent 验收钱包](agent-wallet.md)的首步入口：`yarn agent:wallet addresses` 从根 `.env.local` 的 `AGENT_TEST_WALLET_MNEMONIC` 派生固定路径 EVM/Solana 公开地址，不访问网络、不签名或发送交易。公开向量与失败路径测试入口为 `yarn test:agent-wallet`；2026-10-24 用户配置并授权后，三组测试及实际地址派生、重复性检查通过。用户确认仅 Solana devnet/mainnet 有资金，余额尚未核验。
+
 已沉淀 [keeper 只读预检](keeper-preflight.md)：`yarn keeper:preflight` 复用现有 Arbitrum keeper/代币配置，显式设置已验证的 User-Agent，检查五种基础资产价格（最大年龄 30 秒）、三种非稳定币的 24h/1m K 线与 `solanaTrading`。验证入口为 `yarn test:keeper-preflight`；真实请求发现主端点和两个备用端点均缺少交易开关，正确返回 `blocked` / 退出 2，不伪装成整体通过。工具不启动服务、不发送交易，不自动切换上游。
 
 已沉淀[本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md)：通过现有 fallback key 和固定上游 Origin 为 Agent/本地前端提供统一 HTTP 入口，拒绝交易发送；手动启动 `yarn solana:rpc-proxy`，不自动启动前端。单元验证入口为 `yarn test:solana-rpc-proxy`，真实只读验收为 `yarn solana:rpc-proxy:verify`（需先启动代理）；2026-10-24 经用户授权已通过 handler、真实读取、100 账户、订单扫描及本地浏览器 CORS 验收。前端统一 URL 配置已加入，当前分支尚无 Solana RPC client 消费它；跟踪状态见 [A01 实施清单](agent-acceptance-infrastructure.md)。
