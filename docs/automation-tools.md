@@ -31,7 +31,7 @@
 
 已沉淀 [Linear 需求工具](linear-requirements.md)：复用同一入口完成 FESOL 实时查询、全量快照、筛选和差异比较，避免每次由 Agent 手工翻页、统计及比对。脚本为 `scripts/linear-requirements.mjs`，验证入口为 `yarn test:linear-tools`。
 
-已实现[本地 Agent 验收钱包](agent-wallet.md)的首步入口：`yarn agent:wallet addresses` 从根 `.env.local` 的 `AGENT_TEST_WALLET_MNEMONIC` 派生固定路径 EVM/Solana 公开地址，不访问网络、不签名或发送交易。公开向量与失败路径测试入口为 `yarn test:agent-wallet`；2026-10-24 用户配置并授权后，三组测试及实际地址派生、重复性检查通过。用户确认仅 Solana devnet/mainnet 有资金，余额尚未核验。
+已实现[本地 Agent 验收钱包](agent-wallet.md)的入口：`yarn agent:wallet addresses` 从根 `.env.local` 的 `AGENT_TEST_WALLET_MNEMONIC` 派生固定路径 EVM/Solana 公开地址，不访问网络、不签名或发送交易。公开向量与失败路径测试入口为 `yarn test:agent-wallet`；2026-10-24 用户配置并授权后，三组测试及实际地址派生、重复性检查通过。Mainnet 原生 SOL 余额预检命令为 `yarn agent:wallet balances --network solana-mainnet`，先启动既有 RPC 代理；先校验完整网络 genesis，再输出精确余额、slot 和时间。当前共六组测试及真实 Mainnet 对照验收通过；Devnet 暂缓，尚无签名或发送功能。资金相关验收先重新运行预检，不依赖历史余额。
 
 已沉淀 [keeper 只读预检](keeper-preflight.md)：`yarn keeper:preflight` 复用现有 Arbitrum keeper/代币配置，显式设置已验证的 User-Agent，检查五种基础资产价格（最大年龄 30 秒）、三种非稳定币的 24h/1m K 线与 `solanaTrading`。验证入口为 `yarn test:keeper-preflight`；真实请求发现主端点和两个备用端点均缺少交易开关，正确返回 `blocked` / 退出 2，不伪装成整体通过。工具不启动服务、不发送交易，不自动切换上游。
 
