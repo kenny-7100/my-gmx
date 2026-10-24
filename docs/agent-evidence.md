@@ -42,6 +42,7 @@ verify 不需要原始文件路径、RPC、钱包、API 或原报告中的源码
 | local-read-only-infrastructure | 统一只读预检 |
 | github-pr-preview | PR 精确预览部署元数据（不证明页面功能） |
 | solana-statistics-index | Solana volume 索引契约、高度与最新事件年龄 |
+| real-wasm-reference-vectors | 真实 WASM 离线基础数值参考向量 |
 
 每包 1～20 个文件，每文件最大 16 MiB。名称为小写字母开头、最多 40 字符的小写字母/数字/连字符，不可重复或为 manifest。输入必须是普通 `.json` 文件；最终输入文件、包目录本身以及包内文件不能是符号链接，包内不允许额外文件或子目录。工具不执行输入内容、不遍历目录、不自动收集日志或 `.env`，不读取助记词。祖先目录的符号链接和并发修改不是本工具的隔离边界，使用任务内受控目录。
 
