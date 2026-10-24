@@ -1,7 +1,8 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { lstat, readFile } from "node:fs/promises";
 import path from "node:path";
+import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
@@ -20,6 +21,7 @@ const SUPPORTING_FILES = {
 };
 const STATUSES = ["passed", "failed", "blocked", "not-run"];
 const validCode = (value) => typeof value === "string" && /^[a-z0-9-]{1,80}$/.test(value);
+const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
 const isCommit = (value) => typeof value === "string" && /^[0-9a-f]{40}$/.test(value);
 
 export function summarize(results) {
@@ -128,13 +130,7 @@ export function interpretResult(name, result) {
   }
 }
 
-async function readEvidence(selected) {
-  const gitCommand = (...args) =>
-    new Promise((resolve, reject) => {
-      execFile("git", args, { cwd: ROOT, timeout: 10_000 }, (error, stdout) =>
-        error ? reject(new Error("Cannot read repository evidence.")) : resolve(stdout.trim())
-      );
-    });
+function evidenceFiles(selected) {
   const files = [
     "scripts/agent-preflight.mjs",
     "package.json",
@@ -143,9 +139,19 @@ async function readEvidence(selected) {
       .flatMap((name) => TASKS[name].args.filter((arg) => arg.endsWith(".mjs") || arg.endsWith(".ts")))
       .filter((file) => !file.startsWith("node_modules/")),
   ];
-  const sha256 = {};
   files.push(...selected.flatMap((name) => SUPPORTING_FILES[name]));
-  for (const file of new Set(files))
+  return [...new Set(files)];
+}
+
+async function readEvidence(selected) {
+  const gitCommand = (...args) =>
+    new Promise((resolve, reject) => {
+      execFile("git", args, { cwd: ROOT, timeout: 10_000 }, (error, stdout) =>
+        error ? reject(new Error("Cannot read repository evidence.")) : resolve(stdout.trim())
+      );
+    });
+  const sha256 = {};
+  for (const file of evidenceFiles(selected))
     sha256[file] = createHash("sha256")
       .update(await readFile(path.join(ROOT, file)))
       .digest("hex");
@@ -195,24 +201,105 @@ export async function runPreflight({
   };
 }
 
+function validSource(source) {
+  requireValid(isCommit(source?.commit) && typeof source.dirty === "boolean");
+  requireValid(source.sha256 !== null && typeof source.sha256 === "object" && !Array.isArray(source.sha256));
+  const entries = Object.entries(source.sha256);
+  requireValid(entries.length > 0 && entries.length <= 100);
+  requireValid(
+    entries.every(
+      ([file, hash]) =>
+        /^[A-Za-z0-9][A-Za-z0-9./-]{0,159}$/.test(file) &&
+        !file.split("/").includes("..") &&
+        typeof hash === "string" &&
+        /^[0-9a-f]{64}$/.test(hash)
+    )
+  );
+}
+
+export async function compareSource({ baseline, evidenceReader = readEvidence }) {
+  requireValid(baseline?.schemaVersion === 1 && baseline.scope === "local-read-only-infrastructure");
+  requireValid(
+    STATUSES.includes(baseline.status) &&
+      typeof baseline.finishedAt === "string" &&
+      Number.isFinite(Date.parse(baseline.finishedAt))
+  );
+  const selected = baseline.selected;
+  requireValid(
+    Array.isArray(selected) &&
+      selected.length > 0 &&
+      new Set(selected).size === selected.length &&
+      selected.every((name) => hasOwn(TASKS, name))
+  );
+  validSource(baseline.source);
+  // The current fixed checker plan supplies paths; baseline keys never drive file reads.
+  const current = await evidenceReader(selected);
+  validSource(current);
+  const before = baseline.source.sha256;
+  const after = current.sha256;
+  const added = Object.keys(after)
+    .filter((file) => !hasOwn(before, file))
+    .sort();
+  const removed = Object.keys(before)
+    .filter((file) => !hasOwn(after, file))
+    .sort();
+  const changed = Object.keys(after)
+    .filter((file) => hasOwn(before, file) && after[file] !== before[file])
+    .sort();
+  const different = added.length + removed.length + changed.length > 0;
+  return {
+    scope: "local-source-comparison",
+    status: different ? "blocked" : "passed",
+    exitCode: different ? 2 : 0,
+    checkedAt: new Date().toISOString(),
+    selected,
+    baseline: {
+      finishedAt: baseline.finishedAt,
+      status: baseline.status,
+      commit: baseline.source.commit,
+      dirty: baseline.source.dirty,
+    },
+    current,
+    added,
+    removed,
+    changed,
+    liveEnvironment: "not-evaluated",
+    requirementAcceptance: "not-evaluated",
+  };
+}
+
 export async function runCli(args = process.argv.slice(2)) {
   try {
     const { values } = parseArgs({
       args,
-      options: { checks: { type: "string", default: "rpc,keeper,api" }, help: { type: "boolean", short: "h" } },
+      options: {
+        checks: { type: "string" },
+        "compare-source": { type: "string" },
+        help: { type: "boolean", short: "h" },
+      },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn agent:preflight [--checks rpc,keeper,api,wallet]\nDefault: rpc,keeper,api. Wallet reads require explicit selection. Start required services separately. No signing or sending. Exit: 0 passed, 1 failed, 2 blocked, 3 configuration/internal error.\n"
+        "Usage: yarn agent:preflight [--checks rpc,keeper,api,wallet]\n       yarn agent:preflight --compare-source REPORT.json\nSource comparison is offline and does not rerun checks or assess live freshness.\nDefault: rpc,keeper,api. Wallet reads require explicit selection. Start required services separately. No signing or sending. Exit: 0 passed, 1 failed, 2 blocked, 3 configuration/internal error.\n"
       );
       return 0;
     }
-    const report = await runPreflight({ selected: values.checks.split(",") });
+    let report;
+    if (values["compare-source"] !== undefined) {
+      requireValid(values.checks === undefined && path.extname(values["compare-source"]) === ".json");
+      const stat = await lstat(values["compare-source"]);
+      requireValid(stat.isFile() && !stat.isSymbolicLink() && stat.size > 0 && stat.size <= 1048576);
+      const bytes = await readFile(values["compare-source"]);
+      requireValid(bytes.length <= 1048576);
+      report = await compareSource({ baseline: JSON.parse(bytes.toString("utf8")) });
+    } else {
+      report = await runPreflight({ selected: (values.checks ?? "rpc,keeper,api").split(",") });
+    }
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return report.exitCode;
   } catch {
     process.stderr.write(
-      `${JSON.stringify({ status: "failed", code: "configuration-or-evidence-error", message: "Check selected checks, repository checkout and installed dependencies. Use --help." })}\n`
+      `${JSON.stringify({ status: "failed", code: "configuration-or-evidence-error", message: "Check selected checks, baseline report, repository checkout and installed dependencies. Use --help." })}\n`
     );
     return 3;
   }
