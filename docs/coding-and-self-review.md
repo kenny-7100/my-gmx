@@ -28,6 +28,8 @@
 
 13. **PR 页面验收先固定预览身份。** 已有页面验收授权时，按[本地预览说明](agent-preview.md)先执行 `yarn agent:preview --pr ... --expected-sha ...`，将 PR/head/不可变 URL/check 链接记入工作表，再打开该版本。解析失败不切换分支别名或旧成功部署；元数据 passed 不代表页面已验收，PR 更新后重新定位。单元/本地只读任务无需此项。
 
+14. **Solana 统计验收先核实索引依赖。** 目标数据确实来自现有 volumeRecords 时，按[索引预检说明](solana-index-preflight.md)先执行 `yarn solana:index-preflight`，核对配置默认来源与目标环境是否一致。GraphQL 错误不当空数据；旧/空/未来记录为 blocked，先核实活动范围和时钟，不将事件年龄直接当索引处理延迟。钱包/价格/样例验收不运行此项，不自动部署索引器或换源。
+
 完整前端构建命令（工作目录：主仓库根目录；仅在已获构建授权、机器资源允许时执行）：
 
 ```sh

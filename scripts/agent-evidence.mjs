@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { isDeepStrictEqual, parseArgs } from "node:util";
 
 const SCOPES = new Set([
+  "solana-statistics-index",
   "github-pr-preview",
   "local-artifacts",
   "local-artifacts-and-mainnet-program",
