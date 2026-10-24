@@ -52,3 +52,5 @@
 已沉淀[Agent 本地 PR 预览定位](agent-preview.md)：`yarn agent:preview --pr NUMBER [--expected-sha SHA]` 通过 gh 只读 API 复用 CI 的精确部署解析器，提供分页、版本/URL/检查链接与源码摘要。验证入口 `yarn test:agent-preview`；报告可加入证据包，不打开页面、构建、部署或运行 UI。
 
 已沉淀[Solana 统计索引只读预检](solana-index-preflight.md)：`yarn solana:index-preflight` 从现有 API 源码默认配置核实 SQD 端点/阈值，轻量检查 GraphQL 契约、高度与最新 volume 事件年龄。测试入口 `yarn test:solana-index-preflight`；支持证据包，不扫描全历史、不部署或自动切源，事件年龄不等于处理延迟。
+
+已沉淀[真实 SDK/WASM 基础向量](solana-sdk-vectors.md)：`yarn solana:sdk-vectors` 复用本地指纹检查后，实例化真实固定 WASM 并逐项对照独立 Python 整数生成的 apply_factor 参考值。测试入口 `yarn test:solana-sdk-vectors`；无 RPC/钱包/构建，不把基础数值结果当复杂业务计算或链上兼容证明。
