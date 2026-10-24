@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, parseEnv } from "node:util";
 
 import { readSolanaMainnetBalance, WalletRpcError } from "./agent-wallet-balance.mjs";
+import { readSolanaTokenInventory } from "./agent-wallet-tokens.mjs";
 
 const ENV_FILE = fileURLToPath(new URL("../.env.local", import.meta.url));
 const MNEMONIC_KEY = "AGENT_TEST_WALLET_MNEMONIC";
@@ -101,17 +102,17 @@ export async function runCli({
     }
     if (parsed.values.help) {
       stdout.write(
-        "Usage: yarn agent:wallet addresses\n       yarn agent:wallet balances --network solana-mainnet\nReads AGENT_TEST_WALLET_MNEMONIC from root .env.local. Addresses are offline; balances use read-only RPC through the configured proxy. No signing or transaction sending.\n"
+        "Usage: yarn agent:wallet addresses\n       yarn agent:wallet balances --network solana-mainnet\n       yarn agent:wallet tokens --network solana-mainnet\nReads AGENT_TEST_WALLET_MNEMONIC from root .env.local. Addresses are offline; balances use read-only RPC through the configured proxy. No signing or transaction sending.\n"
       );
       return 0;
     }
     const command = parsed.positionals[0];
-    if (parsed.positionals.length !== 1 || !["addresses", "balances"].includes(command)) {
-      throw new WalletConfigError("Expected addresses or balances. Use yarn agent:wallet --help.");
+    if (parsed.positionals.length !== 1 || !["addresses", "balances", "tokens"].includes(command)) {
+      throw new WalletConfigError("Expected addresses, balances or tokens. Use yarn agent:wallet --help.");
     }
-    if (command === "balances" && parsed.values.network !== "solana-mainnet") {
+    if (command !== "addresses" && parsed.values.network !== "solana-mainnet") {
       throw new WalletConfigError(
-        "Balances require --network solana-mainnet. Devnet and EVM balance checks are not supported."
+        "Read commands require --network solana-mainnet. Devnet and EVM reads are not supported."
       );
     }
     if (command === "addresses" && parsed.values.network !== undefined) {
@@ -119,10 +120,14 @@ export async function runCli({
     }
     const addresses = deriveAddresses(await readMnemonic(envFile));
     let report = addresses;
-    if (command === "balances") {
+    if (command !== "addresses") {
       const wallet = addresses.wallets.find((wallet) => wallet.chain === "solana");
       report = {
-        ...(await readSolanaMainnetBalance({ address: wallet.address, rpcUrl, fetchImpl })),
+        ...(await (command === "balances" ? readSolanaMainnetBalance : readSolanaTokenInventory)({
+          address: wallet.address,
+          rpcUrl,
+          fetchImpl,
+        })),
         path: wallet.path,
       };
     }
