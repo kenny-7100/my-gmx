@@ -75,3 +75,4 @@ claude.md
 /.local/acceptance/evidence/
 /.local/acceptance/preview/
 /.local/acceptance/solana-index/
+/.local/acceptance/sdk-vectors/

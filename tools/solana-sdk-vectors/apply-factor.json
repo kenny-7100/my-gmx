@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "operation": "apply_factor",
+  "factorDecimals": 20,
+  "rounding": "floor",
+  "overflow": "undefined-above-u128",
+  "oracle": "Python unbounded integer multiplication and floor division; no SDK import",
+  "referenceCommit": "f102501f30635062fac156ca05831c0fb63a8590",
+  "referenceFiles": [
+    "crates/sdk/src/js/utils.rs",
+    "crates/programs/src/constants/mod.rs",
+    "crates/model/src/utils.rs",
+    "crates/model/src/num.rs"
+  ],
+  "vectors": [
+    {
+      "name": "zero-value",
+      "value": "0",
+      "factor": "100000000000000000000",
+      "expected": "0"
+    },
+    {
+      "name": "zero-factor",
+      "value": "340282366920938463463374607431768211455",
+      "factor": "0",
+      "expected": "0"
+    },
+    {
+      "name": "one-percent",
+      "value": "10000000000000000000000",
+      "factor": "1000000000000000000",
+      "expected": "100000000000000000000"
+    },
+    {
+      "name": "identity",
+      "value": "1234567890123456789012345",
+      "factor": "100000000000000000000",
+      "expected": "1234567890123456789012345"
+    },
+    {
+      "name": "one-hundred-ten-percent",
+      "value": "10000000000000000000000",
+      "factor": "110000000000000000000",
+      "expected": "11000000000000000000000"
+    },
+    {
+      "name": "floor-to-zero",
+      "value": "1",
+      "factor": "99999999999999999999",
+      "expected": "0"
+    },
+    {
+      "name": "floor-remainder",
+      "value": "101",
+      "factor": "33333333333333333333",
+      "expected": "33"
+    },
+    {
+      "name": "above-js-safe-integer",
+      "value": "18446744073709551617",
+      "factor": "50000000000000000000",
+      "expected": "9223372036854775808"
+    },
+    {
+      "name": "max-identity",
+      "value": "340282366920938463463374607431768211455",
+      "factor": "100000000000000000000",
+      "expected": "340282366920938463463374607431768211455"
+    },
+    {
+      "name": "max-factor",
+      "value": "1",
+      "factor": "340282366920938463463374607431768211455",
+      "expected": "3402823669209384634"
+    },
+    {
+      "name": "max-product",
+      "value": "340282366920938463463374607431768211455",
+      "factor": "340282366920938463463374607431768211455",
+      "expected": null
+    },
+    {
+      "name": "overflow-by-one",
+      "value": "170141183460469231731687303715884105728",
+      "factor": "200000000000000000000",
+      "expected": null
+    }
+  ]
+}
