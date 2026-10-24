@@ -121,11 +121,17 @@ export async function packEvidence({ issue, reports, outDir, worksheet }) {
   return verifyEvidence({ dir: outDir });
 }
 
-export async function verifyEvidence({ dir }) {
+export async function verifyEvidence({ dir, expectedManifestSha256 }) {
+  check(
+    expectedManifestSha256 === undefined ||
+      (typeof expectedManifestSha256 === "string" && HASH.test(expectedManifestSha256))
+  );
   check(typeof dir === "string" && dir.length > 0);
   const stat = await lstat(dir);
   check(stat.isDirectory() && !stat.isSymbolicLink());
   const manifestBytes = await regularFile(path.join(dir, "manifest.json"));
+  const manifestSha256 = hash(manifestBytes);
+  check(expectedManifestSha256 === undefined || expectedManifestSha256 === manifestSha256);
   const manifest = JSON.parse(manifestBytes.toString("utf8"));
   check(plain(manifest) && [1, 2].includes(manifest.schemaVersion) && manifest.scope === "acceptance-evidence-package");
   check(manifest.schemaVersion === 2 ? plain(manifest.worksheet) : manifest.worksheet === undefined);
@@ -162,7 +168,8 @@ export async function verifyEvidence({ dir }) {
     status: "passed",
     scope: "evidence-package-integrity",
     issue: manifest.issue,
-    manifestSha256: hash(manifestBytes),
+    manifestSha256,
+    manifestIdentity: expectedManifestSha256 === undefined ? "not-checked" : "matched",
     requirementAcceptance: "not-evaluated",
     reports: manifest.reports,
     ...(worksheet ? { worksheet } : {}),
@@ -180,19 +187,22 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
         out: { type: "string" },
         dir: { type: "string" },
         worksheet: { type: "string" },
+        "expected-manifest-sha256": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       stdout.write(
-        "Usage: yarn agent:evidence pack --issue FESOL-123 --report name=report.json [--report other=other.json] [--worksheet PATH.md] --out PATH\n       yarn agent:evidence verify --dir PATH\nOffline integrity and optional worksheet consistency only. Does not execute recorded commands, infer acceptance coverage, or upload files.\n"
+        "Usage: yarn agent:evidence pack --issue FESOL-123 --report name=report.json [--report other=other.json] [--worksheet PATH.md] --out PATH\n       yarn agent:evidence verify --dir PATH [--expected-manifest-sha256 SHA256]\nOffline integrity and optional worksheet consistency only. Does not execute recorded commands, infer acceptance coverage, or upload files.\n"
       );
       return 0;
     }
     check(positionals.length === 1);
     let report;
     if (positionals[0] === "pack") {
-      check(values.dir === undefined && Array.isArray(values.report));
+      check(
+        values.dir === undefined && values["expected-manifest-sha256"] === undefined && Array.isArray(values.report)
+      );
       const reports = values.report.map((item) => {
         const separator = item.indexOf("=");
         check(separator > 0);
@@ -207,13 +217,13 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
           values.out === undefined &&
           values.worksheet === undefined
       );
-      report = await verifyEvidence({ dir: values.dir });
+      report = await verifyEvidence({ dir: values.dir, expectedManifestSha256: values["expected-manifest-sha256"] });
     }
     stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return 0;
   } catch {
     stderr.write(
-      `${JSON.stringify({ status: "failed", code: "evidence-package-error", message: "Check report format, file integrity, unique names and output directory. Inputs and existing output are never overwritten. No input contents were logged." })}\n`
+      `${JSON.stringify({ status: "failed", code: "evidence-package-error", message: "Check expected manifest SHA-256, report format, file integrity, unique names and output directory. Inputs and existing output are never overwritten. No input contents were logged." })}\n`
     );
     return 1;
   }
