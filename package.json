@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "solana:index-preflight": "node scripts/solana-index-preflight.mjs",
+    "test:solana-index-preflight": "node --test scripts/solana-index-preflight.test.mjs",
     "agent:preview": "node scripts/agent-preview.mjs",
     "test:agent-preview": "node --test scripts/agent-preview.test.mjs autotests/regression/ci/resolvePreview.test.cjs",
     "agent:evidence": "node scripts/agent-evidence.mjs",
