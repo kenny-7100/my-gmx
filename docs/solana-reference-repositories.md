@@ -10,14 +10,14 @@
 - 复用 GMX 现有页面、组件、状态管理、业务模型及交互流程；将 Solana 所需数据和行为适配到这些既有契约。
 - RPC、钱包、账户解码、交易构建等链特有能力可以有专属适配实现，但不能因此引入一套并行的 Solana 页面、状态或业务数据流。
 - `gmx-solana-interface` 用于理解原有资源和行为，用户已明确该旧前端后续会废弃，不能将其持续运行作为新集成的前提。
-- 用户之后会提供旧 Solana 后端代码，目前尚未收录；该后端也可能废弃。它与工作区已有的 `gmx-api` 不是同一项目。获得代码后，应分析所需数据和行为如何进入现有 GMX 数据链路，而非直接迁移其服务或让新前端长期依赖它。
+- 旧 Solana 后端已收录到 `gmtrade-web-backend/`，是用户提供的源码快照，无 Git 历史；该后端可能废弃，与工作区已有的 `gmx-api` 不是同一项目。应分析所需数据和行为如何进入现有 GMX 数据链路，而非直接迁移其服务或让新前端长期依赖它。查阅[后端参考说明](gmtrade-web-backend-reference.md)。
 - 不因参考项目已有某种实现就照搬；先查 GMX 是否已有等价能力。没有等价模块、需要新增前端组件或模块时，按根 `AGENTS.md` 先确认。
 
 实现及自审都应检查：Solana 是否接入了现有共享数据模型和业务流程，以及移除旧前端和可能废弃的旧后端后，目标方案是否仍可独立工作。具体接口、适配位置和替代能力需在对应任务中核实，不能根据废弃计划自行推断。
 
 ## 工作区与仓库用途
 
-以下路径均相对于主项目根目录。当前工作区包含主项目及 10 个配套仓库。
+以下路径均相对于主项目根目录。当前工作区包含主项目、10 个配套仓库，以及 1 个后端源码快照。
 实现落在 `gmx-interface`；参考仓库的存在不表示应迁移其架构或复制其组件。
 
 | 本地路径 | 上游仓库 | 用途与查阅入口 |
@@ -26,6 +26,7 @@
 | `gmx-api/` | [gmx-io/gmx-api](https://github.com/gmx-io/gmx-api) | 数据服务，已作为 Git 子模块引入。查阅 `README.md`、`src/solanaApp.ts`、`src/domain/solana/`；区分样例响应与真实链上读取，不把样例路由当成已完成的数据服务。 |
 | `gmx-prompts/` | [gmx-io/gmx-prompts](https://github.com/gmx-io/gmx-prompts) | 工程规范。先看 `skills/gmx-interface-dev/SKILL.md` 和 `skills/gmx-solana/SKILL.md`，再按其指引查阅相关文档。 |
 | `gmx-solana-interface/` | [gmsol-labs/gmx-solana-interface](https://github.com/gmsol-labs/gmx-solana-interface) | 原 Solana 前端参考。了解资源、接口调用、钱包及订单交互；仅提取所需行为，不能直接搬运页面、业务逻辑或 UI 组件。 |
+| `gmtrade-web-backend/` | 用户提供的压缩包，无上游 remote 信息 | 旧 Solana Web 后端源码快照。查阅 `src/lib.rs`、`src/http/mod.rs`、`src/refresh.rs`、`src/aggregate/` 和 `src/sources/`；详见[参考说明](gmtrade-web-backend-reference.md)。 |
 | `gmx-adrs/` | [gmx-io/gmx-adrs](https://github.com/gmx-io/gmx-adrs) | 跨项目架构决策。重点查看 ADR-0015 的专门分支，以及 API launch modes 等相关 ADR。详见下节。 |
 | `gmx-synthetics/` | [gmx-io/gmx-synthetics](https://github.com/gmx-io/gmx-synthetics) | GMX V2 EVM 协议及测试。查阅 `contracts/order/`、`contracts/position/`、`contracts/reader/` 和 `test/`，核对共享前端原有的协议假设；Solana 实际行为仍以 gmsol 为准。 |
 | `gmx-solana/` | [gmsol-labs/gmx-solana](https://github.com/gmsol-labs/gmx-solana) | Solana 协议与 SDK 源码。`programs/store/` 为核心程序，`crates/model/` 为计算模型，`crates/sdk/` 为 SDK；另有 `crates/decode/`、`tests/`、`examples/`。用于核对账户布局、精度、PDA、指令和协议计算。 |
@@ -83,6 +84,7 @@ git -C gmx-adrs show origin/adr-0015-solana-gmx-api:adr/0015-serve-solana-data-t
 | `gmx-api` | `origin` → `gmx-io/gmx-api` | `my-gmx-api` → `kenny-7100/my-gmx-api` |
 | `gmx-solana-interface` | `origin` → `gmsol-labs/gmx-solana-interface` | `my-gmt` → `kenny-7100/my-gmt` |
 | `gmx-prompts` | `origin` → `gmx-io/gmx-prompts` | 例外，不套用个人镜像推送规则 |
+| `gmtrade-web-backend` | 无 Git 元数据，来源为用户提供的源码快照 | 无独立 remote，暂作为主项目下的参考文件管理 |
 | 本轮新增的 7 个仓库 | 各自上游的 `origin` | 尚未配置个人镜像 remote |
 
 执行用户授权的 push 时，除 `gmx-prompts` 外，必须明确选择对应的 `my-` remote，不能依据 upstream 自动推送到 `origin`。个人 remote 尚未配置时，先向用户确认目标；本次 clone 不包含创建 GitHub 镜像的授权。
