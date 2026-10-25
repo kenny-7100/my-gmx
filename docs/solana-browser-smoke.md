@@ -1,6 +1,6 @@
 # Solana 本地只读浏览器冒烟
 
-更新日期：2026-10-25。A09 首个页面入口已实现，环境预检工具已完成并验收；真实页面运行尚未执行，须取得启动本地开发服务和 UI 测试的明确授权。不能将测试发现或类型检查通过写成页面验收通过。
+更新日期：2026-10-25。A09 首个只读页面冒烟入口及环境预检均已完成真实验收。用户已长期授权后续任务启动本地 Vite 和 Chrome，在已授权任务中无需再次确认本地页面运行；不扩大到构建、部署、其他服务或签名广播。
 
 ## 用途与验收条件
 
@@ -8,15 +8,15 @@
 
 | 用例 | 明确预期 | 当前状态 |
 | --- | --- | --- |
-| `solanaNetwork=false` | 点击 Solana 显示现有 GMTrade 提示；保持 Arbitrum；不选中 Solana；EVM 网络及结算 ID 保持 42161；本次观察期间无 gmsol SDK/WASM 请求 | 待真实页面验收 |
-| `solanaNetwork=true` | 可选中 Solana，刷新后仍选中；底层 EVM 网络及结算 ID 保持 42161；切回 Arbitrum 后清除 Solana 选中状态 | 待真实页面验收 |
-| 共用诊断 | 页面无未处理 JS 错误；报告包含本地 checkout commit/dirty、目标地址、状态附件；失败保留截图及 trace | 待真实页面验收 |
+| `solanaNetwork=false` | 点击 Solana 显示现有 GMTrade 提示；保持 Arbitrum；不选中 Solana；EVM 网络及结算 ID 保持 42161；本次观察期间无 gmsol SDK/WASM 请求 | passed，真实 Chrome |
+| `solanaNetwork=true` | 可选中 Solana，刷新后仍选中；底层 EVM 网络及结算 ID 保持 42161；切回 Arbitrum 后清除 Solana 选中状态 | passed，真实 Chrome |
+| 共用诊断 | 页面无未处理 JS 错误；报告包含本地 checkout commit/dirty、目标地址、状态附件；失败保留截图及 trace | passed；首轮失败产物与复验报告均保留 |
 
 不覆盖真实钱包连接、余额、交易组件、签名、广播、keeper 执行、远端预览或完整 EVM 回归。无 SDK 请求断言只覆盖当前用例观察窗口，不替代构建产物分析。此入口不修改业务代码、前端默认开关或线上状态。
 
 ## 先准备，再执行
 
-工作目录：主仓库根目录。先核对当前授权；下列准备检查不启动浏览器或本地服务。
+工作目录：主仓库根目录。用户已长期授权本地 Vite/Chrome；下列准备检查本身不启动浏览器或本地服务。
 
 优先执行已固化的环境预检，再按失败阶段处理，而不是先启动页面或逐个重跑命令：
 
@@ -28,7 +28,7 @@ yarn solana:browser-preflight
 
 成功退出 0；缺依赖、Chrome、SDK 产物或不支持的平台为 blocked / 退出 2；测试发现失败或报告异常为 failed / 退出 1。报告列出 `playwright/chrome/sdk/discovery` 状态，保留 `browserExecution=not-run`、`serverReadiness=not-evaluated` 和 `requirementAcceptance=not-evaluated`；子进程原始 stderr 不输出，避免泄漏配置或任意错误内容。每个子进程限时 30 秒、输出上限 1 MiB，不自动重试。源码摘要覆盖预检、配置、用例、fixture、AB/env、package/lock，SDK 依赖摘要复用既有报告；它不是整个前端或完整依赖树的指纹。
 
-当前 Chrome 文件检查支持 macOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` 与 Linux `/opt/google/chrome/chrome`，对应已锁定 Playwright 的 stable Chrome 路径。Windows 等平台明确 blocked；本轮只在 macOS 实测，Linux 路径来自当前 Playwright 源码，未实机验收。文件存在且可执行不证明动态库、沙箱或真实启动成功，这些留给明确授权后的 UI 运行。检查不会改用其他浏览器绕过缺失条件。
+当前 Chrome 文件检查支持 macOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` 与 Linux `/opt/google/chrome/chrome`，对应已锁定 Playwright 的 stable Chrome 路径。Windows 等平台明确 blocked；本轮只在 macOS 实测，Linux 路径来自当前 Playwright 源码，未实机验收。文件存在且可执行不证明动态库、沙箱或真实启动成功，这些由当前已授权任务的真实 UI 运行验证。检查不会改用其他浏览器绕过缺失条件。
 
 归档时可执行：
 
@@ -45,9 +45,9 @@ yarn solana:browser-preflight > .local/acceptance/solana-browser/ready.json
 2. 执行 `yarn test:solana-readonly --list`，应发现本文件列出的 2 项；执行 `yarn test:regression:types`。`--list` 仅发现，不等于执行。需要对指定文件格式检查时用 `yarn exec prettier ...`，根 `yarn prettier` 是范围较广的仓库脚本。
 3. 当前入口使用 `channel: "chrome"`，先核实机器已安装 Google Chrome；没有则先协调安装，不自动下载浏览器。2026-10-25 本机 Chrome 已存在，但 Playwright 配套 Chromium 不存在；本轮未启动两者。
 4. 核对本地已有 SDK/WASM 产物；需要时执行 `yarn solana:runtime-preflight --local-only`，缺产物先处理构建授权，不自动构建。本机本轮检查 passed，只证明本地产物指纹，不证明页面可用。
-5. 取得明确的本地服务及 UI 执行授权后，再启动服务、执行用例，失败先保留报告并区分基础设施问题与业务问题。业务修复仍须核对任务范围。
+5. 本地 Vite/Chrome 已获长期授权；在已授权任务内直接启动服务和执行用例。失败先保留报告并区分基础设施问题与业务问题；业务修复仍须核对任务范围。
 
-已获启动与 UI 授权后才执行（两个终端，均在主仓库根目录）：
+执行当前已授权的验收任务时使用（两个终端，均在主仓库根目录）：
 
 ```sh
 yarn exec vite --host 127.0.0.1 --port 3010 --strictPort
@@ -69,7 +69,9 @@ yarn test:solana-readonly
 
 报告位于本机已忽略的 `playwright-report/solana-read-only/`、`test-results/solana-read-only-results.json`，失败产物在 `test-results/solana-read-only/`。这些原始产物不随仓库共享；按需求工作表记录实际运行版本、时间、结果和证据，不把本工具准备状态当作需求通过。
 
-本轮进度：实现完成 → 静态准备通过 → **等待本地服务/UI 执行授权** → 真实验收待执行。完成实际运行后再更新本节及总表，不预填 passed。
+当前进度：实现完成 → 环境预检通过 → 首轮问题定位与修复完成 → **真实页面复验通过**。以下准备阶段记录为历史结果，不替代本轮真实页面结果。
+
+### 历史准备检查（未运行页面）
 
 已完成的准备验证：新入口发现 2 项；原 EVM regression 入口发现 486 项 / 96 文件，未包含新目录；regression fixture 单元测试 23 passed；根及 regression 类型检查、指定 TypeScript 文件 ESLint/Prettier、6 类非法目标拒绝、本地 SDK/WASM 指纹和文档链接检查通过。仅测试发现未运行任何页面。
 
@@ -77,3 +79,16 @@ yarn test:solana-readonly
 
 
 环境预检阶段验收（2026-10-25）：本机四项真实检查 passed；远端目标 discovery failed / 退出 1；3 组工具测试及 6 组证据包回归通过，故障状态不被升级。真实报告 pack/verify matched，原页面 JSON 和输出目录探针保持不变；根及 regression 类型、ESLint/Prettier/语法及文档链接通过。完整前端单元测试 3014 passed / 1 原有 skipped，退出 0，123.67 秒。证据位置与包外摘要见[本轮实施记录](agent-acceptance-infrastructure.md#a09-浏览器验收环境预检进度2026-10-25)。这些仅为环境预检验收，真实 UI 仍未执行。
+
+
+## 真实页面验收与导航经验（2026-10-25）
+
+首轮两项均在 `page.goto` 等待默认 `load` 时超过 60 秒；页面快照中主界面已显示，诊断无未处理 JS 错误，但有外部资源失败/中断。仅将本组 `goto` 和 `reload` 改为 `waitUntil: "domcontentloaded"`，继续由网络菜单可见和状态断言确认应用就绪；复验两项均 passed，16.7 秒。不开自动重试，不加长超时、不屏蔽外部请求，也不修改业务代码。后续遇到导航超时先核实等待的事件、页面快照和 trace，再判断资源/应用问题，不能直接断言前端不可用。
+
+真实 Chrome 验收开始于北京时间 2026-10-25 08:09:01；checkout 为 `5fe2d88919d60f8f6135bfbfc4ad24accb9b7684`、dirty=true。关闭用例最终 Solana 选择为 null、EVM/结算 ID 均为 42161、SDK/WASM 请求为空；开启用例的选择与刷新均由断言通过，切回 Arbitrum 后 Solana 选择为 null。两个用例 JS errors 均为空；开启用例仍记录 81 条外部请求失败或刷新中断，不将其抹去或当作所有外部服务可用。
+
+本机产物目录 `.local/acceptance/solana-browser/a09-live-20261025/` 被 Git 忽略，不随仓库共享，包含首轮失败 JSON/截图/trace、副本化的复验 JSON/HTML、准备报告和测试源码摘要。原生 Playwright JSON 不属于当前 agent:evidence 支持的工具报告格式，本轮保留原始产物与包外摘要，不转换为伪造的工具 passed 报告。
+
+复验 `run-2-results.json` 的 SHA-256 为 `0fd46c58055e0575e1750bbc7095d6bb5204d03cf5bd29f7a23be5e9b7894014`；实际用例源码 SHA-256 为 `e2060c4de26c5d52fdaee97db466bfd986c2f98d06aea8c9bd05f2e993e6fae3`。配置与共用 fixture 摘要另存 `test-source-sha256.json`，可将 dirty checkout 的实际测试内容与结果对应核对。新一轮运行不会沿用历史 passed，应记录自己的实际报告。
+
+本轮完成的是网络选择冒烟阶段，A09 整体仍部分完成；钱包、余额、交易、远端预览及完整 EVM 回归仍需按具体需求推进。
