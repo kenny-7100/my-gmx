@@ -8,11 +8,11 @@
 | [Linear 需求查阅与复盘](linear-requirements.md) | FESOL 实时查询、全量快照、项目筛选和进度差异工具的配置、命令与验收记录 |
 | [需求推荐与就绪核验](solana-next-task.md) | 综合 Linear、GitHub PR、最新上游代码和实际前置，推荐下一条迁移需求 |
 | [Solana 迁移实际进度评估](solana-progress.md) | 跨仓库取证、去重与工作量估算，输出两个进度口径及中英文简述 |
-| [Agent 验收基础设施调研与实施清单](agent-acceptance-infrastructure.md) | RPC、keeper、API、钱包等验收条件与实施记录；A01/A02 访问工具已完成；最新就绪决策：A09 实现及环境预检已完成，下一步真实只读 UI 待明确授权；A03 仍待实际部署入口 |
+| [Agent 验收基础设施调研与实施清单](agent-acceptance-infrastructure.md) | RPC、keeper、API、钱包等验收条件与实施记录；A01/A02 访问工具已完成；A09 首个本地网络选择冒烟及环境预检已通过真实验收；A03 仍待实际部署入口 |
 | [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；新增 Markdown 工作表一致性检查，拒绝错误汇总与无效证据引用 |
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
 | [Solana 统计索引只读预检](solana-index-preflight.md) | A16：核实实际 volume 索引的 GraphQL 契约、高度和最新事件年龄；不推断处理延迟或历史完整性 |
-| [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：环境预检检查依赖、Chrome、SDK 与测试发现；本地开关/网络冒烟入口已准备，真实 UI 待授权验收 |
+| [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：环境预检检查依赖、Chrome、SDK 与测试发现；本地开关/网络选择/刷新持久化已通过真实 Chrome 验收，含导航等待排障顺序 |
 | [Agent 本地 PR 预览定位](agent-preview.md) | A09/A14：复用 CI 解析器，从实时 PR head 定位成功部署的不可变 URL；不打开页面或执行 UI 测试 |
 | [Agent 验收证据包](agent-evidence.md) | A07/A14：显式选取工具报告，可绑定并携带 Markdown 工作表，离线验证完整性、结论/统计及包外预期摘要；不推断业务验收通过或自动上传 |
 | [Agent 统一只读预检](agent-preflight.md) | 按任务选择 RPC/keeper/样例 API/可选钱包检查，统一状态、退出码和本地版本证据；不自动启动服务；支持历史报告源码指纹离线比较 |

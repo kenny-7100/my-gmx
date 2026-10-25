@@ -35,7 +35,7 @@ A01 已完成本地开发与 Agent 读取、模拟验证通道的建设及验收
 | A06 | P0 | Agent 操作授权与入口 | 已批准本地地址、Mainnet 余额工具及实际只读验收；可通过 `.env.local` 配置获取专用钱包公开地址。UI 测试、构建、部署和服务启动仍遵循根约定。 | 后续签名与发送使用独立命令，明确网络、允许操作、预算和停止条件；不把助记词配置当作交易授权。 | 所有需求，尤其浏览器和交易验收。 | 当前批准范围不包含实际钱包签名或广播交易；后续任务按已有会话授权核对，不自动扩大权限。 | 部分完成（地址与 Mainnet 余额入口已授权并验收；签名/发送边界待确认） |
 | A07 | P1 | 需求与验收结果映射 | 已建立[验收映射流程](agent-acceptance-workflow.md)、模板与 FESOL-55 首个实例；新增 Markdown 工作表一致性检查，不实施业务。 | 每项记录验收条件、环境/数据、执行方式、证据和人工项；区分 passed、failed、blocked、not-run、partial。 | 所有需求；避免切片完成就误关父需求。 | 从选定需求渐进建立，不一次性给所有条目造测试。 | 已完成（流程、模板、首个实例与一致性检查；其他需求按需扩展） |
 | A08 | P1 | 本地 gmx-api 样例服务 | 已提供[本地服务与验收命令](solana-api-local.md)，复用现有 Solana 入口，无需数据库、RPC、subgraph 或钱包；14 项真实 HTTP 检查通过，输出 sample 模式和本地预期源码摘要。 | 本地服务启动、样例对照和诊断已具备；前端 host 接入、reviewed samples 和真实数据验收随对应需求推进。 | FESOL-97/98/100；背景 FESOL-62。 | 当前前端无 Solana API host 入口，本轮不修改业务代码；样例一致不等于 A04 契约评审或真实数据正确。 | 本地服务与 CLI 已验收；前端接入待业务需求（整体部分完成） |
-| A09 | P1 | Solana 浏览器验收 | 已有 Playwright、fixture、只读账户、报告、截图、trace。regression 配置当前只接受 Arbitrum/Avalanche；funded runner 面向 Arbitrum。新增[本地 PR 预览定位](agent-preview.md)，复用 CI 精确部署规则。 | 在现有框架扩展网络选择、状态隔离、地址、余额及共享交易组件场景，复用诊断与报告。 | FESOL-42/48/90/96/97～100；flags 开/关；EVM 回归。 | 保留 EVM `chainId` 与独立 `networkId` 模型，不能只改 chainId；预览定位不代表 Solana 页面验收。 | 部分完成（精确预览入口已验收；[本地只读冒烟](solana-browser-smoke.md)已实现；环境预检已验收，真实 UI 待授权验收） |
+| A09 | P1 | Solana 浏览器验收 | 已有 Playwright、fixture、只读账户、报告、截图、trace。regression 配置当前只接受 Arbitrum/Avalanche；funded runner 面向 Arbitrum。新增[本地 PR 预览定位](agent-preview.md)，复用 CI 精确部署规则。 | 在现有框架扩展网络选择、状态隔离、地址、余额及共享交易组件场景，复用诊断与报告。 | FESOL-42/48/90/96/97～100；flags 开/关；EVM 回归。 | 保留 EVM `chainId` 与独立 `networkId` 模型，不能只改 chainId；预览定位不代表 Solana 页面验收。 | 部分完成（精确预览入口已验收；[本地只读冒烟](solana-browser-smoke.md)已实现；环境预检及两项本地网络选择 UI 已验收；真实钱包/余额/交易等覆盖待推进） |
 | A10 | P1 | 真实钱包连接环境 | FESOL-42 为 Test，PR #3110 开放；要求 Phantom、Solflare、OKX、TokenPocket。现有回归未证明真实扩展与 Privy 完整兼容。 | 准备专用浏览器 profile、扩展和账户；检查连接、恢复、主动断开及 EVM/Solana 会话隔离，保留真实钱包兼容性验收。 | FESOL-42/6。 | 本地 CLI 地址工具不替代页面钱包连接、恢复、拒签及断开验收；注入钱包也不能单独证明四种钱包兼容。 | 待推进 |
 | A11 | P1 | 数值正确性基准 | FESOL-57/64/65 要求与 gmsol 模型或链上 view 对比；ADR 指出已发布 SDK 的清算参数参考限制；新增[真实 WASM 基础向量](solana-sdk-vectors.md)，独立 Python 期望对照 apply_factor。 | 建立带源码/程序版本、账户、价格、时间和容差的参考向量；API 与前端 SDK 对同一输入核验。 | FESOL-92/57/64/65；精度、funding、borrowing、PnL、清算价。 | 两端相互比较不足以证明正确，需独立且已核实的基准；基础向量不证明复杂业务数学或链上兼容。 | 部分完成（真实 WASM 与基础定点向量已验收；复杂数学基准待推进） |
 | A12 | P1 | 交易生命周期证据 | 已有[Mainnet 回执证据工具](solana-transaction-evidence.md)，核对 finalized 签名状态、完整回执与链上结果；交易确认不等于 keeper 已执行，协议事件由 FESOL-94 跟踪。 | 关联模拟、发送签名、订单账户、执行/取消交易、原因、最终持仓和 API 刷新；明确各阶段超时。 | FESOL-20/56/59/94。 | simulation 只检查创建阶段；账户消失或创建交易成功不能单独证明成交成功。 | 部分完成（基础回执证据已验收；订单/keeper/API 关联待完善） |
@@ -494,7 +494,7 @@ A02 之后建议推进 A03，确认实际 api-solana 部署地址、版本与数
 
 本轮先 push 浏览器环境预检，提交 `21f244985c` 到 `my-gmx/solana-integration`。随后实时核对 FESOL-62/61/57/71/94/66/67，抓取时间为北京时间 2026-10-25 07:47:16～27；核对 gmx-api PR #292/#293 正文与评论，两者均 MERGED，仍未提供实际部署 URL。FESOL-62 为 Done，61/71/94 为 Todo，57 为 Execution，66/67 为 Backlog，未发现解除下述条件的新证据。本轮没有重新请求公开 API、keeper 或 RPC，历史访问结果不作为新的实测。
 
-**最值得下一步：A09 两项本地只读浏览器用例真实验收。** 实现、静态检查、依赖预检与报告机制均已完成；下一步需要执行现有用例取得真实页面证据。当前状态为 **待明确授权启动本地 Vite 服务和 Chrome/Playwright**，不是继续增加预检或工具封装。根 AGENTS.md 通用要求第 5 条仍适用。
+**历史就绪记录：A09 两项本地只读浏览器用例真实验收。2026-10-25 用户已解除下述本地 Vite/Chrome 授权阻碍，实际运行结果见文末。** 实现、静态检查、依赖预检与报告机制均已完成；下一步需要执行现有用例取得真实页面证据。当前状态为 **待明确授权启动本地 Vite 服务和 Chrome/Playwright**，不是继续增加预检或工具封装。根 AGENTS.md 通用要求第 5 条仍适用。
 
 | 候选 | 本次就绪判断 | 所需最小协调 |
 | --- | --- | --- |
@@ -524,3 +524,26 @@ A02 之后建议推进 A03，确认实际 api-solana 部署地址、版本与数
 | 真实验收 | 待用户授权；未执行 |
 
 本轮仅更新就绪判断和入口，未修改业务/验收代码、未修改 Linear、未联系负责人。纯文档仅核对链接与差异，不重复测试、构建或预检。
+
+
+## A09 本地只读页面真实验收进度（2026-10-25）
+
+本轮先 push，远端已是最新 `5fe2d88919`。用户明确长期授权后续任务启动本地 Vite 和 Chrome；已更新根 AGENTS.md 通用要求第 5 条及执行顺序，后续已授权任务不再因相同本地运行请求确认。不扩展到构建、部署、其他服务、钱包签名或广播。
+
+| 阶段 | 状态 | 条件与结果 |
+| --- | --- | --- |
+| 选项与验收口径 | 已完成 | 沿用两项 Solana 开关/选择/刷新/EVM 状态隔离条件，不实施业务需求 |
+| 环境准备 | 已通过 | 既有预检四项 passed，使用已安装 Chrome 和现有 SDK/WASM；无构建 |
+| 首轮真实运行 | failed，已定位 | 两项导航等待 load 均超时；主界面已显示，无未处理 JS 错误，外部请求有失败/中断；失败截图、trace 和诊断已保留 |
+| 基础设施修复 | 已完成 | 仅测试的 goto/reload 改为 domcontentloaded，再由菜单可见与状态断言确认就绪；不加长超时、不屏蔽请求、不改业务 |
+| 真实复验 | 已通过 | 两项 2 passed / 0 skipped / 0 flaky，16.7 秒；关闭无 SDK/WASM 请求；开启选择、刷新、切回通过，EVM ID 为 42161，无未处理 JS 错误 |
+| 工程与交接 | 已完成并验收 | 根及 regression 类型、lint/格式、完整前端单元测试和文档证据检查通过；长期授权和导航经验已进入执行入口 |
+
+本轮只完成 A09 首个网络选择冒烟阶段；A09 整体仍部分完成，不代表真实钱包兼容、余额、交易组件、远端预览或全部 EVM 回归通过。开启用例诊断仍有 81 条外部请求失败/刷新中断记录，原样保留；本次断言不以所有外部依赖正常作为通过条件，不能据此声明 RPC/keeper/Privy 全部可用。
+
+
+工程收尾通过：完整前端单元测试 299 文件 / 3014 tests passed、1 原有 skipped，退出 0，120.62 秒；根及 regression 类型、指定测试/配置文件 ESLint 零警告和 Prettier、文档链接与差异检查通过。日志仍有既有 happy-dom teardown AbortError，未改无关代码。根类型与前端测试日志在本机 `/tmp/gmx-a09-live-{tscheck,test-ci}.log`，regression 类型日志为 `/tmp/gmx-a09-live-types.log`。
+
+原始证据保存在被忽略的 `.local/acceptance/solana-browser/a09-live-20261025/`：首轮 `run-1-results.json` 和 `run-1-artifacts/` 保留失败，复验 `run-2-results.json`、`run-2-html/` 保存实际通过结果；后续测试发现不覆盖归档副本。复验报告 SHA-256 为 `0fd46c58055e0575e1750bbc7095d6bb5204d03cf5bd29f7a23be5e9b7894014`，实际用例源码 SHA-256 为 `e2060c4de26c5d52fdaee97db466bfd986c2f98d06aea8c9bd05f2e993e6fae3`；配置/fixture 摘要另存 `test-source-sha256.json`，checkout 为 `5fe2d88919`、dirty=true，运行开始于北京时间 08:09:01。运行后重新生成 `prerequisites-final.json` 并通过，固定修复后的预检源码摘要。
+
+本轮仅修改两处测试导航等待条件及协作规则/文档；没有修改业务代码，没有注入钱包、读取助记词、签名、广播、构建或部署。页面本身访问既有外部读取服务，失败请求保留在诊断中；不声称所有外部服务通过。本轮启动的 Vite 已停止，Playwright 测试上下文已关闭。A09 首个本地网络选择冒烟阶段已完成，整体仍部分完成；新改动留待下一次 push 指令提交。

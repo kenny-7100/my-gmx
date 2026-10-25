@@ -25,7 +25,7 @@ for (const enabled of [false, true]) {
         settlementChainId: localStorage.getItem("SELECTED_SETTLEMENT_CHAIN_ID"),
         flag: JSON.parse(localStorage.getItem("ab-flags") || "{}").solanaNetwork?.enabled,
       }));
-    await page.goto("/trade");
+    await page.goto("/trade", { waitUntil: "domcontentloaded" });
     const network = page.getByTestId("networks-dropdown-handle").first();
     await expect(network.getByAltText("Arbitrum", { exact: true })).toBeVisible();
     expect((await state()).flag).toBe(enabled);
@@ -40,7 +40,7 @@ for (const enabled of [false, true]) {
     } else {
       await expect(network.getByAltText("Solana", { exact: true })).toBeVisible();
       expect(await state()).toMatchObject({ solana: "true", chainId: "42161", settlementChainId: "42161" });
-      await page.reload();
+      await page.reload({ waitUntil: "domcontentloaded" });
       await expect(network.getByAltText("Solana", { exact: true })).toBeVisible();
       await network.click();
       await page.getByTestId("networks-dropdown-Arbitrum").click();
