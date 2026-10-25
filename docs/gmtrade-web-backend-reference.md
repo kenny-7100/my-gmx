@@ -1,6 +1,10 @@
 # 旧 Solana 后端参考说明
 
-核验日期：2026-10-24。位置：`gmtrade-web-backend/`。这是用户提供的旧 Solana Web 后端，可能在后续废弃；与 GMX 的 `gmx-api` 不同。
+源码快照核验日期：2026-10-24；线上入口核验日期：2026-10-25。位置：`gmtrade-web-backend/`。这是用户提供的旧 Solana Web 后端，可能在后续废弃；与 GMX 的 `gmx-api` 不同。
+
+## 当前线上地址与源码快照的区别
+
+当前 GMTrade 的 Web 后端、keeper、SQD、RPC 和发布脚本配置见[GMTrade 当前线上服务地址](gmtrade-live-services.md)，GMX 见[GMX 当前线上服务地址](gmx-live-services.md)。线上事实以目标页面当前实际请求为准；本页源码快照不能证明线上部署版本、配置或依赖。此前旧配置中的 `api.gmtrade.xyz` 不能用作当前正式后端，详见线上核验记录。
 
 ## 来源与完整性
 

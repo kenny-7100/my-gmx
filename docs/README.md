@@ -4,12 +4,14 @@
 
 | 文档 | 适用场景 |
 | --- | --- |
+| [GMTrade 当前线上服务地址](gmtrade-live-services.md) | 当前正式 Web 后端 HTTP/WS、keeper GraphQL、SQD、RPC 与发布配置；线上行为/真实数据验收优先查阅 |
+| [GMX 当前线上服务地址](gmx-live-services.md) | 从真实线上页面请求核实各链 API、价格 keeper/fallback、SQD、Goldsky、RPC 与其他依赖，区分线上调用和发布脚本配置 |
 | [Linear 需求开发与 PR 交付流程](linear-development-workflow.md) | 一需求一分支、开发与交付基础隔离、命名规范、Draft PR、自测表格及人工确认 |
 | [Linear 需求查阅与复盘](linear-requirements.md) | FESOL 实时查询、全量快照、项目筛选和进度差异工具的配置、命令与验收记录 |
 | [需求推荐与就绪核验](solana-next-task.md) | 综合 Linear、GitHub PR、最新上游代码和实际前置，推荐下一条迁移需求 |
 | [Solana 迁移实际进度评估](solana-progress.md) | 跨仓库取证、去重与工作量估算，输出两个进度口径及中英文简述 |
 | [Agent 验收基础设施调研与实施清单](agent-acceptance-infrastructure.md) | RPC、keeper、API、钱包等验收条件与实施记录；A01/A02 访问工具已完成；A09 首个本地网络选择冒烟及环境预检已通过真实验收；A03 仍待实际部署入口 |
-| [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；新增 Markdown 工作表一致性检查，拒绝错误汇总与无效证据引用 |
+| [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，涉及现有行为/真实数据时先核对线上基线，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；新增 Markdown 工作表一致性检查，拒绝错误汇总与无效证据引用 |
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
 | [Solana 统计索引只读预检](solana-index-preflight.md) | A16：核实实际 volume 索引的 GraphQL 契约、高度和最新事件年龄；不推断处理延迟或历史完整性 |
 | [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：环境预检检查依赖、Chrome、SDK 与测试发现；本地开关/网络选择/刷新持久化已通过真实 Chrome 验收，含导航等待排障顺序 |
@@ -24,7 +26,7 @@
 | [本地 Agent 验收钱包](agent-wallet.md) | A05：助记词配置、固定 EVM/Solana 地址、Mainnet 原生 SOL 及 SPL/Token-2022 账户盘点与失败诊断；已通过自动测试和真实只读验收，Devnet 暂缓 |
 | [本地 Solana API 样例验收服务](solana-api-local.md) | A08：启动现有 gmx-api 样例模式、检查样例和 HTTP 行为、记录源码证据；不依赖钱包、数据库或 RPC |
 | [Solana 迁移参考仓库](solana-reference-repositories.md) | 查找仓库用途、协议与 SDK 资料、ADR-0015 分支、版本注意事项和 remote 规则 |
-| [旧 Solana 后端参考说明](gmtrade-web-backend-reference.md) | 查阅源码快照的结构、数据流、接口、精度及缺失依赖，理解其与 GMX 目标架构的区别 |
+| [旧 Solana 后端参考说明](gmtrade-web-backend-reference.md) | 旧后端源码快照的数据流、接口和缺失依赖；当前线上地址另见独立服务文档 |
 | [文档维护约定](documentation-maintenance.md) | 主动沉淀协作知识，把环境排障经验提升为执行前置，维护索引及接手资料 |
 | [编码与自审规范](coding-and-self-review.md) | 执行前核对检查范围、SDK 产物及构建内存；按任务查阅 gmx-prompts，执行编码、自审和跨仓库核验 |
 | [自动化工具沉淀约定](automation-tools.md) | 识别重复任务，复用和实现脚本、检查器等工具，记录验证结果和使用入口 |
