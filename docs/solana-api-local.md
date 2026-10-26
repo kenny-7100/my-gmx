@@ -278,6 +278,24 @@ stdout 输出 `mode: offline-fixtures` 的 JSON，含实际 apiDir、API commit/
 
 本机验收摘要为同目录 `offline-latest.json`，失败/隔离验证为 `offline-acceptance.json`；临时注入仅发生在已清理的源码副本，真实 API 文件未改动。该阶段为 A08/A11 的回归执行能力补充，未新增独立数学基准，不能将旧 fixture 当成未来全部 SDK / 部署版本的正确性证明。
 
+### API 离线测试源码断点调试
+
+2026-10-27 已实现并真实验收。需要排查现有 API 纯计算测试时，在主仓库根目录显式选择一份 suite：
+
+```bash
+yarn gmx-api:test-offline --suite src/domain/gmUserEarnings/math.test.ts --inspect-port 9239
+```
+
+1. 入口先检查 loopback 端口可用，再输出 `API offline debug session`，含 inspector、日志、报告路径及总时限。这只是启动安排；该次 `jest.log` 出现 `Debugger listening on ws://127.0.0.1:9239/...` 才说明 inspector 已监听。端口占用明确失败，不接管或停止既有服务。
+2. Chrome `chrome://inspect` 配置 `127.0.0.1:9239` 后 Inspect，或用 IDE 的 Node attach。Agent 可复用 `scripts/lib/agent-inspector.mjs`，连接该端口 `/json/list` 返回的 WebSocket；它属于本次 Jest 主进程，`--runInBand` 不另启测试 worker。仅允许 `127.0.0.1` 监听。
+3. 开启 source maps，在当前 API checkout 的 TypeScript 文件设置断点，再恢复初始暂停。本机已在 `src/domain/gmUserEarnings/math.ts` 的 `calcEndOfPeriodIncome` 条件行命中，读取 `latestBalanceChange.tokensBalance`、`accumulatorNow` 和原测试调用栈。初始暂停、端口可连接或测试通过均不能替代目标源码断点证据。
+4. 自动化连接 Jest 时，可在恢复前用 `Debugger.setBreakpointByUrl` 对目标文件 URL 设置入口断点；命中后检查 `Debugger.scriptParsed` 的 inline source map 与磁盘源码一致，用映射和 `Debugger.getPossibleBreakpoints` 选择具体 TypeScript 行。ts-jest 的 data URL 可包含 `charset=utf-8`，不能只接受 SDK 使用的固定前缀。本机 Jest VM 场景中 `beforeScriptExecution` 未截住目标文件，改用 URL 断点完成验收，不照搬 SDK 的 instrumentation 流程。
+5. 完成后移除自身断点、恢复执行并断开调试器；Node 可能在测试已结束后仍等待 debugger 断开。需要中止时对外层命令 Ctrl-C / SIGTERM，沿用所属进程组清理，核对报告 `exit.cleanup` 和端口释放。
+
+调试整次上限 30 分钟，包含等待连接与暂停；普通模式仍为 120 秒，原 suite 单项 10 秒超时保留。仅支持单 suite，保留空 CWD、环境白名单、UTC、联网保护及前后源码指纹，不需要数据库、API HTTP 服务或构建。报告新增 `debug.inspector`、`pauseOnStart`、`timeoutMs`、`started`，启动日志未确认 inspector 成功时不得 passed；日志确认仍不能证明实际命中断点。前置失败在 stderr 提供具体诊断，退出 1。
+
+本机真实验收：source map 源码匹配，目标断点读取预期 BigInt 参数并确认环境哨兵未加载、fetch 保护器仍为 `deny`；恢复后原有收益计算 6 项通过，源码未变、端口关闭。初始暂停时 SIGTERM 返回 failed 且清理通过；非法端口、多 suite 和端口占用均拒绝，占用服务保留。普通默认 12 项、指定计算 59 项及统一工具 91 项通过。证据位于忽略目录 `.local/acceptance/solana-api-local/offline-debug-{acceptance,negative,default,selected}.json` 和 `offline-debug-tools.tap`。没有修改 API 业务源码、原测试、配置或依赖。
+
 ## gmx-api 路由生成准备与过期检查
 
 2026-10-26 已完成并验收。新 checkout 的 `src/codegen/tsoa/` 可能缺失；`src/app.ts` 直接导入生成的 v1/v2 路由及 Swagger。需要测试真实 Express 路由或修改 TSOA controller/类型时，先检查生成状态，再运行相关测试；仅运行已有 Solana 样例服务或纯计算测试不需要这一步。
