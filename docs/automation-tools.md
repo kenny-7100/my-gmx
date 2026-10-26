@@ -26,6 +26,8 @@ API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测�
 
 [组合联调](solana-dev-workspace.md#独立-api-checkout-的组合联调)复用既有 API manager：up 用 `--api-dir` 选择独立 API，健康检查绑定路径和实例，浏览器诊断读取实际 API checkout 的源码身份；不从基础设施固定路径猜测 API 版本，owned/borrowed 清理规则保持一致。
 
+[工作区 API 调试](solana-dev-workspace.md#工作区内的-api-源码断点调试)在 up 显式加 `--api-inspect-port`，复用原 API manager 的 loopback inspector 和 `solana:api-debug --attach` 验证真实 TypeScript 断点；借用必须匹配调试端口，不自动重配既有服务，默认不启用。
+
 ## 统一离线工具回归
 
 2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：
