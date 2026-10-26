@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import process from "node:process";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+
+import { passedResults, sourceInputs } from "./gmx-api-offline-tests.mjs";
 
 test("offline guard blocks Node network transports and records swallowed attempts", () => {
   const guard = fileURLToPath(new URL("../tools/gmx-api-offline/network-guard.cjs", import.meta.url));
@@ -32,4 +38,57 @@ test("offline guard blocks Node network transports and records swallowed attempt
     { encoding: "utf8", timeout: 5000 }
   );
   assert.equal(result.status, 0, result.stderr);
+});
+
+test("API offline results require exact unique files, executed assertions and a clean exit", () => {
+  const suites = ["/api/src/a.test.ts", "/api/src/b.test.ts"];
+  const result = {
+    success: true,
+    numTotalTestSuites: 2,
+    numPassedTestSuites: 2,
+    numPendingTests: 0,
+    numTodoTests: 0,
+    numPassedTests: 2,
+    numTotalTests: 2,
+    testResults: suites.map((name) => ({ name, status: "passed", assertionResults: [{ status: "passed" }] })),
+  };
+  const exit = { code: 0, signal: null };
+  assert.equal(passedResults(result, suites, exit), true);
+  for (const changed of [
+    undefined,
+    { ...result, success: false },
+    { ...result, numTotalTestSuites: 1 },
+    { ...result, numPassedTests: 0, numTotalTests: 0 },
+    { ...result, numPendingTests: 1 },
+    { ...result, numTodoTests: 1 },
+    { ...result, testResults: [] },
+    { ...result, testResults: [result.testResults[0], result.testResults[0]] },
+    { ...result, testResults: [result.testResults[0], { ...result.testResults[1], name: "/api/src/other.test.ts" }] },
+    { ...result, testResults: result.testResults.map((file) => ({ ...file, assertionResults: [] })) },
+    {
+      ...result,
+      testResults: result.testResults.map((file) => ({ ...file, assertionResults: [{ status: "pending" }] })),
+    },
+  ])
+    assert.equal(passedResults(changed, suites, exit), false);
+  assert.equal(passedResults(result, suites, { ...exit, code: 1 }), false);
+  assert.equal(passedResults(result, suites, { ...exit, signal: "SIGTERM" }), false);
+});
+
+test("API source identity detects dependency edits and added files beyond the selected suite", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "gmx-api-source-"));
+  try {
+    await mkdir(path.join(dir, "src"));
+    for (const file of ["package.json", "yarn.lock", "tsconfig.json", "src/selected.test.ts", "src/dependency.ts"])
+      await writeFile(path.join(dir, file), "original");
+    const before = await sourceInputs(dir);
+    await writeFile(path.join(dir, "src/dependency.ts"), "changed");
+    assert.notEqual((await sourceInputs(dir)).sha256, before.sha256);
+    await writeFile(path.join(dir, "src/dependency.ts"), "original");
+    assert.deepEqual(await sourceInputs(dir), before);
+    await writeFile(path.join(dir, "src/new.json"), "{}");
+    assert.equal((await sourceInputs(dir)).fileCount, before.fileCount + 1);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });

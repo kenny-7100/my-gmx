@@ -235,11 +235,15 @@ yarn solana:api-local verify > .local/acceptance/solana-api-local/report.json
 # From the gmx-interface root
 yarn gmx-api:test-offline
 
+# Select exact existing source suites; repeat --suite to combine
+yarn gmx-api:test-offline --suite src/lib/__test__/number.test.ts
+yarn gmx-api:test-offline --suite src/lib/__test__/number.test.ts --suite src/domain/gmUserEarnings/math.test.ts
+
 # From gmx-api
 node ../scripts/gmx-api-offline-tests.mjs --api-dir .
 ```
 
-适用于修改或核对 `marketStatus`、市场账户解码及 `solanaPairsRows` 时的快速回归。当前固定执行以下两个原有测试集，不接受任意测试路径，以免误把数据库测试放进无数据库环境：
+适用于修改或核对纯计算及离线行为时的快速回归。默认继续执行以下两个原有 Solana 测试集；2026-10-27 已扩展为支持重复 `--suite src/...test.ts` 精确选择其他现有测试。路径校验复用隔离集成测试的选择器：只接受所选 API checkout 内真实存在的 `src/**/*.test.ts`，拒绝重复、缺失、目录、glob 及逃逸符号链接。选择需要数据库、HTTP 或外部数据的测试会明确失败，不自动补依赖或切换 profile。
 
 | 原有测试 | 当前覆盖 |
 | --- | --- |
@@ -250,11 +254,13 @@ node ../scripts/gmx-api-offline-tests.mjs --api-dir .
 
 测试进程使用临时空工作目录和环境变量白名单，不继承钱包/数据库凭据或 `NODE_OPTIONS`，dotenv 默认不会读取项目 `.env`。网络 guard 拦截测试环境中常见 Node HTTP、TCP、TLS、HTTP/2、UDP、DNS 和 fetch 入口；外连尝试即时报错，且即使异常被捕获，suite 的 afterAll 仍报告失败。这是用于防止意外外连的测试约束，不是操作系统级沙箱，不支持不可信测试代码。
 
-运行总超时 120 秒、单项测试超时 10 秒，不重试、不使用 forceExit 掩盖未清理资源。成功要求两个 suite 均通过、测试非空且无 skip/todo、进程退出 0，并且运行前后的选定源码证据一致。已通过的是历史 fixture 回归，不证明当前链上状态或实时 keeper / SQD 数据。
+运行总超时 120 秒、单项测试超时 10 秒，不重试、不使用 forceExit 掩盖未清理资源。成功要求所选 suite 及每份文件内的实际断言全部通过、测试非空且无 skip/todo、实际结果文件路径与选择精确一致且无重复、进程退出 0，并且运行前后的源码证据一致。已通过的是历史 fixture 回归，不证明当前链上状态或实时 keeper / SQD 数据。
 
-stdout 输出 `mode: offline-fixtures` 的 JSON，含 API commit/dirty、选定文件摘要、guard 摘要、测试数量和 excluded 范围。成功退出 0，其余退出 1；测试失败也保留结构化报告。前置条件缺失时 stderr 给出固定诊断信息，不启动数据库或自动安装依赖。
+stdout 输出 `mode: offline-fixtures` 的 JSON，含实际 apiDir、API commit/dirty、选定文件摘要、guard 摘要、测试数量和 excluded 范围。`sourceInputs` / `sourceInputsAfter` 聚合 API `src/` 下 TS/JS/JSON（含本地模块、fixture 和生成源码）及 package、锁文件、tsconfig 的摘要与文件数，不仅检查测试文件；源码符号链接需先显式审查，不自动跟随。此摘要不覆盖所有已安装第三方包内容或项目外任意读取，不能代表完整运行时/部署身份。测试固定 TZ=UTC。成功退出 0，其余退出 1；测试失败也保留结构化报告。前置条件缺失时 stderr 给出固定诊断信息，不启动数据库或自动安装依赖。
 
 每次实际执行的日志与原始 Jest JSON 保存在 `.local/acceptance/solana-api-local/offline-*/`，报告提供 `logFile`、`resultsFile`；临时工作目录自动清理。源码身份不是当前部署身份。工具入口为 `scripts/gmx-api-offline-tests.mjs`，guard 回归为 `yarn test:gmx-api-offline`。
+
+2026-10-27 可选 suite 扩展已验收：默认 12 项保持通过；显式选择原有 number 与 gmUserEarnings/math 两个文件共 59 项通过，报告仅含所选文件。隔离源码副本实际验证调用方/文件环境哨兵未加载，捕获联网异常后仍失败，断言失败、skip、零测试及运行中新增源码均失败；最后一种报告 `sourceUnchanged=false`。没有修改真实 API 源码或原有预期，副本已清理。工具回归覆盖精确范围、重复结果、空断言、skip/todo、信号退出和非选中依赖变化；统一 `yarn test:agent-tools` 87 项通过。 根类型检查、ESLint、Prettier、111 个文档本地目标和差异检查通过；完整前端单元测试 3,014 项通过、1 项既有跳过。证据在本机忽略目录 `.local/acceptance/solana-api-local/offline-{selected-acceptance,default-compatibility,selection-negative}.json` 和 `offline-tools.tap`。
 
 实施与验收状态：
 
