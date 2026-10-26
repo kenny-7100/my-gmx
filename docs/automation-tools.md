@@ -1,5 +1,7 @@
 # 自动化工具沉淀约定
 
+全栈联调优先复用 [Agent Solana 工作区](solana-dev-workspace.md)：`yarn solana:dev` 管理选定 API/Vite/RPC 及开发代理，`solana:dev:browser` 与 trace 查询关联真实请求，contracts 提供来源固定的未评审样例形状检查。借用服务不被 stop 清理，业务消费和 reviewed contract 缺口明确报告；仅属个人开发基础，不进入上游业务交付。
+
 更新日期：2026-10-25。用户已授权 Agent 在实际协作中主动发现、实现并积累有复用价值的自动化能力，减少重复推理、人工操作、执行时间和成本。
 
 ## 何时沉淀

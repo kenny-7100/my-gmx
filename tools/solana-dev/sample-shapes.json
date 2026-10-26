@@ -1,0 +1,867 @@
+{
+  "schemaVersion": 1,
+  "apiCommit": "b86956df00902e44e0295827d651b206a6153942",
+  "review": "unreviewed-source-samples",
+  "routes": [
+    {
+      "path": "/v1/markets/config",
+      "file": "src/domain/solana/samples/markets-config.json",
+      "sha256": "49ddf587856d5afae6cb29ce983d361f32a9b378c3b8f1f43ac7e896c69398aa",
+      "shape": {
+        "type": "array",
+        "variants": [
+          {
+            "type": "object",
+            "fields": {
+              "atomicSwapFeeFactor": {
+                "type": "integer-string"
+              },
+              "borrowingExponentFactorLong": {
+                "type": "integer-string"
+              },
+              "borrowingExponentFactorShort": {
+                "type": "integer-string"
+              },
+              "borrowingFactorLong": {
+                "type": "integer-string"
+              },
+              "borrowingFactorShort": {
+                "type": "integer-string"
+              },
+              "data": {
+                "type": "string"
+              },
+              "fundingDecreaseFactorPerSecond": {
+                "type": "integer-string"
+              },
+              "fundingExponentFactor": {
+                "type": "integer-string"
+              },
+              "fundingFactor": {
+                "type": "integer-string"
+              },
+              "fundingIncreaseFactorPerSecond": {
+                "type": "integer-string"
+              },
+              "indexTokenAddress": {
+                "type": "string"
+              },
+              "isClosed": {
+                "type": "boolean"
+              },
+              "isDisabled": {
+                "type": "boolean"
+              },
+              "isSameCollaterals": {
+                "type": "boolean"
+              },
+              "isSpotOnly": {
+                "type": "boolean"
+              },
+              "lentPositionImpactPoolAmount": {
+                "type": "integer-string"
+              },
+              "longTokenAddress": {
+                "type": "string"
+              },
+              "marketClosedMinCollateralFactorForLiquidation": {
+                "type": "integer-string"
+              },
+              "marketTokenAddress": {
+                "type": "string"
+              },
+              "maxCollateralSumLongTokenLong": {
+                "type": "integer-string"
+              },
+              "maxCollateralSumLongTokenShort": {
+                "type": "integer-string"
+              },
+              "maxCollateralSumShortTokenLong": {
+                "type": "integer-string"
+              },
+              "maxCollateralSumShortTokenShort": {
+                "type": "integer-string"
+              },
+              "maxFundingFactorPerSecondLong": {
+                "type": "integer-string"
+              },
+              "maxFundingFactorPerSecondShort": {
+                "type": "integer-string"
+              },
+              "maxLendableImpactFactor": {
+                "type": "integer-string"
+              },
+              "maxLendableImpactFactorForWithdrawals": {
+                "type": "integer-string"
+              },
+              "maxLendableImpactUsd": {
+                "type": "integer-string"
+              },
+              "maxLongPoolAmount": {
+                "type": "integer-string"
+              },
+              "maxLongPoolUsdForDeposit": {
+                "type": "integer-string"
+              },
+              "maxOpenInterestLong": {
+                "type": "integer-string"
+              },
+              "maxOpenInterestShort": {
+                "type": "integer-string"
+              },
+              "maxPnlFactorForDepositsLong": {
+                "type": "integer-string"
+              },
+              "maxPnlFactorForDepositsShort": {
+                "type": "integer-string"
+              },
+              "maxPnlFactorForTradersLong": {
+                "type": "integer-string"
+              },
+              "maxPnlFactorForTradersShort": {
+                "type": "integer-string"
+              },
+              "maxPnlFactorForWithdrawalsLong": {
+                "type": "integer-string"
+              },
+              "maxPnlFactorForWithdrawalsShort": {
+                "type": "integer-string"
+              },
+              "maxPositionImpactFactorForLiquidations": {
+                "type": "integer-string"
+              },
+              "maxPositionImpactFactorNegative": {
+                "type": "integer-string"
+              },
+              "maxPositionImpactFactorPositive": {
+                "type": "integer-string"
+              },
+              "maxShortPoolAmount": {
+                "type": "integer-string"
+              },
+              "maxShortPoolUsdForDeposit": {
+                "type": "integer-string"
+              },
+              "minCollateralFactor": {
+                "type": "integer-string"
+              },
+              "minCollateralFactorForLiquidation": {
+                "type": "integer-string"
+              },
+              "minCollateralFactorForOpenInterestLong": {
+                "type": "integer-string"
+              },
+              "minCollateralFactorForOpenInterestShort": {
+                "type": "integer-string"
+              },
+              "minCollateralUsd": {
+                "type": "integer-string"
+              },
+              "minFundingFactorPerSecondLong": {
+                "type": "integer-string"
+              },
+              "minFundingFactorPerSecondShort": {
+                "type": "integer-string"
+              },
+              "minFundingIncreaseRatePerSecond": {
+                "type": "integer-string"
+              },
+              "minPositionImpactPoolAmount": {
+                "type": "integer-string"
+              },
+              "minPositionSizeUsd": {
+                "type": "integer-string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "openInterestReserveFactorLong": {
+                "type": "integer-string"
+              },
+              "openInterestReserveFactorShort": {
+                "type": "integer-string"
+              },
+              "positionFeeFactorForBalanceWasImproved": {
+                "type": "integer-string"
+              },
+              "positionFeeFactorForBalanceWasNotImproved": {
+                "type": "integer-string"
+              },
+              "positionImpactExponentFactorNegative": {
+                "type": "integer-string"
+              },
+              "positionImpactExponentFactorPositive": {
+                "type": "integer-string"
+              },
+              "positionImpactFactorNegative": {
+                "type": "integer-string"
+              },
+              "positionImpactFactorPositive": {
+                "type": "integer-string"
+              },
+              "positionImpactPoolDistributionRate": {
+                "type": "integer-string"
+              },
+              "reserveFactorLong": {
+                "type": "integer-string"
+              },
+              "reserveFactorShort": {
+                "type": "integer-string"
+              },
+              "shortTokenAddress": {
+                "type": "string"
+              },
+              "swapFeeFactorForBalanceWasImproved": {
+                "type": "integer-string"
+              },
+              "swapFeeFactorForBalanceWasNotImproved": {
+                "type": "integer-string"
+              },
+              "swapImpactExponentFactor": {
+                "type": "integer-string"
+              },
+              "swapImpactFactorNegative": {
+                "type": "integer-string"
+              },
+              "swapImpactFactorPositive": {
+                "type": "integer-string"
+              },
+              "thresholdForDecreaseFunding": {
+                "type": "integer-string"
+              },
+              "thresholdForStableFunding": {
+                "type": "integer-string"
+              },
+              "useOpenInterestInTokensForBalance": {
+                "type": "boolean"
+              },
+              "virtualIndexTokenId": {
+                "type": "string"
+              },
+              "virtualLongTokenId": {
+                "type": "string"
+              },
+              "virtualMarketId": {
+                "type": "string"
+              },
+              "virtualShortTokenId": {
+                "type": "string"
+              },
+              "withdrawalFeeFactorBalanceWasImproved": {
+                "type": "integer-string"
+              },
+              "withdrawalFeeFactorBalanceWasNotImproved": {
+                "type": "integer-string"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "path": "/v1/markets/values",
+      "file": "src/domain/solana/samples/markets-values.json",
+      "sha256": "e7c5586e3b1ae4b195be9f3aa15a915cd6da97aa133fb649745eb4e7541f700d",
+      "shape": {
+        "type": "array",
+        "variants": [
+          {
+            "type": "object",
+            "fields": {
+              "borrowingFactorPerSecondForLongs": {
+                "type": "integer-string"
+              },
+              "borrowingFactorPerSecondForShorts": {
+                "type": "integer-string"
+              },
+              "fundingFactorPerSecond": {
+                "type": "integer-string"
+              },
+              "longInterestInTokens": {
+                "type": "integer-string"
+              },
+              "longInterestInTokensUsingLongToken": {
+                "type": "integer-string"
+              },
+              "longInterestInTokensUsingShortToken": {
+                "type": "integer-string"
+              },
+              "longInterestUsd": {
+                "type": "integer-string"
+              },
+              "longInterestUsdUsingLongToken": {
+                "type": "integer-string"
+              },
+              "longInterestUsdUsingShortToken": {
+                "type": "integer-string"
+              },
+              "longPoolAmount": {
+                "type": "integer-string"
+              },
+              "longsPayShorts": {
+                "type": "boolean"
+              },
+              "marketTokenAddress": {
+                "type": "string"
+              },
+              "poolValueMax": {
+                "type": "integer-string"
+              },
+              "poolValueMin": {
+                "type": "integer-string"
+              },
+              "positionImpactPoolAmount": {
+                "type": "integer-string"
+              },
+              "shortInterestInTokens": {
+                "type": "integer-string"
+              },
+              "shortInterestInTokensUsingLongToken": {
+                "type": "integer-string"
+              },
+              "shortInterestInTokensUsingShortToken": {
+                "type": "integer-string"
+              },
+              "shortInterestUsd": {
+                "type": "integer-string"
+              },
+              "shortInterestUsdUsingLongToken": {
+                "type": "integer-string"
+              },
+              "shortInterestUsdUsingShortToken": {
+                "type": "integer-string"
+              },
+              "shortPoolAmount": {
+                "type": "integer-string"
+              },
+              "swapImpactPoolAmountLong": {
+                "type": "integer-string"
+              },
+              "swapImpactPoolAmountShort": {
+                "type": "integer-string"
+              },
+              "totalBorrowingFees": {
+                "type": "integer-string"
+              },
+              "updatedAt": {
+                "type": "number"
+              },
+              "updatedAtSlot": {
+                "type": "number"
+              },
+              "virtualInventoryForPositions": {
+                "type": "integer-string"
+              },
+              "virtualInventoryForPositionsInTokens": {
+                "type": "integer-string"
+              },
+              "virtualPoolAmountForLongToken": {
+                "type": "integer-string"
+              },
+              "virtualPoolAmountForShortToken": {
+                "type": "integer-string"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "path": "/v1/positions?address=11111111111111111111111111111111",
+      "file": "src/domain/solana/samples/positions.json",
+      "sha256": "884e8442ce524e9006bafed3531c54d764ee30b80a837e1c750614729fc95a0f",
+      "shape": {
+        "type": "array",
+        "variants": [
+          {
+            "type": "object",
+            "fields": {
+              "account": {
+                "type": "string"
+              },
+              "accountLamports": {
+                "type": "integer-string"
+              },
+              "claimableLongTokenAmount": {
+                "type": "integer-string"
+              },
+              "claimableShortTokenAmount": {
+                "type": "integer-string"
+              },
+              "closePriceImpactDeltaUsd": {
+                "type": "integer-string"
+              },
+              "closingFeeUsd": {
+                "type": "integer-string"
+              },
+              "collateralAmount": {
+                "type": "integer-string"
+              },
+              "collateralTokenAddress": {
+                "type": "string"
+              },
+              "collateralUsd": {
+                "type": "integer-string"
+              },
+              "contractKey": {
+                "type": "string"
+              },
+              "data": {
+                "type": "string"
+              },
+              "decreasedAtTime": {
+                "type": "integer-string"
+              },
+              "entryPrice": {
+                "type": "integer-string"
+              },
+              "fundingFeeAmount": {
+                "type": "integer-string"
+              },
+              "hasLowCollateral": {
+                "type": "boolean"
+              },
+              "increasedAtTime": {
+                "type": "integer-string"
+              },
+              "indexName": {
+                "type": "string"
+              },
+              "isLong": {
+                "type": "boolean"
+              },
+              "key": {
+                "type": "string"
+              },
+              "leverage": {
+                "type": "integer-string"
+              },
+              "leverageWithPnl": {
+                "type": "integer-string"
+              },
+              "leverageWithoutPnl": {
+                "type": "integer-string"
+              },
+              "liquidationPrice": {
+                "type": "integer-string"
+              },
+              "markPrice": {
+                "type": "integer-string"
+              },
+              "marketAddress": {
+                "type": "string"
+              },
+              "netPriceImapctDeltaUsd": {
+                "type": "integer-string"
+              },
+              "netValue": {
+                "type": "integer-string"
+              },
+              "netValueAfterAllFees": {
+                "type": "integer-string"
+              },
+              "pendingBorrowingFeesUsd": {
+                "type": "integer-string"
+              },
+              "pendingClaimableFundingFeesUsd": {
+                "type": "integer-string"
+              },
+              "pendingFundingFeesUsd": {
+                "type": "integer-string"
+              },
+              "pendingImpactAmount": {
+                "type": "integer-string"
+              },
+              "pendingImpactUsd": {
+                "type": "integer-string"
+              },
+              "pnl": {
+                "type": "integer-string"
+              },
+              "pnlAfterAllFees": {
+                "type": "integer-string"
+              },
+              "pnlAfterAllFeesPercentage": {
+                "type": "integer-string"
+              },
+              "pnlAfterFees": {
+                "type": "integer-string"
+              },
+              "pnlAfterFeesPercentage": {
+                "type": "integer-string"
+              },
+              "pnlPercentage": {
+                "type": "integer-string"
+              },
+              "poolName": {
+                "type": "string"
+              },
+              "positionFeeAmount": {
+                "type": "integer-string"
+              },
+              "positionValueInUsd": {
+                "type": "integer-string"
+              },
+              "priceImpactDiffUsd": {
+                "type": "integer-string"
+              },
+              "remainingCollateralAmount": {
+                "type": "integer-string"
+              },
+              "remainingCollateralUsd": {
+                "type": "integer-string"
+              },
+              "sizeInTokens": {
+                "type": "integer-string"
+              },
+              "sizeInUsd": {
+                "type": "integer-string"
+              },
+              "tradeId": {
+                "type": "integer-string"
+              },
+              "traderDiscountAmount": {
+                "type": "integer-string"
+              },
+              "uiFeeAmount": {
+                "type": "integer-string"
+              },
+              "uiFeeUsd": {
+                "type": "integer-string"
+              },
+              "updatedAtSlot": {
+                "type": "integer-string"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "path": "/v1/orders?address=11111111111111111111111111111111",
+      "file": "src/domain/solana/samples/orders.json",
+      "sha256": "3030f4b5bbf32ed59a7b4ec687838df9c8cb5cad7d89c57881f359180975ca94",
+      "shape": {
+        "type": "array",
+        "variants": [
+          {
+            "type": "object",
+            "fields": {
+              "acceptablePrice": {
+                "type": "integer-string"
+              },
+              "account": {
+                "type": "string"
+              },
+              "actionState": {
+                "type": "string"
+              },
+              "autoCancel": {
+                "type": "boolean"
+              },
+              "callback": {
+                "type": "null"
+              },
+              "callbackContract": {
+                "type": "string"
+              },
+              "callbackGasLimit": {
+                "type": "integer-string"
+              },
+              "cancellationReceiver": {
+                "type": "string"
+              },
+              "dataList": {
+                "type": "array",
+                "variants": []
+              },
+              "decreasePositionSwapType": {
+                "type": "number"
+              },
+              "escrowTokens": {
+                "type": "object",
+                "fields": {
+                  "finalOutputToken": {
+                    "type": "string"
+                  },
+                  "initialCollateralToken": {
+                    "type": "null"
+                  },
+                  "longToken": {
+                    "type": "string"
+                  },
+                  "shortToken": {
+                    "type": "string"
+                  }
+                }
+              },
+              "executionFee": {
+                "type": "integer-string"
+              },
+              "initialCollateralDeltaAmount": {
+                "type": "integer-string"
+              },
+              "initialCollateralTokenAddress": {
+                "type": "string"
+              },
+              "isFrozen": {
+                "type": "boolean"
+              },
+              "isLong": {
+                "type": "boolean"
+              },
+              "key": {
+                "type": "string"
+              },
+              "marketAddress": {
+                "type": "string"
+              },
+              "minOutputAmount": {
+                "type": "integer-string"
+              },
+              "orderAccount": {
+                "type": "string"
+              },
+              "orderType": {
+                "type": "number"
+              },
+              "positionAccount": {
+                "type": "string"
+              },
+              "receiver": {
+                "type": "string"
+              },
+              "referrer": {
+                "type": "string"
+              },
+              "rentReceiver": {
+                "type": "string"
+              },
+              "requestId": {
+                "type": "null"
+              },
+              "shouldUnwrapNativeToken": {
+                "type": "boolean"
+              },
+              "sizeDeltaUsd": {
+                "type": "integer-string"
+              },
+              "srcChainId": {
+                "type": "integer-string"
+              },
+              "swapPath": {
+                "type": "array",
+                "variants": []
+              },
+              "triggerPrice": {
+                "type": "integer-string"
+              },
+              "uiFeeFactor": {
+                "type": "integer-string"
+              },
+              "uiFeeReceiver": {
+                "type": "string"
+              },
+              "updatedAtTime": {
+                "type": "integer-string"
+              },
+              "validFromTime": {
+                "type": "integer-string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "fields": {
+              "acceptablePrice": {
+                "type": "integer-string"
+              },
+              "account": {
+                "type": "string"
+              },
+              "actionState": {
+                "type": "string"
+              },
+              "autoCancel": {
+                "type": "boolean"
+              },
+              "callback": {
+                "type": "null"
+              },
+              "callbackContract": {
+                "type": "string"
+              },
+              "callbackGasLimit": {
+                "type": "integer-string"
+              },
+              "cancellationReceiver": {
+                "type": "string"
+              },
+              "dataList": {
+                "type": "array",
+                "variants": []
+              },
+              "decreasePositionSwapType": {
+                "type": "number"
+              },
+              "escrowTokens": {
+                "type": "object",
+                "fields": {
+                  "finalOutputToken": {
+                    "type": "null"
+                  },
+                  "initialCollateralToken": {
+                    "type": "string"
+                  },
+                  "longToken": {
+                    "type": "string"
+                  },
+                  "shortToken": {
+                    "type": "string"
+                  }
+                }
+              },
+              "executionFee": {
+                "type": "integer-string"
+              },
+              "initialCollateralDeltaAmount": {
+                "type": "integer-string"
+              },
+              "initialCollateralTokenAddress": {
+                "type": "string"
+              },
+              "isFrozen": {
+                "type": "boolean"
+              },
+              "isLong": {
+                "type": "boolean"
+              },
+              "key": {
+                "type": "string"
+              },
+              "marketAddress": {
+                "type": "string"
+              },
+              "minOutputAmount": {
+                "type": "integer-string"
+              },
+              "orderAccount": {
+                "type": "string"
+              },
+              "orderType": {
+                "type": "number"
+              },
+              "positionAccount": {
+                "type": "string"
+              },
+              "receiver": {
+                "type": "string"
+              },
+              "referrer": {
+                "type": "string"
+              },
+              "rentReceiver": {
+                "type": "string"
+              },
+              "requestId": {
+                "type": "null"
+              },
+              "shouldUnwrapNativeToken": {
+                "type": "boolean"
+              },
+              "sizeDeltaUsd": {
+                "type": "integer-string"
+              },
+              "srcChainId": {
+                "type": "integer-string"
+              },
+              "swapPath": {
+                "type": "array",
+                "variants": []
+              },
+              "triggerPrice": {
+                "type": "integer-string"
+              },
+              "uiFeeFactor": {
+                "type": "integer-string"
+              },
+              "uiFeeReceiver": {
+                "type": "string"
+              },
+              "updatedAtTime": {
+                "type": "integer-string"
+              },
+              "validFromTime": {
+                "type": "integer-string"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "path": "/v1/fee-discount?address=11111111111111111111111111111111",
+      "file": "src/domain/solana/samples/fee-discount.json",
+      "sha256": "b0b3cc2774e864b3cb5d4151c5990277d43851870193d746b74b28d0549738ea",
+      "shape": {
+        "type": "object",
+        "fields": {
+          "account": {
+            "type": "string"
+          },
+          "affiliate": {
+            "type": "string"
+          },
+          "attachedOnChain": {
+            "type": "boolean"
+          },
+          "discountFactor": {
+            "type": "integer-string"
+          },
+          "discountShare": {
+            "type": "integer-string"
+          },
+          "gtRank": {
+            "type": "number"
+          },
+          "hasUserAccount": {
+            "type": "boolean"
+          },
+          "orderFeeDiscountFactor": {
+            "type": "integer-string"
+          },
+          "rankDiscountFactor": {
+            "type": "integer-string"
+          },
+          "referralCodeForTxn": {
+            "type": "string"
+          },
+          "referredUserDiscountFactor": {
+            "type": "integer-string"
+          },
+          "referrer": {
+            "type": "string"
+          },
+          "tierId": {
+            "type": "number"
+          },
+          "totalRebate": {
+            "type": "integer-string"
+          },
+          "totalRebateFactor": {
+            "type": "integer-string"
+          },
+          "updatedAt": {
+            "type": "number"
+          },
+          "userReferralCode": {
+            "type": "string"
+          },
+          "userReferralCodeString": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}
