@@ -43,7 +43,7 @@ export async function resolveSuites(sdkDir, requested = DEFAULT_SUITES) {
   return selected;
 }
 
-async function sourceEvidence(sdkDir) {
+export async function sourceEvidence(sdkDir) {
   const files = ["package.json", "yarn.lock", "vitest.config.ts", "tsconfig.json"];
   const walk = async (dir) => {
     for (const entry of await readdir(path.join(sdkDir, dir), { withFileTypes: true })) {
@@ -66,7 +66,11 @@ async function sourceEvidence(sdkDir) {
       );
   }
   const git = (...args) =>
-    execFileSync("git", ["-C", sdkDir, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+    execFileSync("git", ["-C", sdkDir, "-c", "diff.autoRefreshIndex=false", ...args], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
+    }).trim();
   return {
     commit: git("rev-parse", "HEAD"),
     dirty: Boolean(git("status", "--porcelain")),
@@ -85,6 +89,15 @@ export async function targetRuntime(sdkDir) {
   assert.equal(target.version, tool.version, "Target Vitest must match the infrastructure runtime version.");
   const executable = await realpath(path.join(sdkDir, "node_modules/vitest/vitest.mjs"));
   return { vitest: target.version, executable };
+}
+
+export async function sdkToolHashes() {
+  const hashes = {};
+  for (const file of [...TOOL_FILES, "yarn.lock"])
+    hashes[file] = createHash("sha256")
+      .update(await readFile(path.join(ROOT, file)))
+      .digest("hex");
+  return hashes;
 }
 
 export function passedResults(result, suites, exit) {
@@ -159,11 +172,7 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
       process.stderr.write(`SDK debug session: ${JSON.stringify({ ...report.debug, logFile, reportFile })}\n`);
     }
     report.sourceBefore = await sourceEvidence(sdkDir);
-    report.toolSha256 = {};
-    for (const file of [...TOOL_FILES, "yarn.lock"])
-      report.toolSha256[file] = createHash("sha256")
-        .update(await readFile(path.join(ROOT, file)))
-        .digest("hex");
+    report.toolSha256 = await sdkToolHashes();
     const optionsFile = path.join(emptyDir, "options.json");
     await writeFile(optionsFile, JSON.stringify({ sdkDir, suites, emptyDir, resultsFile }), { mode: 0o600 });
     stage = "vitest";
