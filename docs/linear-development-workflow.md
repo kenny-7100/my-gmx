@@ -59,6 +59,8 @@ yarn agent:delivery-check --project-dir /path/to/delivery-checkout --require-cle
 
 真实独立 release clone 已验收：目标不含个人工具，原日期 5 项通过后成功绑定；错误目录、旧提交、失败报告、缺失/失败原生结果和旧工具指纹均拒绝。还在临时副本加入 Git 忽略的源码 JSON，HEAD 和 clean 状态不变，但源码摘要变化使旧证据被拒绝；移除后重新通过。只修改文件 mtime 时匹配仍通过，检查前后索引字节不变。实际排查确认 `git diff` 默认自动刷新索引，即使设置 `GIT_OPTIONAL_LOCKS=0` 仍可能写入；工具现显式禁用 `diff.autoRefreshIndex`，工作区文件列表改用禁用可选写入的 NUL porcelain status，避免只禁用 diff 刷新后把纯 mtime 变化误报为内容修改；mtime 场景已加入只读回归。目标 HEAD、索引、原报告与原生结果内容均保持不变；临时 clone 已删除。证据位于本机忽略目录 `.local/acceptance/delivery-check/frontend-evidence/`，`acceptance.json` 汇总、`matched.json` / `restored.json` 为通过报告，其余命名报告保存预期拒绝结果。
 
+前端及 SDK 离线报告还须通过运行器侧网络审计：`network.status=passed`、安装数等于所选文件数、拒绝次数为 0。交付检查重新读取 `network.eventsFile`，将原始事件与报告汇总比较；事件文件缺失或追加拒绝事件均 blocked。保留事件日志和原生结果一起交接，原生 success 不能覆盖网络审计失败。
+
 ### SDK 测试证据绑定
 
 2026-10-27 新增 `--sdk-report PATH`，将[SDK 离线测试](sdk-offline-tests.md#独立交付目录验收)报告与交付 checkout 的 `sdk/`、交付 head 和当前源码绑定。先在目标干净目录完成测试，再从基础设施目录运行：

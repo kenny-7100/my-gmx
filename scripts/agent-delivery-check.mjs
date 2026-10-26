@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
 import { frontendToolHashes, resolveSuites, sourceEvidence } from "./frontend-offline-tests.mjs";
+import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import {
   passedResults,
   resolveSuites as resolveSdkSuites,
@@ -61,6 +62,9 @@ function validateOfflineEvidence({
   );
   assert.equal(evidence.exit.cleanup, "passed", "Test process cleanup did not pass");
   assert.equal(evidence.temporaryDirectoryCleanup, "passed", "Temporary directory cleanup did not pass");
+  assert.equal(evidence.network.status, "passed", "Offline network audit did not pass");
+  assert.equal(evidence.network.installations, suites.length, "Offline network guard did not cover selected suites");
+  assert.equal(evidence.network.blockedAttempts, 0, "Offline tests attempted network access");
   assert.equal(results.numFailedTests, 0, "Native test results contain failures");
   assert.ok(passedResults(results, suites, evidence.exit), "Native test results do not match selected suites");
   assert.deepEqual(
@@ -264,6 +268,10 @@ export async function checkDelivery({
       assert.ok(Array.isArray(evidence.suites) && evidence.suites.length > 0, "Report must list selected suites");
       const suites = await (isSdk ? resolveSdkSuites : resolveSuites)(targetDir, evidence.suites);
       const source = await (isSdk ? sdkSourceEvidence : sourceEvidence)(targetDir);
+      stage = "network-audit";
+      const network = await readNetworkAudit(evidence.network.eventsFile, suites.length);
+      assert.deepEqual(evidence.network, network, "Offline network audit does not match its event log");
+      stage = "source-and-results";
       (isSdk ? validateSdkEvidence : validateFrontendEvidence)({
         evidence,
         source,
