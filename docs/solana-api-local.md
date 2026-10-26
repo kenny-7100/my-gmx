@@ -280,6 +280,26 @@ stdout 输出 `mode: offline-fixtures` 的 JSON，含实际 apiDir、API commit/
 
 本机验收摘要为同目录 `offline-latest.json`，失败/隔离验证为 `offline-acceptance.json`；临时注入仅发生在已清理的源码副本，真实 API 文件未改动。该阶段为 A08/A11 的回归执行能力补充，未新增独立数学基准，不能将旧 fixture 当成未来全部 SDK / 部署版本的正确性证明。
 
+### 按源码依赖发现 API 测试
+
+在主仓库根目录使用 Node 22，先准备目标 API 的锁定依赖，再执行：
+
+```sh
+yarn gmx-api:discover-tests --api-dir /path/to/gmx-api --related src/domain/gmtrade/marketStatus.ts
+```
+
+可重复传入 `--related`，只接受目标 checkout 内真实存在且不经过符号链接的 `src/` 下 TS/JS/JSON 文件，不接受 glob、重复或逃逸路径。省略 `--api-dir` 时使用本仓库的 `gmx-api/`。工具复用目标实际安装的 Jest、原 `jest.config.ts`、路径别名及依赖图，通过 `--findRelatedTests --listTests --json` 列出直接和间接受影响的测试；不执行测试正文、数据库 globalSetup/globalTeardown 或 setupFilesAfterEnv，不启动数据库或服务，也不生成路由。
+
+**发现通过只表示获得测试清单。** Agent 应先检查返回的 `suites` 及真实依赖，再明确选择已有 `gmx-api:test-offline` 或 `gmx-api:test-integration`，逐个传入 `--suite`；不得把整个发现清单直接当作离线测试。实际 `marketStatus.ts` 的依赖图也会涉及 HTTP/数据库 suite，本工具不根据文件名猜测 profile。动态加载、Jest 未解析的依赖和原有测试覆盖缺口仍需人工核对；发现不能代替需求验收。
+
+每次输出 `mode: api-jest-related-discovery` 的 JSON，保留输入源码、API commit/dirty、配置及完整源码聚合指纹、工具/运行时身份、精确 suite 清单、日志、原生 Jest 清单和进程退出/清理结果。报告在 `.local/acceptance/solana-api-local/discovery-*/`，临时空 CWD 和 Jest 缓存会清理。子进程仅继承 PATH、测试/UTC/CI 设置及审计位置，不加载调用方凭据；使用既有 Node 网络保护器并独立核对安装与拒绝事件。原 Jest 配置本身仍会被加载执行，此约束用于防止意外联网，不是运行不可信配置的系统沙箱。
+
+退出 0 为发现通过；退出 1 为发现失败（包括零匹配、原生错误、联网尝试、中断、超时、清理失败或执行前后源码/工具变化）；退出 2 为参数或前置条件阻塞。零匹配不会退回默认 suite。当前执行器只支持 `src/**/*.test.ts`，发现其他命名的测试会明确拒绝，需要人工选择适用的执行流程。
+
+2026-10-27 已在独立 `origin/release` API checkout 验证原生直接/间接发现；额外临时 fixture 验证路径别名的传递依赖，测试正文与三个 setup/teardown 文件均未执行，零匹配失败，配置捕获联网异常后仍审计失败。发现清单中的原市场与 pairs 纯计算两份 suite 共 12 项通过已有离线入口实际执行。真实 API 业务源码未改；临时 fixture 已清理。路径组合回归自动纳入 `yarn test:agent-tools`，本机证据为忽略的 `.local/acceptance/solana-api-local/discovery-acceptance.json`，其他机器需重新运行。
+
+本轮工程检查：统一工具回归 110 项通过，SDK 产物只读核验、根 `yarn tscheck`、相关 ESLint/Prettier、146 个文档本地目标及差异检查通过；完整前端回归 299 个文件 / 3,014 项通过，另有 1 个文件 / 1 项既有跳过，退出 0。未运行完整 API 数据库测试或构建；本轮发现入口不涉及数据库执行器改动。
+
 ### 在独立 API checkout 中运行测试
 
 2026-10-27 起，离线与隔离数据库入口的测试身份读取独立于样例服务。显式选择普通 API suite 时，不再要求无关的 `solanaApp.ts`、`solanaBootstrap.ts`、Solana 样例 JSON、默认测试文件或 `solanaPairsService.ts`；所选测试自身的真实导入和数据库测试框架文件仍须完整。

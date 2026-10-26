@@ -34,6 +34,8 @@ API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测�
 
 [组合预检](solana-dev-workspace.md#启动前的组合预检)复用 `solana:dev doctor`，汇总双 checkout、runner、浏览器和占用条件，识别可借用 API，不启动服务或浏览器；一次性入口已自动运行并保留 preflight，不重复手动预检。工具回归覆盖多项缺失和保留未知监听者。
 
+API 局部改动先使用[原生依赖发现](solana-api-local.md#按源码依赖发现-api-测试) `yarn gmx-api:discover-tests --api-dir PATH --related src/...ts`：复用目标 Jest 配置、别名及依赖图，保存原生清单和源码/工具身份，不执行测试或数据库初始化。零匹配及联网尝试明确失败；检查实际依赖后显式选择既有离线或隔离数据库执行器，不自动分类环境。路径组合回归纳入统一工具测试。
+
 ## 统一离线工具回归
 
 2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：

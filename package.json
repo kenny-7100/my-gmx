@@ -39,6 +39,7 @@
     "solana:api-local": "node scripts/solana-api-local.mjs",
     "gmx-api:test-offline": "node scripts/gmx-api-offline-tests.mjs",
     "gmx-api:test-integration": "node scripts/gmx-api-integration-tests.mjs",
+    "gmx-api:discover-tests": "node scripts/gmx-api-discover-tests.mjs",
     "gmx-api:tscheck": "node scripts/gmx-api-tscheck.mjs",
     "gmx-api:prepare": "node scripts/gmx-api-prepare.mjs",
     "test:gmx-api-integration": "node --test scripts/gmx-api-integration-tests.test.mjs",
