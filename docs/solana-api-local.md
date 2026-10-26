@@ -1,6 +1,6 @@
 # 本地 Solana API 样例验收服务
 
-更新日期：2026-10-25。对应基础设施清单 A08；状态：**本轮本地服务与 CLI 范围已实现并验收通过**。
+更新日期：2026-10-26。对应基础设施清单 A08；本地样例服务已具备环境预检及一次性启动、验收、清理闭环。
 
 ## 用途与边界
 
@@ -11,6 +11,29 @@
 2026-10-25 实时核对 [FESOL-62](https://linear.app/gmx-io/issue/FESOL-62)：该需求为 Done，评论说明样例服务已经部署；本轮没有取得或验证实际 `run.app` 地址，A03 仍待推进。不修改 Linear 状态，也不重新实现 FESOL-62。
 
 ## 执行前准备与顺序
+
+### Agent 默认入口
+
+在主仓库根目录执行：
+
+```sh
+yarn solana:api-local doctor
+yarn solana:api-local check
+```
+
+`doctor` 不启动服务，逐项检查 Node 22、源码/样例及 Git 信息、已安装 tsx 的可执行性和所选端口；汇总全部检查结果，失败退出 1。它不验证所有运行时依赖，后续启动和 HTTP 检查负责发现实际加载问题。源码或依赖缺失时先按下文准备，不反复尝试启动；端口占用时核对所有者或显式选择其他端口。
+
+`check` 自带同一预检，成功后启动现有服务，最多等待约 20 秒就绪，再执行下述 14 项 HTTP 检查；单次请求最多 5 秒。核对启动时与检查时的源码证据一致，成功或检查抛错均关闭自己启动的子进程，最后检查端口已释放。不会复用或终止未知服务，不自动安装依赖、切换真实数据源或修改前端配置。已有服务需要保留运行时，应使用 `verify`。
+
+每次实际启动在 `.local/acceptance/solana-api-local/check-*/` 保留 `service.log`；成功另写 `report.json`。终端 JSON 包含 `preflight`、`logFile`、`cleanup: passed`、`mode: sample` 和 `liveChainData: not-verified`。失败返回非零退出码，stderr 的 JSON 给出失败预检或启动日志路径。预检失败尚未启动服务，不创建运行日志。源码摘要是本地预期证据，不是服务返回的身份认证。
+
+启动失败先查看该次日志，不能通过删除锁文件、跳过鉴权或换样例来源使检查变绿。所有命令支持 `--api-dir PATH --port PORT`，包括从 `gmx-api` 目录调用主仓库工具：
+
+```sh
+node ../scripts/solana-api-local.mjs check --api-dir . --port 3005
+```
+
+### 依赖准备与持续运行
 
 工作目录为主仓库根目录，依赖 Node 22、Git 和现有 `gmx-api` 源码及其依赖。该仓库是主项目的子模块；缺失时按[参考仓库说明](solana-reference-repositories.md)准备，工具不自动 clone、安装依赖或修改 Git 状态。
 
@@ -34,7 +57,7 @@ yarn solana:api-local start
 yarn solana:api-local verify
 ```
 
-启动输出的 `starting` 仅表示开始启动，等待服务日志的 listening，再执行 verify；verify 退出 0 才代表检查通过。不自动重试或启动替代服务。完成后在启动终端按 Ctrl-C，关闭本任务的服务。
+上述 `start` / `verify` 适合需要保持运行的联调。启动输出的 `starting` 仅表示开始启动，等待服务日志的 listening，再执行 verify；verify 退出 0 才代表检查通过。完成后在启动终端按 Ctrl-C，关闭本任务的服务。一次性验收优先使用 `check`，避免手动等待和遗留进程。
 
 默认地址为 `http://127.0.0.1:3004`，可在两个命令上同时指定 `--port 3005`。端口被占用时先确认服务归属，使用其他端口或由服务所有者关闭，不自动复用未知进程。源代码不在默认位置时，两条命令均指定 `--api-dir /absolute/path/to/gmx-api`；两者必须指向相同 checkout。
 
@@ -72,6 +95,8 @@ yarn solana:api-local verify > .local/acceptance/solana-api-local/report.json
 | `request-failed` | 检查服务是否已就绪、端口是否一致；也包括无法解析的 JSON |
 | `response-mismatch` | 对照失败路由、样例和启动源码，不能只因 ping 正常就继续验收 |
 | `check-failed` | 检查参数、Git checkout、依赖及服务启动日志 |
+| `preflight-failed` | `check` 未启动服务；按报告中的失败检查及 remedy 准备环境 |
+| `startup-failed` | 服务提前退出或约 20 秒内未就绪；查看 logFile，不继续执行样例验收 |
 
 本工具是可复用的服务 smoke 检查，不是字段语义/精度的独立基准。错误消息存在性检查不等于完整错误契约。CORS 检查是 HTTP 头层面的检查，没有运行浏览器，不能等同浏览器端到端验收。
 
@@ -82,6 +107,20 @@ yarn solana:api-local verify > .local/acceptance/solana-api-local/report.json
 本轮完成 Agent 可直接调用的本地样例环境；前端 host 接入属于后续已确认的需求实施，应复用本服务并遵循统一数据流。A08 的前端端到端覆盖仍未具备，不在本轮完成口径内。
 
 ## 实施进度与验收
+
+### 2026-10-26 Agent 生命周期闭环
+
+| 阶段 | 状态与范围 |
+| --- | --- |
+| 复用现有能力 | 已完成；沿用原 Solana 启动入口和 14 项检查，gmx-api 业务代码及依赖不变 |
+| doctor / check | 已实施；Node、源码、运行器、端口逐项诊断；一次性启动、验收、源码核对和清理 |
+| 真实服务 | 已通过；默认 3004 及从 gmx-api 目录调用的自定义 3005 端口均完成 14 项检查，cleanup passed；本机报告 `check-latest.json` / `check-custom-port.json` 位于上述忽略目录 |
+| 主要失败路径 | 已通过；端口占用不终止其所有者，缺源码/运行器汇总报告，子服务提前退出保留日志，检查抛错关闭所属子进程并释放端口 |
+| 静态检查与相关回归 | 已通过；Node 语法、ESLint、定向 Prettier、文档链接、git diff --check、yarn tscheck；统一预检 6 项测试通过；完整前端 299 文件 / 3014 项通过，1 文件 / 1 项原有跳过 |
+
+失败路径报告为同目录 `lifecycle-acceptance.json`，类型检查和完整测试日志为 `typecheck.log` / `frontend-tests.log`。完整测试退出 0，仍有已知 Browserslist 过期提示和 happy-dom teardown AbortError 输出，无失败测试。服务均已关闭，API checkout 为 `b86956df00902e44e0295827d651b206a6153942`，dirty false。
+
+本轮仅验证样例服务，不要求数据库、钱包、RPC 或 keeper；未接入真实 Solana 数据、前端 host 或部署流程。下表为 2026-10-25 原有工具的历史验收记录，不代表本轮重新运行了全部前端测试。
 
 | 阶段 | 状态 |
 | --- | --- |
