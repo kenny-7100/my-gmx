@@ -72,6 +72,56 @@ export async function resolveRelated(projectDir, requested) {
   return selected;
 }
 
+export async function changedSources(projectDir, baseRef) {
+  assert.ok(typeof baseRef === "string" && baseRef.length > 0, "Use a nonempty --changed-since ref.");
+  projectDir = await realpath(projectDir);
+  const git = (...args) =>
+    execFileSync("git", ["--no-pager", "-c", "diff.autoRefreshIndex=false", "-C", projectDir, ...args], {
+      encoding: "utf8",
+      env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 30000,
+      maxBuffer: 32_000_000,
+    });
+  assert.equal(
+    await realpath(git("rev-parse", "--show-toplevel").trim()),
+    projectDir,
+    "Select the frontend checkout root."
+  );
+  const baseSha = git("rev-parse", "--verify", "--end-of-options", `${baseRef}^{commit}`).trim();
+  const head = git("rev-parse", "HEAD").trim();
+  const list = (...args) =>
+    git(...args)
+      .split("\0")
+      .filter(Boolean)
+      .sort();
+  const diff = ["diff", "--no-ext-diff", "--no-textconv", "--no-renames", "--numstat", "-z"];
+  const diffPaths = (...args) =>
+    list(...diff, ...args)
+      .map((entry) => entry.split("\t").slice(2).join("\t"))
+      .sort();
+  const worktreePaths = diffPaths(baseSha, "--");
+  const indexPaths = diffPaths("--cached", baseSha, "--");
+  const untrackedPaths = list("ls-files", "--others", "--exclude-standard", "-z");
+  const paths = [...new Set([...worktreePaths, ...indexPaths, ...untrackedPaths])].sort();
+  assert.ok(paths.length > 0, "No changed source files; select --suite explicitly if tests are needed.");
+  const unsupported = paths.filter((file) => !/^(src|landing)\/[a-zA-Z0-9_./-]+\.(json|[jt]sx?)$/.test(file));
+  assert.equal(
+    unsupported.length,
+    0,
+    `Changed paths require explicit --suite selection: ${unsupported.slice(0, 5).join(", ")}`
+  );
+  let related;
+  try {
+    related = await resolveRelated(projectDir, paths);
+  } catch (error) {
+    if (error.code === "ENOENT")
+      throw new Error("Changed source was deleted or is missing; review its impact and select --suite explicitly.");
+    throw error;
+  }
+  return { baseRef, baseSha, head, worktreePaths, indexPaths, untrackedPaths, related };
+}
+
 export async function sourceEvidence(projectDir) {
   const files = [
     "package.json",
@@ -128,10 +178,15 @@ export async function frontendToolHashes() {
   return hashes;
 }
 
-export async function runFrontendOffline({ suites, related, inspectPort, projectDir = ROOT }) {
+export async function runFrontendOffline({ suites, related, changedSince, inspectPort, projectDir = ROOT }) {
   projectDir = await realpath(projectDir);
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
-  assert.ok(related === undefined || suites === undefined, "Do not combine --related with --suite.");
+  assert.ok(
+    [suites, related, changedSince].filter((value) => value !== undefined).length <= 1,
+    "Do not combine --suite, --related and --changed-since."
+  );
+  const changes = changedSince === undefined ? undefined : await changedSources(projectDir, changedSince);
+  if (changes) related = changes.related;
   assert.ok(
     related === undefined || inspectPort === undefined,
     "Use --suite for debugging after related test discovery."
@@ -179,6 +234,7 @@ export async function runFrontendOffline({ suites, related, inspectPort, project
     runtime,
     suites,
     ...(related ? { related } : {}),
+    ...(changes ? { changes } : {}),
     startedAt: new Date().toISOString(),
     logFile,
     resultsFile,
@@ -312,6 +368,15 @@ export async function runFrontendOffline({ suites, related, inspectPort, project
     };
     report.sourceAfter = await sourceEvidence(projectDir);
     report.sourceUnchanged = report.sourceAfter.sourceSha256 === report.sourceBefore.sourceSha256;
+    if (changes) {
+      stage = "changed-source-selection";
+      report.changesUnchanged = false;
+      report.changesAfter = await changedSources(projectDir, changes.baseSha);
+      report.changesAfter.baseRef = changes.baseRef;
+      report.changesUnchanged = JSON.stringify(changes) === JSON.stringify(report.changesAfter);
+      assert.ok(report.changesUnchanged, "Git change selection changed during testing; rerun the check.");
+    }
+    stage = "source-evidence";
     assert.ok(report.sourceUnchanged, "frontend source changed during the check.");
     stage = "network-audit";
     report.network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
@@ -345,6 +410,7 @@ export async function runCli(args = process.argv.slice(2)) {
       options: {
         suite: { type: "string", multiple: true },
         related: { type: "string", multiple: true },
+        "changed-since": { type: "string" },
         "project-dir": { type: "string", default: ROOT },
         "inspect-port": { type: "string" },
         help: { type: "boolean", short: "h" },
@@ -352,7 +418,7 @@ export async function runCli(args = process.argv.slice(2)) {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn frontend:test-offline [--project-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ...] [--inspect-port 9240]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes. Debug mode requires one suite, pauses a single fork on loopback and allows 30 minutes.\n"
+        "Usage: yarn frontend:test-offline [--project-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ... | --changed-since REF] [--inspect-port 9240]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes. Debug mode requires one suite, pauses a single fork on loopback and allows 30 minutes.\n"
       );
       return 0;
     }
@@ -360,6 +426,7 @@ export async function runCli(args = process.argv.slice(2)) {
       projectDir: values["project-dir"],
       suites: values.suite,
       related: values.related,
+      changedSince: values["changed-since"],
       inspectPort:
         values["inspect-port"] === undefined
           ? undefined

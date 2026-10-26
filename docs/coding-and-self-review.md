@@ -62,7 +62,7 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **Agent 工具回归：** 根 `yarn test:ci` 不覆盖个人基础设施脚本。修改跨工具公共能力或交接基础设施分支时，先按[统一离线回归](automation-tools.md#统一离线工具回归)运行 `yarn test:agent-tools`，一次覆盖脚本、RPC 代理及 CI 辅助测试；单工具小改仍可选原单项入口。确认原生结果后再安排本任务所需的类型、前端或真实服务验收，不把工具测试通过当作 RPC/keeper/API/页面 ready。新工具测试加入统一范围时，核实其保持离线且只使用临时资源，不把真实资金或外部服务检查放进默认回归。
 
-**前端关联测试：** 已知修改的 src/landing 源码而不确定所需 suite 时，按[关联测试说明](frontend-offline-tests.md#按源码依赖图选择关联测试)使用 `frontend:test-offline --related src/...ts`，独立目录显式加 `--project-dir PATH`。先核对发现的精确清单、发现阶段网络审计与清理，再接受实际测试结果；零关联或图解析失败不代表无须测试，应按真实依赖/资源修复，或人工明确选择 `--suite`。配置、删除文件或动态导入影响仍须独立判断。发现阶段已处理目标 Lingui catalog CWD 和 loopback 主机，出现资源错误查看 discovery.log，不关闭插件或网络保护；正式测试仍在空 CWD。
+**前端关联测试：** 已知修改的 src/landing 源码而不确定所需 suite 时，按[关联测试说明](frontend-offline-tests.md#按源码依赖图选择关联测试)使用 `frontend:test-offline --related src/...ts`，独立目录显式加 `--project-dir PATH`。纯前端代码改动也可用 `--changed-since REF` 从明确的 Git 基线收集提交/索引/工作区/未跟踪源码；先确认 `changes.baseSha` 和完整路径范围，结束时要求 `changesUnchanged=true`，配置、删除或混合改动必须人工评估并选测试。先核对发现的精确清单、发现阶段网络审计与清理，再接受实际测试结果；零关联或图解析失败不代表无须测试，应按真实依赖/资源修复，或人工明确选择 `--suite`。配置、删除文件或动态导入影响仍须独立判断。发现阶段已处理目标 Lingui catalog CWD 和 loopback 主机，出现资源错误查看 discovery.log，不关闭插件或网络保护；正式测试仍在空 CWD。
 
 **交付目录与验收身份：** 独立交付 checkout 完成测试后，按[交付隔离检查](linear-development-workflow.md#交付隔离自动检查)显式传 `--project-dir PATH --require-clean`，核对实际 HEAD 与待交付 head 相同，且暂存、未暂存、未跟踪列表为空；比较测试报告的目标路径和 commit。需复用前端、SDK 或浏览器结果时显式加 `--frontend-report PATH` / `--sdk-report PATH` / `--browser-report PATH`（可同时选择），按同一流程自动绑定源码/工具指纹并复核原生结果；证据 blocked 时重跑正确目标的测试，不手改报告或省略检查。默认历史检查的 `worktree.status=not-checked` 不代表干净；blocked 不自动清理文件、切换分支或转移提交。只读 Git 工具使用 `GIT_OPTIONAL_LOCKS=0` 并对 diff 禁用 `diff.autoRefreshIndex`，不能仅凭命令名称推定不写索引；本工具已内置，无需修改全局配置。检查后源码变化时重新验收。
 
@@ -79,6 +79,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 **中断 Playwright 管理的服务：** 需要停止当前锁定版本 Playwright CLI 的测试时，向 CLI 发 SIGINT，使 runner 执行 teardown；不要直接用 SIGTERM 假定其会清理 webServer。管理入口已将外部 SIGINT/SIGTERM 转为该行为。异常结束后先查端口和所属进程，不能因 CLI 已退出就认定 Vite 已停止；原因与实测见[浏览器冒烟说明](solana-browser-smoke.md#一条命令执行并保存独立报告)。
 
 以上经验来自 2026-10-24 的[本地 RPC 代理验收记录](agent-acceptance-infrastructure.md)；具体事实与验证边界保留在主题文档，本节维护影响后续执行顺序的通用步骤。
+
+**只读 Git 工作树范围：** `--changed-since` 已使用内容差异避免 stat 缓存误报。文件恢复原字节后仍被 `diff --name-only` 列为变化时，先核对 blob/numstat，按[范围说明](frontend-offline-tests.md#按-git-变更范围运行局部回归)处理，不为消除提示刷新用户索引；两个已提交树之间的比较不受此项影响。
 
 ## 查阅入口
 
