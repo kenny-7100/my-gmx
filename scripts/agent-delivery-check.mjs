@@ -7,7 +7,13 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
 import { frontendToolHashes, resolveSuites, sourceEvidence } from "./frontend-offline-tests.mjs";
-import { passedResults } from "./sdk-offline-tests.mjs";
+import {
+  passedResults,
+  resolveSuites as resolveSdkSuites,
+  sdkToolHashes,
+  sourceEvidence as sdkSourceEvidence,
+  targetRuntime,
+} from "./sdk-offline-tests.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 
@@ -27,17 +33,27 @@ async function git(cwd, args) {
   }
 }
 
-export function validateFrontendEvidence({ evidence, source, projectDir, head, toolSha256, results, suites }) {
-  assert.equal(evidence.schemaVersion, 1, "Unsupported frontend report schema");
-  assert.equal(evidence.mode, "frontend-source-offline", "Expected a frontend offline report");
-  assert.equal(evidence.status, "passed", "Frontend report did not pass");
-  assert.equal(evidence.projectDir, projectDir, "Frontend report targets another checkout");
+function validateOfflineEvidence({
+  evidence,
+  source,
+  targetDir,
+  targetField,
+  mode,
+  head,
+  toolSha256,
+  results,
+  suites,
+}) {
+  assert.equal(evidence.schemaVersion, 1, "Unsupported offline report schema");
+  assert.equal(evidence.mode, mode, "Unexpected offline report mode");
+  assert.equal(evidence.status, "passed", "Offline report did not pass");
+  assert.equal(evidence[targetField], targetDir, "Offline report targets another checkout");
   assert.equal(source.commit, head, "Current checkout does not match delivery head");
   assert.equal(source.dirty, false, "Current checkout is dirty");
   assert.equal(evidence.sourceUnchanged, true, "Tested source changed during execution");
   assert.deepEqual(evidence.sourceBefore, source, "Tested source does not match current checkout");
   assert.deepEqual(evidence.sourceAfter, source, "Final tested source does not match current checkout");
-  assert.deepEqual(evidence.toolSha256, toolSha256, "Frontend tools changed since testing");
+  assert.deepEqual(evidence.toolSha256, toolSha256, "Offline tools changed since testing");
   assert.ok(
     !evidence.exit.interrupted && !evidence.exit.timedOut && !evidence.exit.signalError,
     "Test execution was interrupted or failed"
@@ -59,6 +75,20 @@ export function validateFrontendEvidence({ evidence, source, projectDir, head, t
   );
 }
 
+export function validateFrontendEvidence(options) {
+  validateOfflineEvidence({
+    ...options,
+    targetDir: options.projectDir,
+    targetField: "projectDir",
+    mode: "frontend-source-offline",
+  });
+}
+
+export function validateSdkEvidence(options) {
+  validateOfflineEvidence({ ...options, targetDir: options.sdkDir, targetField: "sdkDir", mode: "sdk-source-offline" });
+  assert.deepEqual(options.evidence.runtime, options.runtime, "SDK runtime changed since testing");
+}
+
 export async function checkDelivery({
   cwd = ROOT,
   base = "origin/release",
@@ -68,12 +98,18 @@ export async function checkDelivery({
   expectedBase,
   requireClean = false,
   frontendReport,
+  sdkReport,
 }) {
   assert.ok(
     frontendReport === undefined || (typeof frontendReport === "string" && frontendReport.length > 0),
     "Use a nonempty frontend report path"
   );
   assert.ok(frontendReport === undefined || requireClean, "--frontend-report requires --require-clean");
+  assert.ok(
+    sdkReport === undefined || (typeof sdkReport === "string" && sdkReport.length > 0),
+    "Use a nonempty SDK report path"
+  );
+  assert.ok(sdkReport === undefined || requireClean, "--sdk-report requires --require-clean");
   assert.ok(typeof head === "string" && head.length > 0, "An explicit --head ref is required");
   assert.ok(Array.isArray(allowPaths) && allowPaths.length > 0, "At least one explicit --allow-path is required");
   for (const file of allowPaths) {
@@ -105,6 +141,7 @@ export async function checkDelivery({
     projectDir: cwd,
     worktree: { status: "not-checked" },
     frontendEvidence: { status: "not-checked" },
+    sdkEvidence: { status: "not-checked" },
     refs: {
       base: { ref: base, sha: baseSha },
       developmentBase: { ref: developmentBase, sha: developmentSha },
@@ -166,29 +203,40 @@ export async function checkDelivery({
       report.findings.push({ code: "worktree-dirty" });
     }
   }
-  if (frontendReport !== undefined) {
-    const reportFile = path.resolve(frontendReport);
+  for (const [kind, evidencePath] of [
+    ["frontend", frontendReport],
+    ["sdk", sdkReport],
+  ]) {
+    if (evidencePath === undefined) continue;
+    const isSdk = kind === "sdk";
+    const key = `${kind}Evidence`;
+    const reportFile = path.resolve(evidencePath);
     let stage = "report";
-    report.frontendEvidence = { status: "blocked", reportFile };
+    report[key] = { status: "blocked", reportFile };
     try {
       const evidence = JSON.parse(await readFile(reportFile, "utf8"));
       stage = "native-results";
       const results = JSON.parse(await readFile(evidence.resultsFile, "utf8"));
       stage = "source-and-results";
-      const suites = await resolveSuites(cwd, evidence.suites);
-      const source = await sourceEvidence(cwd);
-      validateFrontendEvidence({
+      const targetDir = isSdk ? path.join(cwd, "sdk") : cwd;
+      assert.equal(await realpath(targetDir), targetDir, "Test source must remain in the delivery checkout");
+      assert.ok(Array.isArray(evidence.suites) && evidence.suites.length > 0, "Report must list selected suites");
+      const suites = await (isSdk ? resolveSdkSuites : resolveSuites)(targetDir, evidence.suites);
+      const source = await (isSdk ? sdkSourceEvidence : sourceEvidence)(targetDir);
+      (isSdk ? validateSdkEvidence : validateFrontendEvidence)({
         evidence,
         source,
         projectDir: cwd,
+        ...(isSdk ? { sdkDir: targetDir, runtime: await targetRuntime(targetDir) } : {}),
         head: headSha,
-        toolSha256: await frontendToolHashes(),
+        toolSha256: await (isSdk ? sdkToolHashes : frontendToolHashes)(),
         results,
-        suites: suites.map((file) => path.join(cwd, file)),
+        suites: suites.map((file) => path.join(targetDir, file)),
       });
-      report.frontendEvidence = {
+      report[key] = {
         status: "passed",
         reportFile,
+        ...(isSdk ? { sdkDir: targetDir, runtime: evidence.runtime, lockSha256: source.lockSha256 } : {}),
         testedCommit: source.commit,
         sourceSha256: source.sourceSha256,
         suites,
@@ -196,7 +244,7 @@ export async function checkDelivery({
       };
     } catch (error) {
       report.findings.push({
-        code: "frontend-evidence-invalid",
+        code: `${kind}-evidence-invalid`,
         stage,
         ...(error.code === "ERR_ASSERTION" ? { message: error.message.split("\n")[0].slice(0, 240) } : {}),
       });
@@ -213,6 +261,7 @@ async function runCli() {
         "project-dir": { type: "string", default: ROOT },
         "require-clean": { type: "boolean", default: false },
         "frontend-report": { type: "string" },
+        "sdk-report": { type: "string" },
         base: { type: "string", default: "origin/release" },
         "development-base": { type: "string", default: "solana-integration" },
         head: { type: "string" },
@@ -223,7 +272,7 @@ async function runCli() {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--project-dir PATH] [--require-clean] [--frontend-report PATH] [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. --require-clean also checks checkout HEAD, index, working files and untracked paths. Does not fetch refs or assess business correctness.\n"
+        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--project-dir PATH] [--require-clean] [--frontend-report PATH] [--sdk-report PATH] [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. --require-clean also checks checkout HEAD, index, working files and untracked paths. Does not fetch refs or assess business correctness.\n"
       );
       return;
     }
@@ -231,6 +280,7 @@ async function runCli() {
       cwd: values["project-dir"],
       requireClean: values["require-clean"],
       frontendReport: values["frontend-report"],
+      sdkReport: values["sdk-report"],
       base: values.base,
       developmentBase: values["development-base"],
       head: values.head,
