@@ -40,6 +40,8 @@ SDK 局部源码回归支持[原生关联选择](sdk-offline-tests.md#按源码�
 
 API 纯源码功能分支可用[Git 范围发现](solana-api-local.md#按-api-git-变更范围发现测试) `gmx-api:discover-tests --api-dir PATH --changed-since REF`，在目标 API 仓库固定基线并收集提交/索引/工作区/未跟踪源码，结束时复核范围。配置、迁移、删除或空范围要求显式人工选择；不自动缩小范围、不执行测试或建库，不改变目标暂存状态。
 
+SDK 纯源码功能分支可用[Git 范围回归](sdk-offline-tests.md#按-git-变更范围运行回归) `sdk:test-offline --sdk-dir PATH/sdk --changed-since REF`，在目标所属仓库固定基线并正确转换 `sdk/` 路径；合并提交/索引/工作区/未跟踪源码，复用关联发现及离线执行，结束时复核范围。删除、空范围、SDK 配置或 SDK 外混合改动要求显式选 suite，不自动忽略或修改暂存状态。
+
 ## 统一离线工具回归
 
 2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：
