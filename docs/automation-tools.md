@@ -10,6 +10,8 @@ API 源码调试使用既有持续服务上的[断点验收入口](solana-api-lo
 
 前端局部测试使用[源码离线入口](frontend-offline-tests.md) `yarn frontend:test-offline --suite src/...spec.ts`：复用原 Vite/happy-dom 配置、初始化、网络保护器和精确结果检查，在隔离 CWD/环境中运行，保存独立原生结果；不修改原 `test:ci`。`--project-dir PATH` 可验证独立交付 checkout 的源码、配置与依赖，工具和报告留在基础设施目录，不复制到业务分支。默认日期、PWA 和 Solana flag 三文件 17 项已实测通过，选择器回归自动纳入统一工具测试。局部源码改动可用重复 `--related src/...ts` 或 `--related sdk/src/...ts` 按目标 Vitest 的真实依赖图发现测试，保留发现日志/清单并复用离线执行；无关联测试明确失败，不退回默认范围。 前端与 SDK 源码功能 checkout 可用 `--changed-since REF` 固定 Git 基线，合并提交/索引/工作区/未跟踪源码后自动选择，并在结束时复核范围；删除、空范围或混合配置/资源变化要求人工选测试。单 suite 加 `--inspect-port 9240` 可在隔离的单个 Vitest fork 调试原 TypeScript 源码；已核对断点、输入、调用栈及恢复，进程清理复用共享工具并记录结果，操作见同一文档。
 
+SDK 关联范围预览复用[SDK 只发现入口](sdk-offline-tests.md#只发现关联测试) `sdk:test-offline --discover-only --related src/...ts` 或 `--changed-since REF`；真实 BigMath 清单包含 Accounts 的 RPC 测试，先看依赖再选择执行环境。复用已有选择、网络、身份与清理流程，报告独立标识为 discovery，不能当作 SDK 测试交付证据。
+
 SDK 计算使用[源码离线回归](sdk-offline-tests.md) `yarn sdk:test-offline`（独立交付目录显式使用 `--sdk-dir PATH/sdk`，准备目标依赖并核对运行器/锁文件身份）：复用原 SDK Vitest 配置，精确选测试文件，使用空环境目录和共享 Node 网络保护器，无需构建；报告保留源码摘要和原生结果，拒绝零测试、范围不符及捕获后的联网尝试。SDK 执行与取消复用共享进程组工具，报告明确中断/超时和核实后的清理状态，避免取消后长时间等待或误用成功结果。工具回归为 `yarn test:sdk-offline`，不复制业务实现或预期值。 单 suite 加 `--inspect-port 9238` 可在单个 Vitest fork 的真实 TypeScript 源码设置断点，保留离线隔离；端口预检及 inspector 启动日志核验防止绑定失败却误报成功，操作与实测见同一文档。
 
 前端、SDK、API 离线入口和数据库集成入口共用 `scripts/lib/agent-network-audit.mjs` 读取安装/拒绝事件；各 profile 保留自己的网络权限。离线保护器同步记录事件，运行器独立拒绝迟到或捕获后的连接尝试；回归复用既有 guard 测试，不重复建设测试框架。详见[结束时网络审计](frontend-offline-tests.md#结束时核对网络审计)。
