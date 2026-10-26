@@ -14,8 +14,7 @@ import { parseArgs } from "node:util";
 
 import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
-import { sourceInputs } from "./lib/gmx-api-source.mjs";
-import { readApiSource } from "./solana-api-local.mjs";
+import { readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const DEFAULT_SUITES = ["src/domain/pairs/solanaPairsService.test.ts", "src/solanaApp.test.ts"];
@@ -49,7 +48,6 @@ export async function resolveSuites(apiDir, requested = DEFAULT_SUITES) {
 }
 
 async function readTestSource(apiDir, suites) {
-  const { evidence } = await readApiSource(apiDir);
   const files = [
     ...suites,
     "jest.config.ts",
@@ -59,18 +57,12 @@ async function readTestSource(apiDir, suites) {
     "tsconfig.knex.json",
     "src/config/db.ts",
     "src/lib/db/index.ts",
-    "src/domain/pairs/solanaPairsService.ts",
     ...(await readdir(path.join(apiDir, "migrations")))
       .filter((file) => /\.(ts|js)$/.test(file))
       .sort()
       .map((file) => `migrations/${file}`),
   ];
-  for (const file of files) {
-    evidence.sha256[file] = createHash("sha256")
-      .update(await readFile(path.join(apiDir, file)))
-      .digest("hex");
-  }
-  return evidence;
+  return readApiTestSource(apiDir, files);
 }
 
 export async function runIntegrationTests(apiDir, requested, { inspectPort } = {}) {
@@ -297,6 +289,7 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
   const report = {
     status: passed ? "passed" : "failed",
     mode: "isolated-postgres-integration",
+    apiDir,
     timezone: "UTC",
     network: {
       policy: "owned-database-and-in-process-servers",
