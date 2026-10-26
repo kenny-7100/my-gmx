@@ -300,6 +300,26 @@ yarn gmx-api:discover-tests --api-dir /path/to/gmx-api --related src/domain/gmtr
 
 本轮工程检查：统一工具回归 110 项通过，SDK 产物只读核验、根 `yarn tscheck`、相关 ESLint/Prettier、146 个文档本地目标及差异检查通过；完整前端回归 299 个文件 / 3,014 项通过，另有 1 个文件 / 1 项既有跳过，退出 0。未运行完整 API 数据库测试或构建；本轮发现入口不涉及数据库执行器改动。
 
+#### 按 API Git 变更范围发现测试
+
+已知 API 功能分支的明确基线时，可以省去手工列举源码：
+
+```sh
+yarn gmx-api:discover-tests --api-dir /path/to/gmx-api --changed-since origin/release
+```
+
+`--changed-since` 与 `--related` 互斥，REF 在目标 API Git 根目录中解析，不使用主前端仓库的分支；执行前固定为 commit SHA。它直接比较基线树和当前工作树/索引，并合并未忽略的未跟踪文件，覆盖相对基线已提交、暂存、未暂存及新增源码，不自动寻找 merge-base，不 fetch 或切换分支。先核对报告 `changes.baseSha` 是否为本次期望基线。
+
+仅接受全部变化都属于现存 `src/` 下 TS/JS/JSON 的范围。空范围、删除、迁移、配置、文档、依赖或资源混合改动均退出 2，提示人工评估并使用 `--related`；不会悄悄忽略清单外文件，也不以“无源码变化”代表无需测试。忽略文件不进入 Git 范围；生成路由等忽略源码仍受原有源码指纹约束，但其准备状态及覆盖范围需按对应流程核对。
+
+报告 `changes` 保存原始 ref、固定 SHA、HEAD、工作树/索引/未跟踪路径及最终源码清单，再复用上节原生 Jest 流程。发现结束时以固定 SHA 重算范围，记录 `changesAfter` 和 `changesUnchanged`；新增路径、暂存状态或 HEAD 改变均不得通过。源码内容变化另由原有 `sourceUnchanged` 检查覆盖。任何阶段 failed 都不能复用该次结果；发现成功也仍须明确选择离线或数据库执行环境。
+
+Git 范围读取固定禁用索引自动刷新、外部 diff、textconv 和 rename 推断，并使用内容 numstat 与 NUL 分隔路径。文件恢复原字节后不会仅因 stat 缓存而误选；检查不写入目标索引，不修改用户暂存状态。
+
+2026-10-27 已在独立 API `origin/release` checkout 的临时提交中验证完整范围组合和原生依赖发现。临时测试正文及 setup/teardown 放入失败哨兵，确认未执行；清单中的原市场套件经既有离线执行器实际运行，7 项通过。空范围、配置/迁移混合变化及删除明确阻塞；配置中模拟另一个编辑者暂存新源码，在内容指纹不变时仍得到 `changesUnchanged=false`、退出 1。正常发现保持目标 HEAD/索引不变，真实 API 仓库无修改，副本已删除。真实 Git 回归也覆盖恢复字节、非法 ref 和模式冲突；本机证据为忽略的 `.local/acceptance/solana-api-local/changed-discovery-acceptance.json`。
+
+本轮工程检查通过：统一工具回归 112 项、原 `--related` 独立 checkout 验收及离线默认 12 项、SDK 产物只读核验、根类型检查、相关 ESLint/Prettier、150 个文档本地目标及差异检查。完整前端回归 299 个文件 / 3,014 项通过，另有 1 个文件 / 1 项既有跳过，退出 0。没有执行构建、完整 API 数据库测试或启动服务；新增入口仅扩展发现范围。
+
 ### 在独立 API checkout 中运行测试
 
 2026-10-27 起，离线与隔离数据库入口的测试身份读取独立于样例服务。显式选择普通 API suite 时，不再要求无关的 `solanaApp.ts`、`solanaBootstrap.ts`、Solana 样例 JSON、默认测试文件或 `solanaPairsService.ts`；所选测试自身的真实导入和数据库测试框架文件仍须完整。

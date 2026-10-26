@@ -86,6 +86,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **SDK 关联回归：** 已知改动源码而不确定 suite 时，按[SDK 依赖选择说明](sdk-offline-tests.md#按源码依赖选择回归)使用 `sdk:test-offline --related src/...ts`，独立目录加 `--sdk-dir PATH/sdk`。先检查 `discovery` 的清单、网络审计和清理，再核对顶层实际执行结果；零匹配或关联到真实服务的测试失败都不代表已验收。需要断点时明确单选 `--suite`，不把调试与自动发现混用。
 
+**API Git 回归范围：** 纯 API 源码功能分支可按[范围发现说明](solana-api-local.md#按-api-git-变更范围发现测试)用 `gmx-api:discover-tests --api-dir PATH --changed-since REF` 固定目标 API 基线，收集已提交/暂存/未暂存/未跟踪源码。先核对 `changes.baseSha` 和路径，再确认 `changesUnchanged=true`、原生清单及网络/清理结果；配置、迁移、删除或空范围需人工评估后使用 `--related`。发现之后仍显式选择测试环境，不将主仓库基线套用到嵌套 API。
+
 ## 查阅入口
 
 | 工作 | 必读资料 |
