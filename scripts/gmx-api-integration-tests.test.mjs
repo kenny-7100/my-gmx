@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { resolveSuites, runIntegrationTests } from "./gmx-api-integration-tests.mjs";
+import { resolveSuites, runIntegrationTests, sameGeneratedRoutes } from "./gmx-api-integration-tests.mjs";
 
 test("test selection preserves exact files and rejects invalid, duplicate or escaping paths", async () => {
   const temp = await mkdtemp(path.join(tmpdir(), "gmx-api-suite-selection-"));
@@ -55,6 +55,33 @@ test("integration debugging rejects invalid selections and occupied ports before
     assert.equal(server.listening, true);
   } finally {
     if (server.listening) await new Promise((resolve) => server.close(resolve));
+    await rm(api, { recursive: true, force: true });
+  }
+});
+
+test("required generated routes reject missing preparation before database startup and detect evidence changes", async () => {
+  const api = await mkdtemp(path.join(tmpdir(), "gmx-required-routes-"));
+  try {
+    await mkdir(path.join(api, "src"));
+    await writeFile(path.join(api, "src/one.test.ts"), "");
+    await assert.rejects(runIntegrationTests(api, ["src/one.test.ts"], { requireRoutes: true }), {
+      code: "generated-routes-prerequisite",
+    });
+    const before = {
+      schemaVersion: 2,
+      status: "passed",
+      apiDir: api,
+      source: { sha256: "source" },
+      tooling: { node: "node" },
+      artifacts: { "routes.ts": "artifact" },
+    };
+    sameGeneratedRoutes(before, { ...before, checkedAt: "later" });
+    for (const key of Object.keys(before)) {
+      const after = structuredClone(before);
+      after[key] = "changed";
+      assert.throws(() => sameGeneratedRoutes(before, after), /changed during testing/);
+    }
+  } finally {
     await rm(api, { recursive: true, force: true });
   }
 });

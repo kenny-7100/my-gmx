@@ -334,7 +334,7 @@ yarn gmx-api:prepare --verify
 # If missing or stale
 yarn gmx-api:prepare
 yarn gmx-api:prepare --verify
-yarn gmx-api:test-integration --suite src/routes/routeMap.test.ts --suite src/routes/v1/relay/__test__/relayLaunchMode.test.ts
+yarn gmx-api:test-integration --require-routes --suite src/routes/routeMap.test.ts --suite src/routes/v1/relay/__test__/relayLaunchMode.test.ts
 ```
 
 工具为 `scripts/gmx-api-prepare.mjs`，支持 `--api-dir PATH`。生成命令依次运行 API 原有 `tsoa.json` 与 `tsoa-v2.json` 的 `spec-and-routes`，写入 `src/codegen/tsoa/` 中四个已被 API Git 忽略的文件，不修改业务源码、配置或依赖。每阶段限时 120 秒，不启动 API/数据库，不安装依赖或连接真实 keeper。stdout 输出结构化报告，生成报告、阶段日志及清单保留于 `.local/acceptance/solana-api-local/prepare-*/` 与 `prepared-*.json`，按 checkout 绝对路径区分。`tsoa.log` 现在保存阶段日志路径与进程退出/清理摘要，原始输出分别在 `tsoa.json.log`、`tsoa-v2.json.log`。
@@ -376,6 +376,29 @@ yarn gmx-api:test-integration --suite src/routes/routeMap.test.ts --suite src/ro
 工程检查已通过：两份脚本的语法、ESLint、代码格式、`yarn tscheck`、现有测试选择回归，以及 `yarn test:ci`（3014 项通过，1 项原有跳过，退出 0）；文档本地链接和 `git diff --check` 通过，API checkout 无跟踪改动，测试容器已清理。
 
 本机证据：`prepare-latest.json`、`prepare-acceptance.json`、`integration-routes.json`，均位于上述忽略目录。首次 HTTP 测试失败日志保留在 `integration-HWdri2/jest.log`。ABI 加载使用 `process.cwd()/src/abi`，仅设 `APP_ROOT` 不足；后续遇到 `ABI directory not found` 先核对测试 CWD 的资源链接，不调整业务查找逻辑或移除隔离目录。HTTP 用例沿用原测试的本地 keeper stub，不访问真实 keeper、不发送链上交易。
+
+### 在集成测试中强制校验路由来源
+
+需要测试真实 TSOA 路由或导入 `src/app.ts` 时，在主仓库根目录执行：
+
+```sh
+yarn gmx-api:prepare --api-dir /path/to/api-checkout --verify
+# Explicitly regenerate first when missing or stale, then run the existing tests.
+yarn gmx-api:test-integration --api-dir /path/to/api-checkout --require-routes \
+  --suite src/routes/routeMap.test.ts \
+  --suite src/routes/v1/relay/__test__/relayLaunchMode.test.ts
+```
+
+`--require-routes` 在 API 目录规范化后、Docker 环境及容器准备之前，复用 prepare 的只读 verify；收据缺失、旧版本、输入/生成器/产物过期或生成锁存在时，返回退出 1 / `generated-routes-prerequisite`。它不会自动生成、安装或修复产物。已明确需要运行测试时可直接调用带此参数的集成入口，无需先重复 verify；预先 prepare 的操作与授权仍按上节处理。
+
+Jest 执行、进程和容器清理结束后，再次 verify 并逐项比较 schema、API 目录、源码输入、工具与四个产物摘要。报告 `generatedRoutes.before/after` 保留两次证据，全部一致为 passed；缺失、过期或变化为 failed / `generated-routes-changed`，即使原生 Jest 断言全通过也不接受整体结果。`generatedRoutes=not-checked` 表示未选择该前置，不代表产物已验证。默认纯计算/数据库场景保持原流程；不根据文件名猜测是否需要路由，调用者须按真实导入选择。API 测试工具指纹已包含准备脚本，工具变化后旧测试证据需要重跑。
+
+该检查不锁住整个测试期间的产物，也不能证明外部消费者没有并发修改后又恢复文件；测试期间避免同时生成或人工修改。它验证来源与前后稳定性，不替代业务路由契约、线上部署或完整 API 测试。
+
+2026-10-27 独立 checkout 真实验收：缺失收据与有效文件但过期摘要均在建库前拒绝，前后测试容器集合一致；显式准备后，原 routeMap 5 项及 relayLaunchMode HTTP 1 项通过，generatedRoutes、网络审计、进程/容器清理均 passed。仅在临时 checkout 新增验收夹具，让 Jest 断言通过同时改变忽略的 routes.ts；结果为原生 1 项通过但整体 failed / generated-routes-changed，所属资源清理通过。删除夹具后默认两个集成 suite / 5 项通过，generatedRoutes 为 not-checked。原业务源码/配置/锁文件与 API 工作区保持 clean，临时 clone 已删除，原默认服务 PID 不变且 ready。证据为 `.local/acceptance/solana-dev/routes-required-acceptance.json`、同名 `.log` 和摘要引用的三次集成报告；未修改原测试或业务实现。
+
+
+本轮工程验收通过：统一工具回归 104 项、SDK 产物 verify、`yarn tscheck`、`yarn test:ci`（299 个文件、3014 项通过，1 个文件及其 1 项原有跳过）、三个改动脚本/测试的 Prettier/ESLint、138 个本地文档链接及 `git diff --check`。主项目测试仍有既有 happy-dom teardown AbortError 日志，退出码为 0；工程日志在 `.local/acceptance/solana-dev/routes-required-{tools.tap,sdk-verify.json,tscheck.log,test-ci.log}`。
 
 ## gmx-api 隔离 PostgreSQL 集成测试
 
