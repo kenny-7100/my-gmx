@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { spawn, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { access, mkdtemp, readFile, rm } from "node:fs/promises";
+import { closeSync, openSync } from "node:fs";
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -58,13 +59,47 @@ async function requireFreePort(port) {
   await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
 }
 
-export async function startApi({ apiDir, port }) {
+export async function doctorApi({ apiDir, port }) {
+  const checks = [];
+  const inspect = async (name, action, remedy) => {
+    try {
+      await action();
+      checks.push({ name, status: "passed" });
+    } catch {
+      checks.push({ name, status: "failed", remedy });
+    }
+  };
+  await inspect("node", () => assert.equal(process.versions.node.split(".")[0], "22"), "Use Node 22.");
+  await inspect("source", () => readApiSource(apiDir), "Check the gmx-api checkout and sample files.");
+  await inspect(
+    "runner",
+    () =>
+      execFileSync(process.execPath, [path.join(apiDir, "node_modules/tsx/dist/cli.mjs"), "--version"], {
+        timeout: 5000,
+        env: { PATH: process.env.PATH },
+        stdio: "pipe",
+      }),
+    "Install locked gmx-api dependencies; see docs/solana-api-local.md."
+  );
+  await inspect("port", () => requireFreePort(port), "Identify the port owner or explicitly select another port.");
+  return {
+    status: checks.every((check) => check.status === "passed") ? "passed" : "failed",
+    mode: "sample",
+    checkedAt: new Date().toISOString(),
+    apiDir,
+    baseUrl: `http://127.0.0.1:${port}`,
+    checks,
+  };
+}
+
+export async function startApi({ apiDir, port, afterStart, logFile }) {
   const runner = path.join(apiDir, "node_modules/tsx/dist/cli.mjs");
   await access(runner);
   const { evidence } = await readApiSource(apiDir);
   await requireFreePort(port);
   // dotenv reads the working directory; use an empty one and pass no wallet or backend secrets.
   const cwd = await mkdtemp(path.join(tmpdir(), "gmx-solana-api-"));
+  const logFd = logFile ? openSync(logFile, "wx", 0o600) : undefined;
   const child = spawn(
     process.execPath,
     [runner, "--tsconfig", path.join(apiDir, "tsconfig.json"), path.join(apiDir, "src/index.ts")],
@@ -79,9 +114,18 @@ export async function startApi({ apiDir, port }) {
         APP_ROOT: apiDir,
         COMMIT_HASH: evidence.commit,
       },
-      stdio: "inherit",
+      stdio: logFd === undefined ? "inherit" : ["ignore", logFd, logFd],
     }
   );
+  if (logFd !== undefined) closeSync(logFd);
+  const exited = new Promise((resolve, reject) => {
+    child.once("error", reject);
+    child.once("exit", (code, signal) => resolve({ code, signal }));
+  });
+  // Keep an early startup failure handled while readiness is being checked.
+  exited.catch(() => {
+    // The awaited exit below handles the original startup error.
+  });
   let killTimer;
   const stop = () => {
     child.kill("SIGTERM");
@@ -90,19 +134,71 @@ export async function startApi({ apiDir, port }) {
   process.on("SIGINT", stop);
   process.on("SIGTERM", stop);
   try {
+    if (afterStart) {
+      return await afterStart({ child, evidence });
+    }
     process.stdout.write(
       `${JSON.stringify({ status: "starting", mode: "sample", url: `http://127.0.0.1:${port}`, source: evidence })}\n`
     );
-    const code = await new Promise((resolve, reject) => {
-      child.once("error", reject);
-      child.once("exit", (code, signal) => resolve(signal ? 1 : code));
-    });
-    if (code !== 0) throw new Error("API process exited unsuccessfully. Check the preceding service logs.");
+    const result = await exited;
+    if (result.code !== 0) throw new Error("API process exited unsuccessfully. Check the preceding service logs.");
   } finally {
+    if (child.exitCode === null && child.signalCode === null) stop();
+    await exited.catch(() => {
+      // Preserve the operation's original error while still cleaning up.
+    });
     clearTimeout(killTimer);
     process.off("SIGINT", stop);
     process.off("SIGTERM", stop);
     await rm(cwd, { recursive: true, force: true });
+  }
+}
+
+export async function checkApi({ apiDir, port }) {
+  const preflight = await doctorApi({ apiDir, port });
+  if (preflight.status !== "passed") {
+    throw Object.assign(new Error("API preflight failed."), { code: "preflight-failed", preflight });
+  }
+  const root = fileURLToPath(new URL("../.local/acceptance/solana-api-local/", import.meta.url));
+  await mkdir(root, { recursive: true });
+  const runDir = await mkdtemp(path.join(root, "check-"));
+  const logFile = path.join(runDir, "service.log");
+  try {
+    const report = await startApi({
+      apiDir,
+      port,
+      logFile,
+      afterStart: async ({ child, evidence }) => {
+        const deadline = Date.now() + 20000;
+        let ready = false;
+        while (Date.now() < deadline) {
+          if (child.exitCode !== null || child.signalCode !== null) break;
+          try {
+            const response = await fetch(`http://127.0.0.1:${port}/ping`, {
+              redirect: "error",
+              signal: AbortSignal.timeout(1000),
+            });
+            ready = response.status === 200 && (await response.text()) === "pong";
+          } catch {
+            // Poll only during bounded startup; verification failures are never retried.
+          }
+          if (ready) break;
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        }
+        if (!ready) throw Object.assign(new Error("API did not become ready."), { code: "startup-failed" });
+        const result = await verifyApi({ apiDir, port });
+        assert.deepEqual(result.expectedSource, evidence, "API source changed during verification");
+        if (child.exitCode !== null || child.signalCode !== null) throw new Error("API exited during verification.");
+        return { ...result, preflight, logFile, liveChainData: "not-verified" };
+      },
+    });
+    await requireFreePort(port);
+    const result = { ...report, cleanup: "passed" };
+    await writeFile(path.join(runDir, "report.json"), `${JSON.stringify(result, null, 2)}\n`, { mode: 0o600 });
+    return result;
+  } catch (error) {
+    error.logFile = logFile;
+    throw error;
   }
 }
 
@@ -196,23 +292,31 @@ export async function runCli(args = process.argv.slice(2)) {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn solana:api-local <start|verify> [--api-dir PATH] [--port 3004]\nRuns or checks the existing gmx-api Solana sample service. No real chain data, signing or transactions.\n"
+        "Usage: yarn solana:api-local <doctor|check|start|verify> [--api-dir PATH] [--port 3004]\nDoctor checks prerequisites without starting services. Check starts, verifies and stops the existing sample service. No real chain data, signing or transactions.\n"
       );
       return 0;
     }
     const port = Number(values.port);
     if (
       positionals.length !== 1 ||
-      !["start", "verify"].includes(positionals[0]) ||
+      !["doctor", "check", "start", "verify"].includes(positionals[0]) ||
       !/^\d+$/.test(values.port) ||
       !Number.isInteger(port) ||
       port < 1 ||
       port > 65535
     )
-      throw new Error("Expected start or verify and a port between 1 and 65535.");
+      throw new Error("Expected doctor, check, start or verify and a port between 1 and 65535.");
     const options = { apiDir: path.resolve(values["api-dir"]), port };
     if (positionals[0] === "start") await startApi(options);
-    else process.stdout.write(`${JSON.stringify(await verifyApi(options), null, 2)}\n`);
+    else {
+      const report = await (positionals[0] === "doctor"
+        ? doctorApi(options)
+        : positionals[0] === "check"
+          ? checkApi(options)
+          : verifyApi(options));
+      process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+      return report.status === "passed" ? 0 : 1;
+    }
     return 0;
   } catch (error) {
     // Never print response bodies, caller input or raw filesystem/network errors.
@@ -223,13 +327,15 @@ export async function runCli(args = process.argv.slice(2)) {
       "response-mismatch": "Local API response did not match the expected sample behavior.",
       "request-failed": "Local API request failed. Check that the service is running on the selected port.",
       "check-failed": "Check API source, dependencies, command arguments and preceding service logs.",
+      "preflight-failed": "Resolve failed preflight checks before starting the API.",
+      "startup-failed": "API exited early or did not become ready within 20 seconds. Inspect the service log.",
     };
     const code =
       error?.code === "EADDRINUSE"
         ? "port-in-use"
         : error?.code === "ENOENT"
           ? "missing-prerequisite"
-          : ["response-mismatch", "request-failed"].includes(error?.code)
+          : ["response-mismatch", "request-failed", "preflight-failed", "startup-failed"].includes(error?.code)
             ? error.code
             : "check-failed";
     process.stderr.write(
@@ -238,6 +344,8 @@ export async function runCli(args = process.argv.slice(2)) {
         mode: "sample",
         code,
         check: error?.check,
+        preflight: error?.preflight,
+        logFile: error?.logFile,
         message: messages[code],
       })}\n`
     );
