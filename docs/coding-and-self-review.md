@@ -60,7 +60,7 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **Agent 工具回归：** 根 `yarn test:ci` 不覆盖个人基础设施脚本。修改跨工具公共能力或交接基础设施分支时，先按[统一离线回归](automation-tools.md#统一离线工具回归)运行 `yarn test:agent-tools`，一次覆盖脚本、RPC 代理及 CI 辅助测试；单工具小改仍可选原单项入口。确认原生结果后再安排本任务所需的类型、前端或真实服务验收，不把工具测试通过当作 RPC/keeper/API/页面 ready。新工具测试加入统一范围时，核实其保持离线且只使用临时资源，不把真实资金或外部服务检查放进默认回归。
 
-**交付目录与验收身份：** 独立交付 checkout 完成测试后，按[交付隔离检查](linear-development-workflow.md#交付隔离自动检查)显式传 `--project-dir PATH --require-clean`，核对实际 HEAD 与待交付 head 相同，且暂存、未暂存、未跟踪列表为空；比较测试报告的目标路径和 commit。默认历史检查的 `worktree.status=not-checked` 不代表干净；blocked 不自动清理文件、切换分支或转移提交。检查后源码变化时重新验收。
+**交付目录与验收身份：** 独立交付 checkout 完成测试后，按[交付隔离检查](linear-development-workflow.md#交付隔离自动检查)显式传 `--project-dir PATH --require-clean`，核对实际 HEAD 与待交付 head 相同，且暂存、未暂存、未跟踪列表为空；比较测试报告的目标路径和 commit。需复用前端离线结果时显式加 `--frontend-report PATH`，按同一流程自动绑定源码/工具指纹并复核原生结果；证据 blocked 时重跑正确目标的测试，不手改报告或省略检查。默认历史检查的 `worktree.status=not-checked` 不代表干净；blocked 不自动清理文件、切换分支或转移提交。只读 Git 工具使用 `GIT_OPTIONAL_LOCKS=0` 并对 diff 禁用 `diff.autoRefreshIndex`，不能仅凭命令名称推定不写索引；本工具已内置，无需修改全局配置。检查后源码变化时重新验收。
 
 **前端局部离线测试：** 需要隔离本机配置并防止意外联网时，使用[前端离线入口](frontend-offline-tests.md) `yarn frontend:test-offline --suite src/...spec.ts`，可重复指定 src/landing 文件；验证独立交付 checkout 时显式加 `--project-dir PATH`，先按同一文档准备目标自己的依赖，再核对报告的 projectDir、commit 和测试路径，避免误测开发目录；保留原 Vite/happy-dom、初始化和时区。需要源码断点时选择单 suite 并加 `--inspect-port 9240`，按同一文档连接本次单 fork 调试目标，核对 source map 和真实断点；结束后恢复、断开并核对 `exit.cleanup`。原配置需要 Git/PWA、Lingui/Babel 及 Vitest CLI root 定位，入口已显式处理，不通过读取根 `.env` 或删除原 setup 绕过启动问题。失败先看本次日志，真实网络/浏览器需求使用对应验收入口，不关闭保护；完整前端回归仍用 `yarn test:ci`。
 
