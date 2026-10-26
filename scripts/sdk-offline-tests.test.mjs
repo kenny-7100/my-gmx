@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { passedResults, resolveRelated, resolveSuites, runSdkOffline } from "./sdk-offline-tests.mjs";
+import { changedSources, passedResults, resolveRelated, resolveSuites, runSdkOffline } from "./sdk-offline-tests.mjs";
 
 test("SDK suite selection rejects missing, duplicate, escaped and symlinked paths", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "gmx-sdk-selection-"));
@@ -105,5 +106,56 @@ test("SDK related selection rejects ambiguous paths and symlink traversal", asyn
       await assert.rejects(resolveRelated(dir, files));
   } finally {
     await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("Git source selection includes committed, index, worktree and untracked changes without writing the checkout", async () => {
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), "gmx-changed-")));
+  const git = (...args) =>
+    execFileSync("git", ["-C", root, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  const sdkDir = path.join(root, "sdk");
+  try {
+    git("init", "--initial-branch=release");
+    git("config", "user.name", "Selection Fixture");
+    git("config", "user.email", "selection@example.invalid");
+    git("config", "commit.gpgsign", "false");
+    await mkdir(path.join(sdkDir, "src"), { recursive: true });
+    for (const file of ["one", "removed"]) await writeFile(path.join(sdkDir, `src/${file}.ts`), "export {};\n");
+    git("add", ".");
+    git("commit", "-m", "Release fixture");
+    const base = git("rev-parse", "HEAD");
+    await assert.rejects(changedSources(sdkDir, base), /No changed source/);
+    await writeFile(path.join(sdkDir, "src/one.ts"), "export const temporarilyChanged = true;\n");
+    assert.deepEqual((await changedSources(sdkDir, base)).related, ["src/one.ts"]);
+    await writeFile(path.join(sdkDir, "src/one.ts"), "export {};\n");
+    await assert.rejects(changedSources(sdkDir, base), /No changed source/);
+    await writeFile(path.join(sdkDir, "src/one.ts"), "export const value = 1;\n");
+    git("add", ".");
+    git("commit", "-m", "Feature fixture");
+    await writeFile(path.join(sdkDir, "src/one.ts"), "export const value = 2;\n");
+    await writeFile(path.join(sdkDir, "src/staged.ts"), "export {};\n");
+    git("add", "sdk/src/staged.ts");
+    await writeFile(path.join(sdkDir, "src/untracked.ts"), "export {};\n");
+    const index = await readFile(path.join(root, ".git/index"));
+    const selected = await changedSources(sdkDir, base);
+    assert.equal(selected.baseSha, base);
+    assert.equal(selected.sdkPrefix, "sdk/");
+    assert.equal(selected.checkoutDir, root);
+    assert.equal(selected.head, git("rev-parse", "HEAD"));
+    assert.deepEqual(selected.related, ["src/one.ts", "src/staged.ts", "src/untracked.ts"]);
+    assert.deepEqual(selected.indexPaths, ["sdk/src/one.ts", "sdk/src/staged.ts"]);
+    assert.deepEqual(selected.untrackedPaths, ["sdk/src/untracked.ts"]);
+    assert.deepEqual(await readFile(path.join(root, ".git/index")), index);
+    await writeFile(path.join(root, "vite.config.ts"), "export {};\n");
+    await assert.rejects(changedSources(sdkDir, base), /explicit --suite.*vite.config.ts/);
+    await rm(path.join(root, "vite.config.ts"));
+    await rm(path.join(sdkDir, "src/removed.ts"));
+    await assert.rejects(changedSources(sdkDir, base), /deleted or is missing/);
+    await assert.rejects(changedSources(sdkDir, "--help"));
+    await assert.rejects(runSdkOffline({ sdkDir, changedSince: base, related: [] }), /Do not combine/);
+    await assert.rejects(runSdkOffline({ sdkDir, changedSince: base, suites: [] }), /Do not combine/);
+    await assert.rejects(runSdkOffline({ sdkDir, changedSince: base, inspectPort: 9238 }), /Use --suite/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
   }
 });
