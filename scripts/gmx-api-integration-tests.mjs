@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { openSync, closeSync } from "node:fs";
 import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm, stat, symlink, writeFile } from "node:fs/promises";
+import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -69,13 +70,26 @@ async function readTestSource(apiDir, suites) {
   return evidence;
 }
 
-export async function runIntegrationTests(apiDir, requested) {
+export async function runIntegrationTests(apiDir, requested, { inspectPort } = {}) {
   assert.equal(process.versions.node.split(".")[0], "22");
   let suites;
   try {
     suites = await resolveSuites(apiDir, requested);
   } catch {
     throw Object.assign(new Error("Invalid test selection."), { code: "invalid-test-selection" });
+  }
+  if (inspectPort !== undefined) {
+    assert.ok(
+      Number.isInteger(inspectPort) && inspectPort > 0 && inspectPort <= 65535,
+      "Use an inspector port from 1 to 65535."
+    );
+    assert.equal(suites.length, 1, "Debug exactly one API integration suite using --suite.");
+    const probe = net.createServer();
+    await new Promise((resolve, reject) => {
+      probe.once("error", reject);
+      probe.listen(inspectPort, "127.0.0.1", resolve);
+    });
+    await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
   }
   const evidence = await readTestSource(apiDir, suites);
   for (const file of ["node_modules/jest/bin/jest.js", "jest.config.ts", "tsconfig.knex.json", ...suites]) {
@@ -95,6 +109,18 @@ export async function runIntegrationTests(apiDir, requested) {
   const owner = randomUUID();
   const name = `gmx-agent-api-${owner}`;
   const password = randomBytes(24).toString("hex");
+  const debug =
+    inspectPort === undefined
+      ? undefined
+      : {
+          inspector: `127.0.0.1:${inspectPort}`,
+          pauseOnStart: true,
+          timeoutMs: 1_800_000,
+        };
+  if (debug)
+    process.stderr.write(
+      `API integration debug session: ${JSON.stringify({ ...debug, logFile, reportFile: path.join(runDir, "report.json") })}\n`
+    );
   let container;
   let exit;
   let errorCode;
@@ -154,6 +180,7 @@ export async function runIntegrationTests(apiDir, requested) {
       assert.ok(!stopped, "Integration check interrupted before test execution.");
       exit = await runTestProcess({
         args: [
+          ...(debug ? [`--inspect-brk=${debug.inspector}`] : []),
           path.join(apiDir, "node_modules/jest/bin/jest.js"),
           "--config",
           path.join(apiDir, "jest.config.ts"),
@@ -179,7 +206,7 @@ export async function runIntegrationTests(apiDir, requested) {
           JEST_RETRY_TIMES: "0",
         },
         logFd: fd,
-        timeoutMs: 180000,
+        timeoutMs: debug?.timeoutMs ?? 180000,
       });
       if (exit.interrupted) errorCode = "interrupted";
       else if (exit.timedOut) errorCode = "test-timeout";
@@ -206,6 +233,14 @@ export async function runIntegrationTests(apiDir, requested) {
     process.off("SIGINT", stop);
     process.off("SIGTERM", stop);
   }
+  if (debug) {
+    const log = await readFile(logFile, "utf8").catch((error) => {
+      if (error.code === "ENOENT") return "";
+      throw error;
+    });
+    debug.started =
+      log.includes(`Debugger listening on ws://${debug.inspector}/`) && !log.includes("Starting inspector on");
+  }
   let result;
   try {
     result = JSON.parse(await readFile(resultsFile, "utf8"));
@@ -215,6 +250,7 @@ export async function runIntegrationTests(apiDir, requested) {
   const after = await readTestSource(apiDir, suites);
   const unchanged = JSON.stringify(after) === JSON.stringify(evidence);
   const passed =
+    (!debug || debug.started) &&
     !errorCode &&
     !stopped &&
     exit?.cleanup === "passed" &&
@@ -237,6 +273,7 @@ export async function runIntegrationTests(apiDir, requested) {
     mode: "isolated-postgres-integration",
     timezone: "UTC",
     checkedAt: new Date().toISOString(),
+    temporaryDirectory: cwd,
     source: evidence,
     sourceUnchanged: unchanged,
     suites,
@@ -248,6 +285,7 @@ export async function runIntegrationTests(apiDir, requested) {
       skipped: result?.numPendingTests,
     },
     exit,
+    ...(debug ? { debug } : {}),
     errorCode,
     cleanup,
     logFile,
@@ -265,21 +303,29 @@ export async function runCli(args = process.argv.slice(2)) {
       options: {
         "api-dir": { type: "string", default: path.join(ROOT, "gmx-api") },
         suite: { type: "string", multiple: true },
+        "inspect-port": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn gmx-api:test-integration [--api-dir PATH] [--suite src/path.test.ts ...]\nRepeat --suite to select API test files; defaults to Solana pairs service and app suites. Uses disposable local postgres:15, never pulls images or uses existing databases.\n"
+        "Usage: yarn gmx-api:test-integration [--api-dir PATH] [--suite src/path.test.ts ...] [--inspect-port 9241]\nRepeat --suite to select API test files; defaults to Solana pairs service and app suites. Uses disposable local postgres:15, never pulls images or uses existing databases. Debug mode requires one suite, pauses on loopback and allows 30 minutes.\n"
       );
       return 0;
     }
-    const report = await runIntegrationTests(path.resolve(values["api-dir"]), values.suite);
+    const report = await runIntegrationTests(path.resolve(values["api-dir"]), values.suite, {
+      inspectPort:
+        values["inspect-port"] === undefined
+          ? undefined
+          : /^\d+$/.test(values["inspect-port"])
+            ? Number(values["inspect-port"])
+            : NaN,
+    });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return report.status === "passed" ? 0 : 1;
   } catch (error) {
     process.stderr.write(
-      `${JSON.stringify({ status: "failed", code: error?.code === "invalid-test-selection" ? "invalid-test-selection" : "integration-prerequisite", message: error?.code === "invalid-test-selection" ? "Select unique existing src/**/*.test.ts files relative to the API checkout. No external paths or globs. See --help." : "Check Node 22, API checkout/dependencies, Docker daemon and local postgres:15 image. See docs/solana-api-local.md." })}\n`
+      `${JSON.stringify({ status: "failed", code: error?.code === "invalid-test-selection" ? "invalid-test-selection" : "integration-prerequisite", message: error?.code === "invalid-test-selection" ? "Select unique existing src/**/*.test.ts files relative to the API checkout. No external paths or globs. See --help." : error.message.split("\n")[0].slice(0, 240) })}\n`
     );
     return 1;
   }
