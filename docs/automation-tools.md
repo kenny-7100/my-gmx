@@ -18,6 +18,8 @@ SDK 产物使用[构建产物准备入口](sdk-artifacts.md)：`yarn sdk:artifac
 
 更新日期：2026-10-25。用户已授权 Agent 在实际协作中主动发现、实现并积累有复用价值的自动化能力，减少重复推理、人工操作、执行时间和成本。
 
+API 离线和隔离数据库测试共用 `scripts/lib/gmx-api-source.mjs` 的 Git 身份读取，显式选择普通 suite 不依赖 Solana 样例文件；独立目录用法与实际验收见[API checkout 测试](solana-api-local.md#在独立-api-checkout-中运行测试)。保留全部源码聚合指纹与网络/清理检查。
+
 ## 统一离线工具回归
 
 2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：

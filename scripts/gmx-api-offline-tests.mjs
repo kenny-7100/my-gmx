@@ -12,20 +12,12 @@ import { parseArgs } from "node:util";
 import { resolveSuites } from "./gmx-api-integration-tests.mjs";
 import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
-import { sourceInputs } from "./lib/gmx-api-source.mjs";
-import { readApiSource } from "./solana-api-local.mjs";
+import { readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
 
 export { sourceInputs } from "./lib/gmx-api-source.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const SUITES = ["src/domain/gmtrade/marketStatus.test.ts", "src/domain/pairs/solanaPairsRows.test.ts"];
-const INPUTS = [
-  ...SUITES,
-  "src/domain/gmtrade/marketStatus.ts",
-  "src/domain/gmtrade/marketAccount.ts",
-  "src/domain/gmtrade/__fixtures__/gmtrade-markets-2026-10-06.json",
-  "src/domain/pairs/solanaPairsRows.ts",
-];
 
 export function passedResults(result, suites, exit) {
   const files = result?.testResults ?? [];
@@ -70,14 +62,9 @@ export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort 
     });
     await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
   }
-  const { evidence } = await readApiSource(apiDir);
+  const evidence = await readApiTestSource(apiDir, suites);
   const sourceBefore = await sourceInputs(apiDir);
-  const sourceHashes = {};
-  for (const file of new Set([...INPUTS, ...suites])) {
-    sourceHashes[file] = createHash("sha256")
-      .update(await readFile(path.join(apiDir, file)))
-      .digest("hex");
-  }
+  const sourceHashes = Object.fromEntries(suites.map((file) => [file, evidence.sha256[file]]));
   const jest = path.join(apiDir, "node_modules/jest/bin/jest.js");
   const transformer = path.join(apiDir, "node_modules/ts-jest/dist/index.js");
   await access(jest);
@@ -164,7 +151,7 @@ export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort 
   } catch {
     result = undefined;
   }
-  const { evidence: after } = await readApiSource(apiDir);
+  const after = await readApiTestSource(apiDir, suites);
   const sourceAfter = await sourceInputs(apiDir);
   const unchanged =
     JSON.stringify(after) === JSON.stringify(evidence) && JSON.stringify(sourceAfter) === JSON.stringify(sourceBefore);

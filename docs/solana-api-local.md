@@ -278,6 +278,29 @@ stdout 输出 `mode: offline-fixtures` 的 JSON，含实际 apiDir、API commit/
 
 本机验收摘要为同目录 `offline-latest.json`，失败/隔离验证为 `offline-acceptance.json`；临时注入仅发生在已清理的源码副本，真实 API 文件未改动。该阶段为 A08/A11 的回归执行能力补充，未新增独立数学基准，不能将旧 fixture 当成未来全部 SDK / 部署版本的正确性证明。
 
+### 在独立 API checkout 中运行测试
+
+2026-10-27 起，离线与隔离数据库入口的测试身份读取独立于样例服务。显式选择普通 API suite 时，不再要求无关的 `solanaApp.ts`、`solanaBootstrap.ts`、Solana 样例 JSON、默认测试文件或 `solanaPairsService.ts`；所选测试自身的真实导入和数据库测试框架文件仍须完整。
+
+从基础设施主仓库执行：
+
+```sh
+yarn gmx-api:test-offline --api-dir /path/to/api-checkout --suite src/domain/gmUserEarnings/math.test.ts
+yarn gmx-api:test-integration --api-dir /path/to/api-checkout --suite src/domain/market/marketModel.test.ts
+# Debug one selected source suite using its target checkout.
+yarn gmx-api:test-offline --api-dir /path/to/api-checkout --suite src/domain/gmUserEarnings/math.test.ts --inspect-port 9239
+```
+
+目标须为 API Git checkout 根目录，已按自身锁文件安装依赖；不自动安装、链接基础设施目录依赖、切换分支或准备生成路由。数据库入口仍要求本地 Docker 与现有 postgres:15 镜像，并保留原迁移及 setup；消费 TSOA 路由的测试仍先按[生成准备说明](#gmx-api-路由生成准备与过期检查)处理目标目录。缺文件、依赖或资源明确失败，不改用其他环境。
+
+报告的 `apiDir` 为目标真实路径，`source.commit/dirty/sha256` 来自目标 Git 和所选文件/必要配置；`sourceInputs/sourceInputsAfter` 继续覆盖全部 API 源码和 package/lock/TS 配置，集成入口另外核对原 Jest/DB setup 与迁移文件。离线 `sourceHashes` 仅列所选 suite，其他源码由聚合指纹覆盖。Git 根目录不匹配会在执行测试或创建数据库前失败，不将父仓库身份当作 API 身份。证据始终保存在基础设施目录 `.local/acceptance/solana-api-local/`，不会向目标写入测试配置或报告；普通和断点模式共用该流程。
+
+实际验收：以本地 `gmx-api origin/release` 的 `6e128bb7c96d1f9b3e25bbcd60dc14148580f7a8` 创建隔离 clone，移除上述无关样例及默认测试文件并提交为验收版本；锁文件和 package 与已安装依赖的 API 相同后，仅为本次验收显式链接依赖。旧离线入口因缺少 `solanaApp.ts` 失败，新入口运行原收益计算 6 项和市场数据库 4 项均通过，commit/clean 身份准确；分别注入错误断言后，两个入口均失败并记录 dirty。源码前后指纹相同，测试进程、所属数据库容器和临时目录清理通过；验收 clone 随后删除。摘要为 `checkout-acceptance.json`，四次原始结果为 `checkout-{offline,integration}-{passed,failed}.json`，均位于本机上述忽略目录。真实 API 源码未改动。
+
+最终兼容性与工程检查：原默认离线 12 项、数据库 5 项、统一工具 97 项通过；SDK 产物 verify、根 `yarn tscheck`、相关 ESLint/Prettier、126 个文档本地目标及差异检查通过。完整前端回归 3,014 项通过、1 项既有跳过，退出 0。证据为同目录 `checkout-default-{offline,integration}.json`、`checkout-tools.tap`、`checkout-sdk-verify.json`、`checkout-tscheck.log`、`checkout-test-ci.log`。
+
+此能力不改变默认 Solana suites，也不改变样例 HTTP 服务、doctor/check 或 `solana:api-debug` 的样例文件要求；测试通过不等于 API 已部署、真实数据或整项需求验收通过。
+
 ### API 离线测试源码断点调试
 
 2026-10-27 已实现并真实验收。需要排查现有 API 纯计算测试时，在主仓库根目录显式选择一份 suite：

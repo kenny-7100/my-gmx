@@ -66,6 +66,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **SDK 纯计算回归：** 根 `yarn test:ci` 不覆盖 `sdk/`。需要验证 SDK 数值、BigInt、费用或其他可离线测试时，使用[SDK 源码离线入口](sdk-offline-tests.md) `yarn sdk:test-offline` 或重复 `--suite src/...spec.ts` 指定范围，复用原配置和源码，无需先构建 SDK 或启动服务。独立交付目录显式加 `--sdk-dir PATH/sdk`，先准备目标自己的锁定依赖；核对报告的 `sdkDir`、commit、`runtime.executable` 和目标锁文件摘要。缺依赖或 Vitest 版本不兼容先处理目标环境，不链接开发目录依赖绕过；详见同一文档的独立目录说明。意外联网会明确失败，先核对所选测试的真实依赖，不关闭保护或修改业务预期；该入口通过不代表完整 SDK、Solana 协议或发布产物已通过。 需要断点时显式单选 suite 并加 `--inspect-port 9238`，按[SDK 调试说明](sdk-offline-tests.md#sdk-源码断点调试)连接单 worker、核对源码映射与实际参数；不以 inspector 启动或原测试通过代替目标断点证据。调试端口冲突先换空闲端口，不连接未知监听。SDK 入口已复用共享进程组管理，中断/超时后先核对 `exit.cleanup=passed` 和临时目录清理；清理失败不得复用已生成的成功测试结果，也不手动结束其他任务。
 
+**独立 API 测试目录：** 验证 API 功能分支时，按[独立 checkout 说明](solana-api-local.md#在独立-api-checkout-中运行测试)显式传 `--api-dir PATH --suite src/...test.ts`；先准备目标自己的锁定依赖，核对报告 `apiDir`、`source.commit/dirty` 和源码指纹。目标必须为 API Git 根目录；普通模块不再要求无关 Solana 样例，真实导入、Jest/DB setup 和生成路由前置仍须满足。不要将开发目录结果当作交付版本证据。
+
 **离线网络审计：** 前端、SDK 和 API 离线测试结束时，按[共享审计说明](frontend-offline-tests.md#结束时核对网络审计)核对 `network.status=passed`、安装数等于所选文件数、拒绝次数为 0；缺日志或捕获后的联网尝试不当作通过。出现失败先查本次事件/Jest/Vitest 日志和测试实际依赖，不关闭 guard 或修改汇总。交付检查会重新读取前端/SDK 的事件日志，保留日志和原生结果；普通与断点模式相同。
 
 **独立页面冒烟：** 已授权运行本地网络选择页面验收、且不需要保留开发服务时，优先执行[管理入口](solana-browser-smoke.md#一条命令执行并保存独立报告) `yarn solana:browser-check`，复用预检并由 Playwright 管理独立端口的 Vite，逐次保存原生报告并停服；无需先运行一遍相同预检。验证独立功能 checkout 时显式加 `--project-dir PATH`，先准备目标锁定依赖和相同已批准 SDK 资源，核对 `projectDir`、`targetBefore/targetAfter` 及 Playwright checkout 元数据；不把基础设施预检身份当成目标版本。端口占用时显式换未用端口，不接管既有服务。手动联调仍可使用原两终端入口，无页面验证需求的任务不增加此项。

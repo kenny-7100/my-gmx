@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 
 import { passedResults, runOfflineTests, sourceInputs } from "./gmx-api-offline-tests.mjs";
 import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
+import { readApiTestSource } from "./lib/gmx-api-source.mjs";
 
 test("offline guard blocks Node transports and independently audits swallowed attempts", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "gmx-network-audit-"));
@@ -99,14 +100,29 @@ test("API offline results require exact unique files, executed assertions and a 
   assert.equal(passedResults(result, suites, { ...exit, signal: "SIGTERM" }), false);
 });
 
-test("API source identity detects dependency edits and added files beyond the selected suite", async () => {
+test("API test identity binds the checkout without sample files and detects source changes", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "gmx-api-source-"));
   try {
     await mkdir(path.join(dir, "src"));
     for (const file of ["package.json", "yarn.lock", "tsconfig.json", "src/selected.test.ts", "src/dependency.ts"])
       await writeFile(path.join(dir, file), "original");
+    const git = (args) => {
+      const result = spawnSync("git", ["-C", dir, ...args], { encoding: "utf8" });
+      assert.equal(result.status, 0, result.stderr);
+      return result.stdout.trim();
+    };
+    git(["init", "--quiet"]);
+    git(["add", "."]);
+    git(["-c", "user.name=Agent Test", "-c", "user.email=agent@example.invalid", "commit", "--quiet", "-m", "Seed"]);
+    const identity = await readApiTestSource(dir, ["src/selected.test.ts"]);
+    assert.equal(identity.commit, git(["rev-parse", "HEAD"]));
+    assert.equal(identity.dirty, false);
+    assert.equal(Object.keys(identity.sha256).length, 4);
+    await assert.rejects(readApiTestSource(path.join(dir, "src"), []), /checkout root/);
+    await assert.rejects(readApiTestSource(dir, ["src/missing.test.ts"]), /ENOENT/);
     const before = await sourceInputs(dir);
     await writeFile(path.join(dir, "src/dependency.ts"), "changed");
+    assert.equal((await readApiTestSource(dir, ["src/selected.test.ts"])).dirty, true);
     assert.notEqual((await sourceInputs(dir)).sha256, before.sha256);
     await writeFile(path.join(dir, "src/dependency.ts"), "original");
     assert.deepEqual(await sourceInputs(dir), before);
