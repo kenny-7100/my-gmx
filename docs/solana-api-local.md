@@ -353,6 +353,12 @@ node ../scripts/gmx-api-integration-tests.mjs --api-dir .
 
 stdout JSON 的 `mode` 为 `isolated-postgres-integration`，包括 API commit/dirty、原有 Jest/DB setup/选定测试及迁移文件摘要、镜像 ID、随机端口、测试数量和 cleanup。`exit` 单独记录测试进程的 `processGroup`、`interrupted`、`timedOut`、`cleanup`，信号异常时包含 `signalError`；顶层 `cleanup` 仍表示所属容器及临时目录清理。中断、超时、进程或容器清理失败均不能 passed，`errorCode` 分别标识 `interrupted`、`test-timeout` 或 `process-cleanup-failed` 等执行问题。只有所有选定 suite 全部通过、无 skip/todo、退出 0、源码未变化且清理成功，才报告 passed。前置条件不足在 stderr 报告固定错误；实际测试失败仍输出带日志位置的失败报告。连接密码不写入工具报告。
 
+### 离线测试的独立网络审计
+
+前端、SDK 和 API 离线入口共用[网络审计](frontend-offline-tests.md#结束时核对网络审计)。API 报告新增 `network`：安装数等于所选 suite 数且拒绝次数为 0 才能通过。运行器在 Jest 结束后读取 `network-events.log`，即使最后 afterAll 捕获了联网异常、原生 Jest 仍 success，也会整体失败。API 隔离数据库集成入口复用同一份事件读取逻辑，保留其独立的数据库/本地服务器策略和错误码；两类 profile 不交换网络权限。
+
+2026-10-27 已用隔离 API 副本真实复现旧入口误报 passed，修复后同一末尾 hook 用例原生仍 success、运行器正确 failed。前端/SDK 的隔离 release checkout 分别保留通过断言并捕获联网异常，均由运行器审计拒绝；临时目录和所属进程清理。实际项目源码未修改，依赖仅在验收副本中显式链接，没有安装或构建。证据在 `.local/acceptance/solana-api-local/offline-network-repro.json` / `offline-network-fixed.json` 及 `.local/acceptance/frontend-offline/network-audit-acceptance.json`。
+
 ### 集成测试的网络范围
 
 2026-10-27 起，`gmx-api:test-integration` 默认在所选 Jest suite 执行前安装[网络限制](../tools/gmx-api-integration/network-guard.cjs)。仅允许 loopback 上本次临时 PostgreSQL 端口，以及测试进程自己创建且仍在监听的 TCP 服务器，保留 Supertest 临时 HTTP 服务；外部地址、无关本地服务及 Unix socket 均拒绝。阻断 TLS、UDP、外部 DNS 查询及独立 DNS Resolver；普通 HTTP/fetch 的底层 socket 同样受限。数据库的 `localhost` 解析保留，不将真实服务响应替换成模拟数据。

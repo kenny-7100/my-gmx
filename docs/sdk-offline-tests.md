@@ -65,6 +65,8 @@ yarn sdk:test-offline --suite src/utils/__tests__/bigmath.spec.ts --inspect-port
 
 ## 隔离与结果
 
+结束时同时核对[共享网络审计](frontend-offline-tests.md#结束时核对网络审计)：`network.status=passed`、安装数等于所选文件数、拒绝次数为 0。运行器独立读取 `network-events.log`，捕获异常或更晚的 hook 不得让原生通过结果绕过验收；日志路径在安装时固定，测试修改环境变量不会停用记录。交付时保留该事件文件，delivery-check 会重新读取并比较报告。
+
 - [工具配置](../tools/sdk-offline/vitest.config.mjs) 加载原 `sdk/vitest.config.ts`，保留原源码别名和排除规则，精确限制 include 为所选文件；无需 `sdk/build`。不改生产 SDK 配置，不执行构建、安装或 Git 写操作。
 - 测试在独立临时工作目录中运行，Vite envDir 与缓存也指向该目录；只传 PATH、NODE_ENV=test、TZ=UTC、CI 和本轮参数文件路径，不继承钱包、数据库等调用方配置，不加载项目 `.env`。原 Vitest 配置及测试仍是可执行代码，本工具不承诺阻止它们主动读取任意文件。
 - 复用 [API 离线网络保护器](../tools/gmx-api-offline/network-guard.cjs)，在测试 setup 阶段阻止 Node fetch、HTTP/HTTPS、socket、TLS、HTTP/2、UDP 和 DNS；同步 builtin ESM 导出。文件结束时检查尝试次数，即使测试捕获了网络异常也失败。保护器不替换业务数据，不提供 RPC/服务兜底。

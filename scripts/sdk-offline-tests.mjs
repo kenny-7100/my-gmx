@@ -10,6 +10,7 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
+import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -21,6 +22,7 @@ const DEFAULT_SUITES = [
 const TOOL_FILES = [
   "scripts/sdk-offline-tests.mjs",
   "scripts/lib/agent-test-process.mjs",
+  "scripts/lib/agent-network-audit.mjs",
   "tools/sdk-offline/vitest.config.mjs",
   "tools/sdk-offline/setup.mjs",
   "tools/gmx-api-offline/network-guard.cjs",
@@ -192,6 +194,7 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
           NODE_ENV: "test",
           TZ: "UTC",
           CI: "true",
+          GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "network-events.log"),
           GMX_SDK_OFFLINE_OPTIONS: optionsFile,
         },
         logFd: fd,
@@ -222,6 +225,10 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     report.sourceAfter = await sourceEvidence(sdkDir);
     report.sourceUnchanged = report.sourceAfter.sourceSha256 === report.sourceBefore.sourceSha256;
     assert.ok(report.sourceUnchanged, "SDK source changed during the check.");
+    stage = "network-audit";
+    report.network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
+    assert.equal(report.network.status, "passed", "Offline network audit did not pass; inspect network-events.log.");
+    stage = "results";
     assert.ok(
       passedResults(
         result,
