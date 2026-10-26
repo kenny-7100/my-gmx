@@ -64,6 +64,7 @@ claude.md
 /.local/solana-progress/
 
 # Local keeper preflight evidence
+/.local/acceptance/sdk-offline/
 /.local/acceptance/keeper/
 /.local/acceptance/solana-api-local/
 /.local/acceptance/solana-dev/
