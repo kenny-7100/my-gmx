@@ -1,6 +1,6 @@
 # SDK 源码离线回归
 
-更新日期：2026-10-26。个人开发基础设施；运行主项目 `sdk/` 中已有测试，不修改 SDK 业务代码、原 Vitest 配置、测试或依赖版本。根目录 `yarn test:ci` 不覆盖 SDK，本入口补充明确范围的源码回归，不代替 SDK 全量测试。
+更新日期：2026-10-27。个人开发基础设施；运行主项目 `sdk/` 中已有测试，不修改 SDK 业务代码、原 Vitest 配置、测试或依赖版本。根目录 `yarn test:ci` 不覆盖 SDK，本入口补充明确范围的源码回归，不代替 SDK 全量测试。
 
 ## 使用方式
 
@@ -19,6 +19,16 @@ yarn test:sdk-offline
 ```
 
 默认三份原有测试是 `bigmath.spec.ts`、`numbers.spec.ts`、`fees.spec.ts`，位于 `sdk/src/utils/__tests__/`。本轮实际执行共 153 项；单选 BigInt 为 6 项。选择器要求真实存在、位于所选 SDK `src/` 内的 `.spec.ts` / `.test.ts`（含 tsx）文件，拒绝重复、越界、逃逸符号链接及 glob。原配置的 exclude 继续生效；被排除的文件、空文件或零测试不能通过。
+
+## 独立交付目录验收
+
+从当前基础设施目录调用 `--sdk-dir /absolute/path/to/delivery/sdk`，无需把个人工具复制进交付分支。先在目标 SDK 目录准备其锁定依赖；确实需要安装且已获授权时，在目标 `sdk/` 下执行 `yarn install --immutable --mode=skip-build`，不要借用开发基础目录的 `node_modules`，也不要通过普通根安装触发 SDK 构建。完整 checkout 需保留 Yarn 配置引用的根 `.yarn/` 文件。工具本身不安装、不构建、不切换分支。
+
+运行器从目标 `sdk/node_modules/vitest/vitest.mjs` 启动，启动前要求目标 Vitest 与基础设施根目录的 Vitest 版本完全一致；缺少目标包或版本不兼容时直接失败，不回退到开发基础目录。基础设施配置包装器及 setup 仍来自当前工具目录，因此保留这一版本限制；不自动升级目标依赖来满足工具。报告的 `runtime.executable` 为解析符号链接后的实际文件，`runtime.vitest` 为版本；核对其归属和目标源码路径后再消费结果。配置包装器使用基础设施自己的 Vite，不要求目标 SDK 的 Vite 与其相同。
+
+报告的 `sdkDir`、`sourceBefore.commit/dirty`、原生结果文件名必须对应目标 checkout。源码指纹包含目标 SDK 自己的 `yarn.lock`，另记录 `sourceBefore/After.lockSha256`；运行期间修改锁文件会导致 `sourceUnchanged=false` 和整体失败。工具摘要中的根 `yarn.lock` 仍表示基础设施依赖，两者用途不同。锁文件摘要并不证明已安装依赖完整匹配锁文件，准备依赖仍需使用 immutable 安装；该工具不验证全部 `node_modules` 内容。
+
+2026-10-27 已用独立临时 Git checkout 验收：复制原有 SDK 源码、配置与锁文件，复制目标 Vitest 文件，仅为隔离验收显式链接其他现有 SDK 依赖；这不代表验证了全新安装。原 BigMath 6 项通过，commit、干净状态、真实运行器路径和结果路径均属于目标目录；修改目标断言后 1 项失败。缺少目标依赖、Vitest 版本不兼容、捕获联网异常以及测试期间修改目标锁文件均正确失败；环境哨兵未进入测试，正常/失败运行的进程及临时目录均清理。实际 SDK 业务文件未修改，临时 checkout 验收后已删除。证据位于忽略的 `.local/acceptance/sdk-offline/target-acceptance.json`。 当前 SDK 默认 153 项及真实源码断点复验通过；统一工具测试 95 项、根类型检查、前端 3,014 项（另 1 项既有跳过）通过，相关脚本静态检查和 119 个文档本地目标检查通过。
 
 ## SDK 源码断点调试
 
@@ -60,7 +70,7 @@ yarn sdk:test-offline --suite src/utils/__tests__/bigmath.spec.ts --inspect-port
 - 文件串行执行、无重试；普通模式整次 Vitest 限时 180 秒，显式调试模式为 30 分钟，超时终止所属进程组。通过共享 `scripts/lib/agent-test-process.mjs` 创建独立 POSIX 进程组；SIGINT/SIGTERM 先发送 SIGTERM，1 秒后仍未退出则强制停止，超时直接终止所属组。正常退出或失败后也检查并清理组内存活子进程，使用系统 `ps` 核实非 zombie 成员已消失，再删除临时目录；SIGKILL/系统崩溃不保证清理。
 - 退出 0 要求进程正常退出、JSON success、实际执行测试全部通过、每个所选文件都有通过断言且无 skipped/todo、结果文件范围精确一致、SDK 源码摘要未变化。其他情况退出 1。路径等前置错误输出 stderr，不进入测试。
 
-日志和报告在忽略目录 `.local/acceptance/sdk-offline/run-*/`：`vitest.log`、原生 `vitest-results.json`、汇总 `report.json`。记录选定文件、时间、进程退出、测试数、SDK Git commit/dirty、源码文件数和聚合 SHA-256，以及工具和根锁文件摘要。源码摘要覆盖 SDK `src/` 中的 TS/TSX/JS/JSON、SDK package/tsconfig/Vitest 配置；不读取 `.env`，不代表整个依赖树、构建产物或部署身份。dirty 是所处 Git 仓库状态，不能仅凭 commit 复原工作树。
+日志和报告在忽略目录 `.local/acceptance/sdk-offline/run-*/`：`vitest.log`、原生 `vitest-results.json`、汇总 `report.json`。记录选定文件、时间、进程退出、测试数、SDK Git commit/dirty、源码文件数和聚合 SHA-256，以及工具和根锁文件摘要。源码摘要覆盖 SDK `src/` 中的 TS/TSX/JS/JSON、SDK package/锁文件/tsconfig/Vitest 配置；不读取 `.env`，不代表整个依赖树、构建产物或部署身份。dirty 是所处 Git 仓库状态，不能仅凭 commit 复原工作树。
 
 默认测试沿用现有 EVM/共享计算输入，不能据此声明 Solana 数学、链上兼容、SDK 发布包或真实 API 已验收。工具不修改任何业务预期，失败先查看本轮日志和结果。
 
