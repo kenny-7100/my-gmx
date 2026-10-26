@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { openSync, closeSync } from "node:fs";
-import { access, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -12,15 +12,40 @@ import { parseArgs } from "node:util";
 import { readApiSource } from "./solana-api-local.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
-const SUITES = ["src/domain/pairs/solanaPairsService.test.ts", "src/solanaApp.test.ts"];
+const DEFAULT_SUITES = ["src/domain/pairs/solanaPairsService.test.ts", "src/solanaApp.test.ts"];
 const exec = promisify(execFile);
 const docker = async (args, options = {}) =>
   (await exec("docker", args, { timeout: 15000, maxBuffer: 1_048_576, ...options })).stdout.trim();
 
-async function readTestSource(apiDir) {
+export async function resolveSuites(apiDir, requested = DEFAULT_SUITES) {
+  assert.ok(Array.isArray(requested) && requested.length > 0, "Select at least one test file.");
+  const root = await realpath(apiDir);
+  const suites = [];
+  for (const file of requested) {
+    assert.ok(typeof file === "string" && !path.isAbsolute(file), "Use paths relative to the API checkout.");
+    const candidate = path.resolve(root, file);
+    const relative = path.relative(root, candidate);
+    assert.ok(
+      relative.startsWith(`src${path.sep}`) && relative.endsWith(".test.ts"),
+      "Select a src/**/*.test.ts file."
+    );
+    const resolved = await realpath(candidate);
+    const canonical = path.relative(root, resolved);
+    assert.ok(
+      canonical.startsWith(`src${path.sep}`) && canonical.endsWith(".test.ts"),
+      "Test files must remain inside API src."
+    );
+    assert.ok((await stat(resolved)).isFile(), "Select a regular test file.");
+    assert.ok(!suites.includes(canonical), "Duplicate test selection.");
+    suites.push(canonical);
+  }
+  return suites;
+}
+
+async function readTestSource(apiDir, suites) {
   const { evidence } = await readApiSource(apiDir);
   const files = [
-    ...SUITES,
+    ...suites,
     "jest.config.ts",
     "jest.setup-global.ts",
     "jest.teardown-global.ts",
@@ -42,10 +67,16 @@ async function readTestSource(apiDir) {
   return evidence;
 }
 
-export async function runIntegrationTests(apiDir) {
+export async function runIntegrationTests(apiDir, requested) {
   assert.equal(process.versions.node.split(".")[0], "22");
-  const evidence = await readTestSource(apiDir);
-  for (const file of ["node_modules/jest/bin/jest.js", "jest.config.ts", "tsconfig.knex.json", ...SUITES]) {
+  let suites;
+  try {
+    suites = await resolveSuites(apiDir, requested);
+  } catch {
+    throw Object.assign(new Error("Invalid test selection."), { code: "invalid-test-selection" });
+  }
+  const evidence = await readTestSource(apiDir, suites);
+  for (const file of ["node_modules/jest/bin/jest.js", "jest.config.ts", "tsconfig.knex.json", ...suites]) {
     await access(path.join(apiDir, file));
   }
   await docker(["info", "--format", "{{.ServerVersion}}"]);
@@ -92,6 +123,8 @@ export async function runIntegrationTests(apiDir) {
         "--tmpfs",
         "/var/lib/postgresql/data:rw",
         image.Id,
+        "-c",
+        "timezone=UTC",
       ],
       { env: { ...process.env, POSTGRES_PASSWORD: password } }
     );
@@ -126,7 +159,7 @@ export async function runIntegrationTests(apiDir) {
           apiDir,
           "--runInBand",
           "--runTestsByPath",
-          ...SUITES.map((file) => path.join(apiDir, file)),
+          ...suites.map((file) => path.join(apiDir, file)),
           "--forceExit",
           "--json",
           "--outputFile",
@@ -137,6 +170,7 @@ export async function runIntegrationTests(apiDir) {
           env: {
             PATH: process.env.PATH,
             NODE_ENV: "test",
+            TZ: "UTC",
             CI: "true",
             APP_ROOT: apiDir,
             TS_NODE_PROJECT: path.join(apiDir, "tsconfig.knex.json"),
@@ -180,7 +214,7 @@ export async function runIntegrationTests(apiDir) {
   } catch {
     result = undefined;
   }
-  const after = await readTestSource(apiDir);
+  const after = await readTestSource(apiDir, suites);
   const unchanged = JSON.stringify(after) === JSON.stringify(evidence);
   const passed =
     !errorCode &&
@@ -189,8 +223,8 @@ export async function runIntegrationTests(apiDir) {
     !exit.signal &&
     cleanup === "passed" &&
     result?.success === true &&
-    result.numPassedTestSuites === SUITES.length &&
-    result.numTotalTestSuites === SUITES.length &&
+    result.numPassedTestSuites === suites.length &&
+    result.numTotalTestSuites === suites.length &&
     result.numPassedTests > 0 &&
     result.numPendingTests === 0 &&
     result.numTodoTests === 0 &&
@@ -199,10 +233,11 @@ export async function runIntegrationTests(apiDir) {
   const report = {
     status: passed ? "passed" : "failed",
     mode: "isolated-postgres-integration",
+    timezone: "UTC",
     checkedAt: new Date().toISOString(),
     source: evidence,
     sourceUnchanged: unchanged,
-    suites: SUITES,
+    suites,
     database: { image: image.Id, container, host: "127.0.0.1", port, ephemeral: true },
     counts: {
       suites: result?.numTotalTestSuites,
@@ -227,21 +262,22 @@ export async function runCli(args = process.argv.slice(2)) {
       args,
       options: {
         "api-dir": { type: "string", default: path.join(ROOT, "gmx-api") },
+        suite: { type: "string", multiple: true },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn gmx-api:test-integration [--api-dir PATH]\nRuns two existing API suites using a disposable local postgres:15 container. Requires Docker and the local image; never pulls images or uses existing databases.\n"
+        "Usage: yarn gmx-api:test-integration [--api-dir PATH] [--suite src/path.test.ts ...]\nRepeat --suite to select API test files; defaults to Solana pairs service and app suites. Uses disposable local postgres:15, never pulls images or uses existing databases.\n"
       );
       return 0;
     }
-    const report = await runIntegrationTests(path.resolve(values["api-dir"]));
+    const report = await runIntegrationTests(path.resolve(values["api-dir"]), values.suite);
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return report.status === "passed" ? 0 : 1;
-  } catch {
+  } catch (error) {
     process.stderr.write(
-      `${JSON.stringify({ status: "failed", code: "integration-prerequisite", message: "Check Node 22, API checkout/dependencies, Docker daemon and local postgres:15 image. See docs/solana-api-local.md." })}\n`
+      `${JSON.stringify({ status: "failed", code: error?.code === "invalid-test-selection" ? "invalid-test-selection" : "integration-prerequisite", message: error?.code === "invalid-test-selection" ? "Select unique existing src/**/*.test.ts files relative to the API checkout. No external paths or globs. See --help." : "Check Node 22, API checkout/dependencies, Docker daemon and local postgres:15 image. See docs/solana-api-local.md." })}\n`
     );
     return 1;
   }
