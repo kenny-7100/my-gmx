@@ -112,3 +112,6 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 
 
 交付隔离复用[既有 delivery-check](linear-development-workflow.md#交付隔离自动检查)：`--project-dir PATH --require-clean` 可从基础设施目录核对独立交付 checkout 的 HEAD 与暂存、未暂存、未跟踪状态；默认仍仅看提交历史，检查不改 Git 或文件。真实 Git 回归覆盖三种脏状态、目标身份、特殊文件名、忽略产物及只读保持，不复制工具到业务分支。
+
+
+API 数据库集成入口也复用共享测试进程组工具：`yarn gmx-api:test-integration` 分别记录 `exit.cleanup` 与容器/临时目录 `cleanup`，中断、超时或任一清理失败都不能 passed。已通过隔离 API 副本复现并修复 Jest `--forceExit` 后派生进程残留；具体执行与验收见[API 集成测试说明](solana-api-local.md#测试派生进程清理验收2026-10-27)。共享生命周期回归纳入 `yarn test:agent-tools`，不另建重复测试框架。
