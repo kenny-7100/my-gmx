@@ -106,6 +106,47 @@ yarn solana:api-local verify > .local/acceptance/solana-api-local/report.json
 
 本轮完成 Agent 可直接调用的本地样例环境；前端 host 接入属于后续已确认的需求实施，应复用本服务并遵循统一数据流。A08 的前端端到端覆盖仍未具备，不在本轮完成口径内。
 
+## gmx-api Solana 离线计算回归
+
+2026-10-26 增加独立入口，复用 API 已有测试与 fixture，不修改 API 源码、Jest 默认配置或业务算法：
+
+```sh
+# From the gmx-interface root
+yarn gmx-api:test-offline
+
+# From gmx-api
+node ../scripts/gmx-api-offline-tests.mjs --api-dir .
+```
+
+适用于修改或核对 `marketStatus`、市场账户解码及 `solanaPairsRows` 时的快速回归。当前固定执行以下两个原有测试集，不接受任意测试路径，以免误把数据库测试放进无数据库环境：
+
+| 原有测试 | 当前覆盖 |
+| --- | --- |
+| `src/domain/gmtrade/marketStatus.test.ts` | 7 组市场 fixture，核对资金费率方向、流动性、持仓价值及市场账户解码 |
+| `src/domain/pairs/solanaPairsRows.test.ts` | 5 项 pair 输出、价格/成交量、funding 间隔、禁用市场，以及开放/休市市场的陈旧数据行为 |
+
+依赖 Node 22 及 API 锁定的 Jest / ts-jest / 业务依赖。工具以独立 Jest 配置串行运行所选测试，不调用原配置的数据库 globalSetup / teardown，不启动服务；ts-jest 使用 CommonJS 及 Node 模块解析转换现有测试。原有数据库集成和 Solana launch-mode 测试仍按 API 默认流程运行，本入口没有覆盖它们，也不替代完整 API 测试。
+
+测试进程使用临时空工作目录和环境变量白名单，不继承钱包/数据库凭据或 `NODE_OPTIONS`，dotenv 默认不会读取项目 `.env`。网络 guard 拦截测试环境中常见 Node HTTP、TCP、TLS、HTTP/2、UDP、DNS 和 fetch 入口；外连尝试即时报错，且即使异常被捕获，suite 的 afterAll 仍报告失败。这是用于防止意外外连的测试约束，不是操作系统级沙箱，不支持不可信测试代码。
+
+运行总超时 120 秒、单项测试超时 10 秒，不重试、不使用 forceExit 掩盖未清理资源。成功要求两个 suite 均通过、测试非空且无 skip/todo、进程退出 0，并且运行前后的选定源码证据一致。已通过的是历史 fixture 回归，不证明当前链上状态或实时 keeper / SQD 数据。
+
+stdout 输出 `mode: offline-fixtures` 的 JSON，含 API commit/dirty、选定文件摘要、guard 摘要、测试数量和 excluded 范围。成功退出 0，其余退出 1；测试失败也保留结构化报告。前置条件缺失时 stderr 给出固定诊断信息，不启动数据库或自动安装依赖。
+
+每次实际执行的日志与原始 Jest JSON 保存在 `.local/acceptance/solana-api-local/offline-*/`，报告提供 `logFile`、`resultsFile`；临时工作目录自动清理。源码身份不是当前部署身份。工具入口为 `scripts/gmx-api-offline-tests.mjs`，guard 回归为 `yarn test:gmx-api-offline`。
+
+实施与验收状态：
+
+| 阶段 | 状态 |
+| --- | --- |
+| 现有测试与数据库耦合核验 | 已完成；默认 Jest 即使指定纯计算测试也会创建模板数据库，因此使用明确独立的离线 profile |
+| 实际 API 测试 | 已通过；2 个 suite、12 项测试，无失败/跳过；API commit `b86956df00902e44e0295827d651b206a6153942`，dirty false |
+| 隔离与失败退出 | 已通过；临时副本中注入计算断言失败，返回退出 1 并保留报告；被捕获的 HTTP 外连仍令 suite 失败；公开环境哨兵及副本 `.env` 不进入测试 |
+| 网络 guard 回归 | 已通过；9 个网络入口均阻断，累计尝试不能静默通过 |
+| 静态检查与最终复验 | 已通过；实际 API 2 个 suite / 12 项最终复验、网络 guard 回归、Node 语法、ESLint、定向 Prettier、yarn tscheck、文档链接及 git diff --check。未重新运行完整前端或 API 数据库测试，业务文件和默认配置未改动 |
+
+本机验收摘要为同目录 `offline-latest.json`，失败/隔离验证为 `offline-acceptance.json`；临时注入仅发生在已清理的源码副本，真实 API 文件未改动。该阶段为 A08/A11 的回归执行能力补充，未新增独立数学基准，不能将旧 fixture 当成未来全部 SDK / 部署版本的正确性证明。
+
 ## 实施进度与验收
 
 ### 2026-10-26 Agent 生命周期闭环

@@ -58,3 +58,5 @@
 已沉淀[验收工作表一致性检查](agent-acceptance-workflow.md#工作表自动一致性检查)：`yarn agent:acceptance --file PATH.md` 直接读取既有 Markdown 条件/执行表，核对唯一编号、引用、执行结果和汇总状态，输出工作表/检查器摘要；验证入口 `yarn test:agent-acceptance`。不执行表内命令、不读取凭据或原始证据，不评判需求完整覆盖及证据充分性。
 
 已沉淀[Solana 浏览器环境预检](solana-browser-smoke.md#先准备再执行)：`yarn solana:browser-preflight` 将已遇到的缺包、缺浏览器、SDK 产物及测试发现检查前置，输出可归档 JSON 与阶段状态，不启动浏览器或服务。测试入口 `yarn test:solana-browser-preflight`；不将准备通过当页面或需求通过。
+
+已沉淀 [gmx-api Solana 离线计算回归](solana-api-local.md#gmx-api-solana-离线计算回归)：`yarn gmx-api:test-offline` 复用 API 两个既有 suite、fixture 与真实计算代码，使用独立无数据库配置，隔离环境并阻断意外外连；输出版本、12 项测试结果与日志。`yarn test:gmx-api-offline` 验证网络 guard。该 profile 不替代默认数据库集成、HTTP 或实时服务验收。
