@@ -56,7 +56,7 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 同一任务中已完成且仍有效的准备工作应复用；源码、依赖、工具链或相关配置发生变化时，再判断哪些前置条件和检查失效。不要在每次小改动后重复整套准备。
 
-**API 源码调试验收：** 需要确认 Agent 能连接 inspector、命中当前 TypeScript 源码并读取变量时，使用[源码断点验收](solana-api-local.md#agent-可重复的源码断点验收) `yarn solana:api-debug`，默认独立端口并自动停服；仅在明确要复用已启用 inspector 的管理服务时加 `--attach --port PORT`。源码映射不一致或断点未命中应检查报告的失败阶段，不把 HTTP 健康检查当成调试通过；无断点需求的任务不增加此项。
+**API 源码调试验收：** 需要确认 Agent 能连接 inspector、命中当前 TypeScript 源码并读取变量时，使用[源码断点验收](solana-api-local.md#agent-可重复的源码断点验收) `yarn solana:api-debug`，默认独立端口并自动停服；仅在明确要复用已启用 inspector 的管理服务时加 `--attach --port PORT`，独立 checkout 同时指定 `--api-dir PATH`。组合联调按[工作区调试说明](solana-dev-workspace.md#工作区内的-api-源码断点调试)在 up 时显式加 `--api-inspect-port PORT`，先核对报告的调试地址和服务归属，再 attach；已有 API 未启用或端口不匹配时不自动重配。源码映射不一致或断点未命中应检查报告的失败阶段，不把 HTTP 健康检查当成调试通过；无断点需求的任务不增加此项。
 
 **Agent 工具回归：** 根 `yarn test:ci` 不覆盖个人基础设施脚本。修改跨工具公共能力或交接基础设施分支时，先按[统一离线回归](automation-tools.md#统一离线工具回归)运行 `yarn test:agent-tools`，一次覆盖脚本、RPC 代理及 CI 辅助测试；单工具小改仍可选原单项入口。确认原生结果后再安排本任务所需的类型、前端或真实服务验收，不把工具测试通过当作 RPC/keeper/API/页面 ready。新工具测试加入统一范围时，核实其保持离线且只使用临时资源，不把真实资金或外部服务检查放进默认回归。
 
