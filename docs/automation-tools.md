@@ -22,7 +22,7 @@ API 离线和隔离数据库测试共用 `scripts/lib/gmx-api-source.mjs` 的 Gi
 
 持续联调复用 [solana:dev 工作区](solana-dev-workspace.md#独立前端-checkout-的持续联调)：`--project-dir` 同时选择目标 Vite 与控制 socket，不同目标可使用独立端口并存；浏览器探测核对管理地址和实际目标源码身份，报告留在基础设施目录。
 
-API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测试运行时；[交付检查](linear-development-workflow.md#api-测试证据绑定)可重复传 `--api-report PATH`，重新核对当前 API 源码、原生 Jest 结果、网络事件和清理，避免复用其他目录或旧版本的 passed。
+API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测试运行时；[交付检查](linear-development-workflow.md#api-测试证据绑定)可重复传 `--api-report PATH`，重新核对当前 API 源码、原生 Jest 结果、网络事件和清理；声明路由校验的报告还须与当前只读路由 verify 一致，避免复用其他目录或旧版本的 passed。
 
 [组合联调](solana-dev-workspace.md#独立-api-checkout-的组合联调)复用既有 API manager：up 用 `--api-dir` 选择独立 API，健康检查绑定路径和实例，浏览器诊断读取实际 API checkout 的源码身份；不从基础设施固定路径猜测 API 版本，owned/borrowed 清理规则保持一致。
 
