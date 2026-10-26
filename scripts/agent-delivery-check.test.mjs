@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, rm, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -9,6 +11,7 @@ import { promisify } from "node:util";
 import {
   checkDelivery,
   validateApiEvidence,
+  validateApiTypecheckEvidence,
   validateApiRoutes,
   validateBrowserEvidence,
   validateFrontendEvidence,
@@ -54,6 +57,8 @@ test("real Git histories distinguish clean delivery from inherited or copied dev
     assert.equal((await checkDelivery(strict)).worktree.status, "passed");
     assert.equal(clean.worktree.status, "not-checked");
     assert.equal(clean.sdkEvidence.status, "not-checked");
+    assert.equal(clean.apiTypecheckEvidence.status, "not-checked");
+    await assert.rejects(checkDelivery({ ...options, apiTypecheckReport: "/report.json" }), /requires --require-clean/);
     await writeFile(path.join(cwd, ".git/info/exclude"), "ignored-build/\n");
     await mkdir(path.join(cwd, "ignored-build"));
     await writeFile(path.join(cwd, "ignored-build/output.txt"), "ignored artifact");
@@ -361,4 +366,73 @@ test("delivery rejects incomplete or stale generated route evidence without requ
   for (const change of [{ status: "blocked" }, { source: {} }, { tooling: {} }, { artifacts: {} }]) {
     assert.throws(() => validateApiRoutes(evidence, { ...current, ...change }));
   }
+});
+
+test("API typecheck delivery binds clean identity, compiler, logs, route provenance and successful cleanup", () => {
+  const source = { commit: "head", dirty: false };
+  const inputs = { sha256: "source" };
+  const runtime = { typescript: "5.4.2", compilerSha256: "compiler" };
+  const routes = {
+    schemaVersion: 2,
+    status: "passed",
+    apiDir: "/api",
+    source: inputs,
+    tooling: runtime,
+    artifacts: { routes: "generated" },
+  };
+  const log = Buffer.from("");
+  const evidence = {
+    schemaVersion: 1,
+    mode: "api-typescript-no-emit",
+    status: "passed",
+    apiDir: "/api",
+    source,
+    sourceAfter: source,
+    sourceInputs: inputs,
+    sourceInputsAfter: inputs,
+    sourceUnchanged: true,
+    runtime,
+    runtimeAfter: runtime,
+    toolingUnchanged: true,
+    logSha256: createHash("sha256").update(log).digest("hex"),
+    generatedRoutes: { status: "passed", before: routes, after: routes },
+    exit: { code: 0, signal: null, cleanup: "passed" },
+  };
+  const options = { evidence, apiDir: "/api", head: "head", source, inputs, runtime, log, routes };
+  assert.doesNotThrow(() => validateApiTypecheckEvidence(options));
+  for (const change of [
+    { schemaVersion: 0 },
+    { mode: "offline-fixtures" },
+    { status: "failed" },
+    { apiDir: "/other" },
+    { source: { ...source, dirty: true } },
+    { sourceAfter: { ...source, commit: "old" } },
+    { sourceInputs: {} },
+    { sourceInputsAfter: {} },
+    { sourceUnchanged: false },
+    { runtime: {} },
+    { runtimeAfter: {} },
+    { toolingUnchanged: false },
+    { logSha256: undefined },
+    { generatedRoutes: undefined },
+    { generatedRoutes: { status: "not-checked" } },
+    ...[
+      { code: 2 },
+      { signal: "SIGTERM" },
+      { interrupted: true },
+      { timedOut: true },
+      { signalError: "EPERM" },
+      { cleanup: "failed" },
+    ].map((exit) => ({ exit: { ...evidence.exit, ...exit } })),
+  ])
+    assert.throws(() => validateApiTypecheckEvidence({ ...options, evidence: { ...evidence, ...change } }));
+  for (const change of [
+    { head: "new" },
+    { source: { ...source, dirty: true } },
+    { inputs: {} },
+    { runtime: {} },
+    { log: Buffer.from("changed") },
+    { routes: { ...routes, artifacts: {} } },
+  ])
+    assert.throws(() => validateApiTypecheckEvidence({ ...options, ...change }));
 });
