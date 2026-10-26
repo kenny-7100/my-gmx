@@ -1,6 +1,6 @@
 # Agent Solana 本地全栈联调工具
 
-更新日期：2026-10-26。本文只建设个人开发配置、工具及测试辅助，不实现迁移业务。现有 API 持续服务见 [Solana API 说明](solana-api-local.md)。
+更新日期：2026-10-27。本文只建设个人开发配置、工具及测试辅助，不实现迁移业务。现有 API 持续服务见 [Solana API 说明](solana-api-local.md)。
 
 ## 已完成的范围与当前边界
 
@@ -28,7 +28,7 @@ yarn solana:dev logs
 yarn solana:dev stop
 ```
 
-第二条是另一种启动方式，不要在工作区已运行时重复 up。重复工作区、未知端口占用明确失败，不自动接管。可在 up 时指定 `--web-port 3012 --api-port 3014 --rpc-port 3034`，或仅选 `--services api` / `vite` / `rpc`。控制命令始终定位本工作区唯一管理实例，不需要重复端口参数。
+第二条是另一种启动方式，不要在工作区已运行时重复 up。重复工作区、未知端口占用明确失败，不自动接管。可在 up 时指定 `--web-port 3012 --api-port 3014 --rpc-port 3034`，或仅选 `--services api` / `vite` / `rpc`。控制命令按前端 checkout 定位唯一管理实例，不需要重复端口参数；默认仍是基础设施目录的工作区。
 
 - API：优先借用已有 `solana:api-dev` 管理的健康服务，核对实际 apiDir；找不到才调用原有 up。stop 保留 borrowed 服务，仅关闭本工作区 owned 的 API；停止前再次核对 supervisor PID。
 - Vite：工作区自己启动，绑定 `127.0.0.1`、strictPort；未知已有 Vite 不借用。原 API 自身的监听范围沿用[已记录的 OS 默认行为](solana-api-local.md#持续运行的-solana-联调环境)。
@@ -36,6 +36,31 @@ yarn solana:dev stop
 - 服务异常：status 实时检查所选服务。RPC 子进程意外退出会使工作区失败并清理所属资源；API 已有自己的 watcher 管理，故障由 status 暴露，不擅自重启借用服务。
 
 控制 socket 位于 `/tmp/gmx-solana-stack-<uid>-<workspace-hash>.sock`，权限 0600。SIGTERM 正常清理；SIGKILL/系统崩溃不保证清理，须先核对资源归属后处理残留，不盲目 kill 或接管。服务生命周期快照不代表当前健康，必须运行 status。
+
+## 独立前端 checkout 的持续联调
+
+从基础设施仓库运行，工具留在基础设施目录，Vite 加载目标自己的原配置、源码及本地环境文件：
+
+```sh
+yarn solana:dev up --project-dir /path/to/frontend-checkout --web-port 3016
+# All controls select the same checkout; ports are read from its supervisor.
+yarn solana:dev status --project-dir /path/to/frontend-checkout
+yarn solana:dev logs --project-dir /path/to/frontend-checkout
+yarn solana:dev:browser --project-dir /path/to/frontend-checkout --web-port 3016
+yarn solana:dev stop --project-dir /path/to/frontend-checkout
+```
+
+目标须为前端 Git checkout 根目录，已按自己的锁文件安装完整依赖，已安装 Vite 版本与基础设施运行时相同；缺目录、缺依赖或版本不一致在启动服务前失败。工具不安装或链接依赖、不向目标复制个人工具、不修改原 Vite 配置。监督进程以目标为 CWD，保留原配置对 Git/PWA、Lingui/Babel 及相对路径的解析。正常开发所需 SDK 静态资源仍按原环境流程准备，本工具不自动构建或提供替代资源。
+
+管理 socket 按目标真实目录区分；同一目标拒绝重复启动，不同目标可使用不同空闲端口并存。控制命令同样规范化目录，停止前不要移动或删除目标目录。默认基础设施目录保留原 socket 身份，因此不会接管或停止已运行的旧工作区。API 仍为基础设施目录的 `gmx-api`，按原规则启动或借用，不自动改成目标目录下的 API；RPC 和代理行为相同。多个工作区借用同一 API 时，需保留其原管理服务，否则借用方健康检查会失败。
+
+新工作区报告增加 `projectDir`，`frontendSourceAtStart` 记录目标 Git 身份、前端/landing/SDK 源码与必要配置聚合指纹及目标 API 配置摘要；`frontendToolSha256` 单独记录基础设施管理脚本和 Vite 包装器。源码指纹沿用局部测试范围，不覆盖所有静态资源或第三方安装内容，且仍是启动快照。浏览器诊断在执行时重新读取目标源码，并确认探测前后身份一致，不把热更新后的代码当作启动时版本。
+
+浏览器工具先连接所选工作区，要求 ready、已选 API/Vite，且 `--web-port` 与实际管理地址相同，再启动 Chrome；任意外部 Vite 地址或错误目标不能通过身份检查。诊断报告、请求记录与 stdout 均包含目标目录和执行时身份；它仍只探测代理，不表示业务页面已接入。旧监督进程不会热加载新工具代码，缺少新身份字段时浏览器工具会明确失败；需要新诊断能力时按原归属流程停止并重新启动该工作区，不修改旧报告补字段。
+
+2026-10-27 真实验收：以本地 `origin/release` 的 `8ef82eb8a465b2045f73805a66941bf7f836630d` 建立不含个人工具的隔离 clone，核对依赖声明及锁文件一致后，仅为本次验收显式链接现有依赖。在原工作区继续运行时，用独立端口 3016 启动目标，借用既有 3004 API；真实 Chrome 从目标加载验收模块，修改后读取到新值，浏览器 API 探测通过并记录正确 commit/dirty。缺依赖、不兼容 Vite、重复启动、错误浏览器 origin、端口占用均拒绝，原监听者保留；独立工作区停止后 Vite 端口释放，原工作区/API PID 不变且健康，目标没有写入工具报告，验收 clone 已删除。测试没有验证完整 GMX 页面渲染或业务功能。
+
+工程检查通过：98 项统一工具回归、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、125 个文档本地目标及差异检查；完整前端回归 3,014 项通过、1 项既有跳过，退出 0。证据位于本机忽略目录 `.local/acceptance/solana-dev/checkout-acceptance.json`、`checkout-workspace.json`、`checkout-tools.tap`、`checkout-sdk-verify.json`、`checkout-tscheck.log`、`checkout-test-ci.log` 和摘要引用的 `browser-*/`。这些历史身份不代表当前环境；后续使用重新运行 status 和本次所需验收。
 
 ## 1. 本地 API 路径
 
@@ -56,7 +81,7 @@ curl http://127.0.0.1:3010/__agent/solana-api/v1/markets/config
 
 每次工作区报告位于 `.local/acceptance/solana-dev/run-*/report.json`，提供所选服务、归属、URL、sample 模式、API 启动源码证据及日志位置。管理进程/Vite 日志为 `launcher-*/workspace.log`，RPC 日志为该 run 下的 `rpc.log`；借用 API 的日志保留在原服务目录。
 
-`frontendSourceAtStart` 记录前端 HEAD/dirty 与原 Vite、前端/SDK API 配置及工具配置摘要；它是启动配置证据，不是整个 dirty 工作树或热更新后模块身份的完整摘要。浏览器探测另记录执行时的前端/API commit 和相关文件摘要。
+`frontendSourceAtStart` 记录目标前端 HEAD/dirty、源码与必要配置指纹及前端/SDK API 配置摘要；`frontendToolSha256` 记录基础设施工具摘要。它是启动证据，不是热更新后状态；浏览器探测另记录执行时的目标前端源码身份、API commit 和相关文件摘要。
 
 所有工具报告和日志都在忽略目录，不随 Git 交付。磁盘日志不自动轮转；长期开发按需停服后整理。失败先查看对应 report、workspaceLog、API log，不通过改业务或放宽断言使环境变绿。
 
