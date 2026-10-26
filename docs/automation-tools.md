@@ -6,6 +6,8 @@ API 源码调试使用既有持续服务上的[断点验收入口](solana-api-lo
 
 SDK 计算使用[源码离线回归](sdk-offline-tests.md) `yarn sdk:test-offline`：复用原 SDK Vitest 配置，精确选测试文件，使用空环境目录和共享 Node 网络保护器，无需构建；报告保留源码摘要和原生结果，拒绝零测试、范围不符及捕获后的联网尝试。工具回归为 `yarn test:sdk-offline`，不复制业务实现或预期值。
 
+SDK 产物使用[构建产物准备入口](sdk-artifacts.md)：`yarn sdk:artifacts verify` 只读核对源码、工具链与完整产物，已获构建授权后用 `yarn sdk:artifacts build` 隔离预生成和编译，成功后才替换产物。回归入口 `yarn test:sdk-artifacts` 覆盖拒绝错误来源、完整性及替换失败恢复旧产物。
+
 独立网络选择 UI 验收使用[管理浏览器冒烟](solana-browser-smoke.md#一条命令执行并保存独立报告) `yarn solana:browser-check`：复用已有预检、只读用例和 Playwright `webServer`，自动启动/停止 Vite，每次保存独立 JSON/HTML/诊断，不覆盖历史结果、不接管既有服务。回归入口为 `yarn test:solana-browser-check`。
 
 更新日期：2026-10-25。用户已授权 Agent 在实际协作中主动发现、实现并积累有复用价值的自动化能力，减少重复推理、人工操作、执行时间和成本。
