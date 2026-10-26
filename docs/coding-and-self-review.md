@@ -88,6 +88,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **API Git 回归范围：** 纯 API 源码功能分支可按[范围发现说明](solana-api-local.md#按-api-git-变更范围发现测试)用 `gmx-api:discover-tests --api-dir PATH --changed-since REF` 固定目标 API 基线，收集已提交/暂存/未暂存/未跟踪源码。先核对 `changes.baseSha` 和路径，再确认 `changesUnchanged=true`、原生清单及网络/清理结果；配置、迁移、删除或空范围需人工评估后使用 `--related`。发现之后仍显式选择测试环境，不将主仓库基线套用到嵌套 API。
 
+**SDK Git 回归范围：** SDK 纯源码功能分支按[范围说明](sdk-offline-tests.md#按-git-变更范围运行回归)使用 `sdk:test-offline --sdk-dir PATH/sdk --changed-since REF`。先核对目标 `changes.checkoutDir`、`sdkPrefix`、基线 SHA 和完整路径，再确认 `changesUnchanged=true`、原生清单、网络及清理结果；SDK 配置、前端或根配置混入、删除、空范围均需人工评估后显式选 `--suite`。不能把断言通过当成执行期间范围保持一致，调试仍使用单 suite。
+
 ## 查阅入口
 
 | 工作 | 必读资料 |
