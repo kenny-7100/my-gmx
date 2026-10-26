@@ -14,7 +14,7 @@ import { parseArgs } from "node:util";
 
 import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
-import { readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
+import { apiTestTooling, readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const DEFAULT_SUITES = ["src/domain/pairs/solanaPairsService.test.ts", "src/solanaApp.test.ts"];
@@ -47,7 +47,7 @@ export async function resolveSuites(apiDir, requested = DEFAULT_SUITES) {
   return suites;
 }
 
-async function readTestSource(apiDir, suites) {
+export async function readTestSource(apiDir, suites) {
   const files = [
     ...suites,
     "jest.config.ts",
@@ -97,6 +97,7 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
       : createRequire(path.join(apiDir, "package.json")).resolve(file);
   });
   const evidence = await readTestSource(apiDir, suites);
+  const tooling = await apiTestTooling(apiDir, "isolated-postgres-integration");
   const sourceBefore = await sourceInputs(apiDir);
   for (const file of ["node_modules/jest/bin/jest.js", "jest.config.ts", "tsconfig.knex.json", ...suites]) {
     await access(path.join(apiDir, file));
@@ -263,10 +264,13 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
   const unchanged =
     JSON.stringify(after) === JSON.stringify(evidence) && JSON.stringify(sourceAfter) === JSON.stringify(sourceBefore);
   const network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
+  const toolingUnchanged =
+    JSON.stringify(tooling) === JSON.stringify(await apiTestTooling(apiDir, "isolated-postgres-integration"));
   const { installations, blockedAttempts } = network;
   if (!errorCode && blockedAttempts) errorCode = "network-access-forbidden";
   if (!errorCode && installations !== suites.length) errorCode = "network-guard-not-installed";
   const passed =
+    toolingUnchanged &&
     network.status === "passed" &&
     (!debug || debug.started) &&
     !errorCode &&
@@ -287,6 +291,7 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     result.numPassedTests === result.numTotalTests &&
     unchanged;
   const report = {
+    schemaVersion: 1,
     status: passed ? "passed" : "failed",
     mode: "isolated-postgres-integration",
     apiDir,
@@ -302,6 +307,9 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     checkedAt: new Date().toISOString(),
     temporaryDirectory: cwd,
     source: evidence,
+    sourceAfter: after,
+    ...tooling,
+    toolingUnchanged,
     sourceInputs: sourceBefore,
     sourceInputsAfter: sourceAfter,
     sourceUnchanged: unchanged,

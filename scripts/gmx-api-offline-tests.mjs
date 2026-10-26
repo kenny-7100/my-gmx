@@ -12,7 +12,7 @@ import { parseArgs } from "node:util";
 import { resolveSuites } from "./gmx-api-integration-tests.mjs";
 import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
-import { readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
+import { apiTestTooling, readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
 
 export { sourceInputs } from "./lib/gmx-api-source.mjs";
 
@@ -63,6 +63,7 @@ export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort 
     await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
   }
   const evidence = await readApiTestSource(apiDir, suites);
+  const tooling = await apiTestTooling(apiDir, "offline-fixtures");
   const sourceBefore = await sourceInputs(apiDir);
   const sourceHashes = Object.fromEntries(suites.map((file) => [file, evidence.sha256[file]]));
   const jest = path.join(apiDir, "node_modules/jest/bin/jest.js");
@@ -156,7 +157,9 @@ export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort 
   const unchanged =
     JSON.stringify(after) === JSON.stringify(evidence) && JSON.stringify(sourceAfter) === JSON.stringify(sourceBefore);
   const network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
+  const toolingUnchanged = JSON.stringify(tooling) === JSON.stringify(await apiTestTooling(apiDir, "offline-fixtures"));
   const passed =
+    toolingUnchanged &&
     network.status === "passed" &&
     (!debug || debug.started) &&
     !exit.interrupted &&
@@ -170,6 +173,7 @@ export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort 
     ) &&
     unchanged;
   const report = {
+    schemaVersion: 1,
     status: passed ? "passed" : "failed",
     mode: "offline-fixtures",
     network,
@@ -179,6 +183,10 @@ export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort 
     sourceInputs: sourceBefore,
     sourceInputsAfter: sourceAfter,
     source: evidence,
+    sourceAfter: after,
+    ...tooling,
+    toolingUnchanged,
+    temporaryDirectoryCleanup: "passed",
     sourceHashes,
     sourceUnchanged: unchanged,
     guardSha256: createHash("sha256")

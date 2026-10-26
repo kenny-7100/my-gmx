@@ -7,7 +7,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
 import { frontendToolHashes, resolveSuites, sourceEvidence } from "./frontend-offline-tests.mjs";
+import { readTestSource, resolveSuites as resolveApiSuites } from "./gmx-api-integration-tests.mjs";
+import { passedResults as passedApiResults } from "./gmx-api-offline-tests.mjs";
 import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
+import { apiTestTooling, readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
 import {
   passedResults,
   resolveSuites as resolveSdkSuites,
@@ -94,6 +97,65 @@ export function validateSdkEvidence(options) {
   assert.deepEqual(options.evidence.runtime, options.runtime, "SDK runtime changed since testing");
 }
 
+export function validateApiEvidence({ evidence, apiDir, head, source, inputs, tooling, results, suites, network }) {
+  assert.equal(evidence.schemaVersion, 1, "Unsupported API report schema");
+  assert.ok(["offline-fixtures", "isolated-postgres-integration"].includes(evidence.mode), "Unexpected API test mode");
+  assert.equal(evidence.status, "passed", "API report did not pass");
+  assert.equal(evidence.apiDir, apiDir, "API report targets another checkout");
+  assert.equal(source.commit, head, "Current API checkout does not match delivery head");
+  assert.equal(source.dirty, false, "Current API checkout is dirty");
+  assert.equal(evidence.sourceUnchanged, true, "API source changed during testing");
+  assert.deepEqual(evidence.source, source, "Tested API identity does not match current checkout");
+  assert.deepEqual(evidence.sourceAfter, source, "Final API identity does not match current checkout");
+  assert.deepEqual(evidence.sourceInputs, inputs, "Tested API source does not match current checkout");
+  assert.deepEqual(evidence.sourceInputsAfter, inputs, "Final API source does not match current checkout");
+  assert.equal(evidence.toolingUnchanged, true, "API tooling changed during testing");
+  assert.deepEqual(evidence.toolSha256, tooling.toolSha256, "API test tools changed since testing");
+  assert.deepEqual(evidence.runtime, tooling.runtime, "API test runtime changed since testing");
+  assert.ok(
+    !evidence.exit.interrupted && !evidence.exit.timedOut && !evidence.exit.signalError,
+    "API test execution was interrupted or failed"
+  );
+  assert.equal(evidence.exit.cleanup, "passed", "API test process cleanup did not pass");
+  const integration = evidence.mode === "isolated-postgres-integration";
+  assert.equal(
+    integration ? evidence.cleanup : evidence.temporaryDirectoryCleanup,
+    "passed",
+    "API test resource cleanup did not pass"
+  );
+  assert.equal(network.status, "passed", "API network audit did not pass");
+  for (const key of Object.keys(network))
+    assert.deepEqual(evidence.network[key], network[key], "API network audit does not match its event log");
+  const profile = integration ? "gmx-api-integration" : "gmx-api-offline";
+  assert.equal(
+    integration ? evidence.network.guardSha256 : evidence.guardSha256,
+    tooling.toolSha256[`tools/${profile}/network-guard.cjs`],
+    "API network guard changed since testing"
+  );
+  if (integration)
+    assert.equal(evidence.network.policy, "owned-database-and-in-process-servers", "Unexpected API network policy");
+  if (evidence.debug) assert.equal(evidence.debug.started, true, "API inspector did not start");
+  assert.equal(results.numFailedTests, 0, "Native API results contain failures");
+  assert.ok(
+    passedApiResults(
+      results,
+      suites.map((file) => path.join(apiDir, file)),
+      evidence.exit
+    ),
+    "Native API test results do not match selected suites"
+  );
+  assert.deepEqual(
+    evidence.counts,
+    {
+      suites: results.numTotalTestSuites,
+      passed: results.numPassedTests,
+      failed: results.numFailedTests,
+      skipped: results.numPendingTests,
+    },
+    "API report counts do not match native results"
+  );
+}
+
 export function validateBrowserEvidence({ evidence, target, projectDir, head, toolSha256, results }) {
   assert.equal(evidence.schemaVersion, 1, "Unsupported browser report schema");
   assert.equal(evidence.scope, "solana-managed-browser-smoke", "Expected a managed browser report");
@@ -138,7 +200,14 @@ export async function checkDelivery({
   frontendReport,
   sdkReport,
   browserReport,
+  apiReports = [],
 }) {
+  assert.ok(
+    Array.isArray(apiReports) && apiReports.every((file) => typeof file === "string" && file.length > 0),
+    "Use nonempty API report paths"
+  );
+  assert.ok(apiReports.length === 0 || requireClean, "--api-report requires --require-clean");
+  assert.equal(new Set(apiReports.map((file) => path.resolve(file))).size, apiReports.length, "Duplicate API reports");
   assert.ok(
     frontendReport === undefined || (typeof frontendReport === "string" && frontendReport.length > 0),
     "Use a nonempty frontend report path"
@@ -187,6 +256,7 @@ export async function checkDelivery({
     frontendEvidence: { status: "not-checked" },
     sdkEvidence: { status: "not-checked" },
     browserEvidence: { status: "not-checked" },
+    apiEvidence: [],
     refs: {
       base: { ref: base, sha: baseSha },
       developmentBase: { ref: developmentBase, sha: developmentSha },
@@ -338,6 +408,46 @@ export async function checkDelivery({
       });
     }
   }
+  for (const evidencePath of apiReports) {
+    const reportFile = path.resolve(evidencePath);
+    const entry = { status: "blocked", reportFile };
+    report.apiEvidence.push(entry);
+    let stage = "report";
+    try {
+      const evidence = JSON.parse(await readFile(reportFile, "utf8"));
+      stage = "native-results";
+      const results = JSON.parse(await readFile(evidence.resultsFile, "utf8"));
+      stage = "source-and-tooling";
+      assert.ok(
+        ["offline-fixtures", "isolated-postgres-integration"].includes(evidence.mode),
+        "Unexpected API test mode"
+      );
+      assert.ok(Array.isArray(evidence.suites) && evidence.suites.length > 0, "API report must list selected suites");
+      const suites = await resolveApiSuites(cwd, evidence.suites);
+      const source = await (evidence.mode === "offline-fixtures" ? readApiTestSource : readTestSource)(cwd, suites);
+      const inputs = await sourceInputs(cwd);
+      const tooling = await apiTestTooling(cwd, evidence.mode);
+      stage = "network-audit";
+      const network = await readNetworkAudit(evidence.network.eventsFile, suites.length);
+      stage = "source-and-results";
+      validateApiEvidence({ evidence, apiDir: cwd, head: headSha, source, inputs, tooling, results, suites, network });
+      Object.assign(entry, {
+        status: "passed",
+        mode: evidence.mode,
+        testedCommit: source.commit,
+        sourceSha256: inputs.sha256,
+        suites,
+        counts: evidence.counts,
+      });
+    } catch (error) {
+      report.findings.push({
+        code: "api-evidence-invalid",
+        reportFile,
+        stage,
+        ...(error.code === "ERR_ASSERTION" ? { message: error.message.split("\n")[0].slice(0, 240) } : {}),
+      });
+    }
+  }
   report.status = report.findings.length ? "blocked" : "passed";
   return report;
 }
@@ -351,6 +461,7 @@ async function runCli() {
         "frontend-report": { type: "string" },
         "sdk-report": { type: "string" },
         "browser-report": { type: "string" },
+        "api-report": { type: "string", multiple: true },
         base: { type: "string", default: "origin/release" },
         "development-base": { type: "string", default: "solana-integration" },
         head: { type: "string" },
@@ -361,7 +472,7 @@ async function runCli() {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--project-dir PATH] [--require-clean] [--frontend-report PATH] [--sdk-report PATH] [--browser-report PATH] [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. --require-clean also checks checkout HEAD, index, working files and untracked paths. Does not fetch refs or assess business correctness.\n"
+        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--project-dir PATH] [--require-clean] [--frontend-report PATH] [--sdk-report PATH] [--browser-report PATH] [--api-report PATH ...] [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. --require-clean also checks checkout HEAD, index, working files and untracked paths. API reports require an API checkout and may be repeated for offline and integration evidence. Does not fetch refs or assess business correctness.\n"
       );
       return;
     }
@@ -371,6 +482,7 @@ async function runCli() {
       frontendReport: values["frontend-report"],
       sdkReport: values["sdk-report"],
       browserReport: values["browser-report"],
+      apiReports: values["api-report"],
       base: values.base,
       developmentBase: values["development-base"],
       head: values.head,

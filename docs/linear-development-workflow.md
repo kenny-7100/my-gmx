@@ -108,6 +108,33 @@ yarn agent:delivery-check --project-dir /path/to/delivery-checkout --require-cle
 
 真实本地 `origin/release` 临时 clone 已验收：目标不含个人工具，原有两项网络选择用例在真实 Chrome 中通过后成功绑定；同时传入前端日期 5 项、SDK BigMath 6 项报告也通过。错误目录、旧工具、失败报告、缺失/失败原生结果和清理失败均拒绝；Git 忽略的源码变化在 HEAD/clean 不变时被拒绝，恢复后通过；实际新增源码提交后，旧报告在 clean 状态下仍拒绝。检查前后 HEAD、索引字节、原报告及原生结果保持一致，临时 clone 已删除。本轮隔离验收显式复用已安装依赖和准备资源，没有执行全新安装或构建。证据在忽略的 `.local/acceptance/delivery-check/browser-evidence/acceptance.json`，`combined.json` 保存三类报告共同通过结果。 本轮统一工具测试 96 项、根类型检查、相关脚本静态检查及 134 个文档本地目标检查通过；全量前端回归 3,014 项通过、1 项既有跳过。
 
+### API 测试证据绑定
+
+2026-10-27 新增可重复的 `--api-report PATH`，用于 API 交付 checkout 的离线和隔离数据库报告。先在干净目标运行所需的[API 测试](solana-api-local.md#在独立-api-checkout-中运行测试)，再从基础设施目录检查该 API 仓库的交付差异与报告：
+
+```sh
+yarn agent:delivery-check --project-dir /path/to/api-delivery-checkout --require-clean \
+  --base origin/release --development-base API_DEVELOPMENT_BASE \
+  --head API_DELIVERY_BRANCH --expected-base FULL_API_RELEASE_SHA \
+  --allow-path src/path/to/feature.ts \
+  --api-report /path/to/offline-id/report.json \
+  --api-report /path/to/integration-id/report.json
+```
+
+`--project-dir` 此处是 API 仓库根目录，`--development-base`、`--head` 和 release SHA 必须使用该 API 仓库的实际引用；不能照搬前端仓库的身份。必须显式 `--require-clean`，同一报告不能重复传入。可以只选任务所需的一类报告，工具不替用户决定覆盖范围；未选时 `apiEvidence` 为空。前端/SDK/浏览器参数仍核对当前 `--project-dir` 的同一仓库，不用于将另一个仓库的测试结果混入 API 检查。
+
+API 运行器现在保存 schema、测试前后 Git 身份、源码聚合指纹、工具摘要和 Node/Jest/ts-jest/TypeScript 版本；运行中工具或版本变化也不能通过。交付检查重新读取目标所选测试、必要配置与全部 API TS/JS/JSON 源码；集成模式额外读取原 Jest/DB setup 与迁移。目标路径、clean HEAD、源码前后和当前摘要均须匹配，不能仅以 commit 或汇总 passed 判定有效。
+
+检查还会重新读取报告引用的原生 Jest JSON 与网络事件日志，要求精确且唯一的所选 suite、实际断言全部执行通过、无 skip/todo、正常退出和所属进程清理完成；离线临时目录或集成容器/目录清理必须通过。网络安装数须等于 suite 数，拒绝数为 0，guard 摘要及集成网络策略保持一致。计数须与原生结果相同。保留这些原始文件；旧报告缺字段、文件缺失或指纹变化时重跑相关测试，不手改历史报告。
+
+逐份结果在 `apiEvidence` 中，包含报告路径、模式、testedCommit、sourceSha256、suite 和计数；无效证据产生 `api-evidence-invalid` finding，整次 blocked / 退出 2。检查只读取本地文件并运行只读 Git 命令，不启动数据库、HTTP 服务或测试，不 fetch、安装、构建、切分支或修复文件。
+
+本项核对测试结果与交付版本的对应关系，不证明需求覆盖充分、真实数据正确或完整已安装依赖的字节一致；工具摘要和版本也不是签名或原子快照，检查后变更须重新验收。
+
+真实验收：以本地 API `origin/release` 建立独立 clone，仅为验收显式链接 package/lock 一致的已有依赖，以 README 的临时提交建立非空交付差异。原收益计算 6 项和市场数据库 4 项通过后，两份报告共同绑定成功；事件日志追加拒绝事件、缺日志、原生结果失败、错误目录、旧工具/运行时、dirty 源码均拒绝，恢复后通过。再提交新的 HEAD，旧报告在 clean 状态下仍拒绝。检查未改变 Git 索引字节，验收 clone 已删除，真实业务源码未改动。证据为本机忽略目录 `.local/acceptance/solana-api-local/api-delivery-{acceptance,passed,offline,integration}.json`。
+
+本轮工程检查：API 默认离线 12 项、隔离数据库 5 项及统一工具 99 项通过，SDK 产物 verify、根类型检查、相关 ESLint/Prettier、140 个文档本地目标与差异检查通过；完整前端回归 3,014 项通过、1 项既有跳过，退出 0。默认报告及工具、类型、前端日志分别为同目录 `api-delivery-default-{offline,integration}.json`、`api-delivery-tools.tap`、`api-delivery-tscheck.log`、`api-delivery-test-ci.log`。
+
 ### 基础设施验收记录（2026-10-26）
 
 本轮未创建主仓库分支或改写历史。临时仓库真实历史回归通过；主仓库 `HEAD` 与个人开发基础重合，实际只读检查正确返回 `development-base-history` 并退出 2，清单外文件也明确列出。检查前后主仓库 HEAD、索引和 4,511 个文件内容摘要一致。根类型检查、ESLint、Prettier、71 个文档本地目标及差异检查通过；完整前端单元测试 3,014 项通过、1 项既有跳过。证据保留在忽略目录 `.local/acceptance/delivery-check/`；工具本身仅向 stdout 输出 JSON，归档由调用者显式重定向完成。
