@@ -43,6 +43,28 @@ yarn frontend:test-offline --project-dir /path/to/delivery-checkout \
 
 本轮工程检查：当前分支默认离线 17 项、统一工具回归 108 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、136 个文档本地链接和差异检查通过；完整前端回归 299 个文件、3,014 项通过，1 个文件及其 1 项既有跳过，退出 0。当前分支默认报告为同目录 `related-current-default.json`，工程日志为 `related-{tools.tap,sdk.json,types.log,tests.log}`。
 
+## 按 Git 变更范围运行局部回归
+
+在只包含前端代码改动的功能 checkout 中，从基础设施目录执行：
+
+```sh
+yarn frontend:test-offline --project-dir /path/to/feature-checkout --changed-since origin/release
+# Include current index, working files and untracked code relative to HEAD.
+yarn frontend:test-offline --project-dir /path/to/feature-checkout --changed-since HEAD
+```
+
+`REF` 必须是目标仓库中已有的 commit 引用。运行器只读将其固定为完整 SHA，记录当时 HEAD，合并相对该基线的工作树差异、索引差异和 Git 未忽略的未跟踪文件，再把去重的源码清单交给上节真实依赖图流程。比较是所选基线树与当前 checkout 的差异，不自动计算 merge-base，不 fetch、切分支或更新索引；用户应选对实际功能基线。索引中存在但工作文件已撤销的变化仍纳入选择，但测试执行的是当前工作文件，不证明暂存版本通过；交付绑定仍要求干净版本重跑。
+
+参数与 `--suite`、`--related` 互斥；断点调试继续使用发现后的明确 suite。自动范围仅允许已存在的 `src/`、`landing/` TS/TSX/JS/JSX/JSON 普通文件。无变化、引用无效、删除/重命名前的源路径缺失，或包含文档、SDK、配置、样式和其他资源变化时明确失败，列出需要人工判断的路径；不静默略过这些变化或执行默认测试。混合修改时先评估完整影响，再显式选择 `--suite` 或合适的完整验收，不用自动局部回归代替判断。Git 忽略的未跟踪文件不属于此选择范围，需要时显式 `--related`。
+
+报告新增 `changes`，记录 `baseRef/baseSha/head`、`worktreePaths/indexPaths/untrackedPaths` 及最终 `related`；正常执行后用固定基线 SHA 重新收集为 `changesAfter`，要求 `changesUnchanged=true`。源码内容未变但 HEAD、暂存/未跟踪状态或路径范围变化，也不得报告通过；范围变化失败阶段为 `changed-source-selection`。开始前范围不支持时按原 CLI 前置错误退出 1，不启动发现进程。检查不是原子快照，期间不要并发编辑或执行 Git 写操作。
+
+变更范围验收（2026-10-27）：独立 release clone 不含个人运行器。新增干净功能提交后，`HEAD~1` 固定到原 release SHA，自动选择 PWA 原测试 9 项通过；叠加暂存、未暂存和未跟踪源码后，实际执行两个 suite / 10 项，前后范围一致，索引字节及工作区状态未被检查器修改。临时测试仅把已有未跟踪源码加入索引，原生 10 项通过、源码内容指纹未变，但范围状态改变，运行器正确 failed / `changed-source-selection`；恢复后 10 项再次通过。无变化、无效引用、配置混入和删除源码均在发现前失败，未回退默认测试。所有注入和 Git 写操作仅在验收副本中执行，副本已清理；真实业务源码未修改。证据为本机忽略目录 `.local/acceptance/frontend-offline/changed-acceptance.json` 及其中列出的原始报告。
+
+本机验收曾观察到：禁用索引自动刷新时，恢复原字节后的文件仍可能出现在 `diff --name-only`，但 Git blob 哈希相同且 `--numstat` 无差异。工具因此使用 `--numstat -z --no-renames --no-textconv --no-ext-diff` 读取内容差异，而不为清除统计缓存写入索引；回归保留“改动后恢复原字节应为空范围”的检查。若其他只读工作树差异工具遇到同类问题，先核对 blob/内容差异，不直接刷新用户索引。该结论不影响只比较两个已提交树的交付检查。
+
+本轮范围选择工程检查：统一工具回归 109 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、137 个文档本地链接及差异检查通过；完整前端回归 299 个文件、3,014 项通过，1 个文件及其 1 项既有跳过，退出 0。日志为同一忽略目录中的 `changed-{tools.tap,sdk.json,types.log,tests.log}`。
+
 ## 结束时核对网络审计
 
 2026-10-27 起，前端、SDK 和 API 离线入口共用运行器侧的网络事件审计。保护器在每个所选文件安装时记录 `installed`，拒绝连接时记录 `blocked`；日志路径在安装时固定，测试修改环境变量不会关闭记录。运行器结束后独立读取 `network-events.log`，报告 `network.status/installations/blockedAttempts/eventsFile`。安装数须等于所选文件数、拒绝数为 0，缺日志或未知事件也失败；不能只凭原生测试 JSON 的 success 判断通过。
