@@ -64,7 +64,7 @@ async function requireFreePort(port) {
   await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
 }
 
-export async function doctorApi({ apiDir, port }) {
+export async function doctorApi({ apiDir, port, checkPort = true }) {
   const checks = [];
   const inspect = async (name, action, remedy) => {
     try {
@@ -86,7 +86,8 @@ export async function doctorApi({ apiDir, port }) {
       }),
     "Install locked gmx-api dependencies; see docs/solana-api-local.md."
   );
-  await inspect("port", () => requireFreePort(port), "Identify the port owner or explicitly select another port.");
+  if (checkPort)
+    await inspect("port", () => requireFreePort(port), "Identify the port owner or explicitly select another port.");
   return {
     status: checks.every((check) => check.status === "passed") ? "passed" : "failed",
     mode: "sample",

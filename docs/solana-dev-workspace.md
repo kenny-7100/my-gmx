@@ -37,6 +37,29 @@ yarn solana:dev stop
 
 控制 socket 位于 `/tmp/gmx-solana-stack-<uid>-<workspace-hash>.sock`，权限 0600。SIGTERM 正常清理；SIGKILL/系统崩溃不保证清理，须先核对资源归属后处理残留，不盲目 kill 或接管。服务生命周期快照不代表当前健康，必须运行 status。
 
+## 启动前的组合预检
+
+2026-10-27 已验收。在主仓库根目录运行，只输出 JSON，不创建工作区或保存报告文件：
+
+```sh
+yarn solana:dev doctor --project-dir /path/to/frontend-checkout \
+  --api-dir /path/to/api-checkout --web-port 3026 --api-port 3024
+# Check a requested API inspector as well, without enabling it.
+yarn solana:dev doctor --project-dir /path/to/frontend-checkout \
+  --api-dir /path/to/api-checkout --web-port 3026 --api-port 3024 \
+  --api-inspect-port 9247
+```
+
+doctor 汇总 Node、前端 Git 根目录/源码/兼容 Vite、已有工作区、API Git 根目录/样例/tsx runner、API 服务归属及所需端口；选中 vite 时同时检查基础设施的锁定 Playwright 和系统 Chrome 可执行文件，选中 rpc 时检查本地端口。API 依赖检查复用原 doctor，服务归属判断替代其单纯的空闲端口判断。即使某项失败，后续独立项仍执行，逐项给出 blocked 和英文 remedy；全部通过退出 0，存在 blocked 退出 2，非法参数退出 1。doctor 沿用 up 的目录、services 与端口参数，但不启动 API/Vite/RPC/Chrome，不安装依赖或构建；仅执行本地 Git/runner 版本读取、文件检查、临时端口 bind/close，以及已管理 API 的只读健康查询。
+
+API 端口可借用时，报告 `ownership=borrowed`、PID 与 inspector；必须 ready、真实目录匹配，显式请求的调试端口也须匹配。未知占用、其他 checkout 或不匹配 inspector 均 blocked，不停止或重配监听者。端口空闲为 `would-start-owned`，不代表依赖均就绪或服务已启动。相同前端已有工作区会 blocked，因为本检查面向新启动；持续服务健康仍用 status。Chrome 文件可访问仅代表启动前置，不证明其运行、页面或业务可用；完整 UI 冒烟仍使用原 browser-preflight/browser-check，不额外检查本次样例代理不需要的 SDK/WASM 或测试发现。
+
+`solana:dev:check` 已在创建工作区前自动调用同一预检，把结果保存在本次汇总报告的 `preflight` 字段；blocked 时以 `failureStage=preflight`、退出 1 和 `cleanup=not-started` 结束，不尝试启动服务。直接使用一次性入口时无需先手动重复 doctor；持续 up 前可单独运行 doctor，传入与 up 相同的实际参数。预检不能锁定端口，真正启动仍由原管理器再次检查归属和占用。
+
+真实验收：从本地前端/API `origin/release` 创建独立 clone，依赖声明/锁文件相同后仅为验收链接现有依赖。正常 doctor 通过，未产生工作区 run 目录或占用端口；移除两端依赖链接后同时报告 frontend 与 api-runner blocked，一次性入口停在 preflight，没有启动工作区，随后恢复链接。未知 API/Web/inspector 监听者均保留；匹配借用通过，其他目录及错误 inspector 被拒绝。接入预检后，真实 Chrome/两次源码断点/借用保留和普通自建 API/Chrome/自动清理均通过。原默认工作区/API PID 不变且 ready，目标 checkout clean，临时 clone 已删除；业务源码、样例与配置均未修改。证据在本机 `.local/acceptance/solana-dev/doctor-acceptance.json`、同名 `.log` 及摘要引用的运行报告。
+
+工程验收通过：统一工具回归 101 项（包含多项前置缺失与监听者保留）、SDK 产物 verify、`yarn tscheck`、`yarn test:ci`（299 个文件、3014 项通过，1 个文件及其 1 项原有跳过）、五个改动脚本的 Prettier/ESLint、137 个本地文档链接与 `git diff --check`。主项目测试仍有既有 happy-dom teardown AbortError 日志，退出码为 0；工程日志在同目录的 `doctor-tools.tap`、`doctor-sdk-verify.json`、`doctor-tscheck.log` 和 `doctor-test-ci.log`。
+
 ## 独立前端 checkout 的持续联调
 
 从基础设施仓库运行，工具留在基础设施目录，Vite 加载目标自己的原配置、源码及本地环境文件：

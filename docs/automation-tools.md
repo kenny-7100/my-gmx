@@ -30,6 +30,8 @@ API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测�
 
 一次性组合验收用 [solana:dev:check](solana-dev-workspace.md#一条命令运行组合验收并停服)：复用工作区启动、真实 Chrome 和可选断点验收，逐次汇总日志、失败阶段及清理；拒绝已有工作区，结束后只停止本轮工作区并保留借用 API。需要持续开发时仍用原 up/status/stop。
 
+[组合预检](solana-dev-workspace.md#启动前的组合预检)复用 `solana:dev doctor`，汇总双 checkout、runner、浏览器和占用条件，识别可借用 API，不启动服务或浏览器；一次性入口已自动运行并保留 preflight，不重复手动预检。工具回归覆盖多项缺失和保留未知监听者。
+
 ## 统一离线工具回归
 
 2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：

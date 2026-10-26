@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { cp, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -8,7 +9,38 @@ import { setImmediate } from "node:timers";
 
 import { safeApiPath } from "./lib/agent-request-path.mjs";
 import { checkContracts, differences, shape } from "./lib/solana-dev-contracts.mjs";
-import { devTarget, validateApiService } from "./solana-dev.mjs";
+import { devTarget, doctorWorkspace, validateApiService } from "./solana-dev.mjs";
+
+test("workspace doctor aggregates missing prerequisites and preserves an occupied listener without startup", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "gmx-doctor-"));
+  const listener = net.createServer();
+  const apiListener = net.createServer();
+  await new Promise((resolve) => listener.listen(0, "127.0.0.1", resolve));
+  await new Promise((resolve) => apiListener.listen(0, "127.0.0.1", resolve));
+  const { port } = listener.address();
+  try {
+    execFileSync("git", ["init", "--quiet", dir]);
+    const report = await doctorWorkspace({
+      projectDir: dir,
+      apiDir: path.join(dir, "missing-api"),
+      services: ["api", "vite"],
+      webPort: port,
+      apiPort: apiListener.address().port,
+    });
+    assert.equal(report.status, "blocked");
+    for (const name of ["frontend", "api-checkout", "api-source", "api-runner", "api-service", "web-port"])
+      assert.equal(report.checks.find((check) => check.name === name).status, "blocked", name);
+    assert.equal(report.serviceStartup, "not-run");
+    assert.equal(report.browserExecution, "not-run");
+    assert.equal(listener.listening, true);
+    assert.equal(apiListener.listening, true);
+    assert.ok(report.checks.filter((check) => check.status === "blocked").every((check) => check.remedy));
+  } finally {
+    await new Promise((resolve) => listener.close(resolve));
+    await new Promise((resolve) => apiListener.close(resolve));
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 
 test("workspace API identity requires a ready matching checkout and preserves the selected instance", () => {
   const service = { status: "ready", apiDir: "/api", supervisorPid: 123 };

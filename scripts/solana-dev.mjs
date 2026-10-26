@@ -13,6 +13,8 @@ import { sourceEvidence } from "./frontend-offline-tests.mjs";
 import { readApiTestSource } from "./lib/gmx-api-source.mjs";
 import { checkContracts } from "./lib/solana-dev-contracts.mjs";
 import { control as apiControl } from "./solana-api-dev.mjs";
+import { doctorApi } from "./solana-api-local.mjs";
+import { browserDependency, checkChromeExecutable } from "./solana-browser-preflight.mjs";
 import { startVite, API_PREFIX } from "../tools/solana-dev/vite.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -78,6 +80,89 @@ async function freePort(port) {
     server.listen(port, "127.0.0.1", resolve);
   });
   await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+}
+
+export async function doctorWorkspace(options) {
+  const checks = [];
+  const inspect = async (name, remedy, action) => {
+    try {
+      const details = await action();
+      checks.push({ name, status: "passed", ...details });
+    } catch (error) {
+      checks.push({ name, status: "blocked", remedy, reason: error.message.split("\n")[0].slice(0, 240) });
+    }
+  };
+  await inspect("node", "Use Node 22.", () => assert.equal(process.versions.node.split(".")[0], "22"));
+  await inspect("frontend", "Select the frontend Git root with its locked dependencies and compatible Vite.", () =>
+    devTarget(options.projectDir)
+  );
+  await inspect("workspace", "Use another frontend checkout or stop its workspace explicitly.", async () => {
+    let existing;
+    try {
+      existing = await control("status", options.projectDir);
+    } catch (error) {
+      if (!["ENOENT", "ECONNREFUSED"].includes(error.code)) throw error;
+    }
+    assert.ok(!existing, "A workspace already exists for this frontend.");
+  });
+  if (options.services.includes("api")) {
+    await inspect("api-checkout", "Select the API Git checkout root.", () => readApiTestSource(options.apiDir, []));
+    const preparation = await doctorApi({ apiDir: options.apiDir, port: options.apiPort, checkPort: false });
+    for (const check of preparation.checks.filter((check) => check.name !== "node"))
+      checks.push({ ...check, name: `api-${check.name}`, status: check.status === "passed" ? "passed" : "blocked" });
+    await inspect(
+      "api-service",
+      "Select a free API port or a ready matching managed checkout and inspector.",
+      async () => {
+        let existing;
+        try {
+          existing = await apiControl(options.apiPort, "status");
+        } catch (error) {
+          if (!["ENOENT", "ECONNREFUSED"].includes(error.code)) throw error;
+        }
+        if (existing) {
+          validateApiService({
+            service: existing,
+            apiDir: await realpath(options.apiDir),
+            inspectPort: options.apiInspectPort,
+          });
+          return { ownership: "borrowed", supervisorPid: existing.supervisorPid, inspector: existing.inspector };
+        }
+        await freePort(options.apiPort);
+        if (options.apiInspectPort) await freePort(options.apiInspectPort);
+        return { ownership: "would-start-owned" };
+      }
+    );
+  }
+  if (options.services.includes("vite")) {
+    await inspect("web-port", "Select a free Web port; existing listeners are preserved.", () =>
+      freePort(options.webPort)
+    );
+    await inspect(
+      "playwright",
+      "Prepare the infrastructure checkout's locked Playwright dependency.",
+      browserDependency
+    );
+    await inspect(
+      "chrome",
+      "Install the supported system Google Chrome executable; see docs/solana-browser-smoke.md.",
+      () => checkChromeExecutable()
+    );
+  }
+  if (options.services.includes("rpc"))
+    await inspect("rpc-port", "Select a free RPC proxy port.", () => freePort(options.rpcPort));
+  return {
+    schemaVersion: 1,
+    status: checks.every((check) => check.status === "passed") ? "passed" : "blocked",
+    scope: "full-stack-startup-prerequisites",
+    checkedAt: new Date().toISOString(),
+    projectDir: path.resolve(options.projectDir),
+    apiDir: path.resolve(options.apiDir),
+    checks,
+    serviceStartup: "not-run",
+    browserExecution: "not-run",
+    businessAcceptance: "not-run",
+  };
 }
 
 async function supervise(options) {
@@ -435,17 +520,17 @@ export async function runCli(args = process.argv.slice(2)) {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn solana:dev <up|status|logs|stop|trace|contracts> [--project-dir PATH] [--api-dir PATH] [--api-inspect-port PORT] [--services api,vite,rpc] [--web-port 3010 --api-port 3004 --rpc-port 3030] [--id TRACE_ID] [--offline]\nUse --project-dir to select a frontend checkout and its workspace; up may select an independent API checkout using --api-dir. Up requires installed target dependencies, matching Vite and the API Solana sample entry. --api-inspect-port explicitly enables loopback API debugging or requires a matching borrowed inspector. Development tools only. The local API proxy is /__agent/solana-api; no frontend business consumer is added. Contracts are unreviewed structural baselines (partial exits 2).\n"
+        "Usage: yarn solana:dev <doctor|up|status|logs|stop|trace|contracts> [--project-dir PATH] [--api-dir PATH] [--api-inspect-port PORT] [--services api,vite,rpc] [--web-port 3010 --api-port 3004 --rpc-port 3030] [--id TRACE_ID] [--offline]\nUse --project-dir to select a frontend checkout and its workspace; up may select an independent API checkout using --api-dir. Up requires installed target dependencies, matching Vite and the API Solana sample entry. --api-inspect-port explicitly enables loopback API debugging or requires a matching borrowed inspector. Doctor checks startup and Chrome prerequisites without starting services; blocked exits 2. Development tools only. The local API proxy is /__agent/solana-api; no frontend business consumer is added. Contracts are unreviewed structural baselines (partial exits 2).\n"
       );
       return 0;
     }
     assert.equal(positionals.length, 1);
     const command = positionals[0];
-    assert.ok(["up", "_serve", "status", "logs", "stop", "trace", "contracts"].includes(command));
-    assert.equal(process.versions.node.split(".")[0], "22");
+    assert.ok(["doctor", "up", "_serve", "status", "logs", "stop", "trace", "contracts"].includes(command));
+    if (command !== "doctor") assert.equal(process.versions.node.split(".")[0], "22");
     for (const token of tokens.filter((token) => token.kind === "option")) {
       if (["api-dir", "api-inspect-port", "services", "web-port", "api-port", "rpc-port"].includes(token.name))
-        assert.ok(["up", "_serve"].includes(command));
+        assert.ok(["doctor", "up", "_serve"].includes(command));
       if (token.name === "id") assert.equal(command, "trace");
       if (token.name === "offline") assert.equal(command, "contracts");
     }
@@ -483,7 +568,8 @@ export async function runCli(args = process.argv.slice(2)) {
       return process.exitCode ?? 0;
     }
     let result;
-    if (command === "up") {
+    if (command === "doctor") result = await doctorWorkspace(options);
+    else if (command === "up") {
       options.projectDir = (await devTarget(options.projectDir)).projectDir;
       if (options.services.includes("api")) {
         options.apiDir = await realpath(options.apiDir);
@@ -546,7 +632,11 @@ export async function runCli(args = process.argv.slice(2)) {
       result = await control(command === "trace" ? `trace ${values.id}` : command, options.projectDir);
     }
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
-    return result.status === "partial" ? 2 : ["ready", "passed", "stopped"].includes(result.status) ? 0 : 1;
+    return ["partial", "blocked"].includes(result.status)
+      ? 2
+      : ["ready", "passed", "stopped"].includes(result.status)
+        ? 0
+        : 1;
   } catch (error) {
     process.stderr.write(
       `${JSON.stringify({ status: "failed", code: "workspace-unavailable", reason: error.message.split("\n")[0].slice(0, 240), message: "Check arguments, service ownership, installed dependencies and .local/acceptance/solana-dev/run-*/report.json. This workspace never takes over unknown listeners." })}\n`
