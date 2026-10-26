@@ -6,6 +6,10 @@
 
 GMX 本身的线上地址与独立核验结果见 [GMX 当前线上服务地址](gmx-live-services.md)，不要混用两项目的 API、keeper 与索引。
 
+2026-10-26 补充：实际访问 Stake、GT My / Global / Buyback、Referrals、Stats。GT Global 同时调用旧 Web `gtUpdates` 与 Core SQD；Buyback 的池子、结算和水位及新推荐奖励由 GT SQD 返回，有限查询均无 GraphQL errors。Stats 的旧 Web WS 成功接收 `indexTokens`、`tickers`、`glvs`、`tokenMints`、`storeBalances` 等主题，顶部卡片实际读取 R2 `stats-new.json`，其生产者与更新承诺仍待确认。
+
+Keeper HTTP 的只读 schema 查询确认存在质押及 Buyback 相关字段；Keeper WS 使用 `graphql-transport-ws` 握手成功并返回只读 `query { __typename }` 的 `QueryRoot`，随后关闭连接。没有执行业务 mutation、质押 subscription、签名或卖出，不能据此宣告交易通过。下文“仅脚本配置、未观察调用”表保留 **10 月 25 日** 的历史窗口，不覆盖上述新增成功证据。完整功能依赖及验证限制见根目录 [GMTrade 四个页面完整功能与依赖核验](../gmtrade-pages-dependency-audit.md)。
+
 本次使用独立、未连接钱包的 Chrome 访问首页、Pools、交易页（`/trade` 转到 `/trade/SOL-USD`）、Stats 和 GT（`/gt` 转到 `/gt/my`），观察时间约为北京时间 2026-10-25 22:55～22:59。首页 Launch App 弹出条款确认，未代用户接受；后续从公开页面链接发现 `/trade` 并直接访问，没有修改存储绕过条件。只记录去掉 query 的地址、HTTP 状态、GraphQL 操作名及 WS 帧计数，不读取助记词或连接钱包。
 
 | 服务 | 当前地址 | 证据与观察结果 |
