@@ -4,6 +4,8 @@
 
 API 源码调试使用既有持续服务上的[断点验收入口](solana-api-local.md#agent-可重复的源码断点验收)：`yarn solana:api-debug` 自动验证真实 inspector、TypeScript 映射、请求断点、限定局部变量与恢复结果；默认启动并清理所属服务，`--attach` 保留借用服务。回归命令为 `yarn test:solana-api-debug`，使用真实隔离 Node inspector，不改业务源码。
 
+SDK 计算使用[源码离线回归](sdk-offline-tests.md) `yarn sdk:test-offline`：复用原 SDK Vitest 配置，精确选测试文件，使用空环境目录和共享 Node 网络保护器，无需构建；报告保留源码摘要和原生结果，拒绝零测试、范围不符及捕获后的联网尝试。工具回归为 `yarn test:sdk-offline`，不复制业务实现或预期值。
+
 更新日期：2026-10-25。用户已授权 Agent 在实际协作中主动发现、实现并积累有复用价值的自动化能力，减少重复推理、人工操作、执行时间和成本。
 
 ## 何时沉淀
