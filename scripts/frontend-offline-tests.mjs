@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
-import { spawn, execFileSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { closeSync, openSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, readdir, realpath, rm, stat, symlink, writeFile } from "node:fs/promises";
+import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
+import { runTestProcess } from "./lib/agent-test-process.mjs";
 import { passedResults } from "./sdk-offline-tests.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -19,6 +21,7 @@ const DEFAULT_SUITES = [
 ];
 const TOOL_FILES = [
   "scripts/frontend-offline-tests.mjs",
+  "scripts/lib/agent-test-process.mjs",
   "scripts/sdk-offline-tests.mjs",
   "tools/frontend-offline/vitest.config.mjs",
   "tools/frontend-offline/setup.mjs",
@@ -91,10 +94,23 @@ async function sourceEvidence(projectDir) {
   };
 }
 
-export async function runFrontendOffline({ suites }) {
+export async function runFrontendOffline({ suites, inspectPort }) {
   const projectDir = await realpath(ROOT);
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
   suites = await resolveSuites(projectDir, suites);
+  if (inspectPort !== undefined) {
+    assert.ok(
+      Number.isInteger(inspectPort) && inspectPort > 0 && inspectPort <= 65535,
+      "Use an inspector port from 1 to 65535."
+    );
+    assert.equal(suites.length, 1, "Debug exactly one frontend suite using --suite.");
+    const probe = net.createServer();
+    await new Promise((resolve, reject) => {
+      probe.once("error", reject);
+      probe.listen(inspectPort, "127.0.0.1", resolve);
+    });
+    await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
+  }
   const output = path.join(ROOT, ".local/acceptance/frontend-offline");
   await mkdir(output, { recursive: true });
   const runDir = await mkdtemp(path.join(output, "run-"));
@@ -120,24 +136,12 @@ export async function runFrontendOffline({ suites }) {
       "real browser and live data acceptance",
     ],
   };
-  let child;
-  let interrupted = false;
-  const killGroup = (signal) => {
-    if (!child?.pid) return;
-    try {
-      process.kill(-child.pid, signal);
-    } catch (error) {
-      if (error.code !== "ESRCH") throw error;
-    }
-  };
-  const stop = () => {
-    interrupted = true;
-    killGroup("SIGTERM");
-  };
-  process.on("SIGINT", stop);
-  process.on("SIGTERM", stop);
   let stage = "source-evidence";
   try {
+    if (inspectPort !== undefined) {
+      report.debug = { inspector: `127.0.0.1:${inspectPort}`, pauseOnStart: true, timeoutMs: 1_800_000 };
+      process.stderr.write(`Frontend debug session: ${JSON.stringify({ ...report.debug, logFile, reportFile })}\n`);
+    }
     report.sourceBefore = await sourceEvidence(projectDir);
     report.toolSha256 = {};
     for (const file of [...TOOL_FILES, "yarn.lock"])
@@ -148,47 +152,44 @@ export async function runFrontendOffline({ suites }) {
     const optionsFile = path.join(emptyDir, "options.json");
     await writeFile(optionsFile, JSON.stringify({ projectDir, suites, emptyDir, resultsFile }), { mode: 0o600 });
     stage = "vitest";
-    assert.ok(!interrupted, "frontend check interrupted.");
     const fd = openSync(logFile, "wx", 0o600);
-    let timer;
     try {
-      child = spawn(
-        process.execPath,
-        [
+      report.exit = await runTestProcess({
+        args: [
           path.join(ROOT, "node_modules/vitest/vitest.mjs"),
           "run",
           "--config",
           path.join(ROOT, "tools/frontend-offline/vitest.config.mjs"),
           "--root",
           projectDir,
+          ...(inspectPort === undefined ? [] : [`--inspect-brk=127.0.0.1:${inspectPort}`, "--pool=forks"]),
         ],
-        {
-          cwd: emptyDir,
-          env: {
-            PATH: process.env.PATH,
-            NODE_ENV: "test",
-            TZ: "UTC",
-            CI: "true",
-            GMX_FRONTEND_OFFLINE_OPTIONS: optionsFile,
-            LINGUI_CONFIG: path.join(ROOT, ".linguirc"),
-            VITE_APP_PWA_GENERATION: `${execFileSync("git", ["-C", ROOT, "show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim()}000`,
-          },
-          stdio: ["ignore", fd, fd],
-          detached: true,
-        }
-      );
-      report.processGroup = child.pid;
-      timer = setTimeout(() => killGroup("SIGKILL"), 180000);
-      report.exit = await new Promise((resolve, reject) => {
-        child.once("error", reject);
-        child.once("exit", (code, signal) => resolve({ code, signal }));
+        cwd: emptyDir,
+        env: {
+          PATH: process.env.PATH,
+          NODE_ENV: "test",
+          TZ: "UTC",
+          CI: "true",
+          GMX_FRONTEND_OFFLINE_OPTIONS: optionsFile,
+          LINGUI_CONFIG: path.join(ROOT, ".linguirc"),
+          VITE_APP_PWA_GENERATION: `${execFileSync("git", ["-C", ROOT, "show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim()}000`,
+        },
+        logFd: fd,
+        timeoutMs: report.debug?.timeoutMs ?? 180000,
       });
+      report.processGroup = report.exit.processGroup;
     } finally {
-      clearTimeout(timer);
-      killGroup("SIGKILL");
       closeSync(fd);
     }
     stage = "results";
+    if (report.debug) {
+      const log = await readFile(logFile, "utf8");
+      report.debug.started =
+        log.includes(`Debugger listening on ws://${report.debug.inspector}/`) && !log.includes("Starting inspector on");
+      assert.ok(report.debug.started, "Frontend inspector did not start successfully; inspect vitest.log.");
+    }
+    assert.ok(!report.exit.interrupted && !report.exit.timedOut, "Frontend check interrupted or timed out.");
+    assert.ok(report.exit.cleanup === "passed" && !report.exit.signalError, "Frontend test process cleanup failed.");
     const result = JSON.parse(await readFile(resultsFile, "utf8"));
     report.counts = {
       passed: result.numPassedTests,
@@ -199,7 +200,6 @@ export async function runFrontendOffline({ suites }) {
     };
     report.sourceAfter = await sourceEvidence(projectDir);
     report.sourceUnchanged = report.sourceAfter.sourceSha256 === report.sourceBefore.sourceSha256;
-    assert.ok(!interrupted, "frontend check interrupted.");
     assert.ok(report.sourceUnchanged, "frontend source changed during the check.");
     assert.ok(
       passedResults(
@@ -214,8 +214,6 @@ export async function runFrontendOffline({ suites }) {
     report.failureStage = stage;
     report.error = { name: error.name, message: error.message.split("\n")[0].slice(0, 240) };
   } finally {
-    process.off("SIGINT", stop);
-    process.off("SIGTERM", stop);
     await rm(emptyDir, { recursive: true, force: true });
     report.temporaryDirectoryCleanup = "passed";
     report.finishedAt = new Date().toISOString();
@@ -230,16 +228,25 @@ export async function runCli(args = process.argv.slice(2)) {
       args,
       options: {
         suite: { type: "string", multiple: true },
+        "inspect-port": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn frontend:test-offline [--suite src/...spec.ts ...]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes.\n"
+        "Usage: yarn frontend:test-offline [--suite src/...spec.ts ...] [--inspect-port 9240]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes. Debug mode requires one suite, pauses a single fork on loopback and allows 30 minutes.\n"
       );
       return 0;
     }
-    const report = await runFrontendOffline({ suites: values.suite });
+    const report = await runFrontendOffline({
+      suites: values.suite,
+      inspectPort:
+        values["inspect-port"] === undefined
+          ? undefined
+          : /^\d+$/.test(values["inspect-port"])
+            ? Number(values["inspect-port"])
+            : NaN,
+    });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return report.status === "passed" ? 0 : 1;
   } catch (error) {
