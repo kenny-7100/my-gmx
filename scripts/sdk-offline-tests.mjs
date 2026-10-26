@@ -44,7 +44,7 @@ export async function resolveSuites(sdkDir, requested = DEFAULT_SUITES) {
 }
 
 async function sourceEvidence(sdkDir) {
-  const files = ["package.json", "vitest.config.ts", "tsconfig.json"];
+  const files = ["package.json", "yarn.lock", "vitest.config.ts", "tsconfig.json"];
   const walk = async (dir) => {
     for (const entry of await readdir(path.join(sdkDir, dir), { withFileTypes: true })) {
       const relative = path.join(dir, entry.name);
@@ -72,7 +72,19 @@ async function sourceEvidence(sdkDir) {
     dirty: Boolean(git("status", "--porcelain")),
     sourceSha256: digest.digest("hex"),
     sourceFileCount: files.length,
+    lockSha256: createHash("sha256")
+      .update(await readFile(path.join(sdkDir, "yarn.lock")))
+      .digest("hex"),
   };
+}
+
+export async function targetRuntime(sdkDir) {
+  const packageFile = path.join(sdkDir, "node_modules/vitest/package.json");
+  const target = JSON.parse(await readFile(packageFile, "utf8"));
+  const tool = JSON.parse(await readFile(path.join(ROOT, "node_modules/vitest/package.json"), "utf8"));
+  assert.equal(target.version, tool.version, "Target Vitest must match the infrastructure runtime version.");
+  const executable = await realpath(path.join(sdkDir, "node_modules/vitest/vitest.mjs"));
+  return { vitest: target.version, executable };
 }
 
 export function passedResults(result, suites, exit) {
@@ -113,6 +125,7 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     });
     await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
   }
+  const runtime = await targetRuntime(sdkDir);
   const output = path.join(ROOT, ".local/acceptance/sdk-offline");
   await mkdir(output, { recursive: true });
   const runDir = await mkdtemp(path.join(output, "run-"));
@@ -125,6 +138,7 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     status: "failed",
     mode: "sdk-source-offline",
     sdkDir,
+    runtime,
     suites,
     startedAt: new Date().toISOString(),
     logFile,
@@ -157,7 +171,7 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     try {
       report.exit = await runTestProcess({
         args: [
-          path.join(ROOT, "node_modules/vitest/vitest.mjs"),
+          runtime.executable,
           "run",
           "--config",
           path.join(ROOT, "tools/sdk-offline/vitest.config.mjs"),
@@ -233,7 +247,7 @@ export async function runCli(args = process.argv.slice(2)) {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ...] [--inspect-port 9238]\nRuns existing SDK source tests with an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. No SDK build, services or business source changes. Debug mode requires exactly one suite, pauses a single fork on loopback and allows 30 minutes; see the emitted session log path.\n"
+        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ...] [--inspect-port 9238]\nRuns existing SDK source tests using the target SDK's installed Vitest (must match the infrastructure version), an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. No SDK build, services or business source changes. Debug mode requires exactly one suite, pauses a single fork on loopback and allows 30 minutes; see the emitted session log path.\n"
       );
       return 0;
     }
