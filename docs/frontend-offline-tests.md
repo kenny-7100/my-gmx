@@ -20,24 +20,25 @@ yarn frontend:test-offline --suite src/lib/dates.spec.ts --suite src/domain/gmso
 
 ## 按源码依赖图选择关联测试
 
-已知本轮修改的前端源码，但不确定哪些现有测试导入它时，从基础设施目录执行：
+已知本轮修改的前端或 SDK 源码，但不确定哪些现有前端测试导入它时，从基础设施目录执行：
 
 ```sh
 yarn frontend:test-offline --related src/lib/pwa/appUpdateDecision.ts
+yarn frontend:test-offline --related sdk/src/utils/stats/api.ts
 yarn frontend:test-offline --project-dir /path/to/delivery-checkout \
   --related src/lib/pwa/appUpdateDecision.ts \
   --related src/lib/dates.spec.ts
 ```
 
-`--related` 可重复，接受目标 `src/`、`landing/` 下存在的 TS/TSX/JS/JSX/JSON 普通文件，测试文件本身也可作为输入；拒绝重复、glob、绝对路径、规范化前后不同的路径和符号链接。不能与 `--suite` 混用。需要断点时，先读取结果中的精确 `suites`，再用原有 `--suite FILE --inspect-port PORT` 单文件调试。
+`--related` 可重复，接受目标 `src/`、`landing/`、`sdk/src/` 下存在的 TS/TSX/JS/JSX/JSON 普通文件，测试文件本身也可作为输入；拒绝重复、glob、绝对路径、规范化前后不同的路径和符号链接。SDK 输入沿用目标 Vite 的真实 `sdk` alias 和依赖图，支持经过前端模块的传递导入及混合输入并集。输出与执行范围仍限于 `src/`、`landing/` 前端测试；SDK 自身测试另用 [SDK 离线入口](sdk-offline-tests.md)。不能与 `--suite` 混用。需要断点时，先读取结果中的精确 `suites`，再用原有 `--suite FILE --inspect-port PORT` 单文件调试。
 
 运行器先调用目标 Vitest 的 `list --filesOnly --json`，用原 Vite 配置、原 include/exclude（未设置 include 时使用当前 Vitest 官方默认值）和真实依赖图选择测试，多个输入取关联测试并集。发现阶段不执行测试或 global setup；它会变换依赖模块，因此仍要求完整目标依赖与资源。结果文件经过既有精确路径选择器校验，随后只执行发现的 suite，沿用原有零测试/skip/todo/原生结果检查、运行器侧网络审计、源码指纹与清理规则。无关联测试或发现失败整次退出 1，保留 `failureStage=related-discovery`；不退回默认三文件，不把零测试当通过。
 
 报告新增 `related` 和 `discovery`；后者记录发现阶段的退出与清理、网络审计、`discovery.log`、`discovery-files.json`。发现进程在加载 Vite 配置前安装现有 Node 网络保护器，另存 `discovery-network-events.log`，要求一次安装且零拒绝事件；正式测试继续按 suite 数独立审计。发现和执行各限时 180 秒，共享现有进程组取消/清理。临时目录退出后清理，日志与原生发现清单留在本次 run 目录。
 
-发现阶段与正式测试共用隔离环境和目标 PWA HEAD 时间，Vite 环境目录、缓存仍指向临时目录；配置只在空 CWD 加载。发现完整依赖图时，子进程随后将 CWD 指向目标目录，使 Lingui 能按原配置查找 catalog；正式执行是另一个进程，继续使用空 CWD，不加载目标 `.env`。测试包装配置显式使用 `127.0.0.1`，避免 Vite 为 localhost 做 DNS 查询而触发网络拒绝；不放宽保护器。
+发现阶段与正式测试共用隔离环境和目标 PWA HEAD 时间，Vite 环境目录、缓存仍指向临时目录，两阶段均保持空 CWD，不加载目标 `.env`。运行器读取目标 JSON `.linguirc`，仅在临时目录生成 `rootDir` 及 catalog path/include/exclude 为绝对路径的配置，并通过 `LINGUI_CONFIG` 交给原 Lingui 插件；不修改目标配置或关闭翻译插件。测试包装配置显式使用 `127.0.0.1`，避免 Vite 为 localhost 做 DNS 查询而触发网络拒绝；不放宽保护器。
 
-这是局部回归选择工具，不证明需求覆盖完整。Vitest 的依赖分析无法保证识别运行时拼接的导入、外部数据或所有副作用；删除文件、SDK、配置或非代码资源变化仍需按实际影响显式选择测试或运行完整回归，不用关联结果代替这些判断。源码指纹和依赖验证边界沿用本页既有范围。交付检查仍绑定报告中实际执行的 suite，不将关联选择当作业务覆盖证明。
+这是局部回归选择工具，不证明需求覆盖完整。Vitest 的依赖分析无法保证识别运行时拼接的导入、外部数据或所有副作用；删除文件、配置或非代码资源变化仍需按实际影响显式选择测试或运行完整回归，不用关联结果代替这些判断。SDK 源码改动还需独立选择 SDK 自身测试，不能以其前端消费者通过代替。源码指纹和依赖验证边界沿用本页既有范围。交付检查仍绑定报告中实际执行的 suite，不将关联选择当作业务覆盖证明。
 
 关联选择验收（2026-10-27）：当前分支对 PWA 决策源码发现并通过 1 个 suite / 9 项。独立 `origin/release` checkout 不含个人运行器，显式复用锁文件相同的已安装依赖；同一源码 9 项、两个输入并集 14 项及临时副本中的真实传递导入 1 项均通过。无关联源码明确 failed 且未创建正式测试日志；临时 Vite 配置中的 HTTPS 请求在发现阶段被 guard 拒绝，事件独立记录，整次 failed，未发出外部请求。旧显式日期测试 5 项与 release 默认三文件 16 项通过；release 默认数量与当前开发分支的 17 项不同，未修改原测试。目标 HEAD、索引字节与 Git clean 状态保持一致，临时源码/配置注入及 checkout 均已清理，真实业务代码未改。证据在本机忽略目录 `.local/acceptance/frontend-offline/related-acceptance.json` 及其中列出的原始报告。
 
@@ -45,7 +46,13 @@ yarn frontend:test-offline --project-dir /path/to/delivery-checkout \
 
 ## 按 Git 变更范围运行局部回归
 
-在只包含前端代码改动的功能 checkout 中，从基础设施目录执行：
+SDK → 前端跨层验收（2026-10-27）：独立 release 副本沿用原 Vite `sdk` alias，临时 SDK leaf 经前端 bridge 的传递导入准确选中 1 个前端 suite / 1 项；混合输入并集及 SDK/前端混合 Git 范围均为 2 个 suite / 6 项，SDK 单独 Git 变化为 1 项。SDK 自身测试未混入；无关联输入明确失败，无默认回退。成功报告的源码、工具、网络与范围检查均通过，目标 HEAD/索引/源码及副本清理已核对。证据在本机忽略目录 `.local/acceptance/frontend-offline/sdk-cross-layer-acceptance.json`。
+
+实际消费者验证同时发现并修复 Lingui 相对 catalog 路径与空 CWD 的冲突：原 `src/domain/synthetics/subaccount/utils.spec.ts` 的翻译加载由失败恢复为 25 项通过。现有 PWA 源码关联 9 项、默认入口 17 项、工具回归 113 项、SDK 产物 verify、根类型检查及完整前端回归 299 文件 / 3,014 项通过（既有跳过 1 文件 / 1 项）；相关语法、ESLint、Prettier 和差异检查通过。原生结果及工程日志为同目录 `sdk-related-diagnostic-fixed.json`、`sdk-cross-layer-{existing-related.json,default.json,tools.tap,artifacts.log,types.log,tests.log}`。
+
+实际 SDK `utils/stats/api.ts` 的关联图选中 178 个前端文件，触及串行执行的 180 秒上限，期间还出现原 oracleKeeperFetcher 测试的一项断言失败；本次报告正确 failed，进程及临时目录清理通过，不能当作整组通过。较早的 objects 源码探索选中 200 个文件，也未完成整组验收。证据为同目录 `sdk-related-stats.json`、`sdk-related-first.json` 及对应原始日志。共享 SDK 模块可能经现有前端依赖图扩散到大量消费者；关联清单不保证小范围，也不保证任意原测试都适合隔离入口。需要时按真实影响明确选择 suite 或运行完整前端回归，不修改业务测试、关闭保护或扩大超时来制造通过。
+
+在只包含前端及 SDK 源码改动的功能 checkout 中，从基础设施目录执行：
 
 ```sh
 yarn frontend:test-offline --project-dir /path/to/feature-checkout --changed-since origin/release
@@ -55,7 +62,7 @@ yarn frontend:test-offline --project-dir /path/to/feature-checkout --changed-sin
 
 `REF` 必须是目标仓库中已有的 commit 引用。运行器只读将其固定为完整 SHA，记录当时 HEAD，合并相对该基线的工作树差异、索引差异和 Git 未忽略的未跟踪文件，再把去重的源码清单交给上节真实依赖图流程。比较是所选基线树与当前 checkout 的差异，不自动计算 merge-base，不 fetch、切分支或更新索引；用户应选对实际功能基线。索引中存在但工作文件已撤销的变化仍纳入选择，但测试执行的是当前工作文件，不证明暂存版本通过；交付绑定仍要求干净版本重跑。
 
-参数与 `--suite`、`--related` 互斥；断点调试继续使用发现后的明确 suite。自动范围仅允许已存在的 `src/`、`landing/` TS/TSX/JS/JSX/JSON 普通文件。无变化、引用无效、删除/重命名前的源路径缺失，或包含文档、SDK、配置、样式和其他资源变化时明确失败，列出需要人工判断的路径；不静默略过这些变化或执行默认测试。混合修改时先评估完整影响，再显式选择 `--suite` 或合适的完整验收，不用自动局部回归代替判断。Git 忽略的未跟踪文件不属于此选择范围，需要时显式 `--related`。
+参数与 `--suite`、`--related` 互斥；断点调试继续使用发现后的明确 suite。自动范围仅允许已存在的 `src/`、`landing/`、`sdk/src/` TS/TSX/JS/JSX/JSON 普通文件，支持前端与 SDK 源码混合范围。无变化、引用无效、删除/重命名前的源路径缺失，或包含文档、配置、样式和其他资源变化时明确失败，列出需要人工判断的路径；不静默略过这些变化或执行默认测试。混合非代码修改时先评估完整影响，再显式选择 `--suite` 或合适的完整验收，不用自动局部回归代替判断。Git 忽略的未跟踪文件不属于此选择范围，需要时显式 `--related`。
 
 报告新增 `changes`，记录 `baseRef/baseSha/head`、`worktreePaths/indexPaths/untrackedPaths` 及最终 `related`；正常执行后用固定基线 SHA 重新收集为 `changesAfter`，要求 `changesUnchanged=true`。源码内容未变但 HEAD、暂存/未跟踪状态或路径范围变化，也不得报告通过；范围变化失败阶段为 `changed-source-selection`。开始前范围不支持时按原 CLI 前置错误退出 1，不启动发现进程。检查不是原子快照，期间不要并发编辑或执行 Git 写操作。
 

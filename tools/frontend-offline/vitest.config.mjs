@@ -14,8 +14,6 @@ export default defineConfig(async () => {
     path.join(options.projectDir, "vite.config.ts")
   );
   assert.ok(loaded, "Frontend Vitest configuration could not be loaded.");
-  // Lingui resolves catalog globs from CWD while building the full dependency graph.
-  if (options.related) process.chdir(options.projectDir);
   const require = createRequire(path.join(options.projectDir, "package.json"));
   loaded.config.test.setupFiles = loaded.config.test.setupFiles.map((file) =>
     file.startsWith(".") ? path.resolve(options.projectDir, file) : require.resolve(file)

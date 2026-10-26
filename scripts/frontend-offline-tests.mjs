@@ -60,8 +60,8 @@ export async function resolveRelated(projectDir, requested) {
   const selected = [];
   for (const file of requested) {
     assert.ok(
-      /^(src|landing)\/[a-zA-Z0-9_./-]+\.(json|[jt]sx?)$/.test(file) && path.posix.normalize(file) === file,
-      "Use a literal src or landing source path."
+      /^(src|landing|sdk\/src)\/[a-zA-Z0-9_./-]+\.(json|[jt]sx?)$/.test(file) && path.posix.normalize(file) === file,
+      "Use a literal src, landing or sdk/src source path."
     );
     const resolved = await realpath(path.join(root, file));
     assert.equal(resolved, path.join(root, file), "Related source must not traverse symlinks.");
@@ -105,7 +105,7 @@ export async function changedSources(projectDir, baseRef) {
   const untrackedPaths = list("ls-files", "--others", "--exclude-standard", "-z");
   const paths = [...new Set([...worktreePaths, ...indexPaths, ...untrackedPaths])].sort();
   assert.ok(paths.length > 0, "No changed source files; select --suite explicitly if tests are needed.");
-  const unsupported = paths.filter((file) => !/^(src|landing)\/[a-zA-Z0-9_./-]+\.(json|[jt]sx?)$/.test(file));
+  const unsupported = paths.filter((file) => !/^(src|landing|sdk\/src)\/[a-zA-Z0-9_./-]+\.(json|[jt]sx?)$/.test(file));
   assert.equal(
     unsupported.length,
     0,
@@ -258,6 +258,24 @@ export async function runFrontendOffline({ suites, related, changedSince, inspec
     await symlink(path.join(projectDir, "node_modules"), path.join(emptyDir, "node_modules"), "dir");
     const optionsFile = path.join(emptyDir, "options.json");
     await writeFile(optionsFile, JSON.stringify({ projectDir, suites, emptyDir, resultsFile }), { mode: 0o600 });
+    const lingui = JSON.parse(await readFile(path.join(projectDir, ".linguirc"), "utf8"));
+    const rootDir = path.resolve(projectDir, lingui.rootDir ?? ".");
+    const absolute = (value) => path.resolve(rootDir, value.replaceAll("<rootDir>", rootDir));
+    const linguiFile = path.join(emptyDir, ".linguirc");
+    await writeFile(
+      linguiFile,
+      JSON.stringify({
+        ...lingui,
+        rootDir,
+        catalogs: lingui.catalogs.map((catalog) => ({
+          ...catalog,
+          path: absolute(catalog.path),
+          ...(catalog.include ? { include: catalog.include.map(absolute) } : {}),
+          ...(catalog.exclude ? { exclude: catalog.exclude.map(absolute) } : {}),
+        })),
+      }),
+      { mode: 0o600 }
+    );
     const env = {
       PATH: process.env.PATH,
       NODE_ENV: "test",
@@ -265,7 +283,7 @@ export async function runFrontendOffline({ suites, related, changedSince, inspec
       CI: "true",
       GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "network-events.log"),
       GMX_FRONTEND_OFFLINE_OPTIONS: optionsFile,
-      LINGUI_CONFIG: path.join(projectDir, ".linguirc"),
+      LINGUI_CONFIG: linguiFile,
       VITE_APP_PWA_GENERATION: `${execFileSync("git", ["-C", projectDir, "show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim()}000`,
     };
     if (related) {
