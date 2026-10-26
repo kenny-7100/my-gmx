@@ -30,6 +30,8 @@ yarn test:sdk-offline
 
 2026-10-27 已用独立临时 Git checkout 验收：复制原有 SDK 源码、配置与锁文件，复制目标 Vitest 文件，仅为隔离验收显式链接其他现有 SDK 依赖；这不代表验证了全新安装。原 BigMath 6 项通过，commit、干净状态、真实运行器路径和结果路径均属于目标目录；修改目标断言后 1 项失败。缺少目标依赖、Vitest 版本不兼容、捕获联网异常以及测试期间修改目标锁文件均正确失败；环境哨兵未进入测试，正常/失败运行的进程及临时目录均清理。实际 SDK 业务文件未修改，临时 checkout 验收后已删除。证据位于忽略的 `.local/acceptance/sdk-offline/target-acceptance.json`。 当前 SDK 默认 153 项及真实源码断点复验通过；统一工具测试 95 项、根类型检查、前端 3,014 项（另 1 项既有跳过）通过，相关脚本静态检查和 119 个文档本地目标检查通过。
 
+交付前需要自动核对本次测试与交付 HEAD/源码一致时，使用[SDK 测试证据绑定](linear-development-workflow.md#sdk-测试证据绑定)的 `agent:delivery-check --sdk-report PATH --require-clean`；可同时选择前端报告。未选择的证据不算已验收。
+
 ## SDK 源码断点调试
 
 2026-10-26 已在真实 SDK 源码与原有 BigMath 测试中验收。需要查看测试中的参数、调用栈或逐步执行时，复用同一入口，显式选择一个 suite 和调试端口：

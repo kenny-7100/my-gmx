@@ -6,7 +6,7 @@ import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
-import { checkDelivery, validateFrontendEvidence } from "./agent-delivery-check.mjs";
+import { checkDelivery, validateFrontendEvidence, validateSdkEvidence } from "./agent-delivery-check.mjs";
 
 const exec = promisify(execFile);
 
@@ -46,6 +46,7 @@ test("real Git histories distinguish clean delivery from inherited or copied dev
     const strict = { ...options, requireClean: true };
     assert.equal((await checkDelivery(strict)).worktree.status, "passed");
     assert.equal(clean.worktree.status, "not-checked");
+    assert.equal(clean.sdkEvidence.status, "not-checked");
     await writeFile(path.join(cwd, ".git/info/exclude"), "ignored-build/\n");
     await mkdir(path.join(cwd, "ignored-build"));
     await writeFile(path.join(cwd, "ignored-build/output.txt"), "ignored artifact");
@@ -108,57 +109,68 @@ test("real Git histories distinguish clean delivery from inherited or copied dev
   }
 });
 
-test("frontend evidence binds successful native results to clean source, commit, checkout and tools", async () => {
+test("offline evidence binds successful native results to clean source, commit, checkout and tools", async () => {
   await assert.rejects(checkDelivery({ frontendReport: "", requireClean: true }), /nonempty frontend report path/);
   await assert.rejects(checkDelivery({ frontendReport: "report.json" }), /requires --require-clean/);
-  const source = { commit: "a".repeat(40), dirty: false, sourceSha256: "source", sourceFileCount: 1 };
-  const results = {
-    success: true,
-    numPassedTests: 1,
-    numFailedTests: 0,
-    numTotalTests: 1,
-    numPendingTests: 0,
-    numTodoTests: 0,
-    testResults: [{ name: "/target/src/a.spec.ts", status: "passed", assertionResults: [{ status: "passed" }] }],
-  };
-  const evidence = {
-    schemaVersion: 1,
-    mode: "frontend-source-offline",
-    status: "passed",
-    projectDir: "/target",
-    sourceUnchanged: true,
-    sourceBefore: source,
-    sourceAfter: source,
-    toolSha256: { runner: "tool" },
-    exit: { code: 0, signal: null, interrupted: false, timedOut: false, cleanup: "passed" },
-    temporaryDirectoryCleanup: "passed",
-    counts: { passed: 1, failed: 0, skipped: 0, total: 1, files: 1 },
-  };
-  const options = {
-    evidence,
-    source,
-    projectDir: "/target",
-    head: source.commit,
-    toolSha256: evidence.toolSha256,
-    results,
-    suites: ["/target/src/a.spec.ts"],
-  };
-  validateFrontendEvidence(options);
-  for (const changed of [
-    { evidence: { ...evidence, status: "failed" } },
-    { evidence: { ...evidence, projectDir: "/other" } },
-    { head: "b".repeat(40) },
-    { source: { ...source, dirty: true } },
-    { source: { ...source, sourceSha256: "changed" } },
-    { evidence: { ...evidence, sourceUnchanged: false } },
-    { evidence: { ...evidence, sourceAfter: { ...source, sourceSha256: "changed" } } },
-    { toolSha256: { runner: "changed" } },
-    { evidence: { ...evidence, exit: { ...evidence.exit, interrupted: true } } },
-    { evidence: { ...evidence, exit: { ...evidence.exit, cleanup: "failed" } } },
-    { evidence: { ...evidence, counts: { ...evidence.counts, passed: 2 } } },
-    { results: { ...results, success: false } },
-    { results: { ...results, numFailedTests: 1 } },
-    { suites: ["/target/src/other.spec.ts"] },
-  ])
-    assert.throws(() => validateFrontendEvidence({ ...options, ...changed }));
+  await assert.rejects(checkDelivery({ sdkReport: "", requireClean: true }), /nonempty SDK report path/);
+  await assert.rejects(checkDelivery({ sdkReport: "report.json" }), /requires --require-clean/);
+  for (const kind of ["frontend", "sdk"]) {
+    const targetField = kind === "sdk" ? "sdkDir" : "projectDir";
+    const validate = kind === "sdk" ? validateSdkEvidence : validateFrontendEvidence;
+    const runtime = { vitest: "4.1.11", executable: "/target/node_modules/vitest/vitest.mjs" };
+    const source = { commit: "a".repeat(40), dirty: false, sourceSha256: "source", sourceFileCount: 1 };
+    const results = {
+      success: true,
+      numPassedTests: 1,
+      numFailedTests: 0,
+      numTotalTests: 1,
+      numPendingTests: 0,
+      numTodoTests: 0,
+      testResults: [{ name: "/target/src/a.spec.ts", status: "passed", assertionResults: [{ status: "passed" }] }],
+    };
+    const evidence = {
+      schemaVersion: 1,
+      mode: `${kind}-source-offline`,
+      status: "passed",
+      [targetField]: "/target",
+      runtime,
+      sourceUnchanged: true,
+      sourceBefore: source,
+      sourceAfter: source,
+      toolSha256: { runner: "tool" },
+      exit: { code: 0, signal: null, interrupted: false, timedOut: false, cleanup: "passed" },
+      temporaryDirectoryCleanup: "passed",
+      counts: { passed: 1, failed: 0, skipped: 0, total: 1, files: 1 },
+    };
+    const options = {
+      evidence,
+      source,
+      [targetField]: "/target",
+      runtime,
+      head: source.commit,
+      toolSha256: evidence.toolSha256,
+      results,
+      suites: ["/target/src/a.spec.ts"],
+    };
+    validate(options);
+    for (const changed of [
+      { evidence: { ...evidence, status: "failed" } },
+      { evidence: { ...evidence, [targetField]: "/other" } },
+      { head: "b".repeat(40) },
+      { source: { ...source, dirty: true } },
+      { source: { ...source, sourceSha256: "changed" } },
+      { evidence: { ...evidence, sourceUnchanged: false } },
+      { evidence: { ...evidence, sourceAfter: { ...source, sourceSha256: "changed" } } },
+      { toolSha256: { runner: "changed" } },
+      { evidence: { ...evidence, exit: { ...evidence.exit, interrupted: true } } },
+      { evidence: { ...evidence, exit: { ...evidence.exit, cleanup: "failed" } } },
+      { evidence: { ...evidence, counts: { ...evidence.counts, passed: 2 } } },
+      { results: { ...results, success: false } },
+      { results: { ...results, numFailedTests: 1 } },
+      { suites: ["/target/src/other.spec.ts"] },
+    ])
+      assert.throws(() => validate({ ...options, ...changed }));
+    if (kind === "sdk")
+      assert.throws(() => validate({ ...options, runtime: { ...runtime, executable: "/other/vitest.mjs" } }));
+  }
 });

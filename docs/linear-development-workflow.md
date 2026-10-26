@@ -59,6 +59,29 @@ yarn agent:delivery-check --project-dir /path/to/delivery-checkout --require-cle
 
 真实独立 release clone 已验收：目标不含个人工具，原日期 5 项通过后成功绑定；错误目录、旧提交、失败报告、缺失/失败原生结果和旧工具指纹均拒绝。还在临时副本加入 Git 忽略的源码 JSON，HEAD 和 clean 状态不变，但源码摘要变化使旧证据被拒绝；移除后重新通过。只修改文件 mtime 时匹配仍通过，检查前后索引字节不变。实际排查确认 `git diff` 默认自动刷新索引，即使设置 `GIT_OPTIONAL_LOCKS=0` 仍可能写入；工具现显式禁用 `diff.autoRefreshIndex`，工作区文件列表改用禁用可选写入的 NUL porcelain status，避免只禁用 diff 刷新后把纯 mtime 变化误报为内容修改；mtime 场景已加入只读回归。目标 HEAD、索引、原报告与原生结果内容均保持不变；临时 clone 已删除。证据位于本机忽略目录 `.local/acceptance/delivery-check/frontend-evidence/`，`acceptance.json` 汇总、`matched.json` / `restored.json` 为通过报告，其余命名报告保存预期拒绝结果。
 
+### SDK 测试证据绑定
+
+2026-10-27 新增 `--sdk-report PATH`，将[SDK 离线测试](sdk-offline-tests.md#独立交付目录验收)报告与交付 checkout 的 `sdk/`、交付 head 和当前源码绑定。先在目标干净目录完成测试，再从基础设施目录运行：
+
+```sh
+yarn sdk:test-offline --sdk-dir /path/to/delivery-checkout/sdk \
+  --suite src/utils/__tests__/bigmath.spec.ts
+yarn agent:delivery-check --project-dir /path/to/delivery-checkout --require-clean \
+  --head FEATURE_DELIVERY_BRANCH --expected-base FULL_RELEASE_SHA \
+  --allow-path sdk/src/path/to/feature.ts --allow-path sdk/src/path/to/feature.spec.ts \
+  --sdk-report /path/to/sdk-offline/run-id/report.json
+```
+
+必须同时使用 `--require-clean`。SDK 与前端报告可同时传入，分别检查；任一证据无效或原有交付隔离检查不通过，整次返回 blocked / 退出 2。不指定时 `sdkEvidence.status=not-checked`，不能理解为 SDK 已验收。
+
+SDK 复用前端的原生结果与源码一致性校验：目标路径为本次 checkout 的真实 `sdk/`，拒绝 SDK 目录符号链接逃逸；报告前后源码证据须与当前 SDK 完全一致，包括 commit、dirty、全部既定源码输入及目标锁文件摘要。还比较当前 SDK 工具指纹、Vitest 版本与真实运行器路径。结果必须包含精确所选文件的全部通过断言，无 skipped/todo，统计一致，执行及临时目录清理成功。检查不重新运行测试、不安装依赖、不修改报告或 Git 索引。
+
+成功结果输出 `sdkEvidence` 的报告路径、目标 SDK 路径、testedCommit、源码摘要、锁文件摘要、runtime、suite 与计数。失败 finding 为 `sdk-evidence-invalid`，包含阶段及适用的断言说明。缺少结果文件或只有汇总 passed 均不能通过。原生结果路径必须可读取；源码/工具变化后重跑相应测试，不手改历史指纹。
+
+边界与前端证据相同：不证明测试充分覆盖需求，不验证所有已安装依赖，也不是签名或原子快照；检查后目录或提交变化需重新验收。只读 Git 调用禁用可选索引写入，SDK 指纹能力由运行器与交付检查共享，避免两份计划漂移。
+
+真实 `origin/release` 临时 clone 已验收：目标没有个人工具，SDK 原 BigMath 6 项通过后成功绑定；同时传入真实前端日期 5 项报告也通过。错误目录、旧工具、失败报告、缺失/失败原生结果均拒绝；Git 忽略的源码变化即使 HEAD 和 clean 状态不变也拒绝，恢复后通过。实际新增 SDK 源码提交后，旧报告在工作区 clean 的情况下被拒绝。通过及负面检查前后 HEAD、索引字节、原报告与原生结果内容保持一致；临时 clone 已删除。隔离验收显式链接现有依赖，没有执行全新安装。证据在忽略目录 `.local/acceptance/delivery-check/sdk-evidence/acceptance.json`，`combined.json` 保存双报告通过结果。 统一工具回归 95 项、SDK 默认 153 项、类型检查、前端 3,014 项（另 1 项既有跳过）、脚本静态检查及 128 个文档本地目标检查均通过。
+
 ### 基础设施验收记录（2026-10-26）
 
 本轮未创建主仓库分支或改写历史。临时仓库真实历史回归通过；主仓库 `HEAD` 与个人开发基础重合，实际只读检查正确返回 `development-base-history` 并退出 2，清单外文件也明确列出。检查前后主仓库 HEAD、索引和 4,511 个文件内容摘要一致。根类型检查、ESLint、Prettier、71 个文档本地目标及差异检查通过；完整前端单元测试 3,014 项通过、1 项既有跳过。证据保留在忽略目录 `.local/acceptance/delivery-check/`；工具本身仅向 stdout 输出 JSON，归档由调用者显式重定向完成。
