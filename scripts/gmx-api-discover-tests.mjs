@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { closeSync, openSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
@@ -33,6 +34,52 @@ export async function resolveApiRelated(apiDir, files) {
   return [...files];
 }
 
+export async function changedSources(apiDir, baseRef) {
+  assert.ok(typeof baseRef === "string" && baseRef.length > 0, "Use a nonempty --changed-since ref.");
+  apiDir = await realpath(apiDir);
+  const git = (...args) =>
+    execFileSync("git", ["--no-pager", "-c", "diff.autoRefreshIndex=false", "-C", apiDir, ...args], {
+      encoding: "utf8",
+      env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 30000,
+      maxBuffer: 32_000_000,
+    });
+  assert.equal(await realpath(git("rev-parse", "--show-toplevel").trim()), apiDir, "Select the API checkout root.");
+  const baseSha = git("rev-parse", "--verify", "--end-of-options", `${baseRef}^{commit}`).trim();
+  const head = git("rev-parse", "HEAD").trim();
+  const list = (...args) =>
+    git(...args)
+      .split("\0")
+      .filter(Boolean)
+      .sort();
+  const diff = ["diff", "--no-ext-diff", "--no-textconv", "--no-renames", "--numstat", "-z"];
+  const diffPaths = (...args) =>
+    list(...diff, ...args)
+      .map((entry) => entry.split("\t").slice(2).join("\t"))
+      .sort();
+  const worktreePaths = diffPaths(baseSha, "--");
+  const indexPaths = diffPaths("--cached", baseSha, "--");
+  const untrackedPaths = list("ls-files", "--others", "--exclude-standard", "-z");
+  const paths = [...new Set([...worktreePaths, ...indexPaths, ...untrackedPaths])].sort();
+  assert.ok(paths.length > 0, "No changed source files; select --related explicitly if tests are needed.");
+  const unsupported = paths.filter((file) => !/^src\/[a-zA-Z0-9_./-]+\.(json|[jt]s)$/.test(file));
+  assert.equal(
+    unsupported.length,
+    0,
+    `Changed paths require explicit --related selection: ${unsupported.slice(0, 5).join(", ")}`
+  );
+  let related;
+  try {
+    related = await resolveApiRelated(apiDir, paths);
+  } catch (error) {
+    if (error.code === "ENOENT")
+      throw new Error("Changed source was deleted or is missing; review its impact and select --related explicitly.");
+    throw error;
+  }
+  return { baseRef, baseSha, head, worktreePaths, indexPaths, untrackedPaths, related };
+}
+
 async function tooling(apiDir) {
   const result = await apiTestTooling(apiDir, "offline-fixtures");
   for (const file of ["scripts/gmx-api-discover-tests.mjs", "tools/gmx-api-offline/discovery.mjs"])
@@ -42,10 +89,12 @@ async function tooling(apiDir) {
   return result;
 }
 
-export async function discoverApiTests(apiDir, related) {
+export async function discoverApiTests({ apiDir, related, changedSince }) {
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
   apiDir = await realpath(apiDir);
-  related = await resolveApiRelated(apiDir, related);
+  assert.ok(related === undefined || changedSince === undefined, "Do not combine --related and --changed-since.");
+  const changes = changedSince === undefined ? undefined : await changedSources(apiDir, changedSince);
+  related = await resolveApiRelated(apiDir, changes?.related ?? related);
   const sourceBefore = await readApiTestSource(apiDir, ["jest.config.ts"]);
   const sourceInputsBefore = await sourceInputs(apiDir);
   const toolingBefore = await tooling(apiDir);
@@ -59,6 +108,7 @@ export async function discoverApiTests(apiDir, related) {
     status: "failed",
     apiDir,
     related,
+    ...(changes ? { changes } : {}),
     checkedAt: new Date().toISOString(),
     sourceBefore,
     sourceInputsBefore,
@@ -128,6 +178,14 @@ export async function discoverApiTests(apiDir, related) {
       report.sourceUnchanged && report.toolingUnchanged,
       "API discovery source or tools changed during execution."
     );
+    if (changes) {
+      stage = "changed-source-selection";
+      report.changesUnchanged = false;
+      report.changesAfter = await changedSources(apiDir, changes.baseSha);
+      report.changesAfter.baseRef = changes.baseRef;
+      report.changesUnchanged = JSON.stringify(changes) === JSON.stringify(report.changesAfter);
+      assert.ok(report.changesUnchanged, "API Git change selection changed during discovery; rerun the check.");
+    }
     stage = "selected-tests";
     const files = JSON.parse(await readFile(report.resultsFile, "utf8"));
     assert.ok(
@@ -154,16 +212,21 @@ async function runCli() {
       options: {
         "api-dir": { type: "string", default: path.join(ROOT, "gmx-api") },
         related: { type: "string", multiple: true },
+        "changed-since": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn gmx-api:discover-tests --related src/...ts [--related src/...ts ...] [--api-dir PATH]\nLists tests using the target Jest configuration and dependency graph. Does not execute tests or database setup. Choose the existing offline or integration runner explicitly after reviewing dependencies.\n"
+        "Usage: yarn gmx-api:discover-tests [--related src/...ts ... | --changed-since REF] [--api-dir PATH]\nLists tests using the target Jest configuration and dependency graph. --changed-since pins an API Git base and includes committed, staged, working and untracked source changes; mixed configuration changes require explicit selection. Does not execute tests or database setup. Choose the existing offline or integration runner explicitly after reviewing dependencies.\n"
       );
       return;
     }
-    const report = await discoverApiTests(values["api-dir"], values.related);
+    const report = await discoverApiTests({
+      apiDir: values["api-dir"],
+      related: values.related,
+      changedSince: values["changed-since"],
+    });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     process.exitCode = report.status === "passed" ? 0 : 1;
   } catch (error) {
