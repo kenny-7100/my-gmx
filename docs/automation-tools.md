@@ -62,3 +62,5 @@
 已沉淀 [gmx-api Solana 离线计算回归](solana-api-local.md#gmx-api-solana-离线计算回归)：`yarn gmx-api:test-offline` 复用 API 两个既有 suite、fixture 与真实计算代码，使用独立无数据库配置，隔离环境并阻断意外外连；输出版本、12 项测试结果与日志。`yarn test:gmx-api-offline` 验证网络 guard。该 profile 不替代默认数据库集成、HTTP 或实时服务验收。
 
 已沉淀 [gmx-api 隔离 PostgreSQL 集成测试](solana-api-local.md#gmx-api-隔离-postgresql-集成测试)：`yarn gmx-api:test-integration` 使用本地 postgres:15 镜像建立专属临时容器，复用原有 Jest 配置、迁移和数据库 setup/teardown，默认运行两个既有 suite / 5 项测试，可重复传入 `--suite` 指定其他 API 测试（已验证迁移/市场模型 11 项）；校验路径并固定 UTC，保留实际范围、版本和日志，成功或测试失败均清理所属容器。要求本地 Docker，不自动拉镜像，不接触已有数据库，不代表完整 API 或真实数据验收。
+
+已沉淀 [gmx-api 路由准备与过期检查](solana-api-local.md#gmx-api-路由生成准备与过期检查)：`yarn gmx-api:prepare` 复用原 v1/v2 TSOA 配置生成路由及 OpenAPI；`--verify` 只读比较输入和产物摘要，缺失、损坏或过期返回非零。真实路由映射/Express HTTP 测试共 6 项通过；不替代契约评审、部署或实时服务验证。

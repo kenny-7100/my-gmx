@@ -147,6 +147,37 @@ stdout 输出 `mode: offline-fixtures` 的 JSON，含 API commit/dirty、选定�
 
 本机验收摘要为同目录 `offline-latest.json`，失败/隔离验证为 `offline-acceptance.json`；临时注入仅发生在已清理的源码副本，真实 API 文件未改动。该阶段为 A08/A11 的回归执行能力补充，未新增独立数学基准，不能将旧 fixture 当成未来全部 SDK / 部署版本的正确性证明。
 
+## gmx-api 路由生成准备与过期检查
+
+2026-10-26 已完成并验收。新 checkout 的 `src/codegen/tsoa/` 可能缺失；`src/app.ts` 直接导入生成的 v1/v2 路由及 Swagger。需要测试真实 Express 路由或修改 TSOA controller/类型时，先检查生成状态，再运行相关测试；仅运行已有 Solana 样例服务或纯计算测试不需要这一步。
+
+在主仓库根目录执行（依赖 Node 22 与 API 已安装的锁定依赖）：
+
+```bash
+yarn gmx-api:prepare --verify
+# If missing or stale
+yarn gmx-api:prepare
+yarn gmx-api:prepare --verify
+yarn gmx-api:test-integration --suite src/routes/routeMap.test.ts --suite src/routes/v1/relay/__test__/relayLaunchMode.test.ts
+```
+
+工具为 `scripts/gmx-api-prepare.mjs`，支持 `--api-dir PATH`。生成命令依次运行 API 原有 `tsoa.json` 与 `tsoa-v2.json` 的 `spec-and-routes`，写入 `src/codegen/tsoa/` 中四个已被 API Git 忽略的文件，不修改业务源码、配置或依赖。每阶段限时 120 秒，不启动 API/数据库，不安装依赖或连接真实 keeper。stdout 输出结构化报告，生成日志及清单保留于 `.local/acceptance/solana-api-local/prepare-*/` 与 `prepared-*.json`，按 checkout 绝对路径区分。
+
+`--verify` 只读比较清单：记录 `src/` 下 TS/TSX/JS/JSON（排除生成目录）及 package/lock/TS/TSOA 配置的摘要、四个产物摘要，并检查 OpenAPI 3 非空路径和路由注册入口。源码检查有意保守，测试文件变化也要求重生成；不检查 node_modules 实际内容、外部类型依赖或完整 TypeScript 导入图，依赖仍须按锁文件准备。返回 0 表示摘要一致；有效文件但摘要变化返回 2 / `regeneration-required`；文件、清单缺失或格式错误、生成失败返回 1 / `api-generation-not-ready`。失败时先确认 Node/依赖/文件，再查看报告中的生成日志，不手改产物绕过检查。
+
+这证明本地生成状态，不能替代类型检查、HTTP 回归、A04 契约评审或部署/真实数据验收。生成报告明确 `runtimeVerification: not-run`，运行时验证须单独执行上面的测试。
+
+| 验收条件 | 状态与证据 |
+| --- | --- |
+| 复用原有两套生成配置 | 已通过；生成 v1/v2 路由及 OpenAPI，真实 checkout 生成与 verify 通过 |
+| 过期及损坏不能误通过 | 已通过；独立源码副本真实生成后验证正常、源码变更、产物变更、损坏/缺失 spec、恢复、清单缺失；另验证生成器缺失时退出 1 且保留日志，共 9 项检查，副本已清理 |
+| 生成产物可用于原有测试 | 已通过；routeMap 5 项及 relayLaunchMode 1 项，共 6 项；隔离数据库 cleanup passed |
+| 环境修复及接手顺序 | 已完成；运行器临时目录链接真实 `src/abi`，修复导入 `src/app.ts` 的 ABI 查找失败；未改业务和断言，通用执行入口已更新 |
+
+工程检查已通过：两份脚本的语法、ESLint、代码格式、`yarn tscheck`、现有测试选择回归，以及 `yarn test:ci`（3014 项通过，1 项原有跳过，退出 0）；文档本地链接和 `git diff --check` 通过，API checkout 无跟踪改动，测试容器已清理。
+
+本机证据：`prepare-latest.json`、`prepare-acceptance.json`、`integration-routes.json`，均位于上述忽略目录。首次 HTTP 测试失败日志保留在 `integration-HWdri2/jest.log`。ABI 加载使用 `process.cwd()/src/abi`，仅设 `APP_ROOT` 不足；后续遇到 `ABI directory not found` 先核对测试 CWD 的资源链接，不调整业务查找逻辑或移除隔离目录。HTTP 用例沿用原测试的本地 keeper stub，不访问真实 keeper、不发送链上交易。
+
 ## gmx-api 隔离 PostgreSQL 集成测试
 
 2026-10-26 增加数据库测试入口，补充离线计算与样例 HTTP 检查无法覆盖的数据库状态行为。在主仓库执行：
