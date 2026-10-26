@@ -62,6 +62,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **Agent 工具回归：** 根 `yarn test:ci` 不覆盖个人基础设施脚本。修改跨工具公共能力或交接基础设施分支时，先按[统一离线回归](automation-tools.md#统一离线工具回归)运行 `yarn test:agent-tools`，一次覆盖脚本、RPC 代理及 CI 辅助测试；单工具小改仍可选原单项入口。确认原生结果后再安排本任务所需的类型、前端或真实服务验收，不把工具测试通过当作 RPC/keeper/API/页面 ready。新工具测试加入统一范围时，核实其保持离线且只使用临时资源，不把真实资金或外部服务检查放进默认回归。
 
+**前端与 SDK 混合改动先联合规划：** 独立功能 checkout 只含源码变化时，按[联合规划说明](agent-test-plan.md)运行 `yarn agent:test-plan --project-dir PATH --changed-since REF`，一次核对两侧清单及完整 Git 范围。SDK 自身范围拆分后，前端消费者仍包含 SDK 输入；配置/删除/非源码变化需人工判断。规划不执行测试，不作为测试通过或交付证据；根据实际依赖再选择局部命令或完整环境。
+
 **SDK 关联范围预览：** BigMath 等共享 SDK 源码可能关联真实 RPC 测试，优先按[SDK 只发现说明](sdk-offline-tests.md#只发现关联测试)使用 `sdk:test-offline --discover-only --related src/...ts`，或配合 `--changed-since REF`。先核对清单和实际依赖再选择离线 suite 或完整环境；`sdk-source-discovery` 的 passed 仅表示发现通过，不用于交付测试证据，不代表所列测试可离线运行。核对发现网络/清理及前后源码、工具与 Git 范围；不执行测试、setup 或 global setup。
 
 **前端关联范围预览：** SDK 共享模块或未知影响范围优先按[只发现说明](frontend-offline-tests.md#只发现关联测试)加 `--discover-only`，与 `--related` 或 `--changed-since` 配合，先读取真实 suite 清单再决定局部或完整回归。不执行测试或 global setup；核对 `mode=frontend-source-discovery`、`testsExecuted=false`、发现网络/清理及前后源码/工具/Git 范围。发现 passed 不代表测试通过，不能用于交付测试证据；仍需实际执行所需回归。
