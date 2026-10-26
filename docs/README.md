@@ -29,7 +29,7 @@
 | [keeper 只读预检](keeper-preflight.md) | A02 真实价格、图表与开关预检；本地 `solanaTrading` 覆盖配置、环境边界及真实交易前置 |
 | [本地 Agent 验收钱包](agent-wallet.md) | A05：助记词配置、固定 EVM/Solana 地址、Mainnet 原生 SOL 及 SPL/Token-2022 账户盘点与失败诊断；已通过自动测试和真实只读验收，Devnet 暂缓 |
 | [Agent Solana 全栈联调工具](solana-dev-workspace.md) | 个人开发专用 API 代理路径、API/Vite/RPC 工作区管理、浏览器 trace 关联及未评审样例结构回归；不新增业务消费、不随业务 PR 交付 |
-| [本地 Solana API 样例验收服务](solana-api-local.md) | A08：持续服务、热更新与断点调试；`solana:api-debug` 自动核对源码映射、真实断点、变量与请求恢复；doctor/check、离线计算回归、TSOA 路由准备及隔离 PostgreSQL 集成测试 |
+| [本地 Solana API 样例验收服务](solana-api-local.md) | A08：持续服务、热更新与断点调试；`solana:api-debug` 自动核对源码映射、真实断点、变量与请求恢复；doctor/check、支持精确选文件的离线回归、TSOA 路由准备及隔离 PostgreSQL 集成测试 |
 | [Solana 迁移参考仓库](solana-reference-repositories.md) | 查找仓库用途、协议与 SDK 资料、ADR-0015 分支、版本注意事项和 remote 规则 |
 | [旧 Solana 后端参考说明](gmtrade-web-backend-reference.md) | 旧后端源码快照的数据流、接口和缺失依赖；当前线上地址另见独立服务文档 |
 | [文档维护约定](documentation-maintenance.md) | 主动沉淀协作知识，把环境排障经验提升为执行前置，维护索引及接手资料 |
