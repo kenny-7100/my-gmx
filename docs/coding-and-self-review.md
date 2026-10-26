@@ -64,7 +64,7 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **前端局部离线测试：** 需要隔离本机配置并防止意外联网时，使用[前端离线入口](frontend-offline-tests.md) `yarn frontend:test-offline --suite src/...spec.ts`，可重复指定 src/landing 文件；验证独立交付 checkout 时显式加 `--project-dir PATH`，先按同一文档准备目标自己的依赖，再核对报告的 projectDir、commit 和测试路径，避免误测开发目录；保留原 Vite/happy-dom、初始化和时区。需要源码断点时选择单 suite 并加 `--inspect-port 9240`，按同一文档连接本次单 fork 调试目标，核对 source map 和真实断点；结束后恢复、断开并核对 `exit.cleanup`。原配置需要 Git/PWA、Lingui/Babel 及 Vitest CLI root 定位，入口已显式处理，不通过读取根 `.env` 或删除原 setup 绕过启动问题。失败先看本次日志，真实网络/浏览器需求使用对应验收入口，不关闭保护；完整前端回归仍用 `yarn test:ci`。
 
-**SDK 纯计算回归：** 根 `yarn test:ci` 不覆盖 `sdk/`。需要验证 SDK 数值、BigInt、费用或其他可离线测试时，使用[SDK 源码离线入口](sdk-offline-tests.md) `yarn sdk:test-offline` 或重复 `--suite src/...spec.ts` 指定范围，复用原配置和源码，无需先构建 SDK 或启动服务。意外联网会明确失败，先核对所选测试的真实依赖，不关闭保护或修改业务预期；该入口通过不代表完整 SDK、Solana 协议或发布产物已通过。 需要断点时显式单选 suite 并加 `--inspect-port 9238`，按[SDK 调试说明](sdk-offline-tests.md#sdk-源码断点调试)连接单 worker、核对源码映射与实际参数；不以 inspector 启动或原测试通过代替目标断点证据。调试端口冲突先换空闲端口，不连接未知监听。
+**SDK 纯计算回归：** 根 `yarn test:ci` 不覆盖 `sdk/`。需要验证 SDK 数值、BigInt、费用或其他可离线测试时，使用[SDK 源码离线入口](sdk-offline-tests.md) `yarn sdk:test-offline` 或重复 `--suite src/...spec.ts` 指定范围，复用原配置和源码，无需先构建 SDK 或启动服务。意外联网会明确失败，先核对所选测试的真实依赖，不关闭保护或修改业务预期；该入口通过不代表完整 SDK、Solana 协议或发布产物已通过。 需要断点时显式单选 suite 并加 `--inspect-port 9238`，按[SDK 调试说明](sdk-offline-tests.md#sdk-源码断点调试)连接单 worker、核对源码映射与实际参数；不以 inspector 启动或原测试通过代替目标断点证据。调试端口冲突先换空闲端口，不连接未知监听。SDK 入口已复用共享进程组管理，中断/超时后先核对 `exit.cleanup=passed` 和临时目录清理；清理失败不得复用已生成的成功测试结果，也不手动结束其他任务。
 
 **独立页面冒烟：** 已授权运行本地网络选择页面验收、且不需要保留开发服务时，优先执行[管理入口](solana-browser-smoke.md#一条命令执行并保存独立报告) `yarn solana:browser-check`，复用预检并由 Playwright 管理独立端口的 Vite，逐次保存原生报告并停服；无需先运行一遍相同预检。端口占用时显式换未用端口，不接管既有服务。手动联调仍可使用原两终端入口，无页面验证需求的任务不增加此项。
 
