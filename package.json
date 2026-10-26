@@ -100,7 +100,8 @@
     "sdk:artifacts": "node scripts/sdk-artifacts.mjs",
     "test:sdk-artifacts": "node --test scripts/sdk-artifacts.test.mjs",
     "agent:delivery-check": "node scripts/agent-delivery-check.mjs",
-    "test:agent-delivery-check": "node --test scripts/agent-delivery-check.test.mjs"
+    "test:agent-delivery-check": "node --test scripts/agent-delivery-check.test.mjs",
+    "test:agent-tools": "node --import tsx --test --test-concurrency=2 scripts/*.test.mjs scripts/*.test.ts scripts/test-eslint-solana-imports.cjs tools/solana-rpc-proxy/proxy.test.mjs autotests/regression/ci/*.test.cjs autotests/regression/ci/*.test.ts"
   },
   "dependencies": {
     "@apollo/client": "3.5.6",
