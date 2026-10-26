@@ -82,6 +82,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **只读 Git 工作树范围：** `--changed-since` 已使用内容差异避免 stat 缓存误报。文件恢复原字节后仍被 `diff --name-only` 列为变化时，先核对 blob/numstat，按[范围说明](frontend-offline-tests.md#按-git-变更范围运行局部回归)处理，不为消除提示刷新用户索引；两个已提交树之间的比较不受此项影响。
 
+**API 局部回归范围：** 不清楚源码改动影响哪些 API 测试时，先按[原生测试发现](solana-api-local.md#按源码依赖发现-api-测试)执行 `yarn gmx-api:discover-tests --api-dir PATH --related src/...ts`，检查直接及间接 suite 的真实依赖，再明确传给已有离线或隔离数据库入口。发现不执行测试或建库，不自动判断 profile；零匹配需核对覆盖并人工选测试，不当作验收通过。
+
 ## 查阅入口
 
 | 工作 | 必读资料 |
