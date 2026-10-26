@@ -32,6 +32,7 @@
     "agent:preflight": "node scripts/agent-preflight.mjs",
     "test:agent-preflight": "node --test scripts/agent-preflight.test.mjs",
     "test:solana-dev": "node --test scripts/solana-dev-tools.test.mjs",
+    "solana:dev:check": "node scripts/solana-dev-check.mjs",
     "solana:dev:browser": "node scripts/solana-dev-browser.mjs",
     "solana:dev": "node scripts/solana-dev.mjs",
     "solana:api-dev": "node scripts/solana-api-dev.mjs",
