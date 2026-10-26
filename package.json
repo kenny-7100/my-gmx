@@ -27,6 +27,7 @@
     "test:agent-preflight": "node --test scripts/agent-preflight.test.mjs",
     "solana:api-local": "node scripts/solana-api-local.mjs",
     "gmx-api:test-offline": "node scripts/gmx-api-offline-tests.mjs",
+    "gmx-api:test-integration": "node scripts/gmx-api-integration-tests.mjs",
     "test:gmx-api-offline": "node --test scripts/gmx-api-offline-tests.test.mjs",
     "agent:wallet": "node scripts/agent-wallet.mjs",
     "test:agent-wallet": "node --test scripts/agent-wallet.test.mjs scripts/agent-wallet-balance.test.mjs scripts/agent-wallet-tokens.test.mjs",

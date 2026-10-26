@@ -14,7 +14,7 @@
 
 6. **资金相关验收先核实网络和余额。** 在已获授权的 Solana 只读验收中，按[本地钱包说明](agent-wallet.md#mainnet-余额预检与执行顺序)先启动既有代理并运行 `yarn agent:wallet balances --network solana-mainnet`，涉及抵押代币或代币账户时再运行 `yarn agent:wallet tokens --network solana-mainnet`；成功后核对 mint、程序、状态与具体需求的资金条件，不将非零余额当成可花费额度。读取失败先诊断代理或上游，不把错误当零余额；Devnet 当前暂缓，不自动换公共 RPC。该预检不授予签名或发送权限。
 
-7. **样例 API 验收先使用现有 Solana launch mode。** 已获本地服务验收授权时，按[本地 Solana API 说明](solana-api-local.md#执行前准备与顺序)先运行 `yarn solana:api-local doctor` 汇总环境缺项；准备完成后，一次性验收优先运行 `yarn solana:api-local check`，自动限时启动、执行 14 项检查并清理所属服务。持续联调才使用 `start` / `verify` 并手动关闭。启动失败查看该次报告的 `logFile`，不反复猜测启动参数。仅修改或核对 API Solana 市场计算时，先运行 `yarn gmx-api:test-offline`，复用两个既有纯计算 suite；不要先启动无关数据库。数据库、HTTP、实时数据验收仍使用各自完整流程，离线通过不能代替。无需准备 EVM 数据库或 RPC；遇到 immutable 安装的 cacheKey 差异先核对文档中的压缩配置，不删除锁文件或升级依赖。样例通过不代表 reviewed contract 或真实链上数据通过。
+7. **样例 API 验收先使用现有 Solana launch mode。** 已获本地服务验收授权时，按[本地 Solana API 说明](solana-api-local.md#执行前准备与顺序)先运行 `yarn solana:api-local doctor` 汇总环境缺项；准备完成后，一次性验收优先运行 `yarn solana:api-local check`，自动限时启动、执行 14 项检查并清理所属服务。持续联调才使用 `start` / `verify` 并手动关闭。启动失败查看该次报告的 `logFile`，不反复猜测启动参数。仅修改或核对 API Solana 市场计算时，先运行 `yarn gmx-api:test-offline`，复用两个既有纯计算 suite；不要先启动无关数据库。涉及 Solana pairs 数据库状态时，使用 `yarn gmx-api:test-integration`，先核实本地 Docker 与 postgres:15 镜像，再用独立临时容器运行原有数据库测试；不要把默认 Jest 指向共享数据库。HTTP、其他数据库场景及实时数据验收仍使用各自完整流程，所选回归通过不能代替。无需准备 EVM 数据库或 RPC；遇到 immutable 安装的 cacheKey 差异先核对文档中的压缩配置，不删除锁文件或升级依赖。样例通过不代表 reviewed contract 或真实链上数据通过。
 
 8. **组合验收先选择依赖检查项。** 同一任务依赖多个已有通道时，按[统一预检说明](agent-preflight.md)先准备已获授权的服务，再运行 `yarn agent:preflight --checks ...`，查看逐项状态后进入业务验收。钱包必须显式选择；keeper 的真实 blocked 不因本地 mock 被改为 passed，未选择项也不能当作通过。单一通道或需自定义端点时仍可直接使用原工具，不重复运行两套相同检查。
 

@@ -147,6 +147,44 @@ stdout 输出 `mode: offline-fixtures` 的 JSON，含 API commit/dirty、选定�
 
 本机验收摘要为同目录 `offline-latest.json`，失败/隔离验证为 `offline-acceptance.json`；临时注入仅发生在已清理的源码副本，真实 API 文件未改动。该阶段为 A08/A11 的回归执行能力补充，未新增独立数学基准，不能将旧 fixture 当成未来全部 SDK / 部署版本的正确性证明。
 
+## gmx-api 隔离 PostgreSQL 集成测试
+
+2026-10-26 增加数据库测试入口，补充离线计算与样例 HTTP 检查无法覆盖的数据库状态行为。在主仓库执行：
+
+```sh
+yarn gmx-api:test-integration
+
+# From gmx-api
+node ../scripts/gmx-api-integration-tests.mjs --api-dir .
+```
+
+依赖 Node 22、API 已安装的锁定依赖、可用的本地 Docker Unix socket context，以及本地 `postgres:15` 镜像。预检发现缺项时返回退出 1，不自动下载镜像、安装工具或连接替代数据库；需要资源所有者准备后重跑。当前实现面向本机 macOS/Linux Docker context，不接受远端 TCP daemon。
+
+每次使用镜像实际 ID 创建带唯一 owner label 的专属容器，PostgreSQL 数据位于 tmpfs；容器只映射到 `127.0.0.1` 随机端口，并使用本次随机密码。工具不接受外部数据库连接参数，也不复用已有数据库。容器就绪后，在临时空工作目录执行 API **原有** `jest.config.ts`、globalSetup、setup 与 teardown，通过临时 migrations 链接及 APP_ROOT 定位原有源码。仅运行：
+
+| 原有测试 | 验证范围 |
+| --- | --- |
+| `src/domain/pairs/solanaPairsService.test.ts` | 4 项数据库状态回归：不可用时 503、24h 成交量跨轮次去重、索引停滞与缓存过期、休市市场价格保留；外部 keeper/SQD 由该原有测试模拟 |
+| `src/solanaApp.test.ts` | 1 项既有 Solana 样例应用检查，验证该应用路径不加载 EVM 配置；全局测试准备仍沿用原有数据库流程 |
+
+工具不修改 API 默认配置，不跳过数据库迁移或测试 setup。测试进程只继承必要环境白名单，TEST_DB_CONNECTION 由工具生成并指向专属容器；不继承真实数据库、RPC 或钱包凭据，默认 dotenv 不会读项目 `.env`。原有 Jest 的 NODE_ENV=test 仍选择 Hardhat/master 测试配置，这不是 Solana 主网数据验收，也不启动生产 worker。
+
+执行串行测试，关闭原有失败重试，整个 Jest 进程限时 180 秒；数据库就绪等待约 30 秒。沿用 API 原有 `--forceExit` 选项，因此不声称证明了 API 全部连接/定时器能自然退出；所属容器和临时目录清理由工具 finally 单独处理。正常结束或测试失败后，只删除 owner label 匹配的本次容器及其匿名卷，并检查容器已不存在。清理失败会让整次验收失败，报告中的 container ID 可用于定位，不删除其他容器或运行 Docker prune。
+
+stdout JSON 的 `mode` 为 `isolated-postgres-integration`，包括 API commit/dirty、原有 Jest/DB setup/选定测试及迁移文件摘要、镜像 ID、随机端口、测试数量和 cleanup。只有两个 suite 全部通过、无 skip/todo、退出 0、源码未变化且清理成功，才报告 passed。前置条件不足在 stderr 报告固定错误；实际测试失败仍输出带日志位置的失败报告。连接密码不写入工具报告。
+
+日志、原始 Jest 结果及报告保留在 `.local/acceptance/solana-api-local/integration-*/`。入口为 `scripts/gmx-api-integration-tests.mjs`。本机最终报告为 `integration-latest.json`，失败与隔离验收摘要为 `integration-acceptance.json`，均在同一忽略目录，不随 Git 共享。
+
+| 阶段 | 实施与验收状态 |
+| --- | --- |
+| 本地前置 | 已核实；Docker daemon 与 postgres:15 本地镜像可用，无新增资源需求 |
+| 真实数据库测试 | 已通过；原有迁移/setup/teardown，2 个 suite / 5 项测试全部通过，无跳过；API commit `b86956df00902e44e0295827d651b206a6153942`，dirty false |
+| 数据库隔离与清理 | 已通过；随机 loopback 端口，成功结束后删除容器；临时副本失败断言退出 1，仍清理容器，其他容器列表未变化 |
+| 环境隔离 | 已通过；公开父进程凭据哨兵和副本 `.env` 没有进入测试，测试使用工具生成的 localhost 连接 |
+| 静态检查与相关回归 | 已通过；Node 语法、ESLint、定向 Prettier、yarn tscheck、文档链接、git diff --check；离线计算 12 项与网络 guard 回归仍通过。未重跑完整 API/前端测试 |
+
+本轮只新增测试运行基础设施。未修改业务代码、依赖、迁移或原有 Jest 配置；不代表完整 API、实时 RPC/keeper/SQD、前端集成或交易通过。失败注入在已删除的临时副本执行，不污染 API checkout。
+
 ## 实施进度与验收
 
 ### 2026-10-26 Agent 生命周期闭环
