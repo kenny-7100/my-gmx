@@ -96,7 +96,9 @@
     "test:regression:funded:unit": "tsx --tsconfig autotests/regression/funded/tsconfig.json --test --test-concurrency=3 autotests/regression/funded/*.test.ts",
     "test:regression:funded:list": "TSX_TSCONFIG_PATH=autotests/regression/funded/tsconfig.json node --import tsx autotests/regression/funded/cli.ts list --group all",
     "test:regression:funded:types": "tsc -p autotests/regression/funded/tsconfig.json",
-    "build:gmsol-sdk": "vite build --config vite.gmsol.config.ts"
+    "build:gmsol-sdk": "vite build --config vite.gmsol.config.ts",
+    "sdk:artifacts": "node scripts/sdk-artifacts.mjs",
+    "test:sdk-artifacts": "node --test scripts/sdk-artifacts.test.mjs"
   },
   "dependencies": {
     "@apollo/client": "3.5.6",
