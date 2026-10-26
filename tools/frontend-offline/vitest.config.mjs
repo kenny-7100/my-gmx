@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, realpath } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import process from "node:process";
@@ -23,6 +23,15 @@ export default defineConfig(async () => {
     root: options.projectDir,
     envDir: options.emptyDir,
     cacheDir: path.join(options.emptyDir, "vite-cache"),
+    server: {
+      fs: {
+        allow: [
+          options.projectDir,
+          await realpath(path.join(options.projectDir, "node_modules")),
+          fileURLToPath(new URL("../", import.meta.url)),
+        ],
+      },
+    },
     test: {
       include: options.suites,
       setupFiles: [fileURLToPath(new URL("./setup.mjs", import.meta.url))],

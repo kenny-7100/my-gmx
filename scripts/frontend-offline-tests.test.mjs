@@ -48,3 +48,19 @@ test("frontend debugging rejects invalid ports, multiple suites and occupied por
     await new Promise((resolve) => server.close(resolve));
   }
 });
+
+test("frontend targets fail before execution when checkout or installed runtime is unavailable", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "gmx-frontend-target-"));
+  const suites = ["src/selected.spec.ts"];
+  try {
+    await assert.rejects(runFrontendOffline({ projectDir: path.join(dir, "missing"), suites }), { code: "ENOENT" });
+    await mkdir(path.join(dir, "src"));
+    await writeFile(path.join(dir, suites[0]), "");
+    await assert.rejects(runFrontendOffline({ projectDir: dir, suites }), { code: "ENOENT" });
+    await mkdir(path.join(dir, "node_modules/vite"), { recursive: true });
+    await writeFile(path.join(dir, "node_modules/vite/package.json"), JSON.stringify({ version: "0.0.0" }));
+    await assert.rejects(runFrontendOffline({ projectDir: dir, suites }), /Target vite must match/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
