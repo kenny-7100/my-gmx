@@ -3,6 +3,7 @@ import { spawn, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { closeSync, openSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, readdir, realpath, rm, stat, writeFile } from "node:fs/promises";
+import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -92,10 +93,23 @@ export function passedResults(result, suites, exit) {
   );
 }
 
-export async function runSdkOffline({ sdkDir, suites }) {
+export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
   sdkDir = await realpath(sdkDir);
   suites = await resolveSuites(sdkDir, suites);
+  if (inspectPort !== undefined) {
+    assert.ok(
+      Number.isInteger(inspectPort) && inspectPort > 0 && inspectPort <= 65535,
+      "Use an inspector port from 1 to 65535."
+    );
+    assert.equal(suites.length, 1, "Debug exactly one SDK suite using --suite.");
+    const probe = net.createServer();
+    await new Promise((resolve, reject) => {
+      probe.once("error", reject);
+      probe.listen(inspectPort, "127.0.0.1", resolve);
+    });
+    await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
+  }
   const output = path.join(ROOT, ".local/acceptance/sdk-offline");
   await mkdir(output, { recursive: true });
   const runDir = await mkdtemp(path.join(output, "run-"));
@@ -138,6 +152,10 @@ export async function runSdkOffline({ sdkDir, suites }) {
   process.on("SIGTERM", stop);
   let stage = "source-evidence";
   try {
+    if (inspectPort !== undefined) {
+      report.debug = { inspector: `127.0.0.1:${inspectPort}`, pauseOnStart: true, timeoutMs: 1_800_000 };
+      process.stderr.write(`SDK debug session: ${JSON.stringify({ ...report.debug, logFile, reportFile })}\n`);
+    }
     report.sourceBefore = await sourceEvidence(sdkDir);
     report.toolSha256 = {};
     for (const file of [...TOOL_FILES, "yarn.lock"])
@@ -158,6 +176,7 @@ export async function runSdkOffline({ sdkDir, suites }) {
           "run",
           "--config",
           path.join(ROOT, "tools/sdk-offline/vitest.config.mjs"),
+          ...(inspectPort === undefined ? [] : [`--inspect-brk=127.0.0.1:${inspectPort}`, "--pool=forks"]),
         ],
         {
           cwd: emptyDir,
@@ -172,7 +191,7 @@ export async function runSdkOffline({ sdkDir, suites }) {
           detached: true,
         }
       );
-      timer = setTimeout(() => killGroup("SIGKILL"), 180000);
+      timer = setTimeout(() => killGroup("SIGKILL"), report.debug?.timeoutMs ?? 180000);
       report.exit = await new Promise((resolve, reject) => {
         child.once("error", reject);
         child.once("exit", (code, signal) => resolve({ code, signal }));
@@ -183,6 +202,14 @@ export async function runSdkOffline({ sdkDir, suites }) {
       closeSync(fd);
     }
     stage = "results";
+    if (report.debug) {
+      const log = await readFile(logFile, "utf8");
+      report.debug.started = log.includes(`Debugger listening on ws://${report.debug.inspector}/`);
+      assert.ok(
+        report.debug.started && !log.includes("Starting inspector on"),
+        "SDK inspector did not start successfully; inspect vitest.log."
+      );
+    }
     const result = JSON.parse(await readFile(resultsFile, "utf8"));
     report.counts = {
       passed: result.numPassedTests,
@@ -225,16 +252,26 @@ export async function runCli(args = process.argv.slice(2)) {
       options: {
         "sdk-dir": { type: "string", default: path.join(ROOT, "sdk") },
         suite: { type: "string", multiple: true },
+        "inspect-port": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ...]\nRuns existing SDK source tests with an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. No SDK build, services or business source changes.\n"
+        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ...] [--inspect-port 9238]\nRuns existing SDK source tests with an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. No SDK build, services or business source changes. Debug mode requires exactly one suite, pauses a single fork on loopback and allows 30 minutes; see the emitted session log path.\n"
       );
       return 0;
     }
-    const report = await runSdkOffline({ sdkDir: values["sdk-dir"], suites: values.suite });
+    const report = await runSdkOffline({
+      sdkDir: values["sdk-dir"],
+      suites: values.suite,
+      inspectPort:
+        values["inspect-port"] === undefined
+          ? undefined
+          : /^\d+$/.test(values["inspect-port"])
+            ? Number(values["inspect-port"])
+            : NaN,
+    });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return report.status === "passed" ? 0 : 1;
   } catch (error) {
