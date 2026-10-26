@@ -104,7 +104,7 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 
 已沉淀 [gmx-api Solana 离线计算回归](solana-api-local.md#gmx-api-solana-离线计算回归)：`yarn gmx-api:test-offline` 默认复用 API 两个既有 Solana suite（12 项），支持重复 `--suite src/...test.ts` 精确选择其他离线测试；使用独立无数据库配置、UTC 和环境隔离，阻断意外外连，核对精确执行范围及 API 本地源码依赖摘要。已实测 number 与收益计算两份原测试 59 项通过；`yarn test:gmx-api-offline` 验证网络 guard、结果拒绝组合和源码指纹。测试使用独立进程组，成功、失败、中断与超时后清理所属子进程并记录清理结果；真实 Node 生命周期回归自动纳入统一工具测试。单 suite 加 `--inspect-port 9239` 可暂停 Jest，在原 TypeScript 源码查看参数与调用栈；保留网络和环境隔离，详见同一文档的断点调试章节。该 profile 不替代默认数据库集成、HTTP 或实时服务验收。
 
-已沉淀 [gmx-api 隔离 PostgreSQL 集成测试](solana-api-local.md#gmx-api-隔离-postgresql-集成测试)：`yarn gmx-api:test-integration` 使用本地 postgres:15 镜像建立专属临时容器，复用原有 Jest 配置、迁移和数据库 setup/teardown，默认运行两个既有 suite / 5 项测试，可重复传入 `--suite` 指定其他 API 测试（已验证迁移/市场模型 11 项）；校验路径并固定 UTC，复用离线入口的完整 API 源码扫描，核对运行前后源码及原配置/迁移证据，保留实际范围、版本和日志，成功或测试失败均清理所属容器。单 suite 加 `--inspect-port 9241` 可在原数据库测试中命中 TypeScript 模型断点并读取参数，保持 UTC 和所属资源清理；调试步骤见同一文档。要求本地 Docker，不自动拉镜像，不接触已有数据库，不代表完整 API 或真实数据验收。
+已沉淀 [gmx-api 隔离 PostgreSQL 集成测试](solana-api-local.md#gmx-api-隔离-postgresql-集成测试)：`yarn gmx-api:test-integration` 使用本地 postgres:15 镜像建立专属临时容器，复用原有 Jest 配置、迁移和数据库 setup/teardown，默认运行两个既有 suite / 5 项测试，可重复传入 `--suite` 指定其他 API 测试（已验证迁移/市场模型 11 项）；校验路径并固定 UTC，复用离线入口的完整 API 源码扫描，核对运行前后源码及原配置/迁移证据，保留实际范围、版本和日志，成功或测试失败均清理所属容器。单 suite 加 `--inspect-port 9241` 可在原数据库测试中命中 TypeScript 模型断点并读取参数，保持 UTC 和所属资源清理；调试步骤见同一文档。默认网络限制仅允许本次数据库及测试进程自建服务器，拒绝事件由运行器独立核对，捕获异常或末尾钩子也不能误报通过；要求本地 Docker，不自动拉镜像，不接触已有数据库，不代表完整 API 或真实数据验收。
 
 已沉淀 [gmx-api 路由准备与过期检查](solana-api-local.md#gmx-api-路由生成准备与过期检查)：`yarn gmx-api:prepare` 复用原 v1/v2 TSOA 配置生成路由及 OpenAPI；`--verify` 只读比较输入和产物摘要，缺失、损坏或过期返回非零。真实路由映射/Express HTTP 测试共 6 项通过；不替代契约评审、部署或实时服务验证。
 
