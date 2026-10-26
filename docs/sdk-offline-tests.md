@@ -41,6 +41,25 @@ yarn sdk:test-offline --sdk-dir /path/to/delivery/sdk --related src/utils/stats/
 
 本轮兼容性与工程检查通过：默认三份 SDK suite 共 153 项，显式单 suite 的真实源码断点、BigInt 参数与恢复后 6 项测试；统一工具回归 111 项、SDK 产物只读核验、根类型检查、相关 ESLint/Prettier、143 个文档本地目标及差异检查。完整前端回归 299 个文件 / 3,014 项通过，另有 1 个文件 / 1 项既有跳过，退出 0。没有构建 SDK 或启动外部服务；真实 RPC 依赖仍是上述离线覆盖边界。
 
+## 按 Git 变更范围运行回归
+
+SDK 纯源码功能分支可以使用明确基线自动收集改动，无需逐个列出 `--related`：
+
+```sh
+yarn sdk:test-offline --changed-since origin/release
+yarn sdk:test-offline --sdk-dir /path/to/delivery/sdk --changed-since origin/release
+```
+
+REF 在目标 SDK 所属 Git 仓库中解析并固定为 commit SHA，不使用基础设施仓库的 ref。对于主项目结构，报告 `changes.checkoutDir` 为目标主仓库根目录，`sdkPrefix` 为 `sdk/`；Git 路径保留仓库根目录相对形式，最终 `related` 转为 SDK 根目录相对路径。直接比较基线树与当前工作树/索引，合并未忽略的未跟踪文件，覆盖已提交、暂存、未暂存和新增源码；不自动找 merge-base、不 fetch 或切分支。
+
+只有全部变更均为所选 SDK 内现存的 `src/` TS/TSX/JS/JSON 时才自动选择。空范围、删除、SDK 配置/依赖/资源、根配置、前端或其他目录混合改动均明确失败，要求人工评估后用 `--suite`，不会悄悄丢弃范围外文件。此模式与 `--suite`、`--related`、`--inspect-port` 互斥。文档或配置也变更的 SDK 任务仍可显式选测试，但需独立验证这些变化的影响。
+
+先核对 `changes.baseSha`、`head` 和工作树/索引/未跟踪路径，再检查原生发现及实际结果。执行结束以固定 SHA 重算范围，记录 `changesAfter` 和 `changesUnchanged`；即使断言通过、源码字节不变，暂存状态或 HEAD/路径变化也不能 passed。SDK 内容另由 `sourceUnchanged` 检查。Git 读取固定禁用索引自动刷新、外部 diff、textconv 和 rename 推断，以 NUL 分隔的内容 numstat 识别文件，避免文件恢复原字节后的 stat 缓存误报；不写目标索引。
+
+2026-10-27 已在独立 `origin/release` 主项目 checkout 验收：修改原 BigMath 测试文件后，通过 Git 范围自动选中并执行原 6 项测试。临时 fixture 验证四种变更合并、精确执行和调用方环境隔离；空范围、根/SDK 配置、前端源码混入及删除均失败。测试正文模拟另一个编辑者暂存新增源码，在原断言通过、内容指纹不变时仍报告 `changesUnchanged=false` 并失败。正常运行前后目标 HEAD、索引及源码保持不变；临时副本已删除，实际业务文件未改。验收显式复制目标 Vitest、链接其他现有 SDK 依赖，不代表全新安装通过。真实 Git 路径/模式回归纳入统一工具测试，本机证据为忽略的 `.local/acceptance/sdk-offline/changed-acceptance.json`。
+
+本轮兼容性与工程检查通过：默认 SDK 153 项、原 `--related` 独立目录验收、真实 BigMath 源码断点及恢复后 6 项；统一工具回归 113 项、SDK 产物只读核验、根类型检查、相关 ESLint/Prettier、147 个文档本地目标及差异检查。完整前端回归 299 个文件 / 3,014 项通过，另有 1 个文件 / 1 项既有跳过，退出 0。没有构建、启动服务或修改业务源码、原测试和依赖版本。
+
 ## 独立交付目录验收
 
 从当前基础设施目录调用 `--sdk-dir /absolute/path/to/delivery/sdk`，无需把个人工具复制进交付分支。先在目标 SDK 目录准备其锁定依赖；确实需要安装且已获授权时，在目标 `sdk/` 下执行 `yarn install --immutable --mode=skip-build`，不要借用开发基础目录的 `node_modules`，也不要通过普通根安装触发 SDK 构建。完整 checkout 需保留 Yarn 配置引用的根 `.yarn/` 文件。工具本身不安装、不构建、不切换分支。

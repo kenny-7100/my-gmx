@@ -64,6 +64,61 @@ export async function resolveRelated(sdkDir, requested) {
   return selected;
 }
 
+export async function changedSources(sdkDir, baseRef) {
+  assert.ok(typeof baseRef === "string" && baseRef.length > 0, "Use a nonempty --changed-since ref.");
+  sdkDir = await realpath(sdkDir);
+  let checkoutDir = sdkDir;
+  const git = (...args) =>
+    execFileSync("git", ["--no-pager", "-c", "diff.autoRefreshIndex=false", "-C", checkoutDir, ...args], {
+      encoding: "utf8",
+      env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 30000,
+      maxBuffer: 32_000_000,
+    });
+  checkoutDir = await realpath(git("rev-parse", "--show-toplevel").trim());
+  const relativeDir = path.relative(checkoutDir, sdkDir).split(path.sep).join("/");
+  const sdkPrefix = relativeDir ? `${relativeDir}/` : "";
+  const baseSha = git("rev-parse", "--verify", "--end-of-options", `${baseRef}^{commit}`).trim();
+  const head = git("rev-parse", "HEAD").trim();
+  const list = (...args) =>
+    git(...args)
+      .split("\0")
+      .filter(Boolean)
+      .sort();
+  const diff = ["diff", "--no-ext-diff", "--no-textconv", "--no-renames", "--numstat", "-z"];
+  const diffPaths = (...args) =>
+    list(...diff, ...args)
+      .map((entry) => entry.split("\t").slice(2).join("\t"))
+      .sort();
+  const worktreePaths = diffPaths(baseSha, "--");
+  const indexPaths = diffPaths("--cached", baseSha, "--");
+  const untrackedPaths = list("ls-files", "--others", "--exclude-standard", "-z");
+  const paths = [...new Set([...worktreePaths, ...indexPaths, ...untrackedPaths])].sort();
+  assert.ok(paths.length > 0, "No changed source files; select --suite explicitly if tests are needed.");
+  const unsupported = paths.filter(
+    (file) =>
+      !file.startsWith(sdkPrefix) || !/^src\/[a-zA-Z0-9_./-]+\.(json|tsx?|js)$/.test(file.slice(sdkPrefix.length))
+  );
+  assert.equal(
+    unsupported.length,
+    0,
+    `Changed paths require explicit --suite selection: ${unsupported.slice(0, 5).join(", ")}`
+  );
+  let related;
+  try {
+    related = await resolveRelated(
+      sdkDir,
+      paths.map((file) => file.slice(sdkPrefix.length))
+    );
+  } catch (error) {
+    if (error.code === "ENOENT")
+      throw new Error("Changed source was deleted or is missing; review its impact and select --suite explicitly.");
+    throw error;
+  }
+  return { checkoutDir, sdkPrefix, baseRef, baseSha, head, worktreePaths, indexPaths, untrackedPaths, related };
+}
+
 export async function sourceEvidence(sdkDir) {
   const files = ["package.json", "yarn.lock", "vitest.config.ts", "tsconfig.json"];
   const walk = async (dir) => {
@@ -142,10 +197,16 @@ export function passedResults(result, suites, exit) {
   );
 }
 
-export async function runSdkOffline({ sdkDir, suites, related, inspectPort }) {
+export async function runSdkOffline({ sdkDir, suites, related, changedSince, inspectPort }) {
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
   sdkDir = await realpath(sdkDir);
-  assert.ok(suites === undefined || related === undefined, "Do not combine --suite and --related.");
+  assert.ok(
+    [suites, related, changedSince].filter((value) => value !== undefined).length <= 1,
+    "Do not combine --suite, --related and --changed-since."
+  );
+  assert.ok(changedSince === undefined || inspectPort === undefined, "Use --suite for debugging after Git selection.");
+  const changes = changedSince === undefined ? undefined : await changedSources(sdkDir, changedSince);
+  if (changes) related = changes.related;
   assert.ok(
     related === undefined || inspectPort === undefined,
     "Use --suite for debugging after related test discovery."
@@ -181,6 +242,7 @@ export async function runSdkOffline({ sdkDir, suites, related, inspectPort }) {
     runtime,
     suites,
     ...(related ? { related } : {}),
+    ...(changes ? { changes } : {}),
     startedAt: new Date().toISOString(),
     logFile,
     resultsFile,
@@ -311,6 +373,15 @@ export async function runSdkOffline({ sdkDir, suites, related, inspectPort }) {
     };
     report.sourceAfter = await sourceEvidence(sdkDir);
     report.sourceUnchanged = report.sourceAfter.sourceSha256 === report.sourceBefore.sourceSha256;
+    if (changes) {
+      stage = "changed-source-selection";
+      report.changesUnchanged = false;
+      report.changesAfter = await changedSources(sdkDir, changes.baseSha);
+      report.changesAfter.baseRef = changes.baseRef;
+      report.changesUnchanged = JSON.stringify(changes) === JSON.stringify(report.changesAfter);
+      assert.ok(report.changesUnchanged, "SDK Git change selection changed during testing; rerun the check.");
+    }
+    stage = "source-evidence";
     assert.ok(report.sourceUnchanged, "SDK source changed during the check.");
     stage = "network-audit";
     report.network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
@@ -345,13 +416,14 @@ export async function runCli(args = process.argv.slice(2)) {
         "sdk-dir": { type: "string", default: path.join(ROOT, "sdk") },
         suite: { type: "string", multiple: true },
         related: { type: "string", multiple: true },
+        "changed-since": { type: "string" },
         "inspect-port": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ...] [--inspect-port 9238]\nRuns existing SDK source tests using the target SDK's installed Vitest (must match the infrastructure version), an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. --related discovers tests from the target dependency graph before exact offline execution; no matches fails. No SDK build, services or business source changes. Debug mode requires exactly one suite, pauses a single fork on loopback and allows 30 minutes; see the emitted session log path.\n"
+        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ... | --changed-since REF] [--inspect-port 9238]\nRuns existing SDK source tests using the target SDK's installed Vitest (must match the infrastructure version), an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. --related discovers tests from the target dependency graph before exact offline execution; no matches fails. --changed-since pins the target Git base and selects SDK source changes; mixed changes require explicit --suite selection. No SDK build, services or business source changes. Debug mode requires exactly one suite, pauses a single fork on loopback and allows 30 minutes; see the emitted session log path.\n"
       );
       return 0;
     }
@@ -359,6 +431,7 @@ export async function runCli(args = process.argv.slice(2)) {
       sdkDir: values["sdk-dir"],
       suites: values.suite,
       related: values.related,
+      changedSince: values["changed-since"],
       inspectPort:
         values["inspect-port"] === undefined
           ? undefined
