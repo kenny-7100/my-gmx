@@ -18,6 +18,22 @@ yarn frontend:test-offline --suite src/lib/dates.spec.ts --suite src/domain/gmso
 
 支持 `src/` 或 `landing/` 下真实存在的 `.spec` / `.test` 文件（JS/JSX/TS/TSX）。拒绝重复、缺失、glob、绝对路径、目录及越界符号链接；原 Vite exclude 继续有效，被排除或空文件不能通过。只运行明确选定的文件，不递归发现参考仓库。需要真实浏览器、外部服务或业务集成时使用相应验收环境。
 
+## 源码断点调试
+
+需要查看前端模块的实际参数和调用栈时，显式选择一份原有 suite：
+
+```sh
+yarn frontend:test-offline --suite src/lib/pwa/appUpdateDecision.spec.ts --inspect-port 9240
+```
+
+1. 工具先检查 loopback 端口可用，再在 stderr 输出 `Frontend debug session`，包含 `inspector`、本次 `logFile`、`reportFile` 和总时限。这只是启动安排；查看本次日志中的 `Debugger listening on ws://127.0.0.1:9240/...` 确认监听成功。端口占用明确失败，不接管或停止已有服务。
+2. Chrome `chrome://inspect` 配置 `127.0.0.1:9240` 后 Inspect，或用 IDE Node attach；Agent 可复用 `scripts/lib/agent-inspector.mjs` 连接 `/json/list` 中的 WebSocket。调试模式使用单个 Vitest fork，测试执行前等待连接，仅绑定 `127.0.0.1`。
+3. 开启 source maps，在当前 checkout 的 TypeScript 源码设置断点，再恢复初始暂停。本机已在 `src/lib/pwa/appUpdateDecision.ts` 的 `getAppUpdateAction` 首个条件行命中两次，读取 `status.updateBuildId` 及原测试调用栈。初始暂停、端口可连接或测试通过不能代替目标源码断点证据。
+4. Agent 自动化可沿用 SDK 的 `Debugger.setInstrumentationBreakpoint(beforeScriptExecution)`：目标脚本执行前暂停，核对脚本 URL 和 inline source map 的 `sourcesContent` 与磁盘一致，再用映射和 `Debugger.getPossibleBreakpoints` 定位具体源码行；Vite 相对 source 路径按脚本 URL 解析，设置目标断点后移除 instrumentation breakpoint。
+5. 完成后移除自身断点、恢复执行并断开 debugger。需要中止时，对外层命令 Ctrl-C / SIGTERM，核对报告 `exit.cleanup=passed`、调试端口关闭和临时目录清理；只关闭调试窗口可能使测试继续执行。
+
+调试总时限为 30 分钟，包含等待与暂停；普通模式仍为 180 秒，原有单项测试超时保留。只支持单 suite，不改变原 happy-dom、polyfill、Worker、测试时区及网络保护。报告新增 `debug.inspector`、`pauseOnStart`、`timeoutMs`、`started`；日志未确认 inspector 成功启动时不能 passed。此入口调试 Node/happy-dom 中的单元测试，真实浏览器渲染和交互仍使用页面验收环境。
+
 ## 隔离方式与已确认的启动条件
 
 实现位于 `scripts/frontend-offline-tests.mjs`、`tools/frontend-offline/`，复用既有 Node 网络保护器和 SDK 的 Vitest 结果检查器。
@@ -32,11 +48,11 @@ yarn frontend:test-offline --suite src/lib/dates.spec.ts --suite src/domain/gmso
 
 ## 结果、版本与清理
 
-串行执行所选文件、单 worker、无重试；整次限时 180 秒。SIGINT/SIGTERM 及超时清理本次所属进程组，结束后删除临时目录和缓存，保留本次日志。SIGKILL/系统崩溃不保证清理，需核实报告的 processGroup 和资源归属，不接管其他任务。
+串行执行所选文件、单 worker、无重试；整次限时 180 秒。通过共享 `scripts/lib/agent-test-process.mjs` 管理所属 POSIX 进程组，使用系统 `ps` 核实组内非 zombie 进程。SIGINT/SIGTERM 先发送 SIGTERM，1 秒后仍未退出则强制结束；超时直接终止所属组，正常退出后也清理组内存活子进程。清理仅覆盖同组后代，不保证主动脱离进程组的子进程。结束后删除临时目录和缓存，保留本次日志。SIGKILL/系统崩溃不保证清理，需核实报告的 processGroup 和资源归属，不接管其他任务。
 
-stdout 输出 JSON，退出 0 要求：正常退出、原生 success、精确的所选结果文件、实际断言全部通过、无 skipped/todo，且运行前后源码摘要一致。零测试、失败或中断均退出 1；前置错误明确失败，不自动构建或启动服务。
+stdout 输出 JSON，退出 0 要求：正常退出、原生 success、精确的所选结果文件、实际断言全部通过、无 skipped/todo，且运行前后源码摘要一致。零测试、失败、中断、超时、清理失败或信号异常均退出 1；前置错误明确失败，不自动构建或启动服务。
 
-每次证据位于忽略的 `.local/acceptance/frontend-offline/run-*/`：`vitest.log`、`vitest-results.json`、`report.json`。报告记录源码 commit/dirty、选择范围、计数、进程组、工具摘要和清理状态。源码指纹覆盖主 `src/`、`landing/`、`sdk/src/` 中 TS/TSX/JS/JSX/JSON，及 package、锁文件、Vite/TS/Lingui 和测试 global setup 配置；不读取 `.env`，不覆盖所有静态资源、安装包内容或部署身份。
+每次证据位于忽略的 `.local/acceptance/frontend-offline/run-*/`：`vitest.log`、`vitest-results.json`、`report.json`。报告记录源码 commit/dirty、选择范围、计数、进程组、工具摘要和清理状态；`exit` 另含 `interrupted`、`timedOut`、`processGroup`、`cleanup`，信号异常时含 `signalError`。源码指纹覆盖主 `src/`、`landing/`、`sdk/src/` 中 TS/TSX/JS/JSX/JSON，及 package、锁文件、Vite/TS/Lingui 和测试 global setup 配置；不读取 `.env`，不覆盖所有静态资源、安装包内容或部署身份。
 
 根 `yarn test:ci` 保持原状，仍是完整前端回归入口。本入口通过只代表所选离线范围，不代表 Chrome、真实 keeper/RPC/API 或整项业务需求通过。测试导入依赖 SDK 构建声明时，仍按[环境执行顺序](coding-and-self-review.md#执行前的环境检查与顺序)核对产物，不自动构建。
 
@@ -45,3 +61,6 @@ stdout 输出 JSON，退出 0 要求：正常退出、原生 success、精确的
 2026-10-27：原有三文件 17 项通过，无跳过，源码摘要未变；隔离探针确认调用方普通和 Vite 哨兵未进入测试、钱包配置键未继承，原 `Asia/Dubai`、polyfill 与 Worker 初始化保留。实际捕获联网异常后仍失败；断言失败、skip、零测试以及 SIGTERM 中断全部正确失败并清理临时目录，探针随后删除。
 
 工具选择器回归已纳入 `yarn test:agent-tools`，88 项通过；与既有精确结果和网络保护回归一起验证。负面场景结束后另用进程表核实所属进程组消失，并检查临时目录实际不存在。根类型检查、ESLint、Prettier、111 个文档本地目标和差异检查通过；完整前端单元测试 3,014 项通过、1 项既有跳过。原始结果为本机 `.local/acceptance/frontend-offline/default-acceptance.json`，负面路径为 `negative-acceptance.json`，不随 Git 共享。
+
+
+2026-10-27 调试验收：原有 PWA suite 中真实命中两次源码断点，分别读取无新版本与新版本 `200` 输入，source map 与磁盘一致，调用栈包含原测试；恢复后 9 项通过。暂停时核对原 `Asia/Dubai`、document、Worker、Promise polyfill、网络保护及环境隔离均保留。等待连接时 SIGTERM 正确失败，所属进程、端口、临时目录清理完成；非法端口、多 suite 与占用端口均拒绝，占用服务保留。普通默认三文件 17 项及统一工具 92 项通过，未改动业务源码、原测试或 Vite 配置。证据在本机忽略目录 `.local/acceptance/frontend-offline/debug-{acceptance,negative,default-compatibility}.json` 和 `debug-tools.tap`。
