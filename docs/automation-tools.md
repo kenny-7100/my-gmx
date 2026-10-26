@@ -122,7 +122,7 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 
 已沉淀 [gmx-api 隔离 PostgreSQL 集成测试](solana-api-local.md#gmx-api-隔离-postgresql-集成测试)：`yarn gmx-api:test-integration` 使用本地 postgres:15 镜像建立专属临时容器，复用原有 Jest 配置、迁移和数据库 setup/teardown，默认运行两个既有 suite / 5 项测试，可重复传入 `--suite` 指定其他 API 测试（已验证迁移/市场模型 11 项）；校验路径并固定 UTC，复用离线入口的完整 API 源码扫描，核对运行前后源码及原配置/迁移证据，保留实际范围、版本和日志，成功或测试失败均清理所属容器。单 suite 加 `--inspect-port 9241` 可在原数据库测试中命中 TypeScript 模型断点并读取参数，保持 UTC 和所属资源清理；调试步骤见同一文档。默认网络限制仅允许本次数据库及测试进程自建服务器，拒绝事件由运行器独立核对，捕获异常或末尾钩子也不能误报通过；要求本地 Docker，不自动拉镜像，不接触已有数据库，不代表完整 API 或真实数据验收。
 
-已沉淀 [gmx-api 路由准备与过期检查](solana-api-local.md#gmx-api-路由生成准备与过期检查)：`yarn gmx-api:prepare` 复用原 v1/v2 TSOA 配置生成路由及 OpenAPI；`--verify` 只读比较输入和产物摘要，缺失、损坏或过期返回非零。真实路由映射/Express HTTP 测试共 6 项通过；不替代契约评审、部署或实时服务验证。
+已沉淀 [gmx-api 路由准备与过期检查](solana-api-local.md#gmx-api-路由生成准备与过期检查)：`yarn gmx-api:prepare` 复用原 v1/v2 TSOA 配置生成路由及 OpenAPI；目标必须为 API Git 根目录，输出固定且逐个被忽略。schemaVersion 2 记录实际解析的生成器、模板、嵌套 TypeScript、Node 和工具脚本；`--verify` 只读比较源码、工具和产物摘要，缺失、损坏或过期返回非零。真实路由映射/Express HTTP 测试共 6 项通过；不替代契约评审、部署或实时服务验证。
 
 已沉淀 [Solana 持续联调服务](solana-api-local.md#持续运行的-solana-联调环境)：`yarn solana:api-dev up/status/logs/stop` 管理原 Solana 入口及 tsx watch，提供显式 loopback inspector、环境隔离、状态验证、所属进程清理和持久日志；16 项生命周期/异常检查及真实 Chrome 跨域访问已通过。当前入口仍为 sample，不启动数据库/采集，不修改前端 host 或业务代码。
 
