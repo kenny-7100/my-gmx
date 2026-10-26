@@ -1,6 +1,6 @@
 # 本地 Solana API 样例验收服务
 
-更新日期：2026-10-26。对应基础设施清单 A08；本地样例服务已具备环境预检及一次性启动、验收、清理闭环。
+更新日期：2026-10-26。对应基础设施清单 A08；本地样例服务已具备环境预检、一次性验收及持续运行/自动重启/调试/状态与停服入口。
 
 ## 用途与边界
 
@@ -9,6 +9,77 @@
 这是固定样例服务：不需要钱包、数据库、RPC、subgraph 或 keeper。返回的持仓、订单、地址占位符及金额不代表请求地址的真实链上状态；市场 `updatedAt` 是样例服务每次生成的时间，不证明链上数据新鲜。验收通过只代表本地服务与选定源码一致，不代表 A04 的 reviewed samples、真实 API、计算正确性或交易闭环已经通过。
 
 2026-10-25 实时核对 [FESOL-62](https://linear.app/gmx-io/issue/FESOL-62)：该需求为 Done，评论说明样例服务已经部署；本轮没有取得或验证实际 `run.app` 地址，A03 仍待推进。不修改 Linear 状态，也不重新实现 FESOL-62。
+
+## 持续运行的 Solana 联调环境
+
+2026-10-26 已实施并验收。目标是持续运行当前 gmx-api 的正式 `LAUNCH_MODE=solana` 入口，供 Agent 请求接口、修改源码并联调。使用 `scripts/solana-api-dev.mjs` 管理现有 `tsx watch`，不复制 API、不改变业务或前端数据流。
+
+### 日常命令与调试
+
+在主仓库根目录执行，依赖 Node 22、POSIX 本地系统（本机 macOS 已验证）、现有 API checkout 及其锁定依赖：
+
+```bash
+# Start independently of the current terminal
+yarn solana:api-dev up
+# Check the owned process and all 14 HTTP checks
+yarn solana:api-dev status
+# Read the last 100 log lines, limited to the last 64 KiB
+yarn solana:api-dev logs
+# Stop the owned watcher and API process group
+yarn solana:api-dev stop
+```
+
+默认 HTTP 地址为 `http://127.0.0.1:3004`。`up` 可加 `--api-dir PATH` 指向其他 checkout，所有命令可用 `--port 3014` 选择服务。控制命令按“本工作区 + API 端口”定位所属服务；`status` 报告中的 `apiDir` 为实际目标。重复 up 和被占用端口明确失败，不自动复用或关闭其他服务。命令退出 0 表示启动 ready、当前检查通过、日志读取成功或停服成功，失败退出 1。
+
+需要断点时，在启动时显式指定：
+
+```bash
+yarn solana:api-dev up --inspect-port 9229
+```
+
+Node inspector 仅绑定 `127.0.0.1`；Chrome `chrome://inspect` 或 IDE 可连接 9229。已实际验证 inspector WebSocket 连接、HTTP handler 断点暂停和继续执行。自动重启会更换调试目标，调试器需重连；断点暂停期间 HTTP 请求可能超时，status 不会因此伪报健康。调试端口冲突会阻止启动。关闭 inspector 需 stop 后不带该选项重新 up。
+
+源码 `src/**/*` 的变化由 tsx 监控，已验证响应修改、语法错误、修复后的重启和恢复；应用启动异常时 watcher 可继续等待修复，但 HTTP/status 为失败。watcher 本身意外退出时，管理进程清理所属子进程并记录失败，不无限自动重启。修改依赖、启动选项或工具本身后需 stop/up，依赖安装仍按锁文件流程进行。服务持续到显式 stop、系统退出或异常结束，不注册开机启动。
+
+### 配置、日志与身份
+
+无需新增 `.env.local` 变量。管理进程和 API 使用环境白名单，API 在临时空目录启动，固定 `LAUNCH_MODE=solana`、`NODE_ENV=development`、UTC 和选定 PORT，只传必要 PATH/TMPDIR/APP_ROOT/commit；不加载主仓库钱包配置或 API checkout 的 `.env`，不沿用 `yarn dev` 中关闭 TLS 校验的设置。已用无秘密的哨兵配置和运行时 inspector 核实隔离。
+
+每次启动保留 `.local/acceptance/solana-api-local/dev-*/service.log`、`report.json`；stdout 给出绝对路径、API checkout、启动源码摘要、supervisor/watcher PID、数据模式及初次 14 项检查。`status` 实时重跑检查，返回当前期望源码摘要；`sourceAtStart` 是启动时证据，不能据此证明热更新后每个模块的加载身份。磁盘日志不自动轮转，长期开发按需停服后整理，不把它作为生产日志设施。`report.json` 是生命周期快照，ready 不代表读取时仍健康；当前健康状态必须运行 status。停服或失败后可直接读取保留的日志和报告。
+
+控制通道是 `/tmp/gmx-solana-api-<uid>-<workspace-hash>-<port>.sock`，权限 0600，路径亦记录于报告；stop 通过所属管理进程清理进程组，不读取 PID 文件后盲目 kill。普通 stop 和 SIGTERM 已验证清理。管理进程被 SIGKILL 或系统崩溃无法保证清理；先核实报告中的进程、端口及 socket 归属，确认无所属服务后才手工清理残留，不自动接管未知资源。
+
+现有 API 的 `listen(port)` 未指定 host，因此 HTTP 监听沿用 OS 默认地址，并非工具强制仅监听 loopback；报告明确记录这一点。此入口用于本机开发，不应映射到公网。它没有生产凭据、数据库或交易发送入口，也不代表经过生产环境部署验收。
+
+### 当前接口和真实依赖边界
+
+| 能力 | 当前 Solana 入口行为 | 运行依赖 |
+| --- | --- | --- |
+| `/ping` | `pong` | 本地进程 |
+| `/v1/markets/config` | 仓库市场配置样例 | 本地 JSON |
+| `/v1/markets/values` | 仓库市场数值样例；updatedAt 每次请求刷新 | 本地 JSON；时间更新不代表真实行情新鲜 |
+| `/v1/positions`、`/v1/orders`、`/v1/fee-discount` | 校验 address 参数后返回固定样例，不按用户读取真实账户 | 本地 JSON，无需钱包资金 |
+| `/v1/pairs`、EVM/其他 API 路由 | 当前入口不挂载，返回 404 | 不通过添加替代路由补齐 |
+| PostgreSQL、Redis、RPC、keeper、SQD、后台采集 | 当前 `solana` 模式不启用 | 无需为此服务启动或配置 |
+| 已有 Solana pairs 采集代码 | worker 由 `master` 模式持有，不在 Solana bootstrap 中执行 | 属于另一条运行路径，不能将其存在当作本服务已有真实数据 |
+| 前端自动连接此服务 | 当前分支尚无 Solana API host 消费入口 | 随对应业务需求接入统一数据流；本轮验证浏览器直接请求/CORS |
+
+以上根据 `src/index.ts`、`src/solanaBootstrap.ts`、`src/solanaApp.ts`、`src/config/launchModes.ts` 核实，API commit 为 `b86956df00902e44e0295827d651b206a6153942`。无需用 EVM master 模式或旧 GMTrade 服务来绕过 Solana 的真实数据缺口；未来入口切换为真实数据时，需同步更新检查器与模式证据，不能仍沿用 sample 成功口径。
+
+### 本轮验收结果
+
+| 验收条件 | 状态与证据 |
+| --- | --- |
+| 跨命令持续运行、日志和状态 | 已通过；detached 启动、14 项 HTTP/CORS 检查及至少 60 秒持续可用 |
+| 自动重启及失败恢复 | 已通过；隔离副本实际修改响应、恢复、语法错误及修复均验证 |
+| 本地断点调试 | 已通过；真实 inspector 连接和 HTTP 断点暂停/继续 |
+| 进程归属与停服 | 已通过；重复 up、外部 API/调试端口冲突、watcher SIGKILL、supervisor SIGTERM、启动错误及清理 |
+| 环境隔离 | 已通过；checkout `.env` 与调用方钱包/数据库哨兵未进入 API，TLS 校验未被关闭 |
+| 本地浏览器联调访问 | 已通过；实际 Chrome 从另一 localhost origin 请求市场、持仓、错误响应及触发预检的自定义 header，无请求拦截或替代响应 |
+
+工程检查通过：脚本语法、ESLint、代码格式、`yarn tscheck`、`yarn test:ci`（3014 项通过、1 项原有跳过）、文档本地链接及 `git diff --check`。原有 `doctor` / `check` 兼容性复验通过，一次性 check 的 14 项检查及 cleanup 均 passed。
+
+生命周期演练共 16 项，本机报告为 `.local/acceptance/solana-api-local/dev-acceptance.json`；浏览器证据为 `dev-browser.json`，实际 checkout 启动报告为 `dev-current.json`。临时源码副本已清理，真实 API checkout 未修改。当前数据模式的持续服务范围完成，不代表真实链上数据、前端完整接入或下单链路完成。
 
 ## 执行前准备与顺序
 
