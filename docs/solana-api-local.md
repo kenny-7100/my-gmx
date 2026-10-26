@@ -339,7 +339,18 @@ yarn gmx-api:test-integration --suite src/routes/routeMap.test.ts --suite src/ro
 
 工具为 `scripts/gmx-api-prepare.mjs`，支持 `--api-dir PATH`。生成命令依次运行 API 原有 `tsoa.json` 与 `tsoa-v2.json` 的 `spec-and-routes`，写入 `src/codegen/tsoa/` 中四个已被 API Git 忽略的文件，不修改业务源码、配置或依赖。每阶段限时 120 秒，不启动 API/数据库，不安装依赖或连接真实 keeper。stdout 输出结构化报告，生成日志及清单保留于 `.local/acceptance/solana-api-local/prepare-*/` 与 `prepared-*.json`，按 checkout 绝对路径区分。
 
-`--verify` 只读比较清单：记录 `src/` 下 TS/TSX/JS/JSON（排除生成目录）及 package/lock/TS/TSOA 配置的摘要、四个产物摘要，并检查 OpenAPI 3 非空路径和路由注册入口。源码检查有意保守，测试文件变化也要求重生成；不检查 node_modules 实际内容、外部类型依赖或完整 TypeScript 导入图，依赖仍须按锁文件准备。返回 0 表示摘要一致；有效文件但摘要变化返回 2 / `regeneration-required`；文件、清单缺失或格式错误、生成失败返回 1 / `api-generation-not-ready`。失败时先确认 Node/依赖/文件，再查看报告中的生成日志，不手改产物绕过检查。
+`--verify` 只读比较清单：记录 `src/` 下 TS/TSX/JS/JSON（排除生成目录）及 package/lock/TS/TSOA 配置的摘要、四个产物摘要，并检查 OpenAPI 3 非空路径和路由注册入口。源码检查有意保守，测试文件变化也要求重生成。2026-10-27 起收据升级为 schemaVersion 2，加入下述实际生成工具指纹；旧收据不再当作当前证据。返回 0 表示摘要一致；有效文件但源码、工具、产物摘要或收据版本变化返回 2 / `regeneration-required`；文件、清单缺失或格式错误、目标不符合约定、生成失败返回 1 / `api-generation-not-ready`。失败时先确认 Node/依赖/文件和目标约定，再查看生成日志，不手改产物或收据绕过检查。
+
+新增来源及输出检查：
+
+- `--api-dir` 必须是 API Git 根目录。生成前核对两份原配置的输出目录和文件名仍为 `src/codegen/tsoa/` 下的四个约定产物，逐个确认被 Git 忽略且未跟踪，拒绝输出目录/文件符号链接；不自动修复配置或忽略规则。源码输入也拒绝未经核实的符号链接。
+- `tooling` 记录 Node 版本/可执行文件、准备脚本与 Git 来源辅助脚本摘要，以及实际解析到的 `tsoa`、`@tsoa/cli`、`@tsoa/runtime`、TypeScript 的目录、版本、文件数和摘要。扫描三个 TSOA 包的 package.json/dist（含模板），以及实际 TypeScript 的 package.json/lib；沿生成器模块解析链选择依赖，不假定 API 根目录版本就是实际版本。本机根 TypeScript 为 5.4.2，TSOA 实际使用其嵌套的 5.9.3。
+- 生成结束前再次核对源码、工具与输出约定；任一变化不得写入新成功收据。`repository` 记录当前 Git 身份，verify 另以 `generatedRepository` 展示原生成时身份；纯 Git 提交变化不替代实际输入比较。已进入忽略目录的中间产物不作为成功证据，失败后仍须按日志处理并重新生成。
+- 本次检查覆盖上述四个实际工具包，未覆盖所有传递依赖、外部业务类型包或完整 TypeScript 导入图；仍须准备目标锁定依赖。依赖目录移动、工具脚本或 Node 改变时也要求重生成，不从其他 checkout 复制收据。旧 schemaVersion 1 在文件有效时退出 2，应对实际目标显式重新执行 prepare，再 verify；工具不自动执行生成。
+
+2026-10-27 真实验收：从本地 API `origin/release` 创建独立 clone，核对锁文件及依赖声明；其余依赖仅为验收链接现有安装，单独复制生成器及其嵌套依赖，避免修改共享依赖。使用原两份配置真实生成 v1/v2 路由与 OpenAPI，schemaVersion 2 verify 通过。只在临时生成器副本或收据中分别改变生成器字节、模板、实际嵌套 TypeScript 元数据、工具身份、旧 schema 和产物内容，均正确拒绝；恢复后通过，重复生成的四个摘要一致。嵌套目录在生成前拒绝。原 API 与目标业务源码、配置、锁文件保持 clean，临时 clone 已删除，既有默认工作区/API PID 不变且健康。本机证据为 `.local/acceptance/solana-dev/route-provenance-acceptance.json`、同名 `.log` 及摘要引用的 prepare 报告。未启动数据库或额外应用服务，本轮没有重跑 HTTP 业务测试。
+
+本轮工程检查通过：统一工具回归 102 项（新增生成目标边界回归）、SDK 产物 verify、`yarn tscheck`、`yarn test:ci`（299 个文件、3014 项通过，1 个文件及其 1 项原有跳过）、两份改动脚本/测试的 Prettier/ESLint、138 个本地文档链接及 `git diff --check`。主项目测试仍有既有 happy-dom teardown AbortError 日志，退出码为 0；工程日志在 `.local/acceptance/solana-dev/route-provenance-{tools.tap,sdk-verify.json,tscheck.log,test-ci.log}`。
 
 这证明本地生成状态，不能替代类型检查、HTTP 回归、A04 契约评审或部署/真实数据验收。生成报告明确 `runtimeVerification: not-run`，运行时验证须单独执行上面的测试。
 
