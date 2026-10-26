@@ -89,6 +89,31 @@ yarn solana:dev stop --project-dir /path/to/frontend-checkout
 
 本轮工程检查通过：`yarn test:agent-tools`（100 项通过）、`yarn sdk:artifacts verify`、`yarn tscheck`、`yarn test:ci`（299 个文件、3014 项通过，1 个文件及其 1 项原有跳过）、4 个改动脚本的 Prettier/ESLint、129 个本地文档链接及 `git diff --check`。主项目测试仍输出既有 happy-dom teardown AbortError 日志，命令退出码为 0。日志分别为同目录下的 `api-checkout-tools.tap`、`api-checkout-sdk-verify.json`、`api-checkout-tscheck.log` 和 `api-checkout-test-ci.log`。
 
+## 工作区内的 API 源码断点调试
+
+2026-10-27 已验收。需要在组合工作区中调试 API 时，在主仓库根目录显式启用 inspector，再复用[既有源码断点验收](solana-api-local.md#agent-可重复的源码断点验收)：
+
+```sh
+yarn solana:dev up --project-dir /path/to/frontend-checkout \
+  --api-dir /path/to/api-checkout --web-port 3026 --api-port 3024 \
+  --api-inspect-port 9247
+# Attach verifies the selected API and preserves the workspace service.
+yarn solana:api-debug --api-dir /path/to/api-checkout --port 3024 --attach
+yarn solana:dev stop --project-dir /path/to/frontend-checkout
+```
+
+`--api-inspect-port` 仅在 up 时使用，必须选中 api 服务，端口须为 1–65535 且与 Web/API/RPC 配置端口不同。新建 API 默认关闭 inspector；显式启用时沿用 API manager 的端口预检和 `127.0.0.1` 监听。`services.api.inspector` 记录实际地址或 `disabled`，status 继续核对路径、实例和所请求的调试地址；HTTP ready 不代表断点已验收。
+
+借用 API 不会自动开启、关闭或重配 inspector。显式要求调试时，既有服务必须已在同一端口启用，否则工作区明确失败并保留服务；未指定时允许沿用已有服务状态。未知 inspector 监听者不接管。修改启动参数须先停止所属工作区；不要通过重启别人的 API 解决不匹配。
+
+`solana:api-debug --attach` 的 inspector 地址来自 API manager，不需要重复 `--inspect-port`；API 路径仍须显式匹配。它核对当前 TypeScript 路径、source map、断点、限定变量与恢复后的 HTTP 结果，结束后清除自身断点并断开，不停止 API。串行执行调试，避免与人工调试同时控制同一进程；暂停期间其他 API 请求可能阻塞。需要手动调试时可用 IDE Node attach 或 Chrome `chrome://inspect` 连接报告中的地址。工作区停止时仍按 owned/borrowed 规则清理。
+
+真实验收使用从本地前端/API `origin/release` 创建的独立 clone，核对锁文件和依赖声明一致后，仅为本次验收链接已有依赖；业务源码、样例与配置均未修改。工作区在 3026/3024 启动所选 API，9247 inspector 的真实断点两次命中 `src/solanaApp.ts` 第 48 行，读取公开地址/invalid、GET 与 `/positions`，恢复后分别为 200/400。断点工具退出后 API 和工作区保持 ready；工作区停止后 API、Vite、inspector 均释放。默认 inspector 关闭、无 inspector 的借用拒绝、借用端口不匹配拒绝、匹配借用保留及未知 inspector 端口占用保留均已验证；非法参数拒绝。原默认工作区/API PID 不变且健康，目标 checkout 保持 clean，临时 clone 已删除。
+
+本机证据为 `.local/acceptance/solana-dev/api-debug-workspace-acceptance.json`、同名 `.log` 及摘要引用的 `solana-api-local/debug-*/report.json`。这是现有 sample handler 的调试验收，不代表前端业务接入、任意新 handler、数据库或真实链上数据验收通过。
+
+工程验收通过：统一工具回归 100 项、SDK 产物 verify、`yarn tscheck`、`yarn test:ci`（299 个文件、3014 项通过，1 个文件及其 1 项原有跳过）、两个改动脚本的 Prettier/ESLint、140 个本地文档链接及 `git diff --check`。主项目测试仍输出既有 happy-dom teardown AbortError，退出码为 0；工程日志保存在同目录的 `api-debug-workspace-tools.tap`、`api-debug-workspace-sdk-verify.json`、`api-debug-workspace-tscheck.log` 和 `api-debug-workspace-test-ci.log`。
+
 ## 1. 本地 API 路径
 
 独立配置为 `tools/solana-dev/vite.mjs`，通过 Vite Node API 复用原配置并添加开发代理。例如：

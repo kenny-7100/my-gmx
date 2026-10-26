@@ -24,11 +24,13 @@ function workspaceSocket(projectDir) {
 }
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export function validateApiService(service, apiDir, supervisorPid) {
+export function validateApiService({ service, apiDir, supervisorPid, inspectPort }) {
   assert.equal(service.status, "ready", "The selected API service is not ready.");
   assert.equal(service.apiDir, apiDir, "The API port belongs to another checkout.");
   if (supervisorPid !== undefined)
     assert.equal(service.supervisorPid, supervisorPid, "The API service instance changed.");
+  if (inspectPort !== undefined)
+    assert.equal(service.inspector, `127.0.0.1:${inspectPort}`, "The API inspector does not match the requested port.");
 }
 
 export async function control(command, projectDir = ROOT) {
@@ -155,7 +157,12 @@ async function supervise(options) {
     if (options.services.includes("api")) {
       try {
         const result = await apiControl(options.apiPort, "status");
-        validateApiService(result, options.apiDir, report.services.api.supervisorPid);
+        validateApiService({
+          service: result,
+          apiDir: options.apiDir,
+          supervisorPid: report.services.api.supervisorPid,
+          inspectPort: options.apiInspectPort,
+        });
         checks.push({ service: "api", status: "passed", mode: result.mode, apiDir: result.apiDir });
       } catch {
         checks.push({ service: "api", status: "failed" });
@@ -305,20 +312,25 @@ async function supervise(options) {
         if (!["ENOENT", "ECONNREFUSED"].includes(error.code)) throw error;
       }
       if (existing) {
-        validateApiService(existing, options.apiDir);
+        validateApiService({ service: existing, apiDir: options.apiDir, inspectPort: options.apiInspectPort });
         report.services.api = {
           ownership: "borrowed",
           apiDir: existing.apiDir,
+          inspector: existing.inspector,
           supervisorPid: existing.supervisorPid,
           logFile: existing.logFile,
           source: existing.sourceAtStart,
         };
       } else {
-        const started = JSON.parse((await apiCli("up")).stdout);
+        const started = JSON.parse(
+          (await apiCli("up", ...(options.apiInspectPort ? ["--inspect-port", String(options.apiInspectPort)] : [])))
+            .stdout
+        );
         apiOwned = true;
         report.services.api = {
           ownership: "owned",
           apiDir: started.apiDir,
+          inspector: started.inspector,
           supervisorPid: started.supervisorPid,
           logFile: started.logFile,
           source: started.sourceAtStart,
@@ -414,6 +426,7 @@ export async function runCli(args = process.argv.slice(2)) {
         "api-dir": { type: "string", default: path.join(ROOT, "gmx-api") },
         "web-port": { type: "string", default: "3010" },
         "api-port": { type: "string", default: "3004" },
+        "api-inspect-port": { type: "string" },
         "rpc-port": { type: "string", default: "3030" },
         id: { type: "string" },
         offline: { type: "boolean" },
@@ -422,7 +435,7 @@ export async function runCli(args = process.argv.slice(2)) {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn solana:dev <up|status|logs|stop|trace|contracts> [--project-dir PATH] [--api-dir PATH] [--services api,vite,rpc] [--web-port 3010 --api-port 3004 --rpc-port 3030] [--id TRACE_ID] [--offline]\nUse --project-dir to select a frontend checkout and its workspace; up may select an independent API checkout using --api-dir. Up requires installed target dependencies, matching Vite and the API Solana sample entry. Development tools only. The local API proxy is /__agent/solana-api; no frontend business consumer is added. Contracts are unreviewed structural baselines (partial exits 2).\n"
+        "Usage: yarn solana:dev <up|status|logs|stop|trace|contracts> [--project-dir PATH] [--api-dir PATH] [--api-inspect-port PORT] [--services api,vite,rpc] [--web-port 3010 --api-port 3004 --rpc-port 3030] [--id TRACE_ID] [--offline]\nUse --project-dir to select a frontend checkout and its workspace; up may select an independent API checkout using --api-dir. Up requires installed target dependencies, matching Vite and the API Solana sample entry. --api-inspect-port explicitly enables loopback API debugging or requires a matching borrowed inspector. Development tools only. The local API proxy is /__agent/solana-api; no frontend business consumer is added. Contracts are unreviewed structural baselines (partial exits 2).\n"
       );
       return 0;
     }
@@ -431,7 +444,7 @@ export async function runCli(args = process.argv.slice(2)) {
     assert.ok(["up", "_serve", "status", "logs", "stop", "trace", "contracts"].includes(command));
     assert.equal(process.versions.node.split(".")[0], "22");
     for (const token of tokens.filter((token) => token.kind === "option")) {
-      if (["api-dir", "services", "web-port", "api-port", "rpc-port"].includes(token.name))
+      if (["api-dir", "api-inspect-port", "services", "web-port", "api-port", "rpc-port"].includes(token.name))
         assert.ok(["up", "_serve"].includes(command));
       if (token.name === "id") assert.equal(command, "trace");
       if (token.name === "offline") assert.equal(command, "contracts");
@@ -442,6 +455,7 @@ export async function runCli(args = process.argv.slice(2)) {
       apiDir: values["api-dir"],
       webPort: Number(values["web-port"]),
       apiPort: Number(values["api-port"]),
+      apiInspectPort: values["api-inspect-port"] === undefined ? undefined : Number(values["api-inspect-port"]),
       rpcPort: Number(values["rpc-port"]),
     };
     assert.ok(
@@ -452,6 +466,17 @@ export async function runCli(args = process.argv.slice(2)) {
     for (const key of ["web-port", "api-port", "rpc-port"])
       assert.ok(/^\d+$/.test(values[key]) && Number(values[key]) > 0 && Number(values[key]) <= 65535);
     assert.equal(new Set([options.webPort, options.apiPort, options.rpcPort]).size, 3);
+    if (options.apiInspectPort !== undefined) {
+      assert.ok(options.services.includes("api"), "API debugging requires the API service.");
+      assert.ok(
+        /^\d+$/.test(values["api-inspect-port"]) && options.apiInspectPort > 0 && options.apiInspectPort <= 65535,
+        "Invalid API inspector port."
+      );
+      assert.ok(
+        ![options.webPort, options.apiPort, options.rpcPort].includes(options.apiInspectPort),
+        "API inspector port must differ from service ports."
+      );
+    }
     if (command === "_serve") {
       assert.ok(process.send);
       await supervise(options);
@@ -485,6 +510,7 @@ export async function runCli(args = process.argv.slice(2)) {
           values["api-port"],
           "--rpc-port",
           values["rpc-port"],
+          ...(options.apiInspectPort ? ["--api-inspect-port", String(options.apiInspectPort)] : []),
         ],
         {
           cwd: options.projectDir,

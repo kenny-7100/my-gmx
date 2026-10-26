@@ -102,6 +102,8 @@ yarn test:solana-api-debug
 
 默认独立使用 API 3017 / inspector 9237；不会停止或重配默认 3004 上的已有服务。借用模式只连接本工作区 `solana:api-dev` 管理且启用了 inspector 的服务，核对 `--api-dir`（默认 `gmx-api`）与实际 checkout；inspector 地址从服务记录取得，`--inspect-port` 仅用于独立启动。未知端口占用或未启用 inspector 均失败，不接管、不重启、不降级成普通 HTTP 验收。请串行执行调试验收，使用专门的调试服务，避免与人工调试同时操作同一进程。
 
+组合前后端联调时，可通过[工作区调试入口](solana-dev-workspace.md#工作区内的-api-源码断点调试)在 `solana:dev up` 显式加 `--api-inspect-port PORT`，再用本节 `--attach --api-dir PATH --port PORT` 验收实际 API checkout；调试器保留 API，服务由工作区按原归属管理。
+
 实际验证步骤：
 
 1. 连接服务记录中的 loopback Node inspector，读取已加载脚本。

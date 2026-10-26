@@ -12,14 +12,19 @@ import { devTarget, validateApiService } from "./solana-dev.mjs";
 
 test("workspace API identity requires a ready matching checkout and preserves the selected instance", () => {
   const service = { status: "ready", apiDir: "/api", supervisorPid: 123 };
-  validateApiService(service, "/api");
-  validateApiService(service, "/api", 123);
+  validateApiService({ service, apiDir: "/api" });
+  validateApiService({ service, apiDir: "/api", supervisorPid: 123 });
   for (const changed of [
     { ...service, status: "failed" },
     { ...service, apiDir: "/other-api" },
     { ...service, supervisorPid: 456 },
   ])
-    assert.throws(() => validateApiService(changed, "/api", 123));
+    assert.throws(() => validateApiService({ service: changed, apiDir: "/api", supervisorPid: 123 }));
+  const debugging = { ...service, inspector: "127.0.0.1:9237" };
+  validateApiService({ service: debugging, apiDir: "/api", inspectPort: 9237 });
+  validateApiService({ service: debugging, apiDir: "/api" });
+  for (const inspector of [undefined, "disabled", "127.0.0.1:9238", "0.0.0.0:9237"])
+    assert.throws(() => validateApiService({ service: { ...service, inspector }, apiDir: "/api", inspectPort: 9237 }));
 });
 
 test("development targets require their own Git root, source and compatible installed Vite", async () => {
