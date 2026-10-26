@@ -337,7 +337,7 @@ yarn gmx-api:prepare --verify
 yarn gmx-api:test-integration --suite src/routes/routeMap.test.ts --suite src/routes/v1/relay/__test__/relayLaunchMode.test.ts
 ```
 
-工具为 `scripts/gmx-api-prepare.mjs`，支持 `--api-dir PATH`。生成命令依次运行 API 原有 `tsoa.json` 与 `tsoa-v2.json` 的 `spec-and-routes`，写入 `src/codegen/tsoa/` 中四个已被 API Git 忽略的文件，不修改业务源码、配置或依赖。每阶段限时 120 秒，不启动 API/数据库，不安装依赖或连接真实 keeper。stdout 输出结构化报告，生成日志及清单保留于 `.local/acceptance/solana-api-local/prepare-*/` 与 `prepared-*.json`，按 checkout 绝对路径区分。
+工具为 `scripts/gmx-api-prepare.mjs`，支持 `--api-dir PATH`。生成命令依次运行 API 原有 `tsoa.json` 与 `tsoa-v2.json` 的 `spec-and-routes`，写入 `src/codegen/tsoa/` 中四个已被 API Git 忽略的文件，不修改业务源码、配置或依赖。每阶段限时 120 秒，不启动 API/数据库，不安装依赖或连接真实 keeper。stdout 输出结构化报告，生成报告、阶段日志及清单保留于 `.local/acceptance/solana-api-local/prepare-*/` 与 `prepared-*.json`，按 checkout 绝对路径区分。`tsoa.log` 现在保存阶段日志路径与进程退出/清理摘要，原始输出分别在 `tsoa.json.log`、`tsoa-v2.json.log`。
 
 `--verify` 只读比较清单：记录 `src/` 下 TS/TSX/JS/JSON（排除生成目录）及 package/lock/TS/TSOA 配置的摘要、四个产物摘要，并检查 OpenAPI 3 非空路径和路由注册入口。源码检查有意保守，测试文件变化也要求重生成。2026-10-27 起收据升级为 schemaVersion 2，加入下述实际生成工具指纹；旧收据不再当作当前证据。返回 0 表示摘要一致；有效文件但源码、工具、产物摘要或收据版本变化返回 2 / `regeneration-required`；文件、清单缺失或格式错误、目标不符合约定、生成失败返回 1 / `api-generation-not-ready`。失败时先确认 Node/依赖/文件和目标约定，再查看生成日志，不手改产物或收据绕过检查。
 
@@ -351,6 +351,18 @@ yarn gmx-api:test-integration --suite src/routes/routeMap.test.ts --suite src/ro
 2026-10-27 真实验收：从本地 API `origin/release` 创建独立 clone，核对锁文件及依赖声明；其余依赖仅为验收链接现有安装，单独复制生成器及其嵌套依赖，避免修改共享依赖。使用原两份配置真实生成 v1/v2 路由与 OpenAPI，schemaVersion 2 verify 通过。只在临时生成器副本或收据中分别改变生成器字节、模板、实际嵌套 TypeScript 元数据、工具身份、旧 schema 和产物内容，均正确拒绝；恢复后通过，重复生成的四个摘要一致。嵌套目录在生成前拒绝。原 API 与目标业务源码、配置、锁文件保持 clean，临时 clone 已删除，既有默认工作区/API PID 不变且健康。本机证据为 `.local/acceptance/solana-dev/route-provenance-acceptance.json`、同名 `.log` 及摘要引用的 prepare 报告。未启动数据库或额外应用服务，本轮没有重跑 HTTP 业务测试。
 
 本轮工程检查通过：统一工具回归 102 项（新增生成目标边界回归）、SDK 产物 verify、`yarn tscheck`、`yarn test:ci`（299 个文件、3014 项通过，1 个文件及其 1 项原有跳过）、两份改动脚本/测试的 Prettier/ESLint、138 个本地文档链接及 `git diff --check`。主项目测试仍有既有 happy-dom teardown AbortError 日志，退出码为 0；工程日志在 `.local/acceptance/solana-dev/route-provenance-{tools.tap,sdk-verify.json,tscheck.log,test-ci.log}`。
+
+### 生成失败恢复与并发保护
+
+2026-10-27 已验收。生成按 API realpath 在基础设施目录持有 `prepared-<path-hash>.json.lock`，记录 pid、apiDir、runDir 和时间。同一 checkout 的第二次生成以 `generation-in-progress` / 退出 1 拒绝；verify 在读取前后检查生成锁，发现正在生成也退出 1，不把中间文件当作当前产物。不同 checkout 分别管理。锁不授予停止其他进程或删除其文件的权限，也不阻止人工/其他工具直接修改产物。
+
+取得锁后先保存四个产物及旧收据的原字节/缺失状态，再重新核对输入与输出约定。两个生成阶段复用共享进程组管理，每阶段限时 120 秒；普通 SIGINT/SIGTERM 标记失败、停止所属生成进程组，然后恢复旧文件并逐个核对。旧文件缺失时删除本次生成的对应文件。全部生成及输入/产物检查通过后，以 rename 替换新收据；失败不会保留新成功收据，原收据恢复不等于当前输入通过，修改过生成工具后仍需恢复环境或重新生成。
+
+失败报告为该次 `prepare-*/report.json`，CLI stderr 提供 `reportFile`、`logFile`；检查 `failureStage`、`interrupted`、阶段 `exit.cleanup` 与 `restoration`。恢复失败明确记录 `restoration=failed`，不能复用产物。恢复备份仅保存在当前进程内存，SIGKILL、崩溃或断电无法保证恢复；残留锁须先核对记录进程及所属生成任务，不能自动删锁或假定旧产物完整，确认无人运行后按实际目标重新准备并 verify。正常成功、失败和中断均释放所属锁；生成期间避免运行消费这些产物的其他测试。
+
+真实验收在本地 API `origin/release` 独立 clone 中进行，原业务源码/配置/锁文件不变，故障仅注入临时生成器依赖副本：原两套真实生成和 verify 通过；v2 写入部分内容后失败，四个旧产物及收据逐字节恢复；原先全缺失时，新产物删除且收据仍缺失。暂停在 v2 时，第二次生成及 verify 明确拒绝；发送 SIGTERM 后进程组清理通过、旧产物/收据恢复、锁释放，恢复原工具后 verify 通过。原 API 与目标 checkout 保持 clean，临时 clone 已删除，默认工作区/API PID 不变且 healthy。证据在 `.local/acceptance/solana-dev/route-recovery-acceptance.json`、同名 `.log` 及其中引用的失败/中断报告。未启动数据库或额外服务，未重复 HTTP 业务验收。
+
+本轮恢复能力工程检查通过：统一工具回归 103 项、SDK 产物 verify、`yarn tscheck`、`yarn test:ci`（299 个文件、3014 项通过，1 个文件及其 1 项原有跳过）、脚本/测试的 Prettier 与 ESLint、138 个本地文档链接及 `git diff --check`。主项目测试仍输出既有 happy-dom teardown AbortError 日志，退出码为 0；日志保存在 `.local/acceptance/solana-dev/route-recovery-{tools.tap,sdk-verify.json,tscheck.log,test-ci.log}`。
 
 这证明本地生成状态，不能替代类型检查、HTTP 回归、A04 契约评审或部署/真实数据验收。生成报告明确 `runtimeVerification: not-run`，运行时验证须单独执行上面的测试。
 

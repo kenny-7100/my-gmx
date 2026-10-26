@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, open, readFile, readdir, realpath, rename, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
+import { runTestProcess } from "./lib/agent-test-process.mjs";
 import { readApiTestSource } from "./lib/gmx-api-source.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -53,7 +54,11 @@ export async function generationTarget(apiDir) {
 
 export async function generationTooling(apiDir) {
   const toolSha256 = {};
-  for (const file of ["scripts/gmx-api-prepare.mjs", "scripts/lib/gmx-api-source.mjs"])
+  for (const file of [
+    "scripts/gmx-api-prepare.mjs",
+    "scripts/lib/gmx-api-source.mjs",
+    "scripts/lib/agent-test-process.mjs",
+  ])
     toolSha256[file] = hash(await readFile(path.join(ROOT, file)));
   const apiRequire = createRequire(path.join(apiDir, "package.json"));
   const tsoaFile = apiRequire.resolve("tsoa/package.json");
@@ -127,18 +132,57 @@ async function artifacts(apiDir) {
   return result;
 }
 
+export async function restoreGenerationFiles(saved) {
+  for (const { file, bytes } of saved) {
+    if (bytes === undefined) await rm(file, { force: true });
+    else await writeFile(file, bytes);
+  }
+  for (const { file, bytes } of saved) {
+    if (bytes !== undefined) assert.deepEqual(await readFile(file), bytes, "Restored generation file differs.");
+    else {
+      try {
+        await lstat(file);
+        throw new Error("New generation file was not removed.");
+      } catch (error) {
+        if (error.code !== "ENOENT") throw error;
+      }
+    }
+  }
+}
+
 export async function prepareApi(apiPath, verify = false) {
   assert.equal(process.versions.node.split(".")[0], "22");
   const apiDir = await realpath(apiPath);
   const repository = await generationTarget(apiDir);
   const outputRoot = path.join(ROOT, ".local/acceptance/solana-api-local");
   const manifestFile = path.join(outputRoot, `prepared-${hash(apiDir).slice(0, 16)}.json`);
+  const lockFile = `${manifestFile}.lock`;
+  if (verify) {
+    try {
+      await lstat(lockFile);
+      throw Object.assign(new Error("API generation is already in progress; inspect its lock before retrying."), {
+        code: "generation-in-progress",
+        lockFile,
+      });
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
   const source = await inputs(apiDir);
   const tooling = await generationTooling(apiDir);
   if (verify) {
     const manifest = JSON.parse(await readFile(manifestFile, "utf8"));
     assert.equal(manifest.apiDir, apiDir);
     const current = await artifacts(apiDir);
+    try {
+      await lstat(lockFile);
+      throw Object.assign(new Error("API generation started during verification."), {
+        code: "generation-in-progress",
+        lockFile,
+      });
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
     const matches =
       manifest.schemaVersion === 2 &&
       manifest.source.sha256 === source.sha256 &&
@@ -162,30 +206,78 @@ export async function prepareApi(apiPath, verify = false) {
   await mkdir(outputRoot, { recursive: true });
   const runDir = await mkdtemp(path.join(outputRoot, "prepare-"));
   const logFile = path.join(runDir, "tsoa.log");
-  const logs = [];
+  let lock;
   try {
+    lock = await open(lockFile, "wx", 0o600);
+  } catch (error) {
+    if (error.code === "EEXIST")
+      throw Object.assign(new Error("API generation is already in progress."), {
+        code: "generation-in-progress",
+        lockFile,
+      });
+    throw error;
+  }
+  let stage = "backup";
+  let saved;
+  let interrupted = false;
+  const interrupt = () => {
+    interrupted = true;
+  };
+  process.on("SIGINT", interrupt);
+  process.on("SIGTERM", interrupt);
+  const reportFile = path.join(runDir, "report.json");
+  const steps = [];
+  try {
+    await lock.writeFile(JSON.stringify({ pid: process.pid, apiDir, runDir, startedAt: new Date().toISOString() }));
+    saved = await Promise.all(
+      [...ARTIFACTS.map((file) => path.join(apiDir, "src/codegen/tsoa", file)), manifestFile].map(async (file) => {
+        try {
+          return { file, bytes: await readFile(file) };
+        } catch (error) {
+          if (error.code === "ENOENT") return { file };
+          throw error;
+        }
+      })
+    );
+    // Recheck inputs after acquiring the per-checkout lock.
+    assert.deepEqual(await inputs(apiDir), source, "Generation inputs changed before startup.");
+    assert.deepEqual(await generationTooling(apiDir), tooling, "Generation tooling changed before startup.");
+    await generationTarget(apiDir);
     for (const config of ["tsoa.json", "tsoa-v2.json"]) {
+      stage = config;
+      assert.ok(!interrupted, "API generation interrupted.");
+      const stageLog = path.join(runDir, `${config}.log`);
+      const log = await open(stageLog, "wx", 0o600);
+      let exit;
       try {
-        const result = await exec(
-          process.execPath,
-          [path.join(apiDir, "node_modules/tsoa/dist/cli.js"), "spec-and-routes", "--configuration", config],
-          {
-            cwd: apiDir,
-            env: { PATH: process.env.PATH, TZ: "UTC" },
-            timeout: 120000,
-            maxBuffer: 4_194_304,
-          }
-        );
-        logs.push(`${config}\n${result.stdout}\n${result.stderr}`);
-      } catch (error) {
-        logs.push(`${config}\n${error.stdout ?? ""}\n${error.stderr ?? ""}`);
-        throw error;
+        exit = await runTestProcess({
+          args: [path.join(apiDir, "node_modules/tsoa/dist/cli.js"), "spec-and-routes", "--configuration", config],
+          cwd: apiDir,
+          env: { PATH: process.env.PATH, TZ: "UTC" },
+          logFd: log.fd,
+          timeoutMs: 120000,
+        });
+      } finally {
+        await log.close();
       }
+      steps.push({ config, logFile: stageLog, exit });
+      assert.ok(
+        !interrupted &&
+          !exit.interrupted &&
+          !exit.timedOut &&
+          !exit.signal &&
+          !exit.signalError &&
+          exit.code === 0 &&
+          exit.cleanup === "passed",
+        "Generator failed or interrupted; inspect stage log."
+      );
     }
+    stage = "verification";
     assert.deepEqual(await inputs(apiDir), source, "Generation inputs changed.");
     assert.deepEqual(await generationTooling(apiDir), tooling, "Generation tooling changed.");
     await generationTarget(apiDir);
     const generated = await artifacts(apiDir);
+    assert.ok(!interrupted, "API generation interrupted.");
     const report = {
       schemaVersion: 2,
       status: "passed",
@@ -198,15 +290,42 @@ export async function prepareApi(apiPath, verify = false) {
       artifacts: generated,
       logFile,
       manifestFile,
+      reportFile,
+      steps,
       runtimeVerification: "not-run",
     };
-    await writeFile(manifestFile, `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600 });
-    await writeFile(path.join(runDir, "report.json"), `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600 });
+    stage = "receipt";
+    const stagedReceipt = path.join(runDir, "receipt.json");
+    await writeFile(stagedReceipt, `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600 });
+    assert.ok(!interrupted, "API generation interrupted.");
+    await rename(stagedReceipt, manifestFile);
+    await writeFile(reportFile, `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600 });
     return report;
-  } catch {
-    throw Object.assign(new Error("API generation failed."), { logFile });
+  } catch (error) {
+    let restoration = saved ? "passed" : "not-needed";
+    try {
+      if (saved) await restoreGenerationFiles(saved);
+    } catch {
+      restoration = "failed";
+    }
+    await writeFile(
+      reportFile,
+      `${JSON.stringify({ status: "failed", apiDir, failureStage: stage, restoration, interrupted, steps, logFile, error: error.message }, null, 2)}\n`,
+      { mode: 0o600 }
+    );
+    throw Object.assign(new Error("API generation failed; inspect the report and restoration status."), {
+      logFile,
+      reportFile,
+    });
   } finally {
-    await writeFile(logFile, `${logs.join("\n")}\n`, { mode: 0o600 });
+    process.off("SIGINT", interrupt);
+    process.off("SIGTERM", interrupt);
+    try {
+      await writeFile(logFile, `${JSON.stringify(steps, null, 2)}\n`, { mode: 0o600 });
+    } finally {
+      await lock.close();
+      await rm(lockFile);
+    }
   }
 }
 
@@ -231,7 +350,7 @@ export async function runCli(args = process.argv.slice(2)) {
     return report.status === "passed" ? 0 : 2;
   } catch (error) {
     process.stderr.write(
-      `${JSON.stringify({ status: "failed", code: "api-generation-not-ready", logFile: error?.logFile, message: "Check Node 22, API source, installed TSOA dependencies and generation log. Run gmx-api:prepare after source or artifact changes." })}\n`
+      `${JSON.stringify({ status: "failed", code: error?.code === "generation-in-progress" ? error.code : "api-generation-not-ready", lockFile: error?.lockFile, logFile: error?.logFile, reportFile: error?.reportFile, message: "Check Node 22, API source, installed TSOA dependencies and generation log. Run gmx-api:prepare after source or artifact changes." })}\n`
     );
     return 1;
   }
