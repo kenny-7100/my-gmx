@@ -37,7 +37,7 @@
 
 已沉淀[本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md)：通过现有 fallback key 和固定上游 Origin 为 Agent/本地前端提供统一 HTTP 入口，拒绝交易发送；手动启动 `yarn solana:rpc-proxy`，不自动启动前端。单元验证入口为 `yarn test:solana-rpc-proxy`，真实只读验收为 `yarn solana:rpc-proxy:verify`（需先启动代理）；2026-10-24 经用户授权已通过 handler、真实读取、100 账户、订单扫描及本地浏览器 CORS 验收。前端统一 URL 配置已加入，当前分支尚无 Solana RPC client 消费它；跟踪状态见 [A01 实施清单](agent-acceptance-infrastructure.md)。
 
-已沉淀[本地 Solana API 样例验收服务](solana-api-local.md)：`yarn solana:api-local start` 在隔离环境中运行已有 gmx-api Solana 入口，`yarn solana:api-local verify` 检查 14 项健康、样例、动态时间戳、地址错误、404 和 CORS 行为，输出 sample 模式、预期源码 SHA/dirty 和文件摘要。无需钱包或后端凭据；不自动安装依赖、启动前端或切换业务 host。实际使用前按文档准备锁定依赖，完成后关闭自启服务。
+已沉淀[本地 Solana API 样例验收服务](solana-api-local.md)：`yarn solana:api-local doctor` 先汇总环境缺项，`yarn solana:api-local check` 自动启动、限时等待、检查并清理所属服务，保留日志和成功报告。持续联调可用 `yarn solana:api-local start` 在隔离环境中运行已有 gmx-api Solana 入口，`yarn solana:api-local verify` 检查 14 项健康、样例、动态时间戳、地址错误、404 和 CORS 行为，输出 sample 模式、预期源码 SHA/dirty 和文件摘要。无需钱包或后端凭据；不自动安装依赖、启动前端或切换业务 host。实际使用前按文档准备锁定依赖，完成后关闭自启服务。
 
 已沉淀[Agent 统一只读预检](agent-preflight.md)：`yarn agent:preflight` 复用已有 RPC、keeper 和样例 API 检查；`--checks` 可显式选择钱包余额。输出统一 JSON、退出码、本地源码与配置摘要；单项失败不阻止其余检查，不启动服务或发送交易。另有 `--compare-source REPORT.json`，按固定源码计划离线比较历史指纹，列出变化而不重跑原检查。状态/隔离测试入口为 `yarn test:agent-preflight`，真实数据模式、授权和前置仍遵循原工具。
 
