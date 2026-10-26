@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
+import { realpath } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -30,6 +31,7 @@ export async function checkDelivery({
   head,
   allowPaths,
   expectedBase,
+  requireClean = false,
 }) {
   assert.ok(typeof head === "string" && head.length > 0, "An explicit --head ref is required");
   assert.ok(Array.isArray(allowPaths) && allowPaths.length > 0, "At least one explicit --allow-path is required");
@@ -47,6 +49,9 @@ export async function checkDelivery({
     );
   }
   assert.equal(new Set(allowPaths).size, allowPaths.length, "Duplicate allowed paths");
+  cwd = await realpath(cwd);
+  const gitRoot = (await git(cwd, ["rev-parse", "--show-toplevel"])).trim();
+  assert.equal(await realpath(gitRoot), cwd, "Select the repository checkout root");
   const resolve = async (ref) =>
     (await git(cwd, ["rev-parse", "--verify", "--end-of-options", `${ref}^{commit}`])).trim();
   const baseSha = await resolve(base);
@@ -56,6 +61,8 @@ export async function checkDelivery({
     schemaVersion: 1,
     checkedAt: new Date().toISOString(),
     scope: "committed-delivery-diff",
+    projectDir: cwd,
+    worktree: { status: "not-checked" },
     refs: {
       base: { ref: base, sha: baseSha },
       developmentBase: { ref: developmentBase, sha: developmentSha },
@@ -92,6 +99,37 @@ export async function checkDelivery({
   const unexpected = paths.filter((file) => !allowPaths.includes(file));
   if (unexpected.length) report.findings.push({ code: "unexpected-paths", paths: unexpected });
   if (!paths.length) report.findings.push({ code: "empty-delivery" });
+  if (requireClean) {
+    const names = async (args) => (await git(cwd, args)).split("\0").filter(Boolean);
+    report.worktree = {
+      status: "passed",
+      head: await resolve("HEAD"),
+      stagedPaths: await names([
+        "diff",
+        "--no-ext-diff",
+        "--no-textconv",
+        "--no-renames",
+        "--cached",
+        "--name-only",
+        "-z",
+        "--",
+      ]),
+      unstagedPaths: await names(["diff", "--no-ext-diff", "--no-textconv", "--no-renames", "--name-only", "-z", "--"]),
+      untrackedPaths: await names(["ls-files", "--others", "--exclude-standard", "-z"]),
+    };
+    if (report.worktree.head !== headSha) {
+      report.worktree.status = "blocked";
+      report.findings.push({ code: "worktree-head-mismatch", expected: headSha, actual: report.worktree.head });
+    }
+    if (
+      [report.worktree.stagedPaths, report.worktree.unstagedPaths, report.worktree.untrackedPaths].some(
+        (files) => files.length
+      )
+    ) {
+      report.worktree.status = "blocked";
+      report.findings.push({ code: "worktree-dirty" });
+    }
+  }
   report.status = report.findings.length ? "blocked" : "passed";
   return report;
 }
@@ -100,6 +138,8 @@ async function runCli() {
   try {
     const { values } = parseArgs({
       options: {
+        "project-dir": { type: "string", default: ROOT },
+        "require-clean": { type: "boolean", default: false },
         base: { type: "string", default: "origin/release" },
         "development-base": { type: "string", default: "solana-integration" },
         head: { type: "string" },
@@ -110,11 +150,13 @@ async function runCli() {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. Does not fetch refs or assess business correctness.\n"
+        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--project-dir PATH] [--require-clean] [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. --require-clean also checks checkout HEAD, index, working files and untracked paths. Does not fetch refs or assess business correctness.\n"
       );
       return;
     }
     const report = await checkDelivery({
+      cwd: values["project-dir"],
+      requireClean: values["require-clean"],
       base: values.base,
       developmentBase: values["development-base"],
       head: values.head,
