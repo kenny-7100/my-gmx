@@ -20,13 +20,44 @@ yarn test:sdk-offline
 
 默认三份原有测试是 `bigmath.spec.ts`、`numbers.spec.ts`、`fees.spec.ts`，位于 `sdk/src/utils/__tests__/`。本轮实际执行共 153 项；单选 BigInt 为 6 项。选择器要求真实存在、位于所选 SDK `src/` 内的 `.spec.ts` / `.test.ts`（含 tsx）文件，拒绝重复、越界、逃逸符号链接及 glob。原配置的 exclude 继续生效；被排除的文件、空文件或零测试不能通过。
 
+## SDK 源码断点调试
+
+2026-10-26 已在真实 SDK 源码与原有 BigMath 测试中验收。需要查看测试中的参数、调用栈或逐步执行时，复用同一入口，显式选择一个 suite 和调试端口：
+
+```bash
+yarn sdk:test-offline --suite src/utils/__tests__/bigmath.spec.ts --inspect-port 9238
+```
+
+1. 工具先检查 loopback 端口可用，随后 stderr 输出 `SDK debug session`，包含 `inspector`、本次 `logFile`、`reportFile` 和总时限。它表示调试运行已安排，不是 inspector 已就绪；查看该次日志中的 `Debugger listening on ws://127.0.0.1:9238/...`。端口占用则明确失败，不复用或停止既有服务。
+2. Vitest 使用单个 fork，并在执行测试前等待调试器。Chrome `chrome://inspect` 中配置 `127.0.0.1:9238` 后 Inspect，或使用支持 Node attach 的 IDE；Agent 可用现有 `scripts/lib/agent-inspector.mjs` 连接该端口 `/json/list` 中的 WebSocket。inspector 仅绑定 `127.0.0.1`，不允许改为公网监听。
+3. 启用 source maps，在当前 checkout 的 `sdk/src/utils/bigmath/utils.ts` 中 `mulDiv` 的 `const result = (x * y) / z;` 设置断点，再恢复测试；可查看 `x`、`y`、`z` 和原测试调用栈。其他 suite 同样显式选择实际目标源码。代码进入测试前的初始暂停不是业务函数断点已命中，需继续到目标位置。
+4. Agent 自动检查时，可以使用 CDP `Debugger.setInstrumentationBreakpoint(beforeScriptExecution)` 在目标脚本执行前暂停，核对该脚本 URL 和 inline source map 的 `sourcesContent` 与磁盘源码一致，再按 source map 对应位置设断点；移除 instrumentation breakpoint 后恢复。SDK 的 Vite source map 使用相对 `sources`，应相对于脚本 URL 解析，不能直接套用 API tsx 映射格式。
+5. BigInt 变量可通过 `Debugger.evaluateOnCallFrame` 逐个读取；CDP 返回 `type=bigint` 和 `unserializableValue`（例如 `10n`），不能直接把含 BigInt 的对象当作普通 JSON 序列化。检查后恢复执行并关闭调试连接，让 Vitest 完成并保存原生结果。
+
+调试只接受一份 suite，避免多个测试文件重建 worker、调试目标和端口冲突。调试整次上限为 30 分钟（包含等待与暂停），普通模式保持 180 秒；原 suite 的测试超时配置仍保留。无需构建 SDK，不加载项目环境文件，不关闭联网保护。需要中止时对外层命令 Ctrl-C 或 SIGTERM，沿用原进程组清理，不仅关闭浏览器调试窗口；断开 debugger 可能使测试继续执行。
+
+调试报告额外记录 `debug.inspector`、`pauseOnStart`、`timeoutMs` 和日志确认的 `started`。由于已确认当前 Vitest 在 inspector 绑定失败时仍可能运行测试并退出成功，入口同时做端口预检和启动日志检查，失败不能报告 passed。该模式的 passed 仍只代表选定测试通过、源码未变和 inspector 成功启动；具体断点命中、局部变量或业务正确性须有独立证据，不能从端口可连接推断。
+
+### 实际调试验收
+
+2026-10-26，Node v22.17.0，本机实际执行：
+
+- 真实连接单个 Vitest worker，在当前 TypeScript `mulDiv` 源码处命中两次断点；inline source map 内容与磁盘一致，读取 BigInt 参数分别为 `10n / 10n / 2n` 和 `10n / 10n / 3n`，保留原测试调用栈。
+- 暂停时核实调用方哨兵变量未进入 worker，`globalThis.fetch` 仍为网络保护器的 `deny`；没有真实发起网络请求、读取钱包或构建。
+- 移除断点、恢复并断开后，原有 BigMath 6 项通过，SDK 源码摘要未变化，inspector 端口关闭。
+- 初始等待调试器时 SIGTERM 中断：外层退出 1，所属 worker 与调试端口关闭，临时目录清理；端口占用、非法端口和多 suite 调试明确失败，占用端口的服务保留。
+- 普通模式默认三份 suite 153 项复验通过；工具回归 4 组通过，包含端口冲突的针对性回归及既有路径、结果和网络保护测试。
+- 根 `yarn tscheck` 通过；完整前端单元测试 3,014 项通过、1 项既有跳过；ESLint、Prettier、109 个文档本地目标及差异检查通过。
+
+本机证据位于忽略的 `.local/acceptance/sdk-offline/`：`debug-acceptance.json` 保存两次断点、参数、调用栈与实际运行报告，`debug-negative.json` 保存中断和拒绝路径，`debug-default-compatibility.json` 保存普通模式复验。证据不随仓库共享，后续机器应按本节连接本次运行目标，不能复用历史 WebSocket URL。
+
 ## 隔离与结果
 
 - [工具配置](../tools/sdk-offline/vitest.config.mjs) 加载原 `sdk/vitest.config.ts`，保留原源码别名和排除规则，精确限制 include 为所选文件；无需 `sdk/build`。不改生产 SDK 配置，不执行构建、安装或 Git 写操作。
 - 测试在独立临时工作目录中运行，Vite envDir 与缓存也指向该目录；只传 PATH、NODE_ENV=test、TZ=UTC、CI 和本轮参数文件路径，不继承钱包、数据库等调用方配置，不加载项目 `.env`。原 Vitest 配置及测试仍是可执行代码，本工具不承诺阻止它们主动读取任意文件。
 - 复用 [API 离线网络保护器](../tools/gmx-api-offline/network-guard.cjs)，在测试 setup 阶段阻止 Node fetch、HTTP/HTTPS、socket、TLS、HTTP/2、UDP 和 DNS；同步 builtin ESM 导出。文件结束时检查尝试次数，即使测试捕获了网络异常也失败。保护器不替换业务数据，不提供 RPC/服务兜底。
 - 网络保护作用于所选 Node 测试进程，不是操作系统沙箱；不防御恶意测试主动撤销保护或另起子进程。原 Vitest 配置加载发生在测试 setup 之前，只使用可信 checkout；需要真实服务的测试应使用对应环境，不能通过关闭保护器获得本离线入口的 passed。
-- 文件串行执行、无重试；整次 Vitest 限时 180 秒，超时终止所属进程组。SIGINT/SIGTERM 转发到所属测试进程组，正常退出或失败均清理临时目录及遗留子进程；SIGKILL/系统崩溃不保证清理。
+- 文件串行执行、无重试；普通模式整次 Vitest 限时 180 秒，显式调试模式为 30 分钟，超时终止所属进程组。SIGINT/SIGTERM 转发到所属测试进程组，正常退出或失败均清理临时目录及遗留子进程；SIGKILL/系统崩溃不保证清理。
 - 退出 0 要求进程正常退出、JSON success、实际执行测试全部通过、每个所选文件都有通过断言且无 skipped/todo、结果文件范围精确一致、SDK 源码摘要未变化。其他情况退出 1。路径等前置错误输出 stderr，不进入测试。
 
 日志和报告在忽略目录 `.local/acceptance/sdk-offline/run-*/`：`vitest.log`、原生 `vitest-results.json`、汇总 `report.json`。记录选定文件、时间、进程退出、测试数、SDK Git commit/dirty、源码文件数和聚合 SHA-256，以及工具和根锁文件摘要。源码摘要覆盖 SDK `src/` 中的 TS/TSX/JS/JSON、SDK package/tsconfig/Vitest 配置；不读取 `.env`，不代表整个依赖树、构建产物或部署身份。dirty 是所处 Git 仓库状态，不能仅凭 commit 复原工作树。
