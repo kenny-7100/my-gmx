@@ -12,6 +12,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { parseArgs } from "node:util";
 
+import { prepareApi } from "./gmx-api-prepare.mjs";
 import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
 import { apiTestTooling, readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
@@ -65,7 +66,24 @@ export async function readTestSource(apiDir, suites) {
   return readApiTestSource(apiDir, files);
 }
 
-export async function runIntegrationTests(apiDir, requested, { inspectPort } = {}) {
+export async function verifyRequiredRoutes(apiDir) {
+  try {
+    const report = await prepareApi(apiDir, true);
+    assert.equal(report.status, "passed", "Generated routes are stale; explicitly prepare this API checkout.");
+    return report;
+  } catch (error) {
+    throw Object.assign(new Error(`Required generated routes are not ready: ${error.message.split("\n")[0]}`), {
+      code: "generated-routes-prerequisite",
+    });
+  }
+}
+
+export function sameGeneratedRoutes(before, after) {
+  for (const key of ["schemaVersion", "status", "apiDir", "source", "tooling", "artifacts"])
+    assert.deepEqual(after[key], before[key], "Generated route inputs or artifacts changed during testing.");
+}
+
+export async function runIntegrationTests(apiDir, requested, { inspectPort, requireRoutes = false } = {}) {
   assert.equal(process.versions.node.split(".")[0], "22");
   let suites;
   try {
@@ -87,6 +105,7 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
   }
   apiDir = await realpath(apiDir);
+  const routesBefore = requireRoutes ? await verifyRequiredRoutes(apiDir) : undefined;
   const guard = path.join(ROOT, "tools/gmx-api-integration/network-guard.cjs");
   const config = createRequire(path.join(apiDir, "package.json"))(path.join(apiDir, "jest.config.ts"));
   assert.ok(Array.isArray(config.setupFilesAfterEnv), "Expected explicit API test setup files.");
@@ -266,6 +285,18 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
   const network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
   const toolingUnchanged =
     JSON.stringify(tooling) === JSON.stringify(await apiTestTooling(apiDir, "isolated-postgres-integration"));
+  let generatedRoutes = { status: "not-checked" };
+  if (requireRoutes) {
+    generatedRoutes = { status: "failed", before: routesBefore };
+    try {
+      generatedRoutes.after = await verifyRequiredRoutes(apiDir);
+      sameGeneratedRoutes(routesBefore, generatedRoutes.after);
+      generatedRoutes.status = "passed";
+    } catch (error) {
+      generatedRoutes.error = error.message.split("\n")[0].slice(0, 240);
+      if (!errorCode) errorCode = "generated-routes-changed";
+    }
+  }
   const { installations, blockedAttempts } = network;
   if (!errorCode && blockedAttempts) errorCode = "network-access-forbidden";
   if (!errorCode && installations !== suites.length) errorCode = "network-guard-not-installed";
@@ -314,6 +345,7 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     sourceInputsAfter: sourceAfter,
     sourceUnchanged: unchanged,
     suites,
+    generatedRoutes,
     database: { image: image.Id, container, host: "127.0.0.1", port, ephemeral: true },
     counts: {
       suites: result?.numTotalTestSuites,
@@ -341,16 +373,18 @@ export async function runCli(args = process.argv.slice(2)) {
         "api-dir": { type: "string", default: path.join(ROOT, "gmx-api") },
         suite: { type: "string", multiple: true },
         "inspect-port": { type: "string" },
+        "require-routes": { type: "boolean", default: false },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn gmx-api:test-integration [--api-dir PATH] [--suite src/path.test.ts ...] [--inspect-port 9241]\nRepeat --suite to select API test files; defaults to Solana pairs service and app suites. Uses disposable local postgres:15, never pulls images or uses existing databases. Debug mode requires one suite, pauses on loopback and allows 30 minutes.\n"
+        "Usage: yarn gmx-api:test-integration [--api-dir PATH] [--suite src/path.test.ts ...] [--inspect-port 9241] [--require-routes]\nRepeat --suite to select API test files; defaults to Solana pairs service and app suites. Uses disposable local postgres:15, never pulls images or uses existing databases. --require-routes verifies existing generated route provenance before database startup and after testing; it never generates routes. Debug mode requires one suite, pauses on loopback and allows 30 minutes.\n"
       );
       return 0;
     }
     const report = await runIntegrationTests(path.resolve(values["api-dir"]), values.suite, {
+      requireRoutes: values["require-routes"],
       inspectPort:
         values["inspect-port"] === undefined
           ? undefined
@@ -362,7 +396,7 @@ export async function runCli(args = process.argv.slice(2)) {
     return report.status === "passed" ? 0 : 1;
   } catch (error) {
     process.stderr.write(
-      `${JSON.stringify({ status: "failed", code: error?.code === "invalid-test-selection" ? "invalid-test-selection" : "integration-prerequisite", message: error?.code === "invalid-test-selection" ? "Select unique existing src/**/*.test.ts files relative to the API checkout. No external paths or globs. See --help." : error.message.split("\n")[0].slice(0, 240) })}\n`
+      `${JSON.stringify({ status: "failed", code: ["invalid-test-selection", "generated-routes-prerequisite"].includes(error?.code) ? error.code : "integration-prerequisite", message: error?.code === "invalid-test-selection" ? "Select unique existing src/**/*.test.ts files relative to the API checkout. No external paths or globs. See --help." : error.message.split("\n")[0].slice(0, 240) })}\n`
     );
     return 1;
   }

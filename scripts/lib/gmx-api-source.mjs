@@ -15,6 +15,7 @@ export async function apiTestTooling(apiDir, mode) {
   for (const file of [
     "scripts/gmx-api-offline-tests.mjs",
     "scripts/gmx-api-integration-tests.mjs",
+    "scripts/gmx-api-prepare.mjs",
     "scripts/lib/gmx-api-source.mjs",
     "scripts/lib/agent-test-process.mjs",
     "scripts/lib/agent-network-audit.mjs",
