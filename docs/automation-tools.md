@@ -28,6 +28,8 @@ API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测�
 
 [工作区 API 调试](solana-dev-workspace.md#工作区内的-api-源码断点调试)在 up 显式加 `--api-inspect-port`，复用原 API manager 的 loopback inspector 和 `solana:api-debug --attach` 验证真实 TypeScript 断点；借用必须匹配调试端口，不自动重配既有服务，默认不启用。
 
+一次性组合验收用 [solana:dev:check](solana-dev-workspace.md#一条命令运行组合验收并停服)：复用工作区启动、真实 Chrome 和可选断点验收，逐次汇总日志、失败阶段及清理；拒绝已有工作区，结束后只停止本轮工作区并保留借用 API。需要持续开发时仍用原 up/status/stop。
+
 ## 统一离线工具回归
 
 2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：
