@@ -377,6 +377,27 @@ yarn gmx-api:test-integration --require-routes --suite src/routes/routeMap.test.
 
 本机证据：`prepare-latest.json`、`prepare-acceptance.json`、`integration-routes.json`，均位于上述忽略目录。首次 HTTP 测试失败日志保留在 `integration-HWdri2/jest.log`。ABI 加载使用 `process.cwd()/src/abi`，仅设 `APP_ROOT` 不足；后续遇到 `ABI directory not found` 先核对测试 CWD 的资源链接，不调整业务查找逻辑或移除隔离目录。HTTP 用例沿用原测试的本地 keeper stub，不访问真实 keeper、不发送链上交易。
 
+### 独立 API checkout 的类型检查
+
+在主仓库基础设施目录执行，目标使用自己的 TypeScript 与 `tsconfig.json`，无需包含个人工具：
+
+```sh
+yarn gmx-api:prepare --api-dir /path/to/api-checkout --verify
+# Prepare explicitly only when routes are missing or stale.
+yarn gmx-api:prepare --api-dir /path/to/api-checkout
+yarn gmx-api:tscheck --api-dir /path/to/api-checkout
+```
+
+已有有效收据时直接运行 `gmx-api:tscheck`，无需重复 verify 或 prepare。它检查 API 整个原有 TS 项目，不按 Solana 模块缩小范围；固定 `--noEmit --incremental false --pretty false`，不运行 package lifecycle，不生成路由、构建、写增量缓存或启动数据库/HTTP/RPC 服务。根前端的 `yarn tscheck` 不包含嵌套 API，不能代替本入口。
+
+前置要求为 Node 22、API Git 根目录、该目标已安装的锁定依赖，以及有效的路由收据与产物。运行前后只读 verify 路由来源；缺失/过期时退出 2 / blocked，按上面的显式准备步骤处理，不能关闭校验或手改收据。检查期间使用独立环境，仅传 PATH、临时目录和 UTC，不继承 NODE_OPTIONS、TS_NODE 或业务环境变量。TypeScript 不执行项目业务代码，不需要凭据。
+
+每次结果位于基础设施目录 `.local/acceptance/gmx-api-tscheck/run-*/`：`tsc.log` 保留原生诊断，`report.json` 和 stdout 记录实际 apiDir、Git commit/dirty、源码前后指纹、Node/目标 TypeScript 版本与编译器内容指纹、路由前后证据、退出码及所属进程组清理。退出 0 / passed 要求原生编译成功、无中断/超时/信号异常、进程清理成功，源码/工具/路由前后均一致；类型错误或检查期间变化退出 1 / failed。普通编译失败查看报告的 `logFile`，不修改类型断言或业务逻辑来绕过错误。整次编译限时 180 秒，SIGINT/SIGTERM 复用现有进程组清理工具；SIGKILL/机器崩溃仍需人工核实所属进程。
+
+源码指纹覆盖 `src/`（含忽略的生成文件）、可选 `scripts/`、`migrations/` 中全部普通文件，以及根 JSON/TS/JS 配置与 yarn.lock；拒绝这些源码目录中的符号链接。编译器指纹覆盖实际 TypeScript lib/bin，未逐字节核对全部第三方依赖，外部扩展配置或其他自定义源码目录也不在本轮指纹范围。dirty checkout 可用于开发反馈，但报告不能充当干净交付版本证明。本入口尚未接入 delivery-check 的报告参数，`--api-report` 仍只接受原有测试报告，不把类型检查当作测试或业务验收。
+
+类型检查真实验收（2026-10-27）：从本地 API `origin/release` 建立独立 checkout，显式复用 package/lock 相同的已安装依赖。缺路由收据时 blocked；显式准备后，全项目使用目标 TypeScript 5.4.2 通过。临时副本注入 TS2322 类型错误时，工具退出 1，保留原生诊断和 tsc 退出码 2；恢复后通过。编译阶段 SIGTERM 被标记 failed，所属进程组清理 passed。检查前后目标源码产物清单、Git HEAD 和索引字节一致，未启动容器或改动既有服务；副本及注入文件已删除，真实 API 源码未改。另一次工具修改发生在编译期间，原生 tsc 退出 0 而 `toolingUnchanged=false`，整体正确失败。本机证据为忽略目录 `.local/acceptance/solana-dev/api-tscheck-acceptance.json` 与其列出的原始报告；工具变更拒绝证据为 `.local/acceptance/gmx-api-tscheck/run-F7Gmm6/report.json`。该次验收未执行全新依赖安装或业务构建。 工程检查：统一工具回归 106 项、SDK 产物 verify、根前端类型检查、相关 ESLint/Prettier、141 个文档本地链接及差异检查通过；全量前端回归 299 个文件、3,014 项通过，1 个文件及其 1 项既有跳过，退出 0。工程日志保存在同一忽略目录的 `api-tscheck-{tools.tap,sdk.json,frontend-types.log,frontend-tests.log}`。
+
 ### 在集成测试中强制校验路由来源
 
 需要测试真实 TSOA 路由或导入 `src/app.ts` 时，在主仓库根目录执行：
