@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Jest loads this setup as CommonJS. */
+/* global module */
 const dgram = require("node:dgram");
 const dns = require("node:dns");
 const http = require("node:http");
 const http2 = require("node:http2");
 const https = require("node:https");
+const { syncBuiltinESMExports } = require("node:module");
 const net = require("node:net");
 const tls = require("node:tls");
 
-function installNetworkGuard() {
+function installNetworkGuard(profile = "gmx-api") {
   let attempts = 0;
   const deny = () => {
     attempts++;
-    throw new Error("Network access is forbidden in the gmx-api offline test profile.");
+    throw new Error(`Network access is forbidden in the ${profile} offline test profile.`);
   };
   net.Socket.prototype.connect = deny;
   tls.connect = deny;
@@ -29,6 +31,7 @@ function installNetworkGuard() {
     }
   }
   globalThis.fetch = deny;
+  syncBuiltinESMExports();
   return () => {
     if (attempts) throw new Error(`Offline test attempted network access ${attempts} time(s).`);
   };

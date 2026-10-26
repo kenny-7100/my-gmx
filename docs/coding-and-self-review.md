@@ -58,6 +58,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **API 源码调试验收：** 需要确认 Agent 能连接 inspector、命中当前 TypeScript 源码并读取变量时，使用[源码断点验收](solana-api-local.md#agent-可重复的源码断点验收) `yarn solana:api-debug`，默认独立端口并自动停服；仅在明确要复用已启用 inspector 的管理服务时加 `--attach --port PORT`。源码映射不一致或断点未命中应检查报告的失败阶段，不把 HTTP 健康检查当成调试通过；无断点需求的任务不增加此项。
 
+**SDK 纯计算回归：** 根 `yarn test:ci` 不覆盖 `sdk/`。需要验证 SDK 数值、BigInt、费用或其他可离线测试时，使用[SDK 源码离线入口](sdk-offline-tests.md) `yarn sdk:test-offline` 或重复 `--suite src/...spec.ts` 指定范围，复用原配置和源码，无需先构建 SDK 或启动服务。意外联网会明确失败，先核对所选测试的真实依赖，不关闭保护或修改业务预期；该入口通过不代表完整 SDK、Solana 协议或发布产物已通过。
+
 以上经验来自 2026-10-24 的[本地 RPC 代理验收记录](agent-acceptance-infrastructure.md)；具体事实与验证边界保留在主题文档，本节维护影响后续执行顺序的通用步骤。
 
 ## 查阅入口
