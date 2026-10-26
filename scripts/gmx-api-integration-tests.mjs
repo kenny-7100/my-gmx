@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
-import { execFile, spawn } from "node:child_process";
+import { execFile } from "node:child_process";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { openSync, closeSync } from "node:fs";
 import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { parseArgs } from "node:util";
 
+import { runTestProcess } from "./lib/agent-test-process.mjs";
 import { readApiSource } from "./solana-api-local.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -99,10 +101,8 @@ export async function runIntegrationTests(apiDir, requested) {
   let port;
   let cleanup = "not-run";
   let stopped = false;
-  let child;
   const stop = () => {
     stopped = true;
-    child?.kill("SIGTERM");
   };
   process.on("SIGINT", stop);
   process.on("SIGTERM", stop);
@@ -151,9 +151,9 @@ export async function runIntegrationTests(apiDir, requested) {
     await symlink(path.join(apiDir, "src/abi"), path.join(cwd, "src/abi"), "dir");
     const fd = openSync(logFile, "wx", 0o600);
     try {
-      child = spawn(
-        process.execPath,
-        [
+      assert.ok(!stopped, "Integration check interrupted before test execution.");
+      exit = await runTestProcess({
+        args: [
           path.join(apiDir, "node_modules/jest/bin/jest.js"),
           "--config",
           path.join(apiDir, "jest.config.ts"),
@@ -167,27 +167,23 @@ export async function runIntegrationTests(apiDir, requested) {
           "--outputFile",
           resultsFile,
         ],
-        {
-          cwd,
-          env: {
-            PATH: process.env.PATH,
-            NODE_ENV: "test",
-            TZ: "UTC",
-            CI: "true",
-            APP_ROOT: apiDir,
-            TS_NODE_PROJECT: path.join(apiDir, "tsconfig.knex.json"),
-            TEST_DB_CONNECTION: `postgresql://postgres:${password}@localhost:${port}`,
-            JEST_RETRY_TIMES: "0",
-          },
-          stdio: ["ignore", fd, fd],
-          timeout: 180000,
-          killSignal: "SIGKILL",
-        }
-      );
-      exit = await new Promise((resolve, reject) => {
-        child.once("error", reject);
-        child.once("exit", (code, signal) => resolve({ code, signal }));
+        cwd,
+        env: {
+          PATH: process.env.PATH,
+          NODE_ENV: "test",
+          TZ: "UTC",
+          CI: "true",
+          APP_ROOT: apiDir,
+          TS_NODE_PROJECT: path.join(apiDir, "tsconfig.knex.json"),
+          TEST_DB_CONNECTION: `postgresql://postgres:${password}@localhost:${port}`,
+          JEST_RETRY_TIMES: "0",
+        },
+        logFd: fd,
+        timeoutMs: 180000,
       });
+      if (exit.interrupted) errorCode = "interrupted";
+      else if (exit.timedOut) errorCode = "test-timeout";
+      else if (exit.cleanup !== "passed" || exit.signalError) errorCode = "process-cleanup-failed";
     } finally {
       closeSync(fd);
     }
@@ -221,7 +217,11 @@ export async function runIntegrationTests(apiDir, requested) {
   const passed =
     !errorCode &&
     !stopped &&
-    exit?.code === 0 &&
+    exit?.cleanup === "passed" &&
+    !exit.interrupted &&
+    !exit.timedOut &&
+    !exit.signalError &&
+    exit.code === 0 &&
     !exit.signal &&
     cleanup === "passed" &&
     result?.success === true &&

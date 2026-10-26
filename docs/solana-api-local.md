@@ -349,9 +349,15 @@ node ../scripts/gmx-api-integration-tests.mjs --api-dir .
 
 工具不修改 API 默认配置，不跳过数据库迁移或测试 setup。测试进程只继承必要环境白名单，TEST_DB_CONNECTION 由工具生成并指向专属容器；不继承真实数据库、RPC 或钱包凭据，默认 dotenv 不会读项目 `.env`。原有 Jest 的 NODE_ENV=test 仍选择 Hardhat/master 测试配置，这不是 Solana 主网数据验收，也不启动生产 worker。
 
-执行串行测试，关闭原有失败重试，整个 Jest 进程限时 180 秒；数据库就绪等待约 30 秒。沿用 API 原有 `--forceExit` 选项，因此不声称证明了 API 全部连接/定时器能自然退出；所属容器和临时目录清理由工具 finally 单独处理。正常结束或测试失败后，只删除 owner label 匹配的本次容器及其匿名卷，并检查容器已不存在。清理失败会让整次验收失败，报告中的 container ID 可用于定位，不删除其他容器或运行 Docker prune。
+执行串行测试，关闭原有失败重试，整个 Jest 进程限时 180 秒；数据库就绪等待约 30 秒。沿用 API 原有 `--forceExit` 选项，因此不声称证明了 API 全部连接/定时器能自然退出；Jest 通过共享 `scripts/lib/agent-test-process.mjs` 在独立 POSIX 进程组运行，主进程退出后也检查并终止组内存活子进程；SIGINT / SIGTERM 先发送 SIGTERM，1 秒后仍未退出则强制结束，180 秒超时直接结束所属组。使用系统 `ps` 核实非 zombie 成员已消失，不保证清理由测试主动脱离进程组的后代，运行器自身遭 SIGKILL/系统崩溃也无法执行 finally。测试进程清理完成后，所属容器和临时目录由工具 finally 单独处理。正常结束或测试失败后，只删除 owner label 匹配的本次容器及其匿名卷，并检查容器已不存在。清理失败会让整次验收失败，报告中的 container ID 可用于定位，不删除其他容器或运行 Docker prune。
 
-stdout JSON 的 `mode` 为 `isolated-postgres-integration`，包括 API commit/dirty、原有 Jest/DB setup/选定测试及迁移文件摘要、镜像 ID、随机端口、测试数量和 cleanup。只有所有选定 suite 全部通过、无 skip/todo、退出 0、源码未变化且清理成功，才报告 passed。前置条件不足在 stderr 报告固定错误；实际测试失败仍输出带日志位置的失败报告。连接密码不写入工具报告。
+stdout JSON 的 `mode` 为 `isolated-postgres-integration`，包括 API commit/dirty、原有 Jest/DB setup/选定测试及迁移文件摘要、镜像 ID、随机端口、测试数量和 cleanup。`exit` 单独记录测试进程的 `processGroup`、`interrupted`、`timedOut`、`cleanup`，信号异常时包含 `signalError`；顶层 `cleanup` 仍表示所属容器及临时目录清理。中断、超时、进程或容器清理失败均不能 passed，`errorCode` 分别标识 `interrupted`、`test-timeout` 或 `process-cleanup-failed` 等执行问题。只有所有选定 suite 全部通过、无 skip/todo、退出 0、源码未变化且清理成功，才报告 passed。前置条件不足在 stderr 报告固定错误；实际测试失败仍输出带日志位置的失败报告。连接密码不写入工具报告。
+
+### 测试派生进程清理验收（2026-10-27）
+
+隔离 API 源码副本真实复现：原运行器返回 passed、所属 PostgreSQL 容器已删除，但测试创建的 Node 子进程仍存活；核对本次进程归属后清理。修复复用已有进程组工具，不修改实际 API 源码、原测试、配置或依赖。相同副本的成功、断言失败和运行中 SIGTERM 中断均确认子进程消失、所属容器已删除，报告分别保存进程与资源清理结果。
+
+共享真实 Node 回归已覆盖成功、失败、超时、SIGINT / SIGTERM、忽略 SIGTERM 及无关哨兵进程保留，通过 `yarn test:agent-tools` 执行；本轮没有让数据库 fixture 等待完整 180 秒来重复共享超时测试。API 运行器仍显式使用 180 秒时限，不降低原测试范围。真实默认 2 个 suite / 5 项、指定数据库与市场模型 2 个 suite / 11 项均通过，两类清理结果均为 passed；统一工具回归 93 项通过。证据在本机忽略目录 `.local/acceptance/solana-api-local/integration-process-{repro,success,failure,interrupt}.json`。
 
 ### 按需求选择测试文件
 
