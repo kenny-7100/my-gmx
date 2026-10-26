@@ -22,6 +22,8 @@ yarn test:sdk-offline
 
 ## 按源码依赖选择回归
 
+SDK 源码还可能影响前端消费者。另从主仓库基础设施目录运行[前端关联测试](frontend-offline-tests.md#按源码依赖图选择关联测试) `yarn frontend:test-offline --related sdk/src/...ts`，独立交付目录加 `--project-dir PATH`；该入口只执行 src/landing 测试，与本页 SDK 自身测试互补，不能互相替代。
+
 在主仓库根目录执行，路径相对于所选 SDK 根目录：
 
 ```sh
