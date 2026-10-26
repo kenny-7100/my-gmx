@@ -65,6 +65,18 @@ yarn frontend:test-offline --project-dir /path/to/feature-checkout --changed-sin
 
 本轮范围选择工程检查：统一工具回归 109 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、137 个文档本地链接及差异检查通过；完整前端回归 299 个文件、3,014 项通过，1 个文件及其 1 项既有跳过，退出 0。日志为同一忽略目录中的 `changed-{tools.tap,sdk.json,types.log,tests.log}`。
 
+## 结束时核对工具指纹
+
+2026-10-27 已修复前端和 SDK 离线入口的工具变化漏检。原实现只在开始记录 `toolSha256`；测试执行中即使 setup、配置包装器或网络保护器变化，原生断言和源码摘要仍可能通过。现在成功前重新计算同一清单，记录 `toolSha256After` 和 `toolingUnchanged`；必须前后相等才可 passed。变化或结束时文件缺失会在 `tooling-evidence` 阶段失败，保留原生结果、计数、网络审计和进程/临时目录清理证据，不把原生 success 当作整次验收通过。
+
+普通、关联选择、Git 范围选择和调试模式共用这一步。出现此失败时，先确认并发工具编辑已结束，再用稳定版本重跑相关测试；不要复制旧指纹或修改报告状态。工具清单沿用各自既有计划，包含运行器、共享进程/网络工具、配置包装器、setup、发现保护器及基础设施锁文件；不扩展到全部安装包内容，也不是运行期间的文件锁、连续监控或系统沙箱。
+
+[交付检查](linear-development-workflow.md#前端测试证据绑定)同时要求 `toolingUnchanged=true`，并将前后指纹与当前工具比较。缺字段、false 或最终指纹不符均 blocked；缺少这项证据的历史报告需使用当前工具重跑，不能手补字段。
+
+真实验收在隔离工具副本与独立 release checkout 中复现前端、SDK 两种旧误报；修复后原断言仍通过，但工具变化均正确失败，稳定工具的关联选择仍通过。交付 checkout 中，真实前端日期 5 项与 SDK BigMath 6 项报告共同绑定通过；两类报告各自缺检查标识、标识 false、缺最终指纹及最终指纹不符，共 8 种拒绝场景均正确 blocked。目标 HEAD/索引和实际业务源码未被修改，副本已清理。摘要与归档的原始日志/结果在本机忽略目录 `.local/acceptance/sdk-offline/tool-drift/` 的 `repro.json`、`fixed.json`、`delivery.json`，本次工具契约回归沿用既有交付检查测试。
+
+本轮工程检查：默认前端 17 项、SDK 153 项及稳定工具的双入口关联验收通过；统一工具回归 113 项、SDK 产物只读核验、根类型检查、相关 ESLint/Prettier、166 个文档本地目标及差异检查通过。完整前端回归 299 个文件 / 3,014 项通过，另有 1 个文件 / 1 项既有跳过，退出 0。未执行构建或启动服务，未修改业务源码、原测试或依赖版本。
+
 ## 结束时核对网络审计
 
 2026-10-27 起，前端、SDK 和 API 离线入口共用运行器侧的网络事件审计。保护器在每个所选文件安装时记录 `installed`，拒绝连接时记录 `blocked`；日志路径在安装时固定，测试修改环境变量不会关闭记录。运行器结束后独立读取 `network-events.log`，报告 `network.status/installations/blockedAttempts/eventsFile`。安装数须等于所选文件数、拒绝数为 0，缺日志或未知事件也失败；不能只凭原生测试 JSON 的 success 判断通过。

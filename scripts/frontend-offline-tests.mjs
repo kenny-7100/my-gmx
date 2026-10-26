@@ -390,6 +390,11 @@ export async function runFrontendOffline({ suites, related, changedSince, inspec
       ),
       "Selected frontend tests did not all pass; inspect vitest.log and vitest-results.json."
     );
+    stage = "tooling-evidence";
+    report.toolingUnchanged = false;
+    report.toolSha256After = await frontendToolHashes();
+    report.toolingUnchanged = JSON.stringify(report.toolSha256) === JSON.stringify(report.toolSha256After);
+    assert.ok(report.toolingUnchanged, "Frontend offline tools changed during testing; rerun the check.");
     report.status = "passed";
   } catch (error) {
     report.failureStage = stage;
