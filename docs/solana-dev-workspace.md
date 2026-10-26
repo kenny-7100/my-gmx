@@ -89,6 +89,31 @@ yarn solana:dev stop --project-dir /path/to/frontend-checkout
 
 本轮工程检查通过：`yarn test:agent-tools`（100 项通过）、`yarn sdk:artifacts verify`、`yarn tscheck`、`yarn test:ci`（299 个文件、3014 项通过，1 个文件及其 1 项原有跳过）、4 个改动脚本的 Prettier/ESLint、129 个本地文档链接及 `git diff --check`。主项目测试仍输出既有 happy-dom teardown AbortError 日志，命令退出码为 0。日志分别为同目录下的 `api-checkout-tools.tap`、`api-checkout-sdk-verify.json`、`api-checkout-tscheck.log` 和 `api-checkout-test-ci.log`。
 
+## 一条命令运行组合验收并停服
+
+需要一次性验收、无需保留开发服务时，在主仓库根目录使用：
+
+```sh
+yarn solana:dev:check --project-dir /path/to/frontend-checkout \
+  --api-dir /path/to/api-checkout --web-port 3026 --api-port 3024
+# Include the existing TypeScript breakpoint scenario explicitly.
+yarn solana:dev:check --project-dir /path/to/frontend-checkout \
+  --api-dir /path/to/api-checkout --web-port 3026 --api-port 3024 \
+  --api-inspect-port 9247
+```
+
+入口为 [solana-dev-check.mjs](../scripts/solana-dev-check.mjs)，复用现有 `solana:dev up`、`solana:dev:browser`、可选 `solana:api-debug --attach` 与 stop，不新增测试框架、业务路由或数据替代。前置与独立 checkout 联调相同：目标依赖及 sample 入口已准备好，Chrome 可用，本地服务启动在任务授权范围内；不自动安装、构建或创建业务 checkout。默认选当前基础设施前端和嵌套 API，端口为 3026/3024；需保留服务时继续使用 up/status/stop。
+
+同一前端已有工作区时直接拒绝，即使其端口不同或状态失败，也不借用或停止它。没有工作区时调用原管理器创建；API 是否 borrowed/owned 仍由原管理器核对 checkout 和端口。Chrome 从实际 Vite origin 发起样例请求，显式选择 inspector 后再串行运行原断点场景，核对两阶段 API commit 和关键输入摘要一致；默认不启动 inspector 或执行断点。不运行 contracts，也不改变其 unreviewed / partial 结论。
+
+每次在 `.local/acceptance/solana-dev/check-*/` 保存独立 `report.json`、`startup.log`、`browser.log` 和可选 `debug.log`。报告包含所选目录、工作区及 API 归属、阶段进程退出/清理结果、浏览器与断点工具的原始输出及报告路径、最终 stop 结果；子工具继续保存各自原生报告。参数或路径错误返回 1；正常运行仅全部所选探测、最终健康检查及清理通过才返回 0。任一步失败返回 1，保留 `failureStage`、错误摘要与已有日志。`cleanup=not-started` 表示包装入口未取得 ready 工作区，不代表启动器内部没有创建过临时服务；启动失败的具体清理结果查看 startup 日志中的原工作区报告。
+
+SIGINT/SIGTERM 将本轮标为失败并进入清理。启动阶段先等待原有限时 launcher 返回，以取得准确归属；探测阶段复用共享进程组取消与清理，本入口为正常中断显式留出 15 秒退出时间；其他调用仍沿用共享工具原默认值。Chrome 探测遇到正常中断会关闭浏览器，单个样例 fetch 限时 10 秒；每个探测进程总限时 120 秒。停止前重新核对工作区 supervisor PID，实例被替换时拒绝停止并报告 cleanup 失败；只停止本轮取得的工作区，借用 API 保留。SIGKILL/系统崩溃仍需按原管理器规则核实资源，不将未生成的最终报告当作通过。
+
+2026-10-27 真实验收：从本地前端/API `origin/release` 创建独立 clone，核对锁文件及依赖声明后仅为验收链接已有依赖，未修改业务源码、样例或配置。完整模式真实 Chrome 与两次 TypeScript 断点均通过并自动停服；默认模式无 debug，借用 API 在验收后保留。既有工作区被拒绝且 PID 不变；未知 Web 端口占用被保留，启动器先创建的 API 已清理；启动后取消返回失败并清理工作区。原默认工作区/API 保持 ready 且 PID 不变，目标 checkout clean，临时 clone 已删除。补充验收等待 Chrome 探测已进入启动阶段后发送 SIGTERM，子进程以失败码 1 正常退出，进程组和工作区均清理通过；原 1 秒退出时间不足的问题已由本入口的 15 秒配置修正。汇总证据在本机 `.local/acceptance/solana-dev/stack-check-acceptance.json`、`stack-check-cancel-browser.json` 及同名 `.log`，其中引用各次运行报告。范围仍为 sample API 与开发代理，`businessAcceptance=not-run`，不代表业务页面、真实数据或需求已验收。
+
+本轮工程验收通过：`yarn test:agent-tools` 100 项、SDK 产物 verify、`yarn tscheck`、`yarn test:ci`（299 个文件、3014 项通过，1 个文件及其 1 项原有跳过）、三个改动脚本的 ESLint、脚本及 package.json 的 Prettier、135 个本地文档链接与 `git diff --check`。主项目测试仍有既有 happy-dom teardown AbortError 日志，退出码为 0；工程日志在同目录的 `stack-check-tools.tap`、`stack-check-sdk-verify.json`、`stack-check-tscheck.log` 和 `stack-check-test-ci.log`。
+
 ## 工作区内的 API 源码断点调试
 
 2026-10-27 已验收。需要在组合工作区中调试 API 时，在主仓库根目录显式启用 inspector，再复用[既有源码断点验收](solana-api-local.md#agent-可重复的源码断点验收)：
