@@ -15,6 +15,7 @@
 | [Agent 验收基础设施调研与实施清单](agent-acceptance-infrastructure.md) | RPC、keeper、API、钱包等验收条件与实施记录；A01/A02 访问工具已完成；A09 首个本地网络选择冒烟及环境预检已通过真实验收；A03 仍待实际部署入口 |
 | [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，涉及现有行为/真实数据时先核对线上基线，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；新增 Markdown 工作表一致性检查，拒绝错误汇总与无效证据引用 |
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
+| [SDK 构建产物准备与过期检查](sdk-artifacts.md) | 根类型检查前只读 verify；显式隔离 prebuild/编译，成功后替换忽略的产物，保留来源收据与日志 |
 | [SDK 源码离线回归](sdk-offline-tests.md) | 复用 SDK 原 Vitest 配置，默认运行 BigInt、数值及费用原有测试；支持精确选文件、环境隔离、阻止意外联网及记录结果，不需要 SDK 构建 |
 | [Solana 统计索引只读预检](solana-index-preflight.md) | A16：核实实际 volume 索引的 GraphQL 契约、高度和最新事件年龄；不推断处理延迟或历史完整性 |
 | [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：`solana:browser-check` 一条命令完成预检、独立 Vite、真实 Chrome、独立报告和停服；复用网络选择/刷新持久化原有用例，保留手动运行和导航排障入口 |
