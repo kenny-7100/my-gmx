@@ -197,12 +197,16 @@ export function passedResults(result, suites, exit) {
   );
 }
 
-export async function runSdkOffline({ sdkDir, suites, related, changedSince, inspectPort }) {
+export async function runSdkOffline({ sdkDir, suites, related, changedSince, inspectPort, discoverOnly = false }) {
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
   sdkDir = await realpath(sdkDir);
   assert.ok(
     [suites, related, changedSince].filter((value) => value !== undefined).length <= 1,
     "Do not combine --suite, --related and --changed-since."
+  );
+  assert.ok(
+    !discoverOnly || ((related !== undefined || changedSince !== undefined) && inspectPort === undefined),
+    "Use --discover-only with --related or --changed-since, without debugging."
   );
   assert.ok(changedSince === undefined || inspectPort === undefined, "Use --suite for debugging after Git selection.");
   const changes = changedSince === undefined ? undefined : await changedSources(sdkDir, changedSince);
@@ -237,15 +241,15 @@ export async function runSdkOffline({ sdkDir, suites, related, changedSince, ins
   const report = {
     schemaVersion: 1,
     status: "failed",
-    mode: "sdk-source-offline",
+    mode: discoverOnly ? "sdk-source-discovery" : "sdk-source-offline",
+    ...(discoverOnly ? { testsExecuted: false } : {}),
     sdkDir,
     runtime,
     suites,
     ...(related ? { related } : {}),
     ...(changes ? { changes } : {}),
     startedAt: new Date().toISOString(),
-    logFile,
-    resultsFile,
+    ...(!discoverOnly ? { logFile, resultsFile } : {}),
     reportFile,
     temporaryDirectory: emptyDir,
     excluded: [
@@ -333,44 +337,47 @@ export async function runSdkOffline({ sdkDir, suites, related, changedSince, ins
       discovery.status = "passed";
       await writeFile(optionsFile, JSON.stringify({ sdkDir, suites, emptyDir, resultsFile }));
     }
-    stage = "vitest";
-    const fd = openSync(logFile, "wx", 0o600);
-    try {
-      report.exit = await runTestProcess({
-        args: [
-          runtime.executable,
-          "run",
-          "--config",
-          path.join(ROOT, "tools/sdk-offline/vitest.config.mjs"),
-          ...(inspectPort === undefined ? [] : [`--inspect-brk=127.0.0.1:${inspectPort}`, "--pool=forks"]),
-        ],
-        cwd: emptyDir,
-        env,
-        logFd: fd,
-        timeoutMs: report.debug?.timeoutMs ?? 180000,
-      });
-    } finally {
-      closeSync(fd);
+    let result;
+    if (!discoverOnly) {
+      stage = "vitest";
+      const fd = openSync(logFile, "wx", 0o600);
+      try {
+        report.exit = await runTestProcess({
+          args: [
+            runtime.executable,
+            "run",
+            "--config",
+            path.join(ROOT, "tools/sdk-offline/vitest.config.mjs"),
+            ...(inspectPort === undefined ? [] : [`--inspect-brk=127.0.0.1:${inspectPort}`, "--pool=forks"]),
+          ],
+          cwd: emptyDir,
+          env,
+          logFd: fd,
+          timeoutMs: report.debug?.timeoutMs ?? 180000,
+        });
+      } finally {
+        closeSync(fd);
+      }
+      stage = "results";
+      if (report.debug) {
+        const log = await readFile(logFile, "utf8");
+        report.debug.started = log.includes(`Debugger listening on ws://${report.debug.inspector}/`);
+        assert.ok(
+          report.debug.started && !log.includes("Starting inspector on"),
+          "SDK inspector did not start successfully; inspect vitest.log."
+        );
+      }
+      assert.ok(!report.exit.interrupted && !report.exit.timedOut, "SDK check interrupted or timed out.");
+      assert.ok(report.exit.cleanup === "passed" && !report.exit.signalError, "SDK test process cleanup failed.");
+      result = JSON.parse(await readFile(resultsFile, "utf8"));
+      report.counts = {
+        passed: result.numPassedTests,
+        failed: result.numFailedTests,
+        skipped: result.numPendingTests,
+        total: result.numTotalTests,
+        files: result.testResults?.length,
+      };
     }
-    stage = "results";
-    if (report.debug) {
-      const log = await readFile(logFile, "utf8");
-      report.debug.started = log.includes(`Debugger listening on ws://${report.debug.inspector}/`);
-      assert.ok(
-        report.debug.started && !log.includes("Starting inspector on"),
-        "SDK inspector did not start successfully; inspect vitest.log."
-      );
-    }
-    assert.ok(!report.exit.interrupted && !report.exit.timedOut, "SDK check interrupted or timed out.");
-    assert.ok(report.exit.cleanup === "passed" && !report.exit.signalError, "SDK test process cleanup failed.");
-    const result = JSON.parse(await readFile(resultsFile, "utf8"));
-    report.counts = {
-      passed: result.numPassedTests,
-      failed: result.numFailedTests,
-      skipped: result.numPendingTests,
-      total: result.numTotalTests,
-      files: result.testResults?.length,
-    };
     report.sourceAfter = await sourceEvidence(sdkDir);
     report.sourceUnchanged = report.sourceAfter.sourceSha256 === report.sourceBefore.sourceSha256;
     if (changes) {
@@ -383,18 +390,22 @@ export async function runSdkOffline({ sdkDir, suites, related, changedSince, ins
     }
     stage = "source-evidence";
     assert.ok(report.sourceUnchanged, "SDK source changed during the check.");
-    stage = "network-audit";
-    report.network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
-    assert.equal(report.network.status, "passed", "Offline network audit did not pass; inspect network-events.log.");
-    stage = "results";
-    assert.ok(
-      passedResults(
-        result,
-        suites.map((file) => path.join(sdkDir, file)),
-        report.exit
-      ),
-      "Selected SDK tests did not all pass; inspect vitest.log and vitest-results.json."
-    );
+    if (discoverOnly) {
+      report.network = report.discovery.network;
+    } else {
+      stage = "network-audit";
+      report.network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
+      assert.equal(report.network.status, "passed", "Offline network audit did not pass; inspect network-events.log.");
+      stage = "results";
+      assert.ok(
+        passedResults(
+          result,
+          suites.map((file) => path.join(sdkDir, file)),
+          report.exit
+        ),
+        "Selected SDK tests did not all pass; inspect vitest.log and vitest-results.json."
+      );
+    }
     stage = "tooling-evidence";
     report.toolingUnchanged = false;
     report.toolSha256After = await sdkToolHashes();
@@ -423,12 +434,13 @@ export async function runCli(args = process.argv.slice(2)) {
         related: { type: "string", multiple: true },
         "changed-since": { type: "string" },
         "inspect-port": { type: "string" },
+        "discover-only": { type: "boolean", default: false },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ... | --changed-since REF] [--inspect-port 9238]\nRuns existing SDK source tests using the target SDK's installed Vitest (must match the infrastructure version), an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. --related discovers tests from the target dependency graph before exact offline execution; no matches fails. --changed-since pins the target Git base and selects SDK source changes; mixed changes require explicit --suite selection. No SDK build, services or business source changes. Debug mode requires exactly one suite, pauses a single fork on loopback and allows 30 minutes; see the emitted session log path.\n"
+        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ... | --changed-since REF] [--discover-only | --inspect-port 9238]\nRuns existing SDK source tests using the target SDK's installed Vitest (must match the infrastructure version), an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. --related discovers tests from the target dependency graph before exact offline execution; no matches fails. --changed-since pins the target Git base and selects SDK source changes; mixed changes require explicit --suite selection. No SDK build, services or business source changes. --discover-only requires --related or --changed-since and lists tests without execution; it is not passing test evidence. Debug mode requires exactly one suite, pauses a single fork on loopback and allows 30 minutes; see the emitted session log path.\n"
       );
       return 0;
     }
@@ -437,6 +449,7 @@ export async function runCli(args = process.argv.slice(2)) {
       suites: values.suite,
       related: values.related,
       changedSince: values["changed-since"],
+      discoverOnly: values["discover-only"],
       inspectPort:
         values["inspect-port"] === undefined
           ? undefined
