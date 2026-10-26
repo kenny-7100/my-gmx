@@ -16,7 +16,7 @@ const CHROME = {
   linux: "/opt/google/chrome/chrome",
 };
 
-async function dependency() {
+export async function browserDependency() {
   const manifestPath = require.resolve("@playwright/test/package.json");
   const installed = JSON.parse(await readFile(manifestPath, "utf8"));
   const declared = JSON.parse(await readFile(path.join(ROOT, "package.json"), "utf8")).devDependencies[
@@ -25,6 +25,11 @@ async function dependency() {
   require.resolve("@playwright/test");
   if (installed.version !== declared) throw new Error("Playwright version mismatch.");
   return { version: installed.version, cli: path.join(path.dirname(manifestPath), "cli.js") };
+}
+
+export async function checkChromeExecutable(file = CHROME[process.platform]) {
+  if (!(await stat(file)).isFile()) throw new Error("Expected a browser executable file.");
+  await access(file, constants.X_OK);
 }
 
 async function runJson(args) {
@@ -59,12 +64,9 @@ export function checkDiscovery(report) {
 }
 
 export async function preflight({
-  resolveDependency = dependency,
+  resolveDependency = browserDependency,
   platform = process.platform,
-  checkExecutable = async (file) => {
-    if (!(await stat(file)).isFile()) throw new Error("Expected a browser executable file.");
-    await access(file, constants.X_OK);
-  },
+  checkExecutable = checkChromeExecutable,
   readRuntime = () => runJson([require.resolve("tsx/cli"), "scripts/solana-runtime-preflight.mjs", "--local-only"]),
   discover = (cli) => runJson([cli, "test", "-c", "playwright-solana-readonly.config.ts", "--list", "--reporter=json"]),
 } = {}) {

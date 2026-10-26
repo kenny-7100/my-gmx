@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
 import { runTestProcess } from "./lib/agent-test-process.mjs";
-import { control } from "./solana-dev.mjs";
+import { control, doctorWorkspace } from "./solana-dev.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const execute = promisify(execFile);
@@ -29,7 +29,7 @@ export async function checkWorkspace({ projectDir, apiDir, webPort, apiPort, ins
     businessAcceptance: "not-run",
   };
   let workspace;
-  let stage = "workspace-availability";
+  let stage = "preflight";
   let interrupted = false;
   const interrupt = () => {
     interrupted = true;
@@ -66,13 +66,18 @@ export async function checkWorkspace({ projectDir, apiDir, webPort, apiPort, ins
     return step.result;
   };
   try {
-    let existing;
-    try {
-      existing = await control("status", projectDir);
-    } catch (error) {
-      if (!["ENOENT", "ECONNREFUSED"].includes(error.code)) throw error;
-    }
-    assert.ok(!existing, "A workspace already exists for this frontend; use another checkout or stop it explicitly.");
+    report.preflight = await doctorWorkspace({
+      projectDir,
+      apiDir,
+      webPort,
+      apiPort,
+      apiInspectPort: inspectPort,
+      services: ["api", "vite"],
+    });
+    assert.equal(report.preflight.status, "passed", "Workspace prerequisites are blocked; inspect preflight checks.");
+    projectDir = await realpath(projectDir);
+    apiDir = await realpath(apiDir);
+    Object.assign(report, { projectDir, apiDir });
     stage = "startup";
     assert.ok(!interrupted, "Workspace check interrupted.");
     // Let the bounded launcher finish during cancellation so ownership is known before cleanup.
@@ -187,8 +192,8 @@ export async function runCli(args = process.argv.slice(2)) {
           "Invalid port."
         );
     const report = await checkWorkspace({
-      projectDir: await realpath(values["project-dir"]),
-      apiDir: await realpath(values["api-dir"]),
+      projectDir: path.resolve(values["project-dir"]),
+      apiDir: path.resolve(values["api-dir"]),
       webPort: Number(values["web-port"]),
       apiPort: Number(values["api-port"]),
       inspectPort: values["api-inspect-port"] === undefined ? undefined : Number(values["api-inspect-port"]),
