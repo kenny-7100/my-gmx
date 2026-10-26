@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { openSync, closeSync } from "node:fs";
 import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
@@ -10,6 +9,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
 import { resolveSuites } from "./gmx-api-integration-tests.mjs";
+import { runTestProcess } from "./lib/agent-test-process.mjs";
 import { readApiSource } from "./solana-api-local.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -117,9 +117,8 @@ export async function runOfflineTests(apiDir, requested = SUITES) {
   const fd = openSync(logFile, "wx", 0o600);
   let exit;
   try {
-    const child = spawn(
-      process.execPath,
-      [
+    exit = await runTestProcess({
+      args: [
         jest,
         "--config",
         JSON.stringify(config),
@@ -131,26 +130,10 @@ export async function runOfflineTests(apiDir, requested = SUITES) {
         "--outputFile",
         resultsFile,
       ],
-      {
-        cwd,
-        env: { PATH: process.env.PATH, NODE_ENV: "test", TZ: "UTC", CI: "true", JEST_RETRY_TIMES: "0" },
-        stdio: ["ignore", fd, fd],
-        timeout: 120000,
-        killSignal: "SIGKILL",
-      }
-    );
-    const stop = () => child.kill("SIGTERM");
-    process.on("SIGINT", stop);
-    process.on("SIGTERM", stop);
-    try {
-      exit = await new Promise((resolve, reject) => {
-        child.once("error", reject);
-        child.once("exit", (code, signal) => resolve({ code, signal }));
-      });
-    } finally {
-      process.off("SIGINT", stop);
-      process.off("SIGTERM", stop);
-    }
+      cwd,
+      env: { PATH: process.env.PATH, NODE_ENV: "test", TZ: "UTC", CI: "true", JEST_RETRY_TIMES: "0" },
+      logFd: fd,
+    });
   } finally {
     closeSync(fd);
     await rm(cwd, { recursive: true, force: true });
@@ -166,11 +149,16 @@ export async function runOfflineTests(apiDir, requested = SUITES) {
   const unchanged =
     JSON.stringify(after) === JSON.stringify(evidence) && JSON.stringify(sourceAfter) === JSON.stringify(sourceBefore);
   const passed =
+    !exit.interrupted &&
+    !exit.timedOut &&
+    exit.cleanup === "passed" &&
+    !exit.signalError &&
     passedResults(
       result,
       suites.map((file) => path.join(apiDir, file)),
       exit
-    ) && unchanged;
+    ) &&
+    unchanged;
   const report = {
     status: passed ? "passed" : "failed",
     mode: "offline-fixtures",
