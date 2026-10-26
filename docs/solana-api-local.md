@@ -258,7 +258,11 @@ node ../scripts/gmx-api-offline-tests.mjs --api-dir .
 
 stdout 输出 `mode: offline-fixtures` 的 JSON，含实际 apiDir、API commit/dirty、选定文件摘要、guard 摘要、测试数量和 excluded 范围。`sourceInputs` / `sourceInputsAfter` 聚合 API `src/` 下 TS/JS/JSON（含本地模块、fixture 和生成源码）及 package、锁文件、tsconfig 的摘要与文件数，不仅检查测试文件；源码符号链接需先显式审查，不自动跟随。此摘要不覆盖所有已安装第三方包内容或项目外任意读取，不能代表完整运行时/部署身份。测试固定 TZ=UTC。成功退出 0，其余退出 1；测试失败也保留结构化报告。前置条件缺失时 stderr 给出固定诊断信息，不启动数据库或自动安装依赖。
 
+运行器为 Jest 创建独立 POSIX 进程组。测试成功、失败或主进程提前退出后，仍会检查并终止组内存活子进程；120 秒超时直接终止该组，SIGINT / SIGTERM 中断先发送 SIGTERM，1 秒后仍未退出则发送 SIGKILL。报告 `exit` 包含 `processGroup`、`interrupted`、`timedOut`、`cleanup`，信号发送异常时另有 `signalError`；中断、超时、清理失败或信号异常均不能判为 passed，即使 Jest 已生成成功结果。清理使用系统 `ps` 核实组内非 zombie 进程，不影响其他进程组；适用于本项目 macOS/Linux 环境，不保证清理由测试主动脱离进程组的后代，也不能在运行器自身被 SIGKILL 后执行清理。进程生命周期回归为 `node --test scripts/agent-test-process.test.mjs`，已纳入 `yarn test:agent-tools`。
+
 每次实际执行的日志与原始 Jest JSON 保存在 `.local/acceptance/solana-api-local/offline-*/`，报告提供 `logFile`、`resultsFile`；临时工作目录自动清理。源码身份不是当前部署身份。工具入口为 `scripts/gmx-api-offline-tests.mjs`，guard 回归为 `yarn test:gmx-api-offline`。
+
+2026-10-27 进程清理验收：隔离 API 源码副本复现“Jest passed 后所属子进程仍存活”，修复后同一用例确认子进程已结束。真实 Node 回归覆盖成功、失败、超时、SIGINT / SIGTERM、忽略 SIGTERM 的主进程及无关哨兵进程保留；统一工具回归 90 项通过，API 默认 12 项与指定 number / 收益计算 59 项通过，报告均为 `exit.cleanup=passed`。没有修改 API 源码、测试或依赖。复现、修复及实际 API 报告分别在本机忽略目录 `.local/acceptance/solana-api-local/offline-process-{repro,fixed-acceptance,default,selected}.json`，工具回归在 `offline-process-tools.tap`。
 
 2026-10-27 可选 suite 扩展已验收：默认 12 项保持通过；显式选择原有 number 与 gmUserEarnings/math 两个文件共 59 项通过，报告仅含所选文件。隔离源码副本实际验证调用方/文件环境哨兵未加载，捕获联网异常后仍失败，断言失败、skip、零测试及运行中新增源码均失败；最后一种报告 `sourceUnchanged=false`。没有修改真实 API 源码或原有预期，副本已清理。工具回归覆盖精确范围、重复结果、空断言、skip/todo、信号退出和非选中依赖变化；统一 `yarn test:agent-tools` 87 项通过。 根类型检查、ESLint、Prettier、111 个文档本地目标和差异检查通过；完整前端单元测试 3,014 项通过、1 项既有跳过。证据在本机忽略目录 `.local/acceptance/solana-api-local/offline-{selected-acceptance,default-compatibility,selection-negative}.json` 和 `offline-tools.tap`。
 
