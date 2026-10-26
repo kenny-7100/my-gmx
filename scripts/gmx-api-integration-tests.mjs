@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { openSync, closeSync } from "node:fs";
 import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm, stat, symlink, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -92,6 +93,16 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     });
     await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
   }
+  apiDir = await realpath(apiDir);
+  const guard = path.join(ROOT, "tools/gmx-api-integration/network-guard.cjs");
+  const config = createRequire(path.join(apiDir, "package.json"))(path.join(apiDir, "jest.config.ts"));
+  assert.ok(Array.isArray(config.setupFilesAfterEnv), "Expected explicit API test setup files.");
+  const setupFiles = config.setupFilesAfterEnv.map((file) => {
+    assert.equal(typeof file, "string", "Expected a test setup path.");
+    return file.startsWith(".") || file.includes("<rootDir>")
+      ? path.resolve(apiDir, file.replace("<rootDir>", apiDir))
+      : createRequire(path.join(apiDir, "package.json")).resolve(file);
+  });
   const evidence = await readTestSource(apiDir, suites);
   const sourceBefore = await sourceInputs(apiDir);
   for (const file of ["node_modules/jest/bin/jest.js", "jest.config.ts", "tsconfig.knex.json", ...suites]) {
@@ -188,6 +199,9 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
           path.join(apiDir, "jest.config.ts"),
           "--rootDir",
           apiDir,
+          "--setupFilesAfterEnv",
+          guard,
+          ...setupFiles,
           "--runInBand",
           "--runTestsByPath",
           ...suites.map((file) => path.join(apiDir, file)),
@@ -206,6 +220,8 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
           TS_NODE_PROJECT: path.join(apiDir, "tsconfig.knex.json"),
           TEST_DB_CONNECTION: `postgresql://postgres:${password}@localhost:${port}`,
           JEST_RETRY_TIMES: "0",
+          GMX_AGENT_TEST_DATABASE_PORT: String(port),
+          GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "network-events.log"),
         },
         logFd: fd,
         timeoutMs: debug?.timeoutMs ?? 180000,
@@ -253,7 +269,22 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
   const sourceAfter = await sourceInputs(apiDir);
   const unchanged =
     JSON.stringify(after) === JSON.stringify(evidence) && JSON.stringify(sourceAfter) === JSON.stringify(sourceBefore);
+  const events = (
+    await readFile(path.join(runDir, "network-events.log"), "utf8").catch((error) => {
+      if (error.code === "ENOENT") return "";
+      throw error;
+    })
+  )
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  const installations = events.filter((event) => event === "installed").length;
+  const blockedAttempts = events.filter((event) => event === "blocked").length;
+  if (!errorCode && blockedAttempts) errorCode = "network-access-forbidden";
+  if (!errorCode && installations !== suites.length) errorCode = "network-guard-not-installed";
   const passed =
+    installations === suites.length &&
+    blockedAttempts === 0 &&
     (!debug || debug.started) &&
     !errorCode &&
     !stopped &&
@@ -276,6 +307,15 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     status: passed ? "passed" : "failed",
     mode: "isolated-postgres-integration",
     timezone: "UTC",
+    network: {
+      policy: "owned-database-and-in-process-servers",
+      installations,
+      blockedAttempts,
+      guardSha256: createHash("sha256")
+        .update(await readFile(guard))
+        .digest("hex"),
+      scope: "selected Jest suites; original global setup and teardown remain trusted",
+    },
     checkedAt: new Date().toISOString(),
     temporaryDirectory: cwd,
     source: evidence,
