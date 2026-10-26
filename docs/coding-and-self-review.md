@@ -90,6 +90,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **SDK Git 回归范围：** SDK 纯源码功能分支按[范围说明](sdk-offline-tests.md#按-git-变更范围运行回归)使用 `sdk:test-offline --sdk-dir PATH/sdk --changed-since REF`。先核对目标 `changes.checkoutDir`、`sdkPrefix`、基线 SHA 和完整路径，再确认 `changesUnchanged=true`、原生清单、网络及清理结果；SDK 配置、前端或根配置混入、删除、空范围均需人工评估后显式选 `--suite`。不能把断言通过当成执行期间范围保持一致，调试仍使用单 suite。
 
+**离线工具变化：** 前端和 SDK 离线验收成功前，按[工具指纹说明](frontend-offline-tests.md#结束时核对工具指纹)确认 `toolingUnchanged=true` 及前后工具指纹相同。`tooling-evidence` 失败时，先结束并发工具编辑，再用稳定工具重跑；原生断言通过不能覆盖此失败。交付检查要求这项证据，旧报告缺字段需重跑，不手补状态或指纹。
+
 ## 查阅入口
 
 | 工作 | 必读资料 |

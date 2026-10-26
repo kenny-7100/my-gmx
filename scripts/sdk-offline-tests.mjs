@@ -395,6 +395,11 @@ export async function runSdkOffline({ sdkDir, suites, related, changedSince, ins
       ),
       "Selected SDK tests did not all pass; inspect vitest.log and vitest-results.json."
     );
+    stage = "tooling-evidence";
+    report.toolingUnchanged = false;
+    report.toolSha256After = await sdkToolHashes();
+    report.toolingUnchanged = JSON.stringify(report.toolSha256) === JSON.stringify(report.toolSha256After);
+    assert.ok(report.toolingUnchanged, "SDK offline tools changed during testing; rerun the check.");
     report.status = "passed";
   } catch (error) {
     report.failureStage = stage;
