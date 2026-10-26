@@ -35,6 +35,8 @@ node /path/to/infrastructure/scripts/frontend-offline-tests.mjs --project-dir /p
 
 跨 checkout 的 Vite 文件访问范围显式包含目标源码、目标依赖的真实目录及工具初始化目录，防止外部 Worker/setup 被拒绝。目标目录不会写入工具、报告或 Vite 缓存，隔离临时目录仍按既有流程清理。本能力只执行所选测试，不替代[交付隔离检查](linear-development-workflow.md#交付隔离自动检查)、最新上游核对或整项需求验收。
 
+需要将结果作为交付证据时，可按[前端测试证据绑定](linear-development-workflow.md#前端测试证据绑定)给 `agent:delivery-check` 传 `--require-clean --frontend-report PATH`，自动比较当前目标路径、commit、源码与工具指纹，并复核原生 Vitest 结果。前端测试本身允许 dirty checkout，交付绑定则要求测试前后及当前目标均干净；不要把开发现场报告当作已提交交付版本的证据。
+
 ## 源码断点调试
 
 需要查看前端模块的实际参数和调用栈时，显式选择一份原有 suite：
