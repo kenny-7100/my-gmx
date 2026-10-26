@@ -73,6 +73,8 @@ yarn solana:browser-check --project-dir /absolute/path/to/delivery-checkout --po
 
 既定源码指纹复用[前端离线测试](frontend-offline-tests.md)的计划，不代表全部 CSS、静态资源、环境文件或部署身份；本入口另核对上述 SDK 资源。前端仍读取目标的开发环境配置，报告不记录凭据。测试含外部只读请求，继续保留原错误诊断；不把两项页面用例通过解释为整个功能或数据依赖通过。原有端口归属、停止流程和限时保持不变。
 
+正式交付前可按[浏览器测试证据绑定](linear-development-workflow.md#浏览器测试证据绑定)显式传入 `agent:delivery-check --browser-report PATH --require-clean`，自动核对已有页面结果与交付源码。用于交付的测试应从干净目标 checkout 开始；普通本地开发仍允许 dirty 报告，但不能将其当作干净交付证据。
+
 ### 独立目录实际验收（2026-10-27）
 
 基于本地 `origin/release` 引用创建临时 clone，确认目标没有个人浏览器工具；增加仅用于验收的独立静态标记并提交，工具请求该标记核实 Vite 确实服务目标目录。显式链接本机已安装依赖、复制已准备 SDK 静态资源，仅用于本轮隔离验收；没有执行全新安装或构建，也没有改动实际业务 checkout。

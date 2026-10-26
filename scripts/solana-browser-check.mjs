@@ -11,7 +11,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
 import { sourceEvidence } from "./frontend-offline-tests.mjs";
-import { preflight } from "./solana-browser-preflight.mjs";
+import { browserPreflightHashes, preflight } from "./solana-browser-preflight.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
@@ -65,6 +65,18 @@ async function hashes(files) {
       .update(await readFile(path.join(ROOT, file)))
       .digest("hex");
   return result;
+}
+
+export async function browserToolHashes() {
+  return {
+    ...(await browserPreflightHashes()),
+    ...(await hashes([
+      "scripts/solana-browser-check.mjs",
+      "scripts/frontend-offline-tests.mjs",
+      "tools/solana-browser/playwright.config.ts",
+      "vite.config.ts",
+    ])),
+  };
 }
 
 export async function browserTarget(projectDir, localRuntime) {
@@ -182,14 +194,7 @@ export async function checkBrowser(port, { projectDir = ROOT } = {}) {
     }
     stage = "target";
     report.targetBefore = await browserTarget(projectDir, preparation.runtime.local);
-    const files = [
-      ...Object.keys(preparation.source.sha256),
-      "scripts/solana-browser-check.mjs",
-      "scripts/frontend-offline-tests.mjs",
-      "tools/solana-browser/playwright.config.ts",
-      "vite.config.ts",
-    ];
-    report.sourceBefore = await hashes(files);
+    report.sourceBefore = await browserToolHashes();
     stage = "port";
     await portAvailable(port);
     initiallyFree = true;
@@ -223,7 +228,7 @@ export async function checkBrowser(port, { projectDir = ROOT } = {}) {
     const result = JSON.parse(await readFile(resultsFile, "utf8"));
     report.stats = result.stats;
     report.checkout = result.config?.metadata;
-    report.sourceAfter = await hashes(files);
+    report.sourceAfter = await browserToolHashes();
     report.targetAfter = await browserTarget(projectDir, preparation.runtime.local);
     assert.deepEqual(report.targetAfter, report.targetBefore, "Target checkout changed during the run.");
     assert.equal(
