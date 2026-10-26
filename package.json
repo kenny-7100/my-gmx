@@ -25,6 +25,7 @@
     "test:solana-runtime-preflight": "tsx --test scripts/solana-runtime-preflight.test.mjs",
     "agent:preflight": "node scripts/agent-preflight.mjs",
     "test:agent-preflight": "node --test scripts/agent-preflight.test.mjs",
+    "solana:api-dev": "node scripts/solana-api-dev.mjs",
     "solana:api-local": "node scripts/solana-api-local.mjs",
     "gmx-api:test-offline": "node scripts/gmx-api-offline-tests.mjs",
     "gmx-api:test-integration": "node scripts/gmx-api-integration-tests.mjs",
