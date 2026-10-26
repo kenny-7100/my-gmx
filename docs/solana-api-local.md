@@ -353,6 +353,16 @@ node ../scripts/gmx-api-integration-tests.mjs --api-dir .
 
 stdout JSON 的 `mode` 为 `isolated-postgres-integration`，包括 API commit/dirty、原有 Jest/DB setup/选定测试及迁移文件摘要、镜像 ID、随机端口、测试数量和 cleanup。`exit` 单独记录测试进程的 `processGroup`、`interrupted`、`timedOut`、`cleanup`，信号异常时包含 `signalError`；顶层 `cleanup` 仍表示所属容器及临时目录清理。中断、超时、进程或容器清理失败均不能 passed，`errorCode` 分别标识 `interrupted`、`test-timeout` 或 `process-cleanup-failed` 等执行问题。只有所有选定 suite 全部通过、无 skip/todo、退出 0、源码未变化且清理成功，才报告 passed。前置条件不足在 stderr 报告固定错误；实际测试失败仍输出带日志位置的失败报告。连接密码不写入工具报告。
 
+### 集成测试的完整源码指纹
+
+2026-10-27 已补齐。原有 `source.sha256` 继续记录选定测试、数据库配置、Jest setup/teardown 及迁移等文件；报告另有 `sourceInputs` / `sourceInputsAfter`，由与 API 离线入口共享的 `scripts/lib/gmx-api-source.mjs` 计算。聚合指纹覆盖全部 `src/` 下 TS/JS/JSON，以及 `package.json`、`yarn.lock`、`tsconfig.json` 的相对路径和内容，报告摘要及文件数；已有依赖修改、文件新增/删除都会改变指纹。源码符号链接明确拒绝，不自动跟随。普通模式和调试模式使用同一检查，不新增参数。
+
+`sourceUnchanged=true` 要求原有证据与完整源码聚合指纹均在运行前后相同；测试断言通过但指纹变化时整次返回 failed / 退出 1，仍清理所属进程、容器及目录。后续 Agent 不应只比较选中测试文件或 commit：工作区中导入依赖也可能在测试时变化。失败先比较两份摘要及文件数，核实并发编辑，再在稳定源码下重跑，不修改报告或放宽断言。
+
+该扫描用于本地执行前后的一致性，不是持续监控或安全沙箱；无法发现中途修改后恢复到原字节的情况，不覆盖所有安装依赖、静态资源、环境或部署身份。源码在扫描之后仍可变化，不能把它视为锁定的原子快照。运行中出现扫描错误仍明确失败，不自动接受旧证据。
+
+实际验收在隔离 API 副本复现了漏报：原测试导入 JSON 依赖，执行中修改该依赖，原断言通过而旧入口报告 passed / `sourceUnchanged=true`。修复后相同场景及新增源码文件场景均为 failed、`sourceUnchanged=false`，原断言仍通过，两类资源清理均 passed；副本已删除，实际 API 未改。共享摘要的现有回归覆盖非选中依赖修改和新增文件，不复制扫描实现或另建测试框架。原数据库默认 5 项、指定数据库/市场模型 11 项及离线默认 12 项均通过，源码保持一致；统一工具回归 95 项通过。证据在本机忽略目录 `.local/acceptance/solana-api-local/integration-source-{repro,changed,added}.json`。
+
 ### 测试派生进程清理验收（2026-10-27）
 
 隔离 API 源码副本真实复现：原运行器返回 passed、所属 PostgreSQL 容器已删除，但测试创建的 Node 子进程仍存活；核对本次进程归属后清理。修复复用已有进程组工具，不修改实际 API 源码、原测试、配置或依赖。相同副本的成功、断言失败和运行中 SIGTERM 中断均确认子进程消失、所属容器已删除，报告分别保存进程与资源清理结果。
