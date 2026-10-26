@@ -1,6 +1,6 @@
 # Solana 本地只读浏览器冒烟
 
-更新日期：2026-10-26。A09 首个只读页面冒烟入口及环境预检均已完成真实验收；新增一条命令完成预检、独立 Vite、真实 Chrome、独立报告及停服。用户已长期授权后续任务启动本地 Vite 和 Chrome，在已授权任务中无需再次确认本地页面运行；不扩大到构建、部署、其他服务或签名广播。
+更新日期：2026-10-27。A09 首个只读页面冒烟入口及环境预检均已完成真实验收；新增一条命令完成预检、独立 Vite、真实 Chrome、独立报告及停服。用户已长期授权后续任务启动本地 Vite 和 Chrome，在已授权任务中无需再次确认本地页面运行；不扩大到构建、部署、其他服务或签名广播。
 
 ## 用途与验收条件
 
@@ -58,6 +58,30 @@ Playwright 正常退出或失败时负责清理所属 Vite；外层收到 SIGINT
 首轮中断暴露 SIGTERM 直接结束 CLI 的遗留问题；已依据锁定版 Playwright runner 源码修正并真实复验。该次失败报告保留，不覆盖成 passed；遗留进程核对本轮端口、命令和进程组归属后已清理。最终汇总位于本机 `.local/acceptance/solana-browser/managed-acceptance.json`，原生报告位于对应 managed run，不随 Git 共享。
 
 工程检查通过：2 组工具回归、根 `yarn tscheck`、`yarn test:regression:types`、脚本语法、指定文件 ESLint/Prettier、文档链接及 `git diff --check`；完整前端回归 299 个文件通过 / 1 个原有跳过，3014 项通过 / 1 项原有跳过，退出 0。仍有既有 Browserslist、Sass/Vite 及 happy-dom teardown 提示，本轮保留日志，不修改这些无关内容。
+
+## 验证独立功能 checkout
+
+从基础设施 checkout 调用入口，显式传入目标 Git 根目录；无需将个人脚本、Playwright 配置或用例复制进功能分支：
+
+```sh
+yarn solana:browser-check --project-dir /absolute/path/to/delivery-checkout --port 3016
+```
+
+工具从目标 `node_modules/vite/bin/vite.js` 启动 Vite，使用目标工作目录及原 Vite 配置；测试、fixture、Chrome 编排及所有报告留在基础设施目录。`projectDir` 和 `targetBefore/targetAfter` 记录目标 Git commit/dirty、既定前端源码指纹、Vite/SDK 版本、实际 Vite 路径及资产摘要；Playwright `checkout` 元数据也指向目标，并与运行前身份自动核对。目标在运行期间变化或元数据不符时整体失败。原有 `sourceBefore/sourceAfter` 继续表示基础设施用例、配置与工具摘要，预检报告检查的是基础设施测试能力，不代替目标身份。
+
+先准备目标自己的锁定依赖及已批准的 Solana SDK 静态资源。入口不安装、不构建、不自动链接或复制资源。目标必须是实际 Git 根目录，已安装 Vite 版本与基础设施相同；目标声明及已安装 Solana SDK 版本必须一致，并匹配当前基础设施的已批准版本。目标 SDK 配置、已安装 JS/WASM 和准备好的 entry/WASM 与已验证的基础设施资源逐字节核对；缺失、损坏或不兼容在 `target` 阶段失败，退出 1。SDK 资源需要构建时先处理相应授权，不用旧版本或替代资源绕过。当前只支持相同已批准运行时，不承诺任意历史或新 SDK 版本兼容；锁定安装仍是前置，版本检查不证明整个依赖树一致。
+
+既定源码指纹复用[前端离线测试](frontend-offline-tests.md)的计划，不代表全部 CSS、静态资源、环境文件或部署身份；本入口另核对上述 SDK 资源。前端仍读取目标的开发环境配置，报告不记录凭据。测试含外部只读请求，继续保留原错误诊断；不把两项页面用例通过解释为整个功能或数据依赖通过。原有端口归属、停止流程和限时保持不变。
+
+### 独立目录实际验收（2026-10-27）
+
+基于本地 `origin/release` 引用创建临时 clone，确认目标没有个人浏览器工具；增加仅用于验收的独立静态标记并提交，工具请求该标记核实 Vite 确实服务目标目录。显式链接本机已安装依赖、复制已准备 SDK 静态资源，仅用于本轮隔离验收；没有执行全新安装或构建，也没有改动实际业务 checkout。
+
+- 目标两项原有网络选择用例在真实 Chrome 中通过，无 skipped/flaky/unexpected；目标 Git commit、源码和资源前后一致，服务端口释放，临时 clone 随后删除。
+- 错误 Git 根目录、缺目标依赖、损坏的准备资源及不兼容的目标 Vite 均在启动前拒绝。端口占用在 port 阶段失败，原监听服务保留。
+- 最终代码的默认入口两项真实 Chrome 用例复验通过，耗时约 47.7 秒，端口释放。
+
+证据在忽略的 `.local/acceptance/solana-browser/checkout-acceptance.json`、`checkout-version-negative.json` 和 `checkout-default.json`，保留各次独立原生报告及 trace。历史报告中的工具摘要不代表后续修改后的工具版本。 本轮统一工具测试 95 项、根类型检查、regression 类型检查及脚本静态检查通过；全量前端回归 3,014 项通过、1 项既有跳过，124 个文档本地目标及差异检查通过。
 
 ## 先准备，再执行
 
