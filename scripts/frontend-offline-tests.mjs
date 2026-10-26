@@ -51,7 +51,7 @@ export async function resolveSuites(projectDir, requested = DEFAULT_SUITES) {
   return selected;
 }
 
-async function sourceEvidence(projectDir) {
+export async function sourceEvidence(projectDir) {
   const files = [
     "package.json",
     "yarn.lock",
@@ -85,13 +85,26 @@ async function sourceEvidence(projectDir) {
       );
   }
   const git = (...args) =>
-    execFileSync("git", ["-C", projectDir, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+    execFileSync("git", ["-C", projectDir, ...args], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
+    }).trim();
   return {
     commit: git("rev-parse", "HEAD"),
     dirty: Boolean(git("status", "--porcelain")),
     sourceSha256: digest.digest("hex"),
     sourceFileCount: files.length,
   };
+}
+
+export async function frontendToolHashes() {
+  const hashes = {};
+  for (const file of [...TOOL_FILES, "yarn.lock"])
+    hashes[file] = createHash("sha256")
+      .update(await readFile(path.join(ROOT, file)))
+      .digest("hex");
+  return hashes;
 }
 
 export async function runFrontendOffline({ suites, inspectPort, projectDir = ROOT }) {
@@ -156,11 +169,7 @@ export async function runFrontendOffline({ suites, inspectPort, projectDir = ROO
       process.stderr.write(`Frontend debug session: ${JSON.stringify({ ...report.debug, logFile, reportFile })}\n`);
     }
     report.sourceBefore = await sourceEvidence(projectDir);
-    report.toolSha256 = {};
-    for (const file of [...TOOL_FILES, "yarn.lock"])
-      report.toolSha256[file] = createHash("sha256")
-        .update(await readFile(path.join(ROOT, file)))
-        .digest("hex");
+    report.toolSha256 = await frontendToolHashes();
     await symlink(path.join(projectDir, "node_modules"), path.join(emptyDir, "node_modules"), "dir");
     const optionsFile = path.join(emptyDir, "options.json");
     await writeFile(optionsFile, JSON.stringify({ projectDir, suites, emptyDir, resultsFile }), { mode: 0o600 });

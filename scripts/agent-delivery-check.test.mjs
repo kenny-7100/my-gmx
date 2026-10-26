@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
-import { checkDelivery } from "./agent-delivery-check.mjs";
+import { checkDelivery, validateFrontendEvidence } from "./agent-delivery-check.mjs";
 
 const exec = promisify(execFile);
 
@@ -56,6 +56,7 @@ test("real Git histories distinguish clean delivery from inherited or copied dev
     assert.equal((await checkDelivery(strict)).status, "blocked");
     await writeFile(path.join(cwd, unusual), "untracked");
     await writeFile(path.join(cwd, "feature with spaces.txt"), "unstaged");
+    await utimes(path.join(cwd, "shared.txt"), new Date(Date.now() + 10000), new Date(Date.now() + 10000));
     const indexBefore = await readFile(path.join(cwd, ".git/index"));
     const dirty = await checkDelivery(strict);
     assert.equal(dirty.status, "blocked");
@@ -105,4 +106,59 @@ test("real Git histories distinguish clean delivery from inherited or copied dev
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
+});
+
+test("frontend evidence binds successful native results to clean source, commit, checkout and tools", async () => {
+  await assert.rejects(checkDelivery({ frontendReport: "", requireClean: true }), /nonempty frontend report path/);
+  await assert.rejects(checkDelivery({ frontendReport: "report.json" }), /requires --require-clean/);
+  const source = { commit: "a".repeat(40), dirty: false, sourceSha256: "source", sourceFileCount: 1 };
+  const results = {
+    success: true,
+    numPassedTests: 1,
+    numFailedTests: 0,
+    numTotalTests: 1,
+    numPendingTests: 0,
+    numTodoTests: 0,
+    testResults: [{ name: "/target/src/a.spec.ts", status: "passed", assertionResults: [{ status: "passed" }] }],
+  };
+  const evidence = {
+    schemaVersion: 1,
+    mode: "frontend-source-offline",
+    status: "passed",
+    projectDir: "/target",
+    sourceUnchanged: true,
+    sourceBefore: source,
+    sourceAfter: source,
+    toolSha256: { runner: "tool" },
+    exit: { code: 0, signal: null, interrupted: false, timedOut: false, cleanup: "passed" },
+    temporaryDirectoryCleanup: "passed",
+    counts: { passed: 1, failed: 0, skipped: 0, total: 1, files: 1 },
+  };
+  const options = {
+    evidence,
+    source,
+    projectDir: "/target",
+    head: source.commit,
+    toolSha256: evidence.toolSha256,
+    results,
+    suites: ["/target/src/a.spec.ts"],
+  };
+  validateFrontendEvidence(options);
+  for (const changed of [
+    { evidence: { ...evidence, status: "failed" } },
+    { evidence: { ...evidence, projectDir: "/other" } },
+    { head: "b".repeat(40) },
+    { source: { ...source, dirty: true } },
+    { source: { ...source, sourceSha256: "changed" } },
+    { evidence: { ...evidence, sourceUnchanged: false } },
+    { evidence: { ...evidence, sourceAfter: { ...source, sourceSha256: "changed" } } },
+    { toolSha256: { runner: "changed" } },
+    { evidence: { ...evidence, exit: { ...evidence.exit, interrupted: true } } },
+    { evidence: { ...evidence, exit: { ...evidence.exit, cleanup: "failed" } } },
+    { evidence: { ...evidence, counts: { ...evidence.counts, passed: 2 } } },
+    { results: { ...results, success: false } },
+    { results: { ...results, numFailedTests: 1 } },
+    { suites: ["/target/src/other.spec.ts"] },
+  ])
+    assert.throws(() => validateFrontendEvidence({ ...options, ...changed }));
 });

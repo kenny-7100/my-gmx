@@ -115,3 +115,6 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 
 
 API 数据库集成入口也复用共享测试进程组工具：`yarn gmx-api:test-integration` 分别记录 `exit.cleanup` 与容器/临时目录 `cleanup`，中断、超时或任一清理失败都不能 passed。已通过隔离 API 副本复现并修复 Jest `--forceExit` 后派生进程残留；具体执行与验收见[API 集成测试说明](solana-api-local.md#测试派生进程清理验收2026-10-27)。共享生命周期回归纳入 `yarn test:agent-tools`，不另建重复测试框架。
+
+
+前端交付证据绑定复用 `agent:delivery-check --require-clean --frontend-report PATH`，校验现有报告与目标 checkout、head、当前源码/工具指纹及原生测试结果的一致性；不重跑测试、不更新历史报告。具体命令、拒绝条件和真实独立 checkout 验收见[交付说明](linear-development-workflow.md#前端测试证据绑定)。前端运行器与该检查共享原有源码、工具摘要计算，读取 Git 状态禁用可选索引写入。

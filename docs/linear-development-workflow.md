@@ -40,6 +40,25 @@ yarn agent:delivery-check --project-dir /path/to/delivery-checkout --require-cle
 
 实现：`scripts/agent-delivery-check.mjs`；回归：`yarn test:agent-delivery-check`。真实临时 Git 仓库覆盖干净分支、开发基础直接继承/误合、不同 SHA 的等价 cherry-pick、release 前进后基线过期、越界/空差异、无效引用/路径及只读保持。当前 `solana-integration` 被正确拒绝属于预期，不能为了得到 passed 放宽检查条件。
 
+### 前端测试证据绑定
+
+2026-10-27 新增显式 `--frontend-report PATH`，用于把已有前端离线测试报告与本次交付目录、head 和源码绑定，避免只人工比较 commit。必须同时使用 `--require-clean`，不改变未选择证据检查的默认行为：
+
+```sh
+yarn agent:delivery-check --project-dir /path/to/delivery-checkout --require-clean \
+  --head FEATURE_DELIVERY_BRANCH --expected-base FULL_RELEASE_SHA \
+  --allow-path src/path/to/feature.ts --allow-path src/path/to/feature.spec.ts \
+  --frontend-report /path/to/frontend-offline/run-id/report.json
+```
+
+先在目标干净 checkout 运行[前端离线测试](frontend-offline-tests.md#验证独立-checkout)，再传入本次报告。检查只读取文件并计算指纹，不重新执行测试、不修改原报告。`frontendEvidence.status=passed` 要求：报告 schema/mode 和结果成功；目标绝对路径一致；测试前后源码身份与当前目标完全一致，commit 等于交付 head 且 dirty 为 false；当前工具指纹一致；测试进程及临时目录清理通过；原生 Vitest JSON 中精确选定文件及断言全部通过、无跳过/待办，计数与报告一致。工作区和原有提交历史检查仍必须独立通过，才会整次 passed。
+
+未指定时 `frontendEvidence.status=not-checked`。证据缺失、失败、旧提交、源码或工具变化等返回 blocked / 退出 2，finding 为 `frontend-evidence-invalid`，包含失败阶段及适用的断言说明。无效/缺失原生结果不会被报告中的 passed 字段覆盖；不带 `--require-clean` 或空报告路径也会拒绝。报告输出绑定的路径、testedCommit、源码摘要、suite 与计数。使用绝对报告路径便于跨 CWD 调用，原生 `resultsFile` 必须仍可读取；本入口不自动重定位已搬迁产物，归档包仍按证据包流程独立核验。
+
+这是本机源码与已有结果的一致性检查，不是签名或对抗篡改的证明；覆盖范围沿用前端指纹计划，不覆盖所有安装依赖、静态资源或部署身份。只接受报告所选测试，不判断它们是否充分覆盖需求，也不替代其他验收。工具变化后需重新运行相关测试，不能手改历史指纹。检查后目录或提交变化时仍需重跑；它不锁定工作区。
+
+真实独立 release clone 已验收：目标不含个人工具，原日期 5 项通过后成功绑定；错误目录、旧提交、失败报告、缺失/失败原生结果和旧工具指纹均拒绝。还在临时副本加入 Git 忽略的源码 JSON，HEAD 和 clean 状态不变，但源码摘要变化使旧证据被拒绝；移除后重新通过。只修改文件 mtime 时匹配仍通过，检查前后索引字节不变。实际排查确认 `git diff` 默认自动刷新索引，即使设置 `GIT_OPTIONAL_LOCKS=0` 仍可能写入；工具现显式禁用 `diff.autoRefreshIndex`，工作区文件列表改用禁用可选写入的 NUL porcelain status，避免只禁用 diff 刷新后把纯 mtime 变化误报为内容修改；mtime 场景已加入只读回归。目标 HEAD、索引、原报告与原生结果内容均保持不变；临时 clone 已删除。证据位于本机忽略目录 `.local/acceptance/delivery-check/frontend-evidence/`，`acceptance.json` 汇总、`matched.json` / `restored.json` 为通过报告，其余命名报告保存预期拒绝结果。
+
 ### 基础设施验收记录（2026-10-26）
 
 本轮未创建主仓库分支或改写历史。临时仓库真实历史回归通过；主仓库 `HEAD` 与个人开发基础重合，实际只读检查正确返回 `development-base-history` 并退出 2，清单外文件也明确列出。检查前后主仓库 HEAD、索引和 4,511 个文件内容摘要一致。根类型检查、ESLint、Prettier、71 个文档本地目标及差异检查通过；完整前端单元测试 3,014 项通过、1 项既有跳过。证据保留在忽略目录 `.local/acceptance/delivery-check/`；工具本身仅向 stdout 输出 JSON，归档由调用者显式重定向完成。
