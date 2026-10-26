@@ -4,10 +4,13 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
+import { sourceEvidence } from "./frontend-offline-tests.mjs";
 import { attachApiDiagnostics } from "./lib/agent-browser-diagnostics.mjs";
+import { control } from "./solana-dev.mjs";
 import { API_PREFIX } from "../tools/solana-dev/vite.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -17,11 +20,20 @@ export async function runCli() {
   let diagnostics;
   let stage = "arguments";
   try {
-    const { values } = parseArgs({ options: { "web-port": { type: "string", default: "3010" } } });
+    const { values } = parseArgs({
+      options: { "web-port": { type: "string", default: "3010" }, "project-dir": { type: "string", default: ROOT } },
+    });
     assert.ok(
       /^\d+$/.test(values["web-port"]) && Number(values["web-port"]) > 0 && Number(values["web-port"]) <= 65535
     );
     const origin = `http://127.0.0.1:${values["web-port"]}`;
+    stage = "workspace-identity";
+    const workspace = await control("status", values["project-dir"]);
+    assert.equal(workspace.status, "ready", "The managed workspace must be ready.");
+    assert.equal(workspace.webUrl, origin, "Browser origin must match the managed workspace.");
+    assert.ok(workspace.services.vite && workspace.services.api, "Select both Vite and API for this probe.");
+    const { projectDir } = workspace;
+    const frontendSource = await sourceEvidence(projectDir);
     const output = path.join(ROOT, ".local/acceptance/solana-dev");
     await mkdir(output, { recursive: true });
     runDir = await mkdtemp(path.join(output, "browser-"));
@@ -48,12 +60,17 @@ export async function runCli() {
     assert.ok(result.marketCount > 0);
     assert.equal(result.positions, 200);
     assert.equal(result.invalid, 400);
-    const sourceFiles = ["src/config/api.ts", "sdk/src/configs/api.ts", "gmx-api/src/solanaApp.ts"];
+    const sourceFiles = ["src/config/api.ts", "sdk/src/configs/api.ts"];
     const source = {};
     for (const file of sourceFiles)
       source[file] = createHash("sha256")
-        .update(await readFile(path.join(ROOT, file)))
+        .update(await readFile(path.join(projectDir, file)))
         .digest("hex");
+    source["gmx-api/src/solanaApp.ts"] = createHash("sha256")
+      .update(await readFile(path.join(ROOT, "gmx-api/src/solanaApp.ts")))
+      .digest("hex");
+    const frontendSourceAfter = await sourceEvidence(projectDir);
+    assert.deepEqual(frontendSourceAfter, frontendSource, "Frontend source changed during the browser probe.");
     const report = await diagnostics.save(path.join(runDir, "requests.json"), {
       probeResult: "passed",
       requestSource: "explicit-tool-probe",
@@ -61,7 +78,10 @@ export async function runCli() {
       frontendConsumer: "not-evaluated",
       mode: "sample",
       baseUrl: origin,
-      frontendCommit: execFileSync("git", ["-C", ROOT, "rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
+      projectDir,
+      frontendCommit: frontendSource.commit,
+      frontendSource,
+      frontendSourceAfter,
       apiCommit: execFileSync("git", ["-C", path.join(ROOT, "gmx-api"), "rev-parse", "HEAD"], {
         encoding: "utf8",
       }).trim(),
@@ -76,6 +96,8 @@ export async function runCli() {
       JSON.stringify(
         {
           status: "passed",
+          projectDir,
+          frontendSource,
           ...result,
           requestsFile: path.join(runDir, "requests.json"),
           failureTraceId: failure.traceId,
@@ -86,7 +108,7 @@ export async function runCli() {
       ) + "\n"
     );
     process.stdout.write(
-      `${JSON.stringify({ status: "passed", runDir, failureTraceId: failure.traceId, businessPageAcceptance: "not-run" }, null, 2)}\n`
+      `${JSON.stringify({ status: "passed", projectDir, frontendSource, runDir, failureTraceId: failure.traceId, businessPageAcceptance: "not-run" }, null, 2)}\n`
     );
   } catch {
     if (runDir) {

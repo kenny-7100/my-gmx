@@ -20,6 +20,8 @@ SDK 产物使用[构建产物准备入口](sdk-artifacts.md)：`yarn sdk:artifac
 
 API 离线和隔离数据库测试共用 `scripts/lib/gmx-api-source.mjs` 的 Git 身份读取，显式选择普通 suite 不依赖 Solana 样例文件；独立目录用法与实际验收见[API checkout 测试](solana-api-local.md#在独立-api-checkout-中运行测试)。保留全部源码聚合指纹与网络/清理检查。
 
+持续联调复用 [solana:dev 工作区](solana-dev-workspace.md#独立前端-checkout-的持续联调)：`--project-dir` 同时选择目标 Vite 与控制 socket，不同目标可使用独立端口并存；浏览器探测核对管理地址和实际目标源码身份，报告留在基础设施目录。
+
 ## 统一离线工具回归
 
 2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：
