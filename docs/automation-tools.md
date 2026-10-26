@@ -14,6 +14,35 @@ SDK 产物使用[构建产物准备入口](sdk-artifacts.md)：`yarn sdk:artifac
 
 更新日期：2026-10-25。用户已授权 Agent 在实际协作中主动发现、实现并积累有复用价值的自动化能力，减少重复推理、人工操作、执行时间和成本。
 
+## 统一离线工具回归
+
+2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：
+
+```sh
+yarn test:agent-tools
+# Save the native TAP output when evidence is needed.
+yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
+```
+
+归档前先 `mkdir -p .local/acceptance/agent-tools`。入口直接复用 Node 22 的 `node --import tsx --test --test-concurrency=2` 和现有锁定依赖，不增加框架、测试包装器或依赖版本。原单项 `test:*` 命令继续可用；只验证一个独立工具时可运行原单项命令，修改跨工具共享能力或交接整个基础设施分支时使用统一入口。
+
+| 纳入范围 | 用途 |
+| --- | --- |
+| `scripts/*.test.mjs`、`scripts/*.test.ts` | Agent 钱包公开向量与校验、预检、证据包、验收工作表、API/SDK 工具、断点客户端、分支隔离等已有工具回归 |
+| `scripts/test-eslint-solana-imports.cjs` | 既有 Solana 导入边界规则回归 |
+| `tools/solana-rpc-proxy/proxy.test.mjs` | RPC 代理 handler、方法限制与错误处理回归 |
+| `autotests/regression/ci/*.test.cjs`、`*.test.ts` | 预览 URL 解析与报告摘要等既有 CI 辅助测试 |
+
+路径由 shell 在上述明确目录展开，不递归发现测试、不扫描嵌套参考仓库，不重复执行单项 package 命令。上述目录增加同后缀工具测试时自动纳入；新增其他目录或命名方式时需要显式维护命令，不能认为全仓库测试已覆盖。并发限定为两个测试文件，各文件由 Node 隔离执行，避免调试器、子进程等测试无限并发争用资源。
+
+退出码沿用原生 Node test runner：全部通过为 0，有测试失败或加载错误为非零；TAP 末尾给出 tests/pass/fail/cancelled/skipped/todo 和耗时，报告时保留真实跳过情况。该入口不额外禁止测试显式 skip，新增跳过必须说明，不把测试总数固定成长期验收门槛。
+
+这些现有测试使用公开测试向量、临时目录、临时 Git 仓库、注入的数据源及本地 Node inspector/loopback 监听，不需要真实凭据、钱包余额、Docker 容器或外部服务，也不启动 Vite/浏览器、构建或部署。它不是网络或文件系统沙箱，仍应审查新加入测试的副作用，不允许把真实交易、钱包配置或依赖远端服务的验收加入这个默认入口。
+
+**测试范围区别：** 这里验证工具自身，不执行 `agent:preflight` 的真实 RPC/keeper 检查，不运行真实 API 数据库/HTTP 验收或 Chrome 冒烟。`yarn test:ci` 的前端业务测试、`yarn sdk:test-offline` 的 SDK 原有业务计算测试，以及 regression fixture/funded 测试仍使用各自命令；本入口通过不能代替它们。根据任务选择真实验收，避免重复执行没有变化的检查。
+
+本轮真实结果：27 个文件、85 项全部通过，无失败、取消、跳过或 todo，首轮约 5 秒。已核对目标目录内全部现有测试恰好纳入一次；临时注入一份失败测试后命令正确退出 1，删除后恢复通过。范围及失败证据保留在本机忽略目录 `.local/acceptance/agent-tools/scope-and-failure.json`、`failure-propagation.tap`，正常输出为 `baseline.tap` 和 `final.tap`。数量反映本次版本，后续增加测试应以本次运行结果为准。 工程收尾：根类型检查、package 格式、107 个文档本地目标及差异检查通过；完整前端回归 3,014 项通过、1 项既有跳过，汇总为同目录 `acceptance.json`。
+
 ## 何时沉淀
 
 优先关注实际任务中反复执行、步骤固定、结果可验证的工作，例如资料定位、跨仓库信息汇总、格式转换、接口与数据契约核对、精度对照、静态检查和测试验证辅助。
