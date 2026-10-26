@@ -100,7 +100,7 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 
 已沉淀[Solana 浏览器环境预检](solana-browser-smoke.md#先准备再执行)：`yarn solana:browser-preflight` 将已遇到的缺包、缺浏览器、SDK 产物及测试发现检查前置，输出可归档 JSON 与阶段状态，不启动浏览器或服务。测试入口 `yarn test:solana-browser-preflight`；不将准备通过当页面或需求通过。
 
-已沉淀 [gmx-api Solana 离线计算回归](solana-api-local.md#gmx-api-solana-离线计算回归)：`yarn gmx-api:test-offline` 复用 API 两个既有 suite、fixture 与真实计算代码，使用独立无数据库配置，隔离环境并阻断意外外连；输出版本、12 项测试结果与日志。`yarn test:gmx-api-offline` 验证网络 guard。该 profile 不替代默认数据库集成、HTTP 或实时服务验收。
+已沉淀 [gmx-api Solana 离线计算回归](solana-api-local.md#gmx-api-solana-离线计算回归)：`yarn gmx-api:test-offline` 默认复用 API 两个既有 Solana suite（12 项），支持重复 `--suite src/...test.ts` 精确选择其他离线测试；使用独立无数据库配置、UTC 和环境隔离，阻断意外外连，核对精确执行范围及 API 本地源码依赖摘要。已实测 number 与收益计算两份原测试 59 项通过；`yarn test:gmx-api-offline` 验证网络 guard、结果拒绝组合和源码指纹。该 profile 不替代默认数据库集成、HTTP 或实时服务验收。
 
 已沉淀 [gmx-api 隔离 PostgreSQL 集成测试](solana-api-local.md#gmx-api-隔离-postgresql-集成测试)：`yarn gmx-api:test-integration` 使用本地 postgres:15 镜像建立专属临时容器，复用原有 Jest 配置、迁移和数据库 setup/teardown，默认运行两个既有 suite / 5 项测试，可重复传入 `--suite` 指定其他 API 测试（已验证迁移/市场模型 11 项）；校验路径并固定 UTC，保留实际范围、版本和日志，成功或测试失败均清理所属容器。要求本地 Docker，不自动拉镜像，不接触已有数据库，不代表完整 API 或真实数据验收。
 
