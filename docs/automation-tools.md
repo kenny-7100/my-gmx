@@ -2,6 +2,8 @@
 
 全栈联调优先复用 [Agent Solana 工作区](solana-dev-workspace.md)：`yarn solana:dev` 管理选定 API/Vite/RPC 及开发代理，`solana:dev:browser` 与 trace 查询关联真实请求，contracts 提供来源固定的未评审样例形状检查。借用服务不被 stop 清理，业务消费和 reviewed contract 缺口明确报告；仅属个人开发基础，不进入上游业务交付。
 
+API 源码调试使用既有持续服务上的[断点验收入口](solana-api-local.md#agent-可重复的源码断点验收)：`yarn solana:api-debug` 自动验证真实 inspector、TypeScript 映射、请求断点、限定局部变量与恢复结果；默认启动并清理所属服务，`--attach` 保留借用服务。回归命令为 `yarn test:solana-api-debug`，使用真实隔离 Node inspector，不改业务源码。
+
 更新日期：2026-10-25。用户已授权 Agent 在实际协作中主动发现、实现并积累有复用价值的自动化能力，减少重复推理、人工操作、执行时间和成本。
 
 ## 何时沉淀
