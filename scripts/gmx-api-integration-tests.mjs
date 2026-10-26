@@ -147,6 +147,8 @@ export async function runIntegrationTests(apiDir, requested) {
     }
     assert.ok(ready && !stopped, "Database did not become ready.");
     await symlink(path.join(apiDir, "migrations"), path.join(cwd, "migrations"), "dir");
+    await mkdir(path.join(cwd, "src"));
+    await symlink(path.join(apiDir, "src/abi"), path.join(cwd, "src/abi"), "dir");
     const fd = openSync(logFile, "wx", 0o600);
     try {
       child = spawn(
