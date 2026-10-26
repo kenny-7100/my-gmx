@@ -4,7 +4,7 @@
 
 ## 执行前的环境检查与顺序
 
-需要同时运行前端/API/RPC 时，按[全栈工作区说明](solana-dev-workspace.md)使用 `yarn solana:dev up/status/logs/stop`，核对所选服务及 borrowed/owned 归属。持续调试独立前端 checkout 时，按同一说明显式传 `--project-dir PATH`，为目标选择空闲 Vite 端口；同时联调 API 功能分支时，up 显式加 `--api-dir PATH --api-port PORT`，先按同一说明确认 API 自身前置和服务启动授权，核对路径及 PID。status/logs/stop 和浏览器诊断也传同一前端目录，核对报告的目标身份，不误用基础设施目录的既有工作区。浏览器请求问题使用 `solana:dev:browser` 和 `solana:dev trace --id`；contracts 的 partial 不当作完整通过。当前前端未消费开发代理路径，不为环境验收补业务接入。仅需 API 时仍使用下文的独立 API 入口。
+需要同时运行前端/API/RPC 时，按[全栈工作区说明](solana-dev-workspace.md)使用 `yarn solana:dev up/status/logs/stop`，核对所选服务及 borrowed/owned 归属。新启动持续工作区前，先按[组合预检](solana-dev-workspace.md#启动前的组合预检)用相同目录/服务/端口运行 `yarn solana:dev doctor`，一次处理依赖、Chrome 和占用缺项；已运行工作区的健康用 status，不为 doctor 自动停服。一次性 `solana:dev:check` 已内置同一预检，无需重复。持续调试独立前端 checkout 时，按同一说明显式传 `--project-dir PATH`，为目标选择空闲 Vite 端口；同时联调 API 功能分支时，up 显式加 `--api-dir PATH --api-port PORT`，先按同一说明确认 API 自身前置和服务启动授权，核对路径及 PID。status/logs/stop 和浏览器诊断也传同一前端目录，核对报告的目标身份，不误用基础设施目录的既有工作区。浏览器请求问题使用 `solana:dev:browser` 和 `solana:dev trace --id`；contracts 的 partial 不当作完整通过。当前前端未消费开发代理路径，不为环境验收补业务接入。仅需 API 时仍使用下文的独立 API 入口。
 
 本节用于安排当前任务已获授权的检查，不要求每次任务运行所有命令。用户已长期授权本地 Vite、Chrome 及已授权任务所需的本地页面验收；构建（含 SDK 构建）、其他服务及部署仍须遵循根 `AGENTS.md` 的授权边界；用户仅要求 `push` 时直接执行推送流程，不插入本节检查。纯文档修改只检查文档路径、链接及差异。
 
