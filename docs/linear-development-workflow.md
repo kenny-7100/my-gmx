@@ -82,6 +82,30 @@ SDK 复用前端的原生结果与源码一致性校验：目标路径为本次 
 
 真实 `origin/release` 临时 clone 已验收：目标没有个人工具，SDK 原 BigMath 6 项通过后成功绑定；同时传入真实前端日期 5 项报告也通过。错误目录、旧工具、失败报告、缺失/失败原生结果均拒绝；Git 忽略的源码变化即使 HEAD 和 clean 状态不变也拒绝，恢复后通过。实际新增 SDK 源码提交后，旧报告在工作区 clean 的情况下被拒绝。通过及负面检查前后 HEAD、索引字节、原报告与原生结果内容保持一致；临时 clone 已删除。隔离验收显式链接现有依赖，没有执行全新安装。证据在忽略目录 `.local/acceptance/delivery-check/sdk-evidence/acceptance.json`，`combined.json` 保存双报告通过结果。 统一工具回归 95 项、SDK 默认 153 项、类型检查、前端 3,014 项（另 1 项既有跳过）、脚本静态检查及 128 个文档本地目标检查均通过。
 
+### 浏览器测试证据绑定
+
+2026-10-27 新增 `--browser-report PATH`，将[独立 checkout 浏览器冒烟](solana-browser-smoke.md#验证独立功能-checkout)的实际结果与当前交付版本绑定。先在干净目标目录完成页面测试，再从基础设施目录执行：
+
+```sh
+yarn solana:browser-check --project-dir /path/to/delivery-checkout --port 3016
+yarn agent:delivery-check --project-dir /path/to/delivery-checkout --require-clean \
+  --head FEATURE_DELIVERY_BRANCH --expected-base FULL_RELEASE_SHA \
+  --allow-path src/path/to/feature.ts \
+  --browser-report /path/to/solana-browser/managed-id/report.json
+```
+
+必须同时使用 `--require-clean`；可与 `--frontend-report`、`--sdk-report` 同时传入，逐项独立检查，任一无效即整次 blocked / 退出 2。未选择时 `browserEvidence.status=not-checked`。工具只读取文件并计算当前指纹，不启动浏览器、服务、网络探测或测试发现，不重跑页面用例，不安装或构建。
+
+检查要求浏览器报告 schema/scope 正确且 passed；目标绝对路径一致；`targetBefore/targetAfter` 与当前目录、源码、commit/dirty、Vite/SDK 运行时和资产证据完全一致，commit 为交付 head，工作区 clean。工具指纹由浏览器入口和交付检查共用，前后摘要必须与当前工具一致。读取报告引用的预检文件以取得本次本地运行时计划，并重新核对目标与基础设施的真实配置和 JS/WASM 字节；缺文件、损坏或不兼容明确拒绝。
+
+原生 Playwright JSON 必须仍可读取：只接受 loopback 目标下原有两项 `network.spec.ts` 的实际通过执行，无跳过、重试、runner error 或异常退出；统计及 checkout 元数据与汇总一致，原生元数据路径/commit/dirty 也须匹配当前交付目录。服务清理必须为 `port-released`。只有汇总 passed、只有测试发现结果或失败后残留的成功原生结果都不能通过。
+
+成功输出 `browserEvidence` 的 reportFile、testedCommit、sourceSha256、runtime 和 stats；无效证据 finding 为 `browser-evidence-invalid`，包含失败阶段及适用的断言说明。报告、预检和原生结果路径均须可读取；归档搬迁不在此入口自动重定位。旧工具报告需重跑浏览器测试，不手改摘要。
+
+本项只核对两项既有页面冒烟证据与当前交付身份，不证明需求充分覆盖、全部外部服务可用或完整环境一致；也不是签名或原子快照。沿用浏览器入口的源码和资产范围，CSS、其他静态资源及完整依赖树不在该指纹计划内。检查后目录变化须重新验收，不能以交付检查 passed 替代业务验收。
+
+真实本地 `origin/release` 临时 clone 已验收：目标不含个人工具，原有两项网络选择用例在真实 Chrome 中通过后成功绑定；同时传入前端日期 5 项、SDK BigMath 6 项报告也通过。错误目录、旧工具、失败报告、缺失/失败原生结果和清理失败均拒绝；Git 忽略的源码变化在 HEAD/clean 不变时被拒绝，恢复后通过；实际新增源码提交后，旧报告在 clean 状态下仍拒绝。检查前后 HEAD、索引字节、原报告及原生结果保持一致，临时 clone 已删除。本轮隔离验收显式复用已安装依赖和准备资源，没有执行全新安装或构建。证据在忽略的 `.local/acceptance/delivery-check/browser-evidence/acceptance.json`，`combined.json` 保存三类报告共同通过结果。 本轮统一工具测试 96 项、根类型检查、相关脚本静态检查及 134 个文档本地目标检查通过；全量前端回归 3,014 项通过、1 项既有跳过。
+
 ### 基础设施验收记录（2026-10-26）
 
 本轮未创建主仓库分支或改写历史。临时仓库真实历史回归通过；主仓库 `HEAD` 与个人开发基础重合，实际只读检查正确返回 `development-base-history` 并退出 2，清单外文件也明确列出。检查前后主仓库 HEAD、索引和 4,511 个文件内容摘要一致。根类型检查、ESLint、Prettier、71 个文档本地目标及差异检查通过；完整前端单元测试 3,014 项通过、1 项既有跳过。证据保留在忽略目录 `.local/acceptance/delivery-check/`；工具本身仅向 stdout 输出 JSON，归档由调用者显式重定向完成。

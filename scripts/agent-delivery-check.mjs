@@ -14,6 +14,7 @@ import {
   sourceEvidence as sdkSourceEvidence,
   targetRuntime,
 } from "./sdk-offline-tests.mjs";
+import { browserTarget, browserToolHashes, passedBrowserResults } from "./solana-browser-check.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 
@@ -89,6 +90,39 @@ export function validateSdkEvidence(options) {
   assert.deepEqual(options.evidence.runtime, options.runtime, "SDK runtime changed since testing");
 }
 
+export function validateBrowserEvidence({ evidence, target, projectDir, head, toolSha256, results }) {
+  assert.equal(evidence.schemaVersion, 1, "Unsupported browser report schema");
+  assert.equal(evidence.scope, "solana-managed-browser-smoke", "Expected a managed browser report");
+  assert.equal(evidence.status, "passed", "Browser report did not pass");
+  assert.equal(evidence.projectDir, projectDir, "Browser report targets another checkout");
+  assert.equal(target.projectDir, projectDir, "Current browser target is another checkout");
+  assert.equal(target.source.commit, head, "Current browser target does not match delivery head");
+  assert.equal(target.source.dirty, false, "Current browser target is dirty");
+  assert.deepEqual(evidence.targetBefore, target, "Tested browser target does not match current checkout");
+  assert.deepEqual(evidence.targetAfter, target, "Final browser target does not match current checkout");
+  assert.deepEqual(evidence.sourceBefore, toolSha256, "Browser tools changed since testing");
+  assert.deepEqual(evidence.sourceAfter, toolSha256, "Final browser tools do not match current tools");
+  assert.equal(evidence.serviceCleanup, "port-released", "Browser service cleanup did not pass");
+  const url = new URL(evidence.baseUrl);
+  assert.ok(
+    url.protocol === "http:" &&
+      url.hostname === "127.0.0.1" &&
+      url.port &&
+      url.pathname === "/" &&
+      !url.username &&
+      !url.password &&
+      !url.search &&
+      !url.hash,
+    "Expected a local browser target URL"
+  );
+  assert.ok(passedBrowserResults(results, evidence.baseUrl, evidence.exit), "Native browser results did not pass");
+  assert.deepEqual(evidence.stats, results.stats, "Browser statistics do not match native results");
+  assert.deepEqual(evidence.checkout, results.config.metadata, "Browser metadata does not match native results");
+  assert.equal(results.config.metadata.projectDir, projectDir, "Native browser metadata targets another checkout");
+  assert.equal(results.config.metadata.checkoutCommit, head, "Native browser metadata targets another commit");
+  assert.equal(results.config.metadata.checkoutDirty, false, "Native browser metadata records a dirty checkout");
+}
+
 export async function checkDelivery({
   cwd = ROOT,
   base = "origin/release",
@@ -99,6 +133,7 @@ export async function checkDelivery({
   requireClean = false,
   frontendReport,
   sdkReport,
+  browserReport,
 }) {
   assert.ok(
     frontendReport === undefined || (typeof frontendReport === "string" && frontendReport.length > 0),
@@ -110,6 +145,11 @@ export async function checkDelivery({
     "Use a nonempty SDK report path"
   );
   assert.ok(sdkReport === undefined || requireClean, "--sdk-report requires --require-clean");
+  assert.ok(
+    browserReport === undefined || (typeof browserReport === "string" && browserReport.length > 0),
+    "Use a nonempty browser report path"
+  );
+  assert.ok(browserReport === undefined || requireClean, "--browser-report requires --require-clean");
   assert.ok(typeof head === "string" && head.length > 0, "An explicit --head ref is required");
   assert.ok(Array.isArray(allowPaths) && allowPaths.length > 0, "At least one explicit --allow-path is required");
   for (const file of allowPaths) {
@@ -142,6 +182,7 @@ export async function checkDelivery({
     worktree: { status: "not-checked" },
     frontendEvidence: { status: "not-checked" },
     sdkEvidence: { status: "not-checked" },
+    browserEvidence: { status: "not-checked" },
     refs: {
       base: { ref: base, sha: baseSha },
       developmentBase: { ref: developmentBase, sha: developmentSha },
@@ -250,6 +291,45 @@ export async function checkDelivery({
       });
     }
   }
+  if (browserReport !== undefined) {
+    const reportFile = path.resolve(browserReport);
+    let stage = "report";
+    report.browserEvidence = { status: "blocked", reportFile };
+    try {
+      const evidence = JSON.parse(await readFile(reportFile, "utf8"));
+      stage = "native-results";
+      const results = JSON.parse(await readFile(evidence.resultsFile, "utf8"));
+      stage = "preflight";
+      const preparation = JSON.parse(await readFile(evidence.preflightFile, "utf8"));
+      assert.equal(preparation.status, "passed", "Browser prerequisites did not pass");
+      assert.equal(preparation.runtime.scope, "local-artifacts", "Expected local runtime evidence");
+      assert.equal(preparation.runtime.chain.code, "local-only", "Expected local-only runtime evidence");
+      stage = "source-and-results";
+      const target = await browserTarget(cwd, preparation.runtime.local);
+      validateBrowserEvidence({
+        evidence,
+        target,
+        projectDir: cwd,
+        head: headSha,
+        toolSha256: await browserToolHashes(),
+        results,
+      });
+      report.browserEvidence = {
+        status: "passed",
+        reportFile,
+        testedCommit: target.source.commit,
+        sourceSha256: target.source.sourceSha256,
+        runtime: target.runtime,
+        stats: evidence.stats,
+      };
+    } catch (error) {
+      report.findings.push({
+        code: "browser-evidence-invalid",
+        stage,
+        ...(error.code === "ERR_ASSERTION" ? { message: error.message.split("\n")[0].slice(0, 240) } : {}),
+      });
+    }
+  }
   report.status = report.findings.length ? "blocked" : "passed";
   return report;
 }
@@ -262,6 +342,7 @@ async function runCli() {
         "require-clean": { type: "boolean", default: false },
         "frontend-report": { type: "string" },
         "sdk-report": { type: "string" },
+        "browser-report": { type: "string" },
         base: { type: "string", default: "origin/release" },
         "development-base": { type: "string", default: "solana-integration" },
         head: { type: "string" },
@@ -272,7 +353,7 @@ async function runCli() {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--project-dir PATH] [--require-clean] [--frontend-report PATH] [--sdk-report PATH] [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. --require-clean also checks checkout HEAD, index, working files and untracked paths. Does not fetch refs or assess business correctness.\n"
+        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--project-dir PATH] [--require-clean] [--frontend-report PATH] [--sdk-report PATH] [--browser-report PATH] [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. --require-clean also checks checkout HEAD, index, working files and untracked paths. Does not fetch refs or assess business correctness.\n"
       );
       return;
     }
@@ -281,6 +362,7 @@ async function runCli() {
       requireClean: values["require-clean"],
       frontendReport: values["frontend-report"],
       sdkReport: values["sdk-report"],
+      browserReport: values["browser-report"],
       base: values.base,
       developmentBase: values["development-base"],
       head: values.head,

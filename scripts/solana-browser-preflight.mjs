@@ -113,6 +113,23 @@ export async function preflight({
     : checks.every((item) => item.status === "passed")
       ? "passed"
       : "blocked";
+  const sha256 = await browserPreflightHashes();
+  return {
+    status,
+    scope: "solana-browser-prerequisites",
+    checkedAt: new Date().toISOString(),
+    checks,
+    discovery,
+    runtime,
+    source: { sha256 },
+    nodeVersion: process.version,
+    browserExecution: "not-run",
+    serverReadiness: "not-evaluated",
+    requirementAcceptance: "not-evaluated",
+  };
+}
+
+export async function browserPreflightHashes() {
   const files = [
     "scripts/solana-browser-preflight.mjs",
     "playwright-solana-readonly.config.ts",
@@ -128,19 +145,7 @@ export async function preflight({
     sha256[file] = createHash("sha256")
       .update(await readFile(path.join(ROOT, file)))
       .digest("hex");
-  return {
-    status,
-    scope: "solana-browser-prerequisites",
-    checkedAt: new Date().toISOString(),
-    checks,
-    discovery,
-    runtime,
-    source: { sha256 },
-    nodeVersion: process.version,
-    browserExecution: "not-run",
-    serverReadiness: "not-evaluated",
-    requirementAcceptance: "not-evaluated",
-  };
+  return sha256;
 }
 
 export async function runCli({ args = process.argv.slice(2), stdout = process.stdout, runner = preflight } = {}) {
