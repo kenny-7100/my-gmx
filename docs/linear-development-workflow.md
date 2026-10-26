@@ -61,6 +61,8 @@ yarn agent:delivery-check --project-dir /path/to/delivery-checkout --require-cle
 
 前端及 SDK 离线报告还须通过运行器侧网络审计：`network.status=passed`、安装数等于所选文件数、拒绝次数为 0。交付检查重新读取 `network.eventsFile`，将原始事件与报告汇总比较；事件文件缺失或追加拒绝事件均 blocked。保留事件日志和原生结果一起交接，原生 success 不能覆盖网络审计失败。
 
+前端与 SDK 报告还必须记录 `toolingUnchanged=true`，且 `toolSha256` / `toolSha256After` 均等于当前工具指纹。执行中工具变化、缺少复核标识或最终指纹均拒绝；历史报告使用当前工具重跑，不复制字段。实际工具漂移复现与双报告通过、8 种字段异常拒绝验收见[工具指纹说明](frontend-offline-tests.md#结束时核对工具指纹)。该检查沿用原摘要范围，不证明完整依赖安装或对抗篡改。
+
 ### SDK 测试证据绑定
 
 2026-10-27 新增 `--sdk-report PATH`，将[SDK 离线测试](sdk-offline-tests.md#独立交付目录验收)报告与交付 checkout 的 `sdk/`、交付 head 和当前源码绑定。先在目标干净目录完成测试，再从基础设施目录运行：

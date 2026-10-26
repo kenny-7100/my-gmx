@@ -105,6 +105,8 @@ yarn sdk:test-offline --suite src/utils/__tests__/bigmath.spec.ts --inspect-port
 
 ## 隔离与结果
 
+成功前同时核对[结束时工具指纹](frontend-offline-tests.md#结束时核对工具指纹)：`toolingUnchanged=true`，`toolSha256After` 与开始时 `toolSha256` 相同。执行期间工具发生变化，即使原生断言通过也失败；先等工具版本稳定再重跑。交付检查同时比较前后及当前工具，缺少此证据的历史报告需重新生成，不手补字段。源码、工具和网络检查各自保留，不以其中一项通过代替其余项。
+
 结束时同时核对[共享网络审计](frontend-offline-tests.md#结束时核对网络审计)：`network.status=passed`、安装数等于所选文件数、拒绝次数为 0。运行器独立读取 `network-events.log`，捕获异常或更晚的 hook 不得让原生通过结果绕过验收；日志路径在安装时固定，测试修改环境变量不会停用记录。交付时保留该事件文件，delivery-check 会重新读取并比较报告。
 
 - [工具配置](../tools/sdk-offline/vitest.config.mjs) 加载原 `sdk/vitest.config.ts`，保留原源码别名和排除规则，精确限制 include 为所选文件；无需 `sdk/build`。不改生产 SDK 配置，不执行构建、安装或 Git 写操作。
