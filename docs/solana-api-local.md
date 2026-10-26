@@ -160,7 +160,7 @@ node ../scripts/gmx-api-integration-tests.mjs --api-dir .
 
 依赖 Node 22、API 已安装的锁定依赖、可用的本地 Docker Unix socket context，以及本地 `postgres:15` 镜像。预检发现缺项时返回退出 1，不自动下载镜像、安装工具或连接替代数据库；需要资源所有者准备后重跑。当前实现面向本机 macOS/Linux Docker context，不接受远端 TCP daemon。
 
-每次使用镜像实际 ID 创建带唯一 owner label 的专属容器，PostgreSQL 数据位于 tmpfs；容器只映射到 `127.0.0.1` 随机端口，并使用本次随机密码。工具不接受外部数据库连接参数，也不复用已有数据库。容器就绪后，在临时空工作目录执行 API **原有** `jest.config.ts`、globalSetup、setup 与 teardown，通过临时 migrations 链接及 APP_ROOT 定位原有源码。仅运行：
+每次使用镜像实际 ID 创建带唯一 owner label 的专属容器，PostgreSQL 数据位于 tmpfs；容器只映射到 `127.0.0.1` 随机端口，并使用本次随机密码。工具不接受外部数据库连接参数，也不复用已有数据库。容器就绪后，在临时空工作目录执行 API **原有** `jest.config.ts`、globalSetup、setup 与 teardown，通过临时 migrations 链接及 APP_ROOT 定位原有源码。默认运行：
 
 | 原有测试 | 验证范围 |
 | --- | --- |
@@ -171,7 +171,35 @@ node ../scripts/gmx-api-integration-tests.mjs --api-dir .
 
 执行串行测试，关闭原有失败重试，整个 Jest 进程限时 180 秒；数据库就绪等待约 30 秒。沿用 API 原有 `--forceExit` 选项，因此不声称证明了 API 全部连接/定时器能自然退出；所属容器和临时目录清理由工具 finally 单独处理。正常结束或测试失败后，只删除 owner label 匹配的本次容器及其匿名卷，并检查容器已不存在。清理失败会让整次验收失败，报告中的 container ID 可用于定位，不删除其他容器或运行 Docker prune。
 
-stdout JSON 的 `mode` 为 `isolated-postgres-integration`，包括 API commit/dirty、原有 Jest/DB setup/选定测试及迁移文件摘要、镜像 ID、随机端口、测试数量和 cleanup。只有两个 suite 全部通过、无 skip/todo、退出 0、源码未变化且清理成功，才报告 passed。前置条件不足在 stderr 报告固定错误；实际测试失败仍输出带日志位置的失败报告。连接密码不写入工具报告。
+stdout JSON 的 `mode` 为 `isolated-postgres-integration`，包括 API commit/dirty、原有 Jest/DB setup/选定测试及迁移文件摘要、镜像 ID、随机端口、测试数量和 cleanup。只有所有选定 suite 全部通过、无 skip/todo、退出 0、源码未变化且清理成功，才报告 passed。前置条件不足在 stderr 报告固定错误；实际测试失败仍输出带日志位置的失败报告。连接密码不写入工具报告。
+
+### 按需求选择测试文件
+
+默认范围不变；需要验证其他 API 模块时，重复传入 `--suite`，文件路径相对于 `--api-dir` 指定的 API checkout：
+
+```sh
+yarn gmx-api:test-integration --suite src/lib/__test__/db.test.ts --suite src/domain/market/marketModel.test.ts
+```
+
+只执行实际选定文件，不自动追加默认两个 suite。文件必须是 API `src/` 内现有的 `.test.ts` 普通文件；绝对路径、越界路径、指向仓库外的符号链接、重复文件、目录、通配符及不存在文件都拒绝。校验在 Docker 操作前完成，错误退出 1，stderr 错误码为 `invalid-test-selection`。测试选择回归为 `yarn test:gmx-api-integration`，不依赖 Docker。
+
+报告的 `suites`、测试计数及选定测试文件摘要随实际范围变化。每个自定义 suite 仍执行 API 原有数据库 setup/teardown；选得少不代表其他模块通过。其他 suite 可能还需代码生成或独立外部资源，路径校验通过不代表其依赖齐全；缺资源应明确处理，不通过修改断言、跳过测试或替代服务绕过。总超时仍为 180 秒，按本次需求选择范围。
+
+### 时区前置与排障经验
+
+2026-10-26 首次扩展市场模型测试时，本机 Asia/Shanghai 环境出现两项时间戳往返偏移 8 小时：预期 `2026-06-03T12:00:00.000Z`，实际 `2026-06-03T20:00:00.000Z`。保持业务代码与断言不变，仅将 Jest 子进程固定 `TZ=UTC` 后，数据库迁移及市场模型 11 项全部通过。工具现已显式固定 Node 测试进程和临时 PostgreSQL 为 UTC，并在报告输出 `timezone: UTC`；不会改变宿主机器时区或用户配置。
+
+以后数据库时间戳断言失败时，先检查报告时区和实际存取值，再定位代码；不要立即重写断言或调整业务时间计算。这是可重复的 UTC 测试环境，不代表已经修复或验收业务在非 UTC 运行环境下的时间戳行为。初次失败记录 `integration-selected.json` 与最终 `integration-selected-utc.json` 均保留于本机证据目录。`db.test.ts` 会故意触发迁移未完成并断言退出行为，日志中的对应 FATAL 是该用例的预期输出；判断本次结果应查看 Jest 断言、退出码和结构化报告，不仅按日志级别判断。
+
+| 2026-10-26 按需范围扩展 | 状态 |
+| --- | --- |
+| 自定义真实测试 | 已通过；迁移与市场模型 2 个 suite / 11 项，无跳过 |
+| 默认范围回归 | 已通过最终复验；2 个 suite / 5 项，无跳过 |
+| 路径约束 | 已通过；8 类无效选择与有效顺序/归一化的自动回归，非法 CLI 在创建容器前失败 |
+| 自定义失败与清理 | 已通过；临时副本只执行指定测试，断言失败退出 1，仍清理容器；父进程 Asia/Shanghai 不影响子进程 UTC |
+| 静态检查与交接 | 已通过；路径回归、Node 语法、ESLint、Prettier、yarn tscheck、文档链接及 git diff --check；未重跑完整 API/前端测试 |
+
+自定义失败演练摘要为同目录 `integration-selection-acceptance.json`；临时副本已清理。该扩展复用原运行器，不增加新数据库服务或修改 API 文件。
 
 日志、原始 Jest 结果及报告保留在 `.local/acceptance/solana-api-local/integration-*/`。入口为 `scripts/gmx-api-integration-tests.mjs`。本机最终报告为 `integration-latest.json`，失败与隔离验收摘要为 `integration-acceptance.json`，均在同一忽略目录，不随 Git 共享。
 
