@@ -18,6 +18,23 @@ yarn frontend:test-offline --suite src/lib/dates.spec.ts --suite src/domain/gmso
 
 支持 `src/` 或 `landing/` 下真实存在的 `.spec` / `.test` 文件（JS/JSX/TS/TSX）。拒绝重复、缺失、glob、绝对路径、目录及越界符号链接；原 Vite exclude 继续有效，被排除或空文件不能通过。只运行明确选定的文件，不递归发现参考仓库。需要真实浏览器、外部服务或业务集成时使用相应验收环境。
 
+## 验证独立 checkout
+
+工具默认验证所在主仓库，也支持显式指定另一个前端 checkout。这样可在不把个人基础设施复制进交付分支的情况下验证独立交付源码：
+
+```sh
+# Run from the infrastructure checkout
+yarn frontend:test-offline --project-dir /path/to/delivery-checkout --suite src/lib/dates.spec.ts
+# Or invoke the infrastructure script by absolute path from any working directory
+node /path/to/infrastructure/scripts/frontend-offline-tests.mjs --project-dir /path/to/delivery-checkout --suite src/lib/dates.spec.ts
+```
+
+目标必须是前端 Git checkout 的根目录，并已有完整源码和安装好的锁定依赖；运行器不创建分支、不 fetch、不安装依赖，不自动链接或借用基础设施 checkout 的 node_modules。目标的已安装 Vite/Vitest 版本必须与工具运行时一致，否则在执行前明确失败；其他依赖仍按目标自己的锁文件准备，不用版本检查代替完整依赖安装验证。目标没有默认 suite 时需显式选择实际存在的测试。
+
+所选测试、原 Vite 配置、setup/global setup、Lingui 配置、PWA HEAD 时间、node_modules 链接来源、Vitest 可执行文件和源码/Git 指纹均来自 `--project-dir`。配置编排与网络保护仍来自基础设施工具；报告和日志始终写入基础设施 checkout 的 `.local/acceptance/frontend-offline/`，记录规范化 `projectDir`、目标 commit/dirty、源码摘要和 `runtime` 版本。可同时使用 `--inspect-port`，断点应指向目标目录中的源码。不同 checkout 的原配置与依赖变化可能导致明确失败，不承诺任意历史版本兼容。
+
+跨 checkout 的 Vite 文件访问范围显式包含目标源码、目标依赖的真实目录及工具初始化目录，防止外部 Worker/setup 被拒绝。目标目录不会写入工具、报告或 Vite 缓存，隔离临时目录仍按既有流程清理。本能力只执行所选测试，不替代[交付隔离检查](linear-development-workflow.md#交付隔离自动检查)、最新上游核对或整项需求验收。
+
 ## 源码断点调试
 
 需要查看前端模块的实际参数和调用栈时，显式选择一份原有 suite：
@@ -41,7 +58,7 @@ yarn frontend:test-offline --suite src/lib/pwa/appUpdateDecision.spec.ts --inspe
 - Vitest 在临时工作目录运行，Vite `envDir` 和缓存也指向该目录；环境仅传必要 PATH、测试标识、工具参数和下述明确配置，不继承调用方的钱包、数据库、`NODE_OPTIONS` 或 `VITE_*` 变量，不加载主仓库 `.env` 文件。
 - 复用原 `vite.config.ts` 的别名、插件、happy-dom、`src/lib/polyfills.ts`、`@vitest/web-worker` 和 `vitest.global-setup.js`。后者的 `Asia/Dubai` 测试时区保持原状；不擅自改为 UTC。
 - 从隔离 CWD 启动时，除配置中的 root 外，必须显式传 Vitest CLI `--root`，否则现有初始化模块可能解析为无法加载的 `/src/...`。初始化文件转为明确绝对路径；保留原执行内容与顺序，最后安装联网保护。
-- 原 PWA 标识会在 CWD 调用 Git，Lingui/Babel 也依赖配置和包定位。入口从当前仓库 HEAD 时间戳计算与原逻辑相同的 PWA generation，显式指向原 `.linguirc`，在临时目录链接已安装的 `node_modules`；不安装依赖、不复制配置、不修改构建流程。临时目录清理只删除链接，不删除真实依赖。
+- 原 PWA 标识会在 CWD 调用 Git，Lingui/Babel 也依赖配置和包定位。入口从当前仓库 HEAD 时间戳计算与原逻辑相同的 PWA generation，显式指向原 `.linguirc`，在临时目录链接所选 checkout 已安装的 `node_modules`；不安装依赖、不复制配置、不修改构建流程。临时目录清理只删除链接，不删除真实依赖。
 - 网络保护在测试 setup 后阻止常见 Node fetch、HTTP/HTTPS、socket、TLS、HTTP/2、UDP 和 DNS；文件结束时核对尝试次数，即使测试捕获异常也失败。测试可以继续使用原有 mock 数据源，不能为了通过而关闭保护。
 
 该机制用于防止意外读取默认环境和意外外连，不是恶意代码沙箱：可信插件与原配置在 setup 前加载，测试仍能主动读文件、另起进程或改写保护。不得把真实凭据或依赖外部服务的测试放入默认范围。
@@ -64,3 +81,6 @@ stdout 输出 JSON，退出 0 要求：正常退出、原生 success、精确的
 
 
 2026-10-27 调试验收：原有 PWA suite 中真实命中两次源码断点，分别读取无新版本与新版本 `200` 输入，source map 与磁盘一致，调用栈包含原测试；恢复后 9 项通过。暂停时核对原 `Asia/Dubai`、document、Worker、Promise polyfill、网络保护及环境隔离均保留。等待连接时 SIGTERM 正确失败，所属进程、端口、临时目录清理完成；非法端口、多 suite 与占用端口均拒绝，占用服务保留。普通默认三文件 17 项及统一工具 92 项通过，未改动业务源码、原测试或 Vite 配置。证据在本机忽略目录 `.local/acceptance/frontend-offline/debug-{acceptance,negative,default-compatibility}.json` 和 `debug-tools.tap`。
+
+
+2026-10-27 独立 checkout 验收：从本地 `origin/release` 固定 SHA `8ef82eb8a465b2045f73805a66941bf7f836630d` 创建临时独立 clone，确认其中没有本工具；锁文件逐字相同后由验收脚本显式链接本机已有依赖，仅用于本次环境准备。原日期 suite 5 项通过，报告目标身份正确且 checkout 保持 clean；仅在临时副本中修改一条断言后准确失败 1 项，证明没有执行开发目录的同名测试。副本随后删除，未变更主仓库分支或实际业务源码。缺目录、缺目标依赖、不兼容运行时回归均明确失败。独立 checkout 证据位于本机忽略目录 `.local/acceptance/frontend-offline/checkout-task/{acceptance,passed,failed}.json`。
