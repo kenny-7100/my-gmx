@@ -12,6 +12,7 @@ import { promisify } from "node:util";
 import { parseArgs } from "node:util";
 
 import { runTestProcess } from "./lib/agent-test-process.mjs";
+import { sourceInputs } from "./lib/gmx-api-source.mjs";
 import { readApiSource } from "./solana-api-local.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -92,6 +93,7 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
   }
   const evidence = await readTestSource(apiDir, suites);
+  const sourceBefore = await sourceInputs(apiDir);
   for (const file of ["node_modules/jest/bin/jest.js", "jest.config.ts", "tsconfig.knex.json", ...suites]) {
     await access(path.join(apiDir, file));
   }
@@ -248,7 +250,9 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     result = undefined;
   }
   const after = await readTestSource(apiDir, suites);
-  const unchanged = JSON.stringify(after) === JSON.stringify(evidence);
+  const sourceAfter = await sourceInputs(apiDir);
+  const unchanged =
+    JSON.stringify(after) === JSON.stringify(evidence) && JSON.stringify(sourceAfter) === JSON.stringify(sourceBefore);
   const passed =
     (!debug || debug.started) &&
     !errorCode &&
@@ -275,6 +279,8 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     checkedAt: new Date().toISOString(),
     temporaryDirectory: cwd,
     source: evidence,
+    sourceInputs: sourceBefore,
+    sourceInputsAfter: sourceAfter,
     sourceUnchanged: unchanged,
     suites,
     database: { image: image.Id, container, host: "127.0.0.1", port, ephemeral: true },
