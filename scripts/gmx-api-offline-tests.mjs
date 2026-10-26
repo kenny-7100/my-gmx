@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { openSync, closeSync } from "node:fs";
-import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -11,7 +11,10 @@ import { parseArgs } from "node:util";
 
 import { resolveSuites } from "./gmx-api-integration-tests.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
+import { sourceInputs } from "./lib/gmx-api-source.mjs";
 import { readApiSource } from "./solana-api-local.mjs";
+
+export { sourceInputs } from "./lib/gmx-api-source.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const SUITES = ["src/domain/gmtrade/marketStatus.test.ts", "src/domain/pairs/solanaPairsRows.test.ts"];
@@ -22,30 +25,6 @@ const INPUTS = [
   "src/domain/gmtrade/__fixtures__/gmtrade-markets-2026-10-06.json",
   "src/domain/pairs/solanaPairsRows.ts",
 ];
-
-export async function sourceInputs(apiDir) {
-  const files = ["package.json", "yarn.lock", "tsconfig.json"];
-  const scan = async (dir) => {
-    for (const entry of await readdir(path.join(apiDir, dir), { withFileTypes: true })) {
-      assert.ok(!entry.isSymbolicLink(), "API source symlinks require explicit review.");
-      const file = `${dir}/${entry.name}`;
-      if (entry.isDirectory()) await scan(file);
-      else if (/\.(ts|js|json)$/.test(file)) files.push(file);
-    }
-  };
-  await scan("src");
-  const digest = createHash("sha256");
-  for (const file of files.sort())
-    digest
-      .update(file)
-      .update("\0")
-      .update(
-        createHash("sha256")
-          .update(await readFile(path.join(apiDir, file)))
-          .digest()
-      );
-  return { sha256: digest.digest("hex"), fileCount: files.length };
-}
 
 export function passedResults(result, suites, exit) {
   const files = result?.testResults ?? [];
