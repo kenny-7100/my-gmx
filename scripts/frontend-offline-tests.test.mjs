@@ -75,6 +75,11 @@ test("related source selection rejects ambiguous modes, missing files, duplicate
     await writeFile(path.join(root, "outside.ts"), "export {};\n");
     await symlink(path.join(root, "outside.ts"), path.join(root, "src/escape.ts"));
     assert.deepEqual(await resolveRelated(root, ["src/input.ts"]), ["src/input.ts"]);
+    for (const options of [{}, { suites: ["src/input.ts"] }, { related: ["src/input.ts"], inspectPort: 9240 }])
+      await assert.rejects(
+        runFrontendOffline({ projectDir: root, discoverOnly: true, ...options }),
+        /Use --discover-only/
+      );
     for (const related of [
       [],
       ["src/missing.ts"],

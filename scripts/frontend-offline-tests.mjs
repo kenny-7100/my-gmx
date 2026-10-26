@@ -178,12 +178,23 @@ export async function frontendToolHashes() {
   return hashes;
 }
 
-export async function runFrontendOffline({ suites, related, changedSince, inspectPort, projectDir = ROOT }) {
+export async function runFrontendOffline({
+  suites,
+  related,
+  changedSince,
+  inspectPort,
+  discoverOnly = false,
+  projectDir = ROOT,
+}) {
   projectDir = await realpath(projectDir);
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
   assert.ok(
     [suites, related, changedSince].filter((value) => value !== undefined).length <= 1,
     "Do not combine --suite, --related and --changed-since."
+  );
+  assert.ok(
+    !discoverOnly || ((related !== undefined || changedSince !== undefined) && inspectPort === undefined),
+    "Use --discover-only with --related or --changed-since, without debugging."
   );
   const changes = changedSince === undefined ? undefined : await changedSources(projectDir, changedSince);
   if (changes) related = changes.related;
@@ -229,15 +240,15 @@ export async function runFrontendOffline({ suites, related, changedSince, inspec
   const report = {
     schemaVersion: 1,
     status: "failed",
-    mode: "frontend-source-offline",
+    mode: discoverOnly ? "frontend-source-discovery" : "frontend-source-offline",
+    ...(discoverOnly ? { testsExecuted: false } : {}),
     projectDir,
     runtime,
     suites,
     ...(related ? { related } : {}),
     ...(changes ? { changes } : {}),
     startedAt: new Date().toISOString(),
-    logFile,
-    resultsFile,
+    ...(!discoverOnly ? { logFile, resultsFile } : {}),
     reportFile,
     temporaryDirectory: emptyDir,
     excluded: [
@@ -345,45 +356,49 @@ export async function runFrontendOffline({ suites, related, changedSince, inspec
       discovery.status = "passed";
       await writeFile(optionsFile, JSON.stringify({ projectDir, suites, emptyDir, resultsFile }));
     }
-    stage = "vitest";
-    const fd = openSync(logFile, "wx", 0o600);
-    try {
-      report.exit = await runTestProcess({
-        args: [
-          path.join(projectDir, "node_modules/vitest/vitest.mjs"),
-          "run",
-          "--config",
-          path.join(ROOT, "tools/frontend-offline/vitest.config.mjs"),
-          "--root",
-          projectDir,
-          ...(inspectPort === undefined ? [] : [`--inspect-brk=127.0.0.1:${inspectPort}`, "--pool=forks"]),
-        ],
-        cwd: emptyDir,
-        env,
-        logFd: fd,
-        timeoutMs: report.debug?.timeoutMs ?? 180000,
-      });
-      report.processGroup = report.exit.processGroup;
-    } finally {
-      closeSync(fd);
+    let result;
+    if (!discoverOnly) {
+      stage = "vitest";
+      const fd = openSync(logFile, "wx", 0o600);
+      try {
+        report.exit = await runTestProcess({
+          args: [
+            path.join(projectDir, "node_modules/vitest/vitest.mjs"),
+            "run",
+            "--config",
+            path.join(ROOT, "tools/frontend-offline/vitest.config.mjs"),
+            "--root",
+            projectDir,
+            ...(inspectPort === undefined ? [] : [`--inspect-brk=127.0.0.1:${inspectPort}`, "--pool=forks"]),
+          ],
+          cwd: emptyDir,
+          env,
+          logFd: fd,
+          timeoutMs: report.debug?.timeoutMs ?? 180000,
+        });
+        report.processGroup = report.exit.processGroup;
+      } finally {
+        closeSync(fd);
+      }
+      stage = "results";
+      if (report.debug) {
+        const log = await readFile(logFile, "utf8");
+        report.debug.started =
+          log.includes(`Debugger listening on ws://${report.debug.inspector}/`) &&
+          !log.includes("Starting inspector on");
+        assert.ok(report.debug.started, "Frontend inspector did not start successfully; inspect vitest.log.");
+      }
+      assert.ok(!report.exit.interrupted && !report.exit.timedOut, "Frontend check interrupted or timed out.");
+      assert.ok(report.exit.cleanup === "passed" && !report.exit.signalError, "Frontend test process cleanup failed.");
+      result = JSON.parse(await readFile(resultsFile, "utf8"));
+      report.counts = {
+        passed: result.numPassedTests,
+        failed: result.numFailedTests,
+        skipped: result.numPendingTests,
+        total: result.numTotalTests,
+        files: result.testResults?.length,
+      };
     }
-    stage = "results";
-    if (report.debug) {
-      const log = await readFile(logFile, "utf8");
-      report.debug.started =
-        log.includes(`Debugger listening on ws://${report.debug.inspector}/`) && !log.includes("Starting inspector on");
-      assert.ok(report.debug.started, "Frontend inspector did not start successfully; inspect vitest.log.");
-    }
-    assert.ok(!report.exit.interrupted && !report.exit.timedOut, "Frontend check interrupted or timed out.");
-    assert.ok(report.exit.cleanup === "passed" && !report.exit.signalError, "Frontend test process cleanup failed.");
-    const result = JSON.parse(await readFile(resultsFile, "utf8"));
-    report.counts = {
-      passed: result.numPassedTests,
-      failed: result.numFailedTests,
-      skipped: result.numPendingTests,
-      total: result.numTotalTests,
-      files: result.testResults?.length,
-    };
     report.sourceAfter = await sourceEvidence(projectDir);
     report.sourceUnchanged = report.sourceAfter.sourceSha256 === report.sourceBefore.sourceSha256;
     if (changes) {
@@ -396,18 +411,22 @@ export async function runFrontendOffline({ suites, related, changedSince, inspec
     }
     stage = "source-evidence";
     assert.ok(report.sourceUnchanged, "frontend source changed during the check.");
-    stage = "network-audit";
-    report.network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
-    assert.equal(report.network.status, "passed", "Offline network audit did not pass; inspect network-events.log.");
-    stage = "results";
-    assert.ok(
-      passedResults(
-        result,
-        suites.map((file) => path.join(projectDir, file)),
-        report.exit
-      ),
-      "Selected frontend tests did not all pass; inspect vitest.log and vitest-results.json."
-    );
+    if (discoverOnly) {
+      report.network = report.discovery.network;
+    } else {
+      stage = "network-audit";
+      report.network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
+      assert.equal(report.network.status, "passed", "Offline network audit did not pass; inspect network-events.log.");
+      stage = "results";
+      assert.ok(
+        passedResults(
+          result,
+          suites.map((file) => path.join(projectDir, file)),
+          report.exit
+        ),
+        "Selected frontend tests did not all pass; inspect vitest.log and vitest-results.json."
+      );
+    }
     stage = "tooling-evidence";
     report.toolingUnchanged = false;
     report.toolSha256After = await frontendToolHashes();
@@ -436,12 +455,13 @@ export async function runCli(args = process.argv.slice(2)) {
         "changed-since": { type: "string" },
         "project-dir": { type: "string", default: ROOT },
         "inspect-port": { type: "string" },
+        "discover-only": { type: "boolean", default: false },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn frontend:test-offline [--project-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ... | --changed-since REF] [--inspect-port 9240]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes. Debug mode requires one suite, pauses a single fork on loopback and allows 30 minutes.\n"
+        "Usage: yarn frontend:test-offline [--project-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ... | --changed-since REF] [--discover-only | --inspect-port 9240]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes. --discover-only requires --related or --changed-since and lists tests without execution; it is not passing test evidence. Debug mode requires one suite, pauses a single fork on loopback and allows 30 minutes.\n"
       );
       return 0;
     }
@@ -450,6 +470,7 @@ export async function runCli(args = process.argv.slice(2)) {
       suites: values.suite,
       related: values.related,
       changedSince: values["changed-since"],
+      discoverOnly: values["discover-only"],
       inspectPort:
         values["inspect-port"] === undefined
           ? undefined

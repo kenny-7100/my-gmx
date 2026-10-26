@@ -44,6 +44,26 @@ yarn frontend:test-offline --project-dir /path/to/delivery-checkout \
 
 本轮工程检查：当前分支默认离线 17 项、统一工具回归 108 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、136 个文档本地链接和差异检查通过；完整前端回归 299 个文件、3,014 项通过，1 个文件及其 1 项既有跳过，退出 0。当前分支默认报告为同目录 `related-current-default.json`，工程日志为 `related-{tools.tap,sdk.json,types.log,tests.log}`。
 
+## 只发现关联测试
+
+需要先判断影响范围、避免 SDK 共享模块直接触发大量串行测试时，使用同一入口的只发现模式：
+
+```sh
+yarn frontend:test-offline --discover-only --related sdk/src/utils/stats/api.ts
+yarn frontend:test-offline --project-dir /path/to/feature-checkout \
+  --discover-only --changed-since origin/release
+```
+
+`--discover-only` 必须配合 `--related` 或 `--changed-since`，不能用于默认范围、`--suite` 或断点调试。它复用上一节的原生发现、精确路径校验、隔离配置和网络保护；不执行测试模块或 global setup。发现仍会加载 Vite 配置、变换依赖图，要求目标完整依赖与资源，不是无副作用的文本扫描。零匹配、图解析失败、发现联网、中断或清理失败仍明确失败，不回退默认测试。
+
+报告使用 `mode=frontend-source-discovery`、`testsExecuted=false`，`status=passed` 仅表示发现及身份复核成功。保留 `suites`、`discovery`、前后源码/工具摘要；Git 模式还要求 `changesUnchanged=true`。顶层 `network` 为发现进程的审计，安装数为 1，不是所选 suite 数；进程清理看 `discovery.exit.cleanup`，临时目录清理看 `temporaryDirectoryCleanup`。不生成正式执行的 `vitest.log`、`vitest-results.json`，报告没有 `counts`、执行 `exit`、`resultsFile` 或 `logFile`；不能拿文件数量当作通过测试数。
+
+读取清单并判断实际影响后，可重复使用 `--suite FILE` 执行明确的局部测试，或运行 `yarn test:ci` 做完整前端回归。只发现报告不能传作交付的 `--frontend-report`；交付检查沿用原有模式限制拒绝它，需提交版本上实际执行测试后的报告。发现后若源码变化，应重新确认范围，不把历史清单当作当前快照。
+
+只发现验收（2026-10-27）：真实 `sdk/src/utils/stats/api.ts` 在约 13 秒内完成 178 个前端 suite 的发现，源码/工具前后摘要一致，零联网尝试，未生成正式测试日志或结果。独立 release 副本中，测试模块及 global setup 注入顶层报错后，SDK 经前端 bridge 的传递发现和 SDK Git 范围发现仍通过；实际证明未执行这些模块。零关联与配置尝试 HTTPS 均正确失败，发现报告被交付证据模式校验拒绝；恢复副本后普通关联执行 1 项通过，目标 HEAD/索引/源码与清理均核对。证据为本机忽略目录 `.local/acceptance/frontend-offline/discover-only-sdk-stats.json`、`discover-only-acceptance.json` 及所列原始文件。副本注入未进入业务分支。
+
+本轮默认离线 17 项、工具回归 113 项、SDK 产物 verify、根类型检查通过；完整前端回归 299 文件 / 3,014 项通过，既有跳过 1 文件 / 1 项。相关 ESLint、Prettier、151 个文档本地链接及差异检查通过。工程日志为同目录 `discover-only-{default.json,tools.tap,artifacts.log,types.log,tests.log}`。只发现模式用于规划范围，上一轮真实 SDK 大范围执行未通过的限制仍保留，不因本轮发现成功改写为测试通过。
+
 ## 按 Git 变更范围运行局部回归
 
 SDK → 前端跨层验收（2026-10-27）：独立 release 副本沿用原 Vite `sdk` alias，临时 SDK leaf 经前端 bridge 的传递导入准确选中 1 个前端 suite / 1 项；混合输入并集及 SDK/前端混合 Git 范围均为 2 个 suite / 6 项，SDK 单独 Git 变化为 1 项。SDK 自身测试未混入；无关联输入明确失败，无默认回退。成功报告的源码、工具、网络与范围检查均通过，目标 HEAD/索引/源码及副本清理已核对。证据在本机忽略目录 `.local/acceptance/frontend-offline/sdk-cross-layer-acceptance.json`。
