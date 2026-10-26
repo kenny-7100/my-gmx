@@ -32,6 +32,26 @@ yarn agent:test-plan --project-dir /path/to/feature-checkout --changed-since HEA
 
 相关入口：[前端只发现](frontend-offline-tests.md#只发现关联测试)、[SDK 只发现](sdk-offline-tests.md#只发现关联测试)、[交付隔离与证据绑定](linear-development-workflow.md#交付隔离自动检查)。
 
+## 按规划执行明确范围
+
+读取规划清单并确认所选测试适合离线运行后，从基础设施目录显式选择 scope：
+
+```sh
+yarn agent:test-run --plan /path/to/test-plan/report.json --scope sdk
+yarn agent:test-run --plan /path/to/test-plan/report.json --scope frontend
+yarn agent:test-run --plan /path/to/test-plan/report.json --scope both
+```
+
+没有默认 scope。`both` 执行所有适用范围，SDK 为 `not-applicable` 时只执行前端；单独选择不适用的 SDK 范围会 blocked。执行器从已校验的 suite 路径调用原离线运行器，不执行规划中的 `executionCommand` 文本或参数数组，也不通过 shell 解释报告内容。保留规划及原始发现报告；清单必须与所选 scope 的原始发现报告一致，文件缺失、目标不一致或清单变化在执行前拒绝。
+
+执行前、两侧执行之间和结束时，重新核对目标源码、Git 范围及规划工具摘要。规划失败、源码/暂存状态/HEAD/路径范围或工具变化时，先重新生成规划，不能手改旧报告的摘要或通过标记。执行期间还核对规划文件及执行器本身是否变化。不自动安装、构建、启动服务、跳过失败测试或修改业务代码；原有关联组需要 RPC 等外部依赖时，应先选择正确环境，不关闭离线保护器。
+
+汇总报告为 `mode=agent-test-run`，保存在基础设施目录 `.local/acceptance/frontend-offline/test-run-*/report.json`，记录明确 scope、规划路径/摘要、每侧精确 suite、实际计数及原始执行报告路径。`testsExecuted` 表示至少一个原生测试进程已启动，不等于断言通过。任一所选范围失败则整体 failed / 退出 1；普通断言失败后仍收集另一侧结果，但源码或范围变化会阻止继续执行。执行前前置无效为 blocked / 退出 2，不启动测试。
+
+汇总报告不作为 `--frontend-report` 或 `--sdk-report`。需要交付证据时，在干净交付版本上实际执行，并使用汇总中对应的原始单侧报告按既有规则绑定；未选择的 scope 没有执行证据。报告是本地可复核记录，不是安全签名；不允许以手工修改报告替代重新发现或执行。
+
+执行器加入前的历史规划可能因规划工具源码变化而被拒绝；使用当前版本重新规划，不手改旧 `toolSha256`。scope 只支持完整 SDK、完整前端或两侧，不在执行阶段悄悄裁剪已发现的测试；确需不同范围时按原离线入口显式选 suite，并记录覆盖边界。
+
 ## 本轮验收
 
 2026-10-27 在独立 `origin/release` 副本验收，目标不含个人工具，显式复用锁文件匹配的已安装依赖，没有执行全新安装：
@@ -44,3 +64,7 @@ yarn agent:test-plan --project-dir /path/to/feature-checkout --changed-since HEA
 本机原始证据在忽略目录 `.local/acceptance/frontend-offline/test-plan-acceptance.json` 及其所列父/子报告；工具不把这些发现结果当成测试通过或需求覆盖证明。
 
 工程检查：工具回归 113 项、SDK 产物只读 verify、根类型检查、相关 ESLint/Prettier、155 个文档本地链接及差异检查通过。完整前端回归 299 文件 / 3,014 项通过，既有跳过 1 文件 / 1 项；日志为同一忽略目录 `test-plan-{tools.tap,artifacts.log,types.log,tests.log}`。本轮只修改基础设施命令及文档，没有修改业务源码、原业务测试、生产配置或依赖版本，没有构建或启动服务。
+
+按规划执行验收（2026-10-27）：独立 release 副本内，原 SDK Stats 7 项与原前端日期 5 项通过同一规划的 `both` 实际执行；传递依赖 fixture 两侧各 1 项，SDK/前端单选各 1 项均通过。规划中的命令数组替换为写文件载荷后，执行器仍只调用所选原生测试，载荷文件未创建。源码变化、暂存范围变化、旧工具摘要、失败规划、清单与原始发现不符、发现报告缺失均在执行前 blocked；SDK 断言失败而前端通过时整体 failed，未隐藏 SDK 失败。只有前端变化时 both 执行原日期 5 项，单选不适用的 SDK 被拒绝。真实汇总报告被两侧交付证据模式校验拒绝。
+
+成功单侧报告的源码、工具、网络与两类清理均通过；目标 HEAD/索引/源码恢复及副本清理已核对。验收脚本为测试暂存范围自行执行过 add/reset，最终索引比较基准在其操作结束后重新读取，不将这些主动 Git 操作误归因于执行器。证据为本机忽略目录 `.local/acceptance/frontend-offline/test-run-acceptance.json` 及所列原始报告。本轮工具回归 113 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、157 个文档本地链接及差异检查通过；完整前端回归 299 文件 / 3,014 项通过，既有跳过 1 文件 / 1 项。工程日志为同目录 `test-run-{tools.tap,artifacts.log,types.log,tests.log}`。仅修改个人基础设施及文档，未改业务源码、原业务测试、生产配置或依赖版本，未构建或启动服务。

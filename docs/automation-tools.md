@@ -6,6 +6,8 @@
 
 API 源码调试使用既有持续服务上的[断点验收入口](solana-api-local.md#agent-可重复的源码断点验收)：`yarn solana:api-debug` 自动验证真实 inspector、TypeScript 映射、请求断点、限定局部变量与恢复结果；默认启动并清理所属服务，`--attach` 保留借用服务。回归命令为 `yarn test:solana-api-debug`，使用真实隔离 Node inspector，不改业务源码。
 
+确认规划清单适合离线执行后，用[按规划执行](agent-test-plan.md#按规划执行明确范围) `yarn agent:test-run --plan PATH --scope sdk|frontend|both` 显式选择范围，核对规划仍对应当前源码/Git/工具及原始发现清单，再复用原运行器执行。汇总保留实际计数和原始报告，任一所选失败则整体失败；不执行报告内命令文本、不自动启动服务，交付仍绑定原始单侧报告。
+
 混合前端/SDK 源码改动先使用[联合测试范围规划](agent-test-plan.md) `yarn agent:test-plan --project-dir PATH --changed-since REF`：只收集一次 Git 范围，复用 SDK 与前端只发现入口，保留 SDK 自身及前端消费者清单，不自动执行或分类环境；任一必要发现或结束身份复核失败时整体失败。
 
 前端关联范围较大或未知时，先用[只发现入口](frontend-offline-tests.md#只发现关联测试) `frontend:test-offline --discover-only --related sdk/src/...ts`，或配合 `--changed-since REF`；复用现有发现与结束身份复核，不执行断言/global setup，不建设第二套选择器。报告明确为 discovery，交付检查拒绝将其当作测试证据。

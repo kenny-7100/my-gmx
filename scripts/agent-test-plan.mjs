@@ -11,7 +11,7 @@ import { runSdkOffline, sdkToolHashes } from "./sdk-offline-tests.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 
-async function toolHashes() {
+export async function toolHashes() {
   return {
     ...(await frontendToolHashes()),
     ...(await sdkToolHashes()),
