@@ -10,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
 import { resolveSuites } from "./gmx-api-integration-tests.mjs";
+import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
 import { sourceInputs } from "./lib/gmx-api-source.mjs";
 import { readApiSource } from "./solana-api-local.mjs";
@@ -137,7 +138,14 @@ export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort 
         resultsFile,
       ],
       cwd,
-      env: { PATH: process.env.PATH, NODE_ENV: "test", TZ: "UTC", CI: "true", JEST_RETRY_TIMES: "0" },
+      env: {
+        PATH: process.env.PATH,
+        NODE_ENV: "test",
+        TZ: "UTC",
+        CI: "true",
+        JEST_RETRY_TIMES: "0",
+        GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "network-events.log"),
+      },
       logFd: fd,
       timeoutMs: debug?.timeoutMs ?? 120000,
     });
@@ -160,7 +168,9 @@ export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort 
   const sourceAfter = await sourceInputs(apiDir);
   const unchanged =
     JSON.stringify(after) === JSON.stringify(evidence) && JSON.stringify(sourceAfter) === JSON.stringify(sourceBefore);
+  const network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
   const passed =
+    network.status === "passed" &&
     (!debug || debug.started) &&
     !exit.interrupted &&
     !exit.timedOut &&
@@ -175,6 +185,7 @@ export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort 
   const report = {
     status: passed ? "passed" : "failed",
     mode: "offline-fixtures",
+    network,
     checkedAt: new Date().toISOString(),
     apiDir,
     suites,

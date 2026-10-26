@@ -18,6 +18,16 @@ yarn frontend:test-offline --suite src/lib/dates.spec.ts --suite src/domain/gmso
 
 支持 `src/` 或 `landing/` 下真实存在的 `.spec` / `.test` 文件（JS/JSX/TS/TSX）。拒绝重复、缺失、glob、绝对路径、目录及越界符号链接；原 Vite exclude 继续有效，被排除或空文件不能通过。只运行明确选定的文件，不递归发现参考仓库。需要真实浏览器、外部服务或业务集成时使用相应验收环境。
 
+## 结束时核对网络审计
+
+2026-10-27 起，前端、SDK 和 API 离线入口共用运行器侧的网络事件审计。保护器在每个所选文件安装时记录 `installed`，拒绝连接时记录 `blocked`；日志路径在安装时固定，测试修改环境变量不会关闭记录。运行器结束后独立读取 `network-events.log`，报告 `network.status/installations/blockedAttempts/eventsFile`。安装数须等于所选文件数、拒绝数为 0，缺日志或未知事件也失败；不能只凭原生测试 JSON 的 success 判断通过。
+
+测试框架的末尾 hook 可能晚于保护器自己的 afterAll 检查；本轮已在真实 API Jest 中复现原生及旧运行器误报通过，并用独立审计拒绝同一用例。前端/SDK 同样接入审计，捕获连接异常仍失败。普通和断点模式使用相同入口，不增加关闭开关；保护范围仍是原 Node guard，不是操作系统沙箱，不防御恶意测试修改文件或撤销保护。
+
+交付检查选择前端或 SDK 报告时，还会重新读取事件日志并核对汇总字段；保留该日志和原生结果，缺失或内容变化会 blocked。工具和 guard 指纹变化后应重跑相关测试，不手改旧报告。
+
+本轮验收：前端默认 17 项、SDK 默认 153 项、API 离线 12 项及隔离数据库集成 5 项通过，安装数分别为 3、3、2、2，拒绝数均为 0。独立 release checkout 的前端 5 项与 SDK 6 项正常报告共同通过交付检查；向原始事件日志追加 `blocked` 后检查拒绝，恢复后再次通过。工具回归 97 项、根类型检查、相关 ESLint/Prettier 通过；完整前端回归 3,014 项通过、1 项既有跳过，退出码 0。证据保存在本机忽略目录：前端/SDK 的 `audit-default.json`、前端 `network-audit-acceptance.json`，以及 API 目录下的 `offline-audit-default.json`、`integration-audit-default.json`、`offline-audit-tools.tap`、`offline-audit-tscheck.log`、`offline-audit-test-ci.log`。
+
 ## 验证独立 checkout
 
 工具默认验证所在主仓库，也支持显式指定另一个前端 checkout。这样可在不把个人基础设施复制进交付分支的情况下验证独立交付源码：
