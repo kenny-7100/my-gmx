@@ -62,6 +62,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **Agent 工具回归：** 根 `yarn test:ci` 不覆盖个人基础设施脚本。修改跨工具公共能力或交接基础设施分支时，先按[统一离线回归](automation-tools.md#统一离线工具回归)运行 `yarn test:agent-tools`，一次覆盖脚本、RPC 代理及 CI 辅助测试；单工具小改仍可选原单项入口。确认原生结果后再安排本任务所需的类型、前端或真实服务验收，不把工具测试通过当作 RPC/keeper/API/页面 ready。新工具测试加入统一范围时，核实其保持离线且只使用临时资源，不把真实资金或外部服务检查放进默认回归。
 
+**SDK 关联范围预览：** BigMath 等共享 SDK 源码可能关联真实 RPC 测试，优先按[SDK 只发现说明](sdk-offline-tests.md#只发现关联测试)使用 `sdk:test-offline --discover-only --related src/...ts`，或配合 `--changed-since REF`。先核对清单和实际依赖再选择离线 suite 或完整环境；`sdk-source-discovery` 的 passed 仅表示发现通过，不用于交付测试证据，不代表所列测试可离线运行。核对发现网络/清理及前后源码、工具与 Git 范围；不执行测试、setup 或 global setup。
+
 **前端关联范围预览：** SDK 共享模块或未知影响范围优先按[只发现说明](frontend-offline-tests.md#只发现关联测试)加 `--discover-only`，与 `--related` 或 `--changed-since` 配合，先读取真实 suite 清单再决定局部或完整回归。不执行测试或 global setup；核对 `mode=frontend-source-discovery`、`testsExecuted=false`、发现网络/清理及前后源码/工具/Git 范围。发现 passed 不代表测试通过，不能用于交付测试证据；仍需实际执行所需回归。
 
 **前端关联测试：** 已知修改的 src/landing/sdk/src 源码而不确定所需前端 suite 时，按[关联测试说明](frontend-offline-tests.md#按源码依赖图选择关联测试)使用 `frontend:test-offline --related src/...ts` 或 `--related sdk/src/...ts`，独立目录显式加 `--project-dir PATH`。前端与 SDK 源码混合改动也可用 `--changed-since REF` 从明确的 Git 基线收集提交/索引/工作区/未跟踪源码；先确认 `changes.baseSha` 和完整路径范围，结束时要求 `changesUnchanged=true`，配置、删除或混合非代码改动必须人工评估并选测试。输出仍只有前端测试，SDK 自身测试另用 SDK 入口。先核对发现的精确清单、发现阶段网络审计与清理，再接受实际测试结果；零关联或图解析失败不代表无须测试，应按真实依赖/资源修复，或人工明确选择 `--suite`。配置、删除文件或动态导入影响仍须独立判断。发现与执行均在空 CWD，入口已通过临时绝对路径 Lingui catalog 配置和 loopback 主机处理资源定位。若出现 `.po` 的 `not matched to any of your catalogs paths`，先核对目标 JSON `.linguirc` 及本次临时配置的 rootDir/path/include/exclude；这是已复现的相对路径/CWD 问题，查看 discovery.log 或 vitest.log，不关闭翻译插件、读取目标 `.env` 或放宽网络保护。
