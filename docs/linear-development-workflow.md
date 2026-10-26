@@ -139,6 +139,28 @@ API 运行器现在保存 schema、测试前后 Git 身份、源码聚合指纹�
 
 生成路由交付复核验收（2026-10-27）：独立 API release clone 的既有 routeMap/HTTP 两个 suite 共 6 项通过，带路由来源的报告绑定成功；生成产物变更、实际生成器变更、收据丢失、测试后证据缺失及失败状态均被拒绝，恢复后通过。默认数据库 5 项报告在移除路由收据后仍可绑定，明确返回 not-checked。交付检查前后目标 Git 索引字节、原报告及容器清单不变，真实 API 源码和既有调试服务不变，临时 clone 已清理。本机证据为忽略目录 `.local/acceptance/solana-dev/delivery-routes-acceptance.json`，该文件记录原始测试报告路径；复用 package/lock 一致的已安装依赖，没有执行全新安装或构建。 工程检查：统一工具回归 105 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、149 个文档本地链接及差异检查通过；完整前端回归 3,014 项通过、1 项既有跳过，退出 0。日志位于同目录 `delivery-routes-{tools.tap,tscheck.log,test-ci.log}`。
 
+### API 类型检查证据绑定
+
+在干净的 API 交付 checkout 上先运行 `yarn gmx-api:tscheck --api-dir PATH`，保留原始报告和 `tsc.log`，再从基础设施目录执行：
+
+```sh
+yarn agent:delivery-check --project-dir /path/to/api-delivery-checkout --require-clean \
+  --base origin/release --development-base API_DEVELOPMENT_BASE \
+  --head API_DELIVERY_BRANCH --expected-base FULL_API_RELEASE_SHA \
+  --allow-path src/path/to/feature.ts \
+  --api-typecheck-report /path/to/typecheck-run/report.json
+```
+
+该参数只接收 `api-typescript-no-emit` 报告，必须显式 `--require-clean`。可以与同一 API checkout 的一个或多个 `--api-report` 测试报告共同使用，分别核对类型检查与所选测试；不把类型检查报告传给 `--api-report`。未选择时 `apiTypecheckEvidence.status=not-checked`，工具不替需求决定是否必须做类型检查。
+
+交付检查只读核对报告的 schema、模式和成功状态，要求编译前后及当前的规范化目录、干净 HEAD、源码输入与实际 TypeScript/工具指纹一致，原生编译退出 0、无信号/中断/超时/清理异常，且三份路由来源证据一致；重新读取原始日志并核对 SHA-256。源码扫描范围与依赖指纹边界沿用[API 类型检查说明](solana-api-local.md#独立-api-checkout-的类型检查)，不扩展为所有第三方依赖验证。旧报告缺日志摘要、日志缺失/变更、工具/编译器/产物变更时必须重跑类型检查，不能手改历史字段。
+
+成功结果记录在 `apiTypecheckEvidence`，包含报告路径、testedCommit、sourceSha256、TypeScript 版本及日志摘要。证据无效产生 `api-typecheck-evidence-invalid`，附检查阶段，整次 blocked / 退出 2。不重新执行 tsc、生成、安装、构建、启动服务或写 Git；交付差异仍独立接受原有来源和文件清单检查。报告及摘要是本地来源证据，不是签名或原子快照，不证明业务行为通过。
+
+真实验收（2026-10-27）：独立 API release checkout 的原生类型检查通过后，报告单独绑定及与默认离线测试报告共同绑定均成功。日志篡改/缺失、缺摘要的旧报告、失败/中断、错误目录、缺测试后证据、实际 TypeScript 编译器变化、生成路由变化，以及 Git clean 时被忽略的 scripts 输入变化均被拒绝；恢复后通过。新增干净 HEAD 后旧类型检查和测试报告共同被拒绝。交付检查未改变目标索引、原报告或日志，未新增容器，已有调试服务身份不变；临时 clone 已删除，实际 API 业务源码未修改。只为验收显式复用了 package/lock 一致的已安装依赖，目标 TypeScript 另作隔离副本以验证编译器变化；没有全新安装或构建。证据位于本机忽略目录 `.local/acceptance/solana-dev/typecheck-delivery-acceptance.json`，其中列出本轮原始类型检查报告。
+
+本轮工程检查：统一工具回归 107 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、153 个文档本地链接及差异检查通过；完整前端回归 299 个文件、3,014 项通过，1 个文件及其 1 项既有跳过，退出 0。日志位于同一忽略目录的 `typecheck-delivery-{tools.tap,sdk.json,types.log,tests.log}`。
+
 ### 基础设施验收记录（2026-10-26）
 
 本轮未创建主仓库分支或改写历史。临时仓库真实历史回归通过；主仓库 `HEAD` 与个人开发基础重合，实际只读检查正确返回 `development-base-history` 并退出 2，清单外文件也明确列出。检查前后主仓库 HEAD、索引和 4,511 个文件内容摘要一致。根类型检查、ESLint、Prettier、71 个文档本地目标及差异检查通过；完整前端单元测试 3,014 项通过、1 项既有跳过。证据保留在忽略目录 `.local/acceptance/delivery-check/`；工具本身仅向 stdout 输出 JSON，归档由调用者显式重定向完成。
