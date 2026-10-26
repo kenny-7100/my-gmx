@@ -94,8 +94,8 @@ async function sourceEvidence(projectDir) {
   };
 }
 
-export async function runFrontendOffline({ suites, inspectPort }) {
-  const projectDir = await realpath(ROOT);
+export async function runFrontendOffline({ suites, inspectPort, projectDir = ROOT }) {
+  projectDir = await realpath(projectDir);
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
   suites = await resolveSuites(projectDir, suites);
   if (inspectPort !== undefined) {
@@ -111,6 +111,18 @@ export async function runFrontendOffline({ suites, inspectPort }) {
     });
     await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
   }
+  const runtime = {};
+  for (const name of ["vite", "vitest"]) {
+    const target = JSON.parse(await readFile(path.join(projectDir, "node_modules", name, "package.json"), "utf8"));
+    const tool = JSON.parse(await readFile(path.join(ROOT, "node_modules", name, "package.json"), "utf8"));
+    assert.equal(target.version, tool.version, `Target ${name} must match the infrastructure runtime version.`);
+    runtime[name] = target.version;
+  }
+  const gitRoot = execFileSync("git", ["-C", projectDir, "rev-parse", "--show-toplevel"], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+  assert.equal(await realpath(gitRoot), projectDir, "Select the frontend checkout root.");
   const output = path.join(ROOT, ".local/acceptance/frontend-offline");
   await mkdir(output, { recursive: true });
   const runDir = await mkdtemp(path.join(output, "run-"));
@@ -123,6 +135,7 @@ export async function runFrontendOffline({ suites, inspectPort }) {
     status: "failed",
     mode: "frontend-source-offline",
     projectDir,
+    runtime,
     suites,
     startedAt: new Date().toISOString(),
     logFile,
@@ -148,7 +161,7 @@ export async function runFrontendOffline({ suites, inspectPort }) {
       report.toolSha256[file] = createHash("sha256")
         .update(await readFile(path.join(ROOT, file)))
         .digest("hex");
-    await symlink(path.join(ROOT, "node_modules"), path.join(emptyDir, "node_modules"), "dir");
+    await symlink(path.join(projectDir, "node_modules"), path.join(emptyDir, "node_modules"), "dir");
     const optionsFile = path.join(emptyDir, "options.json");
     await writeFile(optionsFile, JSON.stringify({ projectDir, suites, emptyDir, resultsFile }), { mode: 0o600 });
     stage = "vitest";
@@ -156,7 +169,7 @@ export async function runFrontendOffline({ suites, inspectPort }) {
     try {
       report.exit = await runTestProcess({
         args: [
-          path.join(ROOT, "node_modules/vitest/vitest.mjs"),
+          path.join(projectDir, "node_modules/vitest/vitest.mjs"),
           "run",
           "--config",
           path.join(ROOT, "tools/frontend-offline/vitest.config.mjs"),
@@ -171,8 +184,8 @@ export async function runFrontendOffline({ suites, inspectPort }) {
           TZ: "UTC",
           CI: "true",
           GMX_FRONTEND_OFFLINE_OPTIONS: optionsFile,
-          LINGUI_CONFIG: path.join(ROOT, ".linguirc"),
-          VITE_APP_PWA_GENERATION: `${execFileSync("git", ["-C", ROOT, "show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim()}000`,
+          LINGUI_CONFIG: path.join(projectDir, ".linguirc"),
+          VITE_APP_PWA_GENERATION: `${execFileSync("git", ["-C", projectDir, "show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim()}000`,
         },
         logFd: fd,
         timeoutMs: report.debug?.timeoutMs ?? 180000,
@@ -228,17 +241,19 @@ export async function runCli(args = process.argv.slice(2)) {
       args,
       options: {
         suite: { type: "string", multiple: true },
+        "project-dir": { type: "string", default: ROOT },
         "inspect-port": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn frontend:test-offline [--suite src/...spec.ts ...] [--inspect-port 9240]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes. Debug mode requires one suite, pauses a single fork on loopback and allows 30 minutes.\n"
+        "Usage: yarn frontend:test-offline [--project-dir PATH] [--suite src/...spec.ts ...] [--inspect-port 9240]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes. Debug mode requires one suite, pauses a single fork on loopback and allows 30 minutes.\n"
       );
       return 0;
     }
     const report = await runFrontendOffline({
+      projectDir: values["project-dir"],
       suites: values.suite,
       inspectPort:
         values["inspect-port"] === undefined
