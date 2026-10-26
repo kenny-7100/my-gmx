@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "solana:browser-check": "node scripts/solana-browser-check.mjs",
+    "test:solana-browser-check": "node --test scripts/solana-browser-check.test.mjs",
     "sdk:test-offline": "node scripts/sdk-offline-tests.mjs",
     "test:sdk-offline": "node --test scripts/sdk-offline-tests.test.mjs scripts/gmx-api-offline-tests.test.mjs",
     "solana:api-debug": "node scripts/solana-api-debug.mjs",

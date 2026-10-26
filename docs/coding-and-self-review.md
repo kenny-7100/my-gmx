@@ -60,6 +60,10 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **SDK 纯计算回归：** 根 `yarn test:ci` 不覆盖 `sdk/`。需要验证 SDK 数值、BigInt、费用或其他可离线测试时，使用[SDK 源码离线入口](sdk-offline-tests.md) `yarn sdk:test-offline` 或重复 `--suite src/...spec.ts` 指定范围，复用原配置和源码，无需先构建 SDK 或启动服务。意外联网会明确失败，先核对所选测试的真实依赖，不关闭保护或修改业务预期；该入口通过不代表完整 SDK、Solana 协议或发布产物已通过。
 
+**独立页面冒烟：** 已授权运行本地网络选择页面验收、且不需要保留开发服务时，优先执行[管理入口](solana-browser-smoke.md#一条命令执行并保存独立报告) `yarn solana:browser-check`，复用预检并由 Playwright 管理独立端口的 Vite，逐次保存原生报告并停服；无需先运行一遍相同预检。端口占用时显式换未用端口，不接管既有服务。手动联调仍可使用原两终端入口，无页面验证需求的任务不增加此项。
+
+**中断 Playwright 管理的服务：** 需要停止当前锁定版本 Playwright CLI 的测试时，向 CLI 发 SIGINT，使 runner 执行 teardown；不要直接用 SIGTERM 假定其会清理 webServer。管理入口已将外部 SIGINT/SIGTERM 转为该行为。异常结束后先查端口和所属进程，不能因 CLI 已退出就认定 Vite 已停止；原因与实测见[浏览器冒烟说明](solana-browser-smoke.md#一条命令执行并保存独立报告)。
+
 以上经验来自 2026-10-24 的[本地 RPC 代理验收记录](agent-acceptance-infrastructure.md)；具体事实与验证边界保留在主题文档，本节维护影响后续执行顺序的通用步骤。
 
 ## 查阅入口

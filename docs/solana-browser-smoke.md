@@ -1,6 +1,6 @@
 # Solana 本地只读浏览器冒烟
 
-更新日期：2026-10-25。A09 首个只读页面冒烟入口及环境预检均已完成真实验收。用户已长期授权后续任务启动本地 Vite 和 Chrome，在已授权任务中无需再次确认本地页面运行；不扩大到构建、部署、其他服务或签名广播。
+更新日期：2026-10-26。A09 首个只读页面冒烟入口及环境预检均已完成真实验收；新增一条命令完成预检、独立 Vite、真实 Chrome、独立报告及停服。用户已长期授权后续任务启动本地 Vite 和 Chrome，在已授权任务中无需再次确认本地页面运行；不扩大到构建、部署、其他服务或签名广播。
 
 ## 用途与验收条件
 
@@ -13,6 +13,51 @@
 | 共用诊断 | 页面无未处理 JS 错误；报告包含本地 checkout commit/dirty、目标地址、状态附件；失败保留截图及 trace | passed；首轮失败产物与复验报告均保留 |
 
 不覆盖真实钱包连接、余额、交易组件、签名、广播、keeper 执行、远端预览或完整 EVM 回归。无 SDK 请求断言只覆盖当前用例观察窗口，不替代构建产物分析。此入口不修改业务代码、前端默认开关或线上状态。
+
+## 一条命令执行并保存独立报告
+
+已授权本地页面验收时，在主仓库根目录优先使用：
+
+```bash
+# Preflight, start an owned Vite, run real Chrome tests, retain reports, stop Vite
+yarn solana:browser-check
+# Select a different unused local port
+yarn solana:browser-check --port 3015
+# Tool regressions do not start a browser
+yarn test:solana-browser-check
+```
+
+默认使用独立端口 3015，固定 loopback HTTP 地址；不复用或停止 3010 等既有 Vite，不启动 API/RPC、不构建 SDK、不安装依赖。预检复用下文已有实现，缺少依赖或 Chrome/SDK 时仍报告 blocked / 退出 2；其他失败退出 1。仅当现有两项测试实际通过且服务清理通过时退出 0。
+
+[管理配置](../tools/solana-browser/playwright.config.ts) 继承原只读 Playwright 配置，复用全部 fixture、测试和断言，通过 Playwright 原生 `webServer` 启停 Vite；`reuseExistingServer=false`、loopback、strictPort，原 Vite 业务配置保持不变。端口占用在执行前明确拒绝；启动时再次由 Playwright/Vite 保护，不接管未知监听进程。每个用例仍独立 context、无重试，不注入钱包或替代业务数据；前端仍可访问现有真实外部读取服务，并非离线测试。
+
+每次在已忽略的 `.local/acceptance/solana-browser/managed-*/` 中保存：
+
+- `preflight.json`：本次依赖、Chrome、SDK 指纹及两项测试发现结果。
+- `playwright-results.json`、`html/index.html`：Playwright 原生结果及 HTML；失败截图/trace 位于本轮 `test-results/`。尚未启动测试的失败可能没有这些原生产物。
+- `playwright.log`：Vite/Playwright 输出及失败诊断。
+- `report.json`：目标地址、时间、退出码、实际测试统计、checkout 元数据、相关文件摘要及端口释放结果。配置/测试/fixture/开关/SDK 前置等摘要不代表整个应用或依赖树的身份。
+
+不覆盖旧的 `test-results/solana-read-only-results.json`、固定 HTML 目录或其他 managed run。判定要求：恰有两项 `network.spec.ts` 实际通过，无 skipped/flaky/unexpected、无重试或 runner errors、进程退出 0，且相关文件摘要未变化；`--list`、空结果及仅预检通过均不能作为页面 passed。原始附件中的外部请求失败仍保留，不将页面冒烟通过扩大解释为全部外部服务可用。
+
+Playwright 正常退出或失败时负责清理所属 Vite；外层收到 SIGINT/SIGTERM 或超时后，统一向 Playwright CLI 转发 **SIGINT**，使其进入测试 runner 的 teardown。当前锁定版本直接接收 SIGTERM 会终止 CLI 并遗留 Vite，本轮真实中断验收已复现并修正。工具结束前再次检查端口可重新绑定，仍占用则失败，不盲目 kill。全局测试限时 180 秒；外层 240 秒后请求终止，再给 15 秒清理时间。SIGKILL/系统崩溃不能保证清理，先核实端口和进程归属后处理。工具只承诺本地 POSIX 环境，本轮在 macOS 验证。
+
+实现入口：[solana-browser-check.mjs](../scripts/solana-browser-check.mjs)。属于个人开发基础，最终基于 `origin/release` 交付业务需求时不携带本工具、管理配置或相关文档。
+
+2026-10-26 本机管理入口验收：
+
+| 条件 | 实际结果 |
+| --- | --- |
+| 自动预检、启动 Vite、真实 Chrome 与正常停服 | 两轮各 2 项通过，最终一轮 45.9 秒；无 skipped、flaky、unexpected 或重试，结束后端口释放 |
+| 原生报告独立保存 | 两轮各有独立 JSON/HTML/预检/日志，首轮产物仍存在；原固定结果文件 SHA-256 未变化 |
+| 未知端口占用 | 正确失败，报告 port 阶段 / not-started，原监听服务保持运行 |
+| 执行中断 | 实际测试开始后发送 SIGTERM；外层转发 SIGINT 后，运行正确失败，Playwright 清理 Vite，端口释放 |
+| 假通过判定 | 两组工具回归通过，拒绝发现结果、零执行、错误目标/范围、跳过、重试、失败和信号退出；验证端口检查不误停监听进程 |
+| 业务隔离 | 未修改前端、SDK、API 或原用例预期；无构建、钱包注入或业务响应替代 |
+
+首轮中断暴露 SIGTERM 直接结束 CLI 的遗留问题；已依据锁定版 Playwright runner 源码修正并真实复验。该次失败报告保留，不覆盖成 passed；遗留进程核对本轮端口、命令和进程组归属后已清理。最终汇总位于本机 `.local/acceptance/solana-browser/managed-acceptance.json`，原生报告位于对应 managed run，不随 Git 共享。
+
+工程检查通过：2 组工具回归、根 `yarn tscheck`、`yarn test:regression:types`、脚本语法、指定文件 ESLint/Prettier、文档链接及 `git diff --check`；完整前端回归 299 个文件通过 / 1 个原有跳过，3014 项通过 / 1 项原有跳过，退出 0。仍有既有 Browserslist、Sass/Vite 及 happy-dom teardown 提示，本轮保留日志，不修改这些无关内容。
 
 ## 先准备，再执行
 
@@ -47,7 +92,7 @@ yarn solana:browser-preflight > .local/acceptance/solana-browser/ready.json
 4. 核对本地已有 SDK/WASM 产物；需要时执行 `yarn solana:runtime-preflight --local-only`，缺产物先处理构建授权，不自动构建。本机本轮检查 passed，只证明本地产物指纹，不证明页面可用。
 5. 本地 Vite/Chrome 已获长期授权；在已授权任务内直接启动服务和执行用例。失败先保留报告并区分基础设施问题与业务问题；业务修复仍须核对任务范围。
 
-执行当前已授权的验收任务时使用（两个终端，均在主仓库根目录）：
+需要手动运行或保留现有开发服务时，仍可使用原入口（两个终端，均在主仓库根目录）：
 
 ```sh
 yarn exec vite --host 127.0.0.1 --port 3010 --strictPort

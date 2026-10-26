@@ -18,6 +18,7 @@
     "**/*.ts",
     "../../playwright-regression.config.ts",
     "../../playwright-solana-readonly.config.ts",
+    "../../tools/solana-browser/playwright.config.ts",
     "../../playwright-funded-preflight.config.ts",
     "../../playwright-funded-harness.config.ts",
     "../../viem-override.d.ts"

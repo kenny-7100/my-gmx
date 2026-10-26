@@ -1,5 +1,7 @@
 # Agent 验收基础设施调研与实施清单
 
+2026-10-26 补充 [A09 管理浏览器冒烟](solana-browser-smoke.md#一条命令执行并保存独立报告)：`yarn solana:browser-check` 复用既有预检、只读用例及 Playwright webServer，自动运行独立 Vite/真实 Chrome 并按次保存原生报告。两轮各 2 项通过，端口占用保护、旧报告保留及执行中断清理已真实验收；不改业务代码。钱包、余额、交易和远端预览的原有缺口保持不变。
+
 2026-10-26 补充 [API 源码断点验收](solana-api-local.md#agent-可重复的源码断点验收)：`yarn solana:api-debug` 复用持续服务，自动核对当前 TypeScript 源码映射、真实 handler 断点、限定变量和 HTTP 恢复。独立/借用模式、未启用 inspector、未知端口占用及 SIGTERM 清理已真实验收；不改业务代码，原有服务保留。A08 调试能力增加可重复 CLI 验收，真实数据、前端消费和协议交易的原有缺口不变。
 
 2026-10-26 补充[个人全栈联调工具](solana-dev-workspace.md)：A08 开发代理和 API/Vite/RPC 工作区、A09/A17 请求 trace 诊断已验收；A04 增加未评审样例结构回归工具，结构通过仍返回 partial。12 项集成演练通过，未修改业务代码；前端业务消费、parser 和 reviewed contract 仍待对应需求，不因工具完成而标为通过。工具和基线只属于个人开发基础，不进入上游业务交付。
