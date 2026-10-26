@@ -8,6 +8,7 @@ import { promisify } from "node:util";
 
 import {
   checkDelivery,
+  validateApiEvidence,
   validateBrowserEvidence,
   validateFrontendEvidence,
   validateSdkEvidence,
@@ -244,4 +245,88 @@ test("browser evidence binds native executions to the clean delivery target and 
     { results: { ...results, config: { metadata: { ...metadata, checkoutCommit: "old" } } } },
   ])
     assert.throws(() => validateBrowserEvidence({ ...options, ...changed }));
+});
+
+test("API evidence binds both profiles to clean source, tooling, native results and independent network audit", () => {
+  for (const mode of ["offline-fixtures", "isolated-postgres-integration"]) {
+    const integration = mode === "isolated-postgres-integration";
+    const apiDir = "/api";
+    const source = { commit: "head", dirty: false, sha256: { "src/one.test.ts": "test" } };
+    const inputs = { sha256: "source", fileCount: 4 };
+    const tooling = {
+      toolSha256: { [`tools/${integration ? "gmx-api-integration" : "gmx-api-offline"}/network-guard.cjs`]: "guard" },
+      runtime: { jest: "29", node: "22" },
+    };
+    const network = { status: "passed", eventsFile: "/events.log", installations: 1, blockedAttempts: 0 };
+    const results = {
+      success: true,
+      numTotalTestSuites: 1,
+      numPassedTestSuites: 1,
+      numPendingTests: 0,
+      numTodoTests: 0,
+      numPassedTests: 1,
+      numTotalTests: 1,
+      numFailedTests: 0,
+      testResults: [{ name: "/api/src/one.test.ts", status: "passed", assertionResults: [{ status: "passed" }] }],
+    };
+    const evidence = {
+      schemaVersion: 1,
+      status: "passed",
+      mode,
+      apiDir,
+      source,
+      sourceAfter: source,
+      sourceInputs: inputs,
+      sourceInputsAfter: inputs,
+      sourceUnchanged: true,
+      ...tooling,
+      toolingUnchanged: true,
+      network: {
+        ...network,
+        ...(integration ? { policy: "owned-database-and-in-process-servers", guardSha256: "guard" } : {}),
+      },
+      guardSha256: "guard",
+      exit: { code: 0, signal: null, cleanup: "passed" },
+      cleanup: "passed",
+      temporaryDirectoryCleanup: "passed",
+      counts: { suites: 1, passed: 1, failed: 0, skipped: 0 },
+    };
+    const options = {
+      evidence,
+      apiDir,
+      head: "head",
+      source,
+      inputs,
+      tooling,
+      results,
+      suites: ["src/one.test.ts"],
+      network,
+    };
+    assert.doesNotThrow(() => validateApiEvidence(options));
+    for (const change of [
+      { status: "failed" },
+      { schemaVersion: 0 },
+      { mode: "unknown" },
+      { apiDir: "/another-checkout" },
+      { source: { ...source, dirty: true } },
+      { sourceAfter: { ...source, commit: "other-head" } },
+      { sourceInputs: { ...inputs, sha256: "stale" } },
+      { sourceInputsAfter: { ...inputs, sha256: "stale" } },
+      { sourceUnchanged: false },
+      { toolSha256: {} },
+      { runtime: { jest: "other" } },
+      { toolingUnchanged: false },
+      { exit: { ...evidence.exit, interrupted: true } },
+      { exit: { ...evidence.exit, cleanup: "failed" } },
+      integration ? { cleanup: "failed" } : { temporaryDirectoryCleanup: "failed" },
+      { network: { ...evidence.network, installations: 0 } },
+      { network: { ...evidence.network, blockedAttempts: 1 } },
+      integration ? { network: { ...evidence.network, guardSha256: "other" } } : { guardSha256: "other" },
+      { counts: { ...evidence.counts, passed: 2 } },
+    ])
+      assert.throws(() => validateApiEvidence({ ...options, evidence: { ...evidence, ...change } }));
+    assert.throws(() => validateApiEvidence({ ...options, source: { ...source, commit: "later-head" } }));
+    assert.throws(() => validateApiEvidence({ ...options, results: { ...results, numFailedTests: 1 } }));
+    assert.throws(() => validateApiEvidence({ ...options, network: { ...network, status: "failed" } }));
+  }
 });

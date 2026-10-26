@@ -301,6 +301,8 @@ yarn gmx-api:test-offline --api-dir /path/to/api-checkout --suite src/domain/gmU
 
 此能力不改变默认 Solana suites，也不改变样例 HTTP 服务、doctor/check 或 `solana:api-debug` 的样例文件要求；测试通过不等于 API 已部署、真实数据或整项需求验收通过。
 
+需要作为 API 交付证据时，按[API 测试证据绑定](linear-development-workflow.md#api-测试证据绑定)对当前 API checkout 使用 `agent:delivery-check --require-clean --api-report PATH`，可同时选择离线和数据库报告。两类报告新增 `schemaVersion`、`sourceAfter`、`toolSha256`、`runtime` 和 `toolingUnchanged`；离线另显式记录 `temporaryDirectoryCleanup`。工具或 Node/Jest/转换器版本运行中变化会失败；交付检查还会重新核对原始结果和网络日志。旧报告需重跑，不手工补字段。
+
 ### API 离线测试源码断点调试
 
 2026-10-27 已实现并真实验收。需要排查现有 API 纯计算测试时，在主仓库根目录显式选择一份 suite：
