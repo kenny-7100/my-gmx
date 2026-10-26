@@ -43,6 +43,26 @@ yarn sdk:test-offline --sdk-dir /path/to/delivery/sdk --related src/utils/stats/
 
 本轮兼容性与工程检查通过：默认三份 SDK suite 共 153 项，显式单 suite 的真实源码断点、BigInt 参数与恢复后 6 项测试；统一工具回归 111 项、SDK 产物只读核验、根类型检查、相关 ESLint/Prettier、143 个文档本地目标及差异检查。完整前端回归 299 个文件 / 3,014 项通过，另有 1 个文件 / 1 项既有跳过，退出 0。没有构建 SDK 或启动外部服务；真实 RPC 依赖仍是上述离线覆盖边界。
 
+## 只发现关联测试
+
+SDK 共享模块可能关联到需要真实 RPC 或其他服务的测试。先预览清单，再决定离线局部测试或完整环境：
+
+```sh
+yarn sdk:test-offline --discover-only --related src/utils/bigmath/utils.ts
+yarn sdk:test-offline --sdk-dir /path/to/feature-checkout/sdk \
+  --discover-only --changed-since origin/release
+```
+
+`--discover-only` 必须配合 `--related` 或 `--changed-since`，不能用于默认范围、`--suite` 或 inspector。复用原配置、真实依赖图、精确路径校验和发现网络保护，不执行测试模块、setup 或 global setup；加载配置和变换依赖仍需完整依赖及资源。零匹配、图解析失败、配置联网、中断或清理失败仍明确失败，不自动缩小范围或回退默认测试，也不自动判断哪些 suite 可以离线运行。
+
+报告使用 `mode=sdk-source-discovery`、`testsExecuted=false`，`status=passed` 只表示发现及身份复核成功。保留 `suites`、`discovery`、前后源码/工具摘要和锁文件身份；Git 模式另要求 `changesUnchanged=true`。顶层 `network` 是发现进程的审计，安装数为 1；进程清理看 `discovery.exit.cleanup`，临时目录看 `temporaryDirectoryCleanup`。不生成正式执行的 `vitest.log`、`vitest-results.json`，没有执行 `exit`、`counts`、`logFile` 或 `resultsFile`。交付检查拒绝将该模式作为 `--sdk-report`，必须实际执行所需测试；不能以 suite 数量作为通过测试数。
+
+读取真实清单后，按本次需求选择明确的 `--suite` 或所需服务环境；不要关闭网络保护或删除测试来让关联组通过。SDK 变化还可能影响前端，可另外使用[前端只发现入口](frontend-offline-tests.md#只发现关联测试)；两个入口各自保留覆盖范围。源码变化后重新确认清单，发现结果不是锁定后续执行范围的快照。
+
+只发现验收（2026-10-27）：真实 BigMath `src/utils/bigmath/utils.ts` 在约 1.3 秒内发现 35 个 SDK suite，包含 `src/clients/v1/modules/accounts/accounts.spec.ts`；源码/工具前后摘要一致、零联网尝试，没有正式测试日志或结果。独立 release 副本中，测试模块、setup、global setup 注入顶层报错后，传递依赖和 Git 范围发现仍通过；零匹配及配置尝试 HTTPS 均正确失败，发现报告被交付证据模式校验拒绝。恢复副本后，普通关联 fixture 实际执行 1 项、原 Stats 源码关联测试 7 项通过，HEAD/索引/源码保持一致，副本已清理。证据为本机忽略目录 `.local/acceptance/sdk-offline/discover-only-bigmath.json`、`discover-only-acceptance.json` 及所列原始文件。只发现通过不改变上述 Accounts 测试的真实 RPC 依赖边界。
+
+本轮工程检查：SDK 默认 153 项、前端默认 17 项、工具回归 113 项、SDK 产物只读 verify 和根类型检查通过；完整前端回归 299 文件 / 3,014 项通过，既有跳过 1 文件 / 1 项。相关 ESLint、Prettier、156 个文档本地链接及差异检查通过；没有构建或启动外部服务。工程证据为同目录 `discover-only-{default.json,tools.tap,artifacts.log,types.log,tests.log}`，前端默认报告在 `.local/acceptance/frontend-offline/sdk-discover-only-default.json`。
+
 ## 按 Git 变更范围运行回归
 
 SDK 纯源码功能分支可以使用明确基线自动收集改动，无需逐个列出 `--related`：

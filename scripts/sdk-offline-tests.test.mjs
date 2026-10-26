@@ -86,6 +86,8 @@ test("SDK related selection rejects ambiguous paths and symlink traversal", asyn
     await symlink(path.join(dir, "src/module.ts"), path.join(dir, "src/internal.ts"));
     const selected = ["src/module.ts"];
     assert.deepEqual(await resolveRelated(dir, selected), selected);
+    for (const options of [{}, { suites: selected }, { related: selected, inspectPort: 9238 }])
+      await assert.rejects(runSdkOffline({ sdkDir: dir, discoverOnly: true, ...options }), /Use --discover-only/);
     await assert.rejects(runSdkOffline({ sdkDir: dir, suites: [], related: selected }), /Do not combine/);
     await assert.rejects(
       runSdkOffline({ sdkDir: dir, related: selected, inspectPort: 9238 }),

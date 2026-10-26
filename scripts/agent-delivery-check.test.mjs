@@ -170,6 +170,7 @@ test("offline evidence binds successful native results to clean source, commit, 
     validate(options);
     for (const changed of [
       { evidence: { ...evidence, mode: "frontend-source-discovery", testsExecuted: false } },
+      { evidence: { ...evidence, mode: "sdk-source-discovery", testsExecuted: false } },
       { evidence: { ...evidence, status: "failed" } },
       { evidence: { ...evidence, [targetField]: "/other" } },
       { head: "b".repeat(40) },
