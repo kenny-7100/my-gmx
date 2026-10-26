@@ -2,17 +2,25 @@
 /* global module */
 const dgram = require("node:dgram");
 const dns = require("node:dns");
+const { appendFileSync } = require("node:fs");
 const http = require("node:http");
 const http2 = require("node:http2");
 const https = require("node:https");
 const { syncBuiltinESMExports } = require("node:module");
 const net = require("node:net");
+const process = require("node:process");
 const tls = require("node:tls");
 
 function installNetworkGuard(profile = "gmx-api") {
+  const eventsFile = process.env.GMX_AGENT_NETWORK_EVENTS_FILE;
+  const record = (event) => {
+    if (eventsFile) appendFileSync(eventsFile, `${event}\n`);
+  };
+  record("installed");
   let attempts = 0;
   const deny = () => {
     attempts++;
+    record("blocked");
     throw new Error(`Network access is forbidden in the ${profile} offline test profile.`);
   };
   net.Socket.prototype.connect = deny;

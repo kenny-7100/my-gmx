@@ -10,6 +10,7 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
+import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
 import { passedResults } from "./sdk-offline-tests.mjs";
 
@@ -22,6 +23,7 @@ const DEFAULT_SUITES = [
 const TOOL_FILES = [
   "scripts/frontend-offline-tests.mjs",
   "scripts/lib/agent-test-process.mjs",
+  "scripts/lib/agent-network-audit.mjs",
   "scripts/sdk-offline-tests.mjs",
   "tools/frontend-offline/vitest.config.mjs",
   "tools/frontend-offline/setup.mjs",
@@ -192,6 +194,7 @@ export async function runFrontendOffline({ suites, inspectPort, projectDir = ROO
           NODE_ENV: "test",
           TZ: "UTC",
           CI: "true",
+          GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "network-events.log"),
           GMX_FRONTEND_OFFLINE_OPTIONS: optionsFile,
           LINGUI_CONFIG: path.join(projectDir, ".linguirc"),
           VITE_APP_PWA_GENERATION: `${execFileSync("git", ["-C", projectDir, "show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim()}000`,
@@ -223,6 +226,10 @@ export async function runFrontendOffline({ suites, inspectPort, projectDir = ROO
     report.sourceAfter = await sourceEvidence(projectDir);
     report.sourceUnchanged = report.sourceAfter.sourceSha256 === report.sourceBefore.sourceSha256;
     assert.ok(report.sourceUnchanged, "frontend source changed during the check.");
+    stage = "network-audit";
+    report.network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
+    assert.equal(report.network.status, "passed", "Offline network audit did not pass; inspect network-events.log.");
+    stage = "results";
     assert.ok(
       passedResults(
         result,

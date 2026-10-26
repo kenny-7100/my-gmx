@@ -18,9 +18,9 @@ function installNetworkGuard(databasePort) {
     "Invalid owned database port."
   );
   let state = net[STATE];
+  const eventsFile = process.env.GMX_AGENT_NETWORK_EVENTS_FILE;
   const record = (event) => {
-    if (process.env.GMX_AGENT_NETWORK_EVENTS_FILE)
-      appendFileSync(process.env.GMX_AGENT_NETWORK_EVENTS_FILE, `${event}\n`);
+    if (eventsFile) appendFileSync(eventsFile, `${event}\n`);
   };
   record("installed");
   if (state) {

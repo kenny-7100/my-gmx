@@ -10,6 +10,8 @@ API 源码调试使用既有持续服务上的[断点验收入口](solana-api-lo
 
 SDK 计算使用[源码离线回归](sdk-offline-tests.md) `yarn sdk:test-offline`（独立交付目录显式使用 `--sdk-dir PATH/sdk`，准备目标依赖并核对运行器/锁文件身份）：复用原 SDK Vitest 配置，精确选测试文件，使用空环境目录和共享 Node 网络保护器，无需构建；报告保留源码摘要和原生结果，拒绝零测试、范围不符及捕获后的联网尝试。SDK 执行与取消复用共享进程组工具，报告明确中断/超时和核实后的清理状态，避免取消后长时间等待或误用成功结果。工具回归为 `yarn test:sdk-offline`，不复制业务实现或预期值。 单 suite 加 `--inspect-port 9238` 可在单个 Vitest fork 的真实 TypeScript 源码设置断点，保留离线隔离；端口预检及 inspector 启动日志核验防止绑定失败却误报成功，操作与实测见同一文档。
 
+前端、SDK、API 离线入口和数据库集成入口共用 `scripts/lib/agent-network-audit.mjs` 读取安装/拒绝事件；各 profile 保留自己的网络权限。离线保护器同步记录事件，运行器独立拒绝迟到或捕获后的连接尝试；回归复用既有 guard 测试，不重复建设测试框架。详见[结束时网络审计](frontend-offline-tests.md#结束时核对网络审计)。
+
 SDK 产物使用[构建产物准备入口](sdk-artifacts.md)：`yarn sdk:artifacts verify` 只读核对源码、工具链与完整产物，已获构建授权后用 `yarn sdk:artifacts build` 隔离预生成和编译，成功后才替换产物。回归入口 `yarn test:sdk-artifacts` 覆盖拒绝错误来源、完整性及替换失败恢复旧产物。
 
 独立网络选择 UI 验收使用[管理浏览器冒烟](solana-browser-smoke.md#一条命令执行并保存独立报告) `yarn solana:browser-check`：复用已有预检、只读用例和 Playwright `webServer`，自动启动/停止 Vite，每次保存独立 JSON/HTML/诊断，不覆盖历史结果、不接管既有服务。功能分支可显式加 `--project-dir PATH`，核对目标依赖及已批准资源后启动目标 Vite，报告和用例留在基础设施目录。回归入口为 `yarn test:solana-browser-check`。

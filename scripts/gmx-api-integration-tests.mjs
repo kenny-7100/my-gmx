@@ -12,6 +12,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { parseArgs } from "node:util";
 
+import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { runTestProcess } from "./lib/agent-test-process.mjs";
 import { sourceInputs } from "./lib/gmx-api-source.mjs";
 import { readApiSource } from "./solana-api-local.mjs";
@@ -269,22 +270,12 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
   const sourceAfter = await sourceInputs(apiDir);
   const unchanged =
     JSON.stringify(after) === JSON.stringify(evidence) && JSON.stringify(sourceAfter) === JSON.stringify(sourceBefore);
-  const events = (
-    await readFile(path.join(runDir, "network-events.log"), "utf8").catch((error) => {
-      if (error.code === "ENOENT") return "";
-      throw error;
-    })
-  )
-    .trim()
-    .split("\n")
-    .filter(Boolean);
-  const installations = events.filter((event) => event === "installed").length;
-  const blockedAttempts = events.filter((event) => event === "blocked").length;
+  const network = await readNetworkAudit(path.join(runDir, "network-events.log"), suites.length);
+  const { installations, blockedAttempts } = network;
   if (!errorCode && blockedAttempts) errorCode = "network-access-forbidden";
   if (!errorCode && installations !== suites.length) errorCode = "network-guard-not-installed";
   const passed =
-    installations === suites.length &&
-    blockedAttempts === 0 &&
+    network.status === "passed" &&
     (!debug || debug.started) &&
     !errorCode &&
     !stopped &&
@@ -309,8 +300,7 @@ export async function runIntegrationTests(apiDir, requested, { inspectPort } = {
     timezone: "UTC",
     network: {
       policy: "owned-database-and-in-process-servers",
-      installations,
-      blockedAttempts,
+      ...network,
       guardSha256: createHash("sha256")
         .update(await readFile(guard))
         .digest("hex"),

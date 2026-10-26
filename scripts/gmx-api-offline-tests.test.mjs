@@ -9,16 +9,21 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { passedResults, runOfflineTests, sourceInputs } from "./gmx-api-offline-tests.mjs";
+import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 
-test("offline guard blocks Node network transports and records swallowed attempts", () => {
-  const guard = fileURLToPath(new URL("../tools/gmx-api-offline/network-guard.cjs", import.meta.url));
-  const result = spawnSync(
-    process.execPath,
-    [
-      "-e",
-      `
+test("offline guard blocks Node transports and independently audits swallowed attempts", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "gmx-network-audit-"));
+  const eventsFile = path.join(dir, "events.log");
+  try {
+    const guard = fileURLToPath(new URL("../tools/gmx-api-offline/network-guard.cjs", import.meta.url));
+    const result = spawnSync(
+      process.execPath,
+      [
+        "-e",
+        `
       const assert = require('node:assert/strict');
       const verify = require(process.argv[1]).installNetworkGuard();
+      delete process.env.GMX_AGENT_NETWORK_EVENTS_FILE;
       const attempts = [
         () => new (require('node:net').Socket)().connect(9, '127.0.0.1'),
         () => require('node:tls').connect(9, '127.0.0.1'),
@@ -34,11 +39,29 @@ test("offline guard blocks Node network transports and records swallowed attempt
       for (const attempt of attempts) assert.throws(attempt, /Network access is forbidden/);
       assert.throws(verify, /attempted network access 9 time/);
       `,
-      guard,
-    ],
-    { encoding: "utf8", timeout: 5000 }
-  );
-  assert.equal(result.status, 0, result.stderr);
+        guard,
+      ],
+      { encoding: "utf8", timeout: 5000, env: { ...process.env, GMX_AGENT_NETWORK_EVENTS_FILE: eventsFile } }
+    );
+    assert.equal(result.status, 0, result.stderr);
+    const audit = await readNetworkAudit(eventsFile, 1);
+    assert.equal(audit.status, "failed");
+    assert.equal(audit.installations, 1);
+    assert.equal(audit.blockedAttempts, 9);
+    for (const [content, status] of [
+      ["installed\n", "passed"],
+      ["installed\ninstalled\n", "failed"],
+      ["installed\nunknown\n", "failed"],
+      ["", "failed"],
+    ]) {
+      await writeFile(eventsFile, content);
+      assert.equal((await readNetworkAudit(eventsFile, 1)).status, status);
+    }
+    await rm(eventsFile);
+    assert.equal((await readNetworkAudit(eventsFile, 1)).status, "failed");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 test("API offline results require exact unique files, executed assertions and a clean exit", () => {
