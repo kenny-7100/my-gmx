@@ -34,7 +34,7 @@ yarn sdk:test-offline --suite src/utils/__tests__/bigmath.spec.ts --inspect-port
 4. Agent 自动检查时，可以使用 CDP `Debugger.setInstrumentationBreakpoint(beforeScriptExecution)` 在目标脚本执行前暂停，核对该脚本 URL 和 inline source map 的 `sourcesContent` 与磁盘源码一致，再按 source map 对应位置设断点；移除 instrumentation breakpoint 后恢复。SDK 的 Vite source map 使用相对 `sources`，应相对于脚本 URL 解析，不能直接套用 API tsx 映射格式。
 5. BigInt 变量可通过 `Debugger.evaluateOnCallFrame` 逐个读取；CDP 返回 `type=bigint` 和 `unserializableValue`（例如 `10n`），不能直接把含 BigInt 的对象当作普通 JSON 序列化。检查后恢复执行并关闭调试连接，让 Vitest 完成并保存原生结果。
 
-调试只接受一份 suite，避免多个测试文件重建 worker、调试目标和端口冲突。调试整次上限为 30 分钟（包含等待与暂停），普通模式保持 180 秒；原 suite 的测试超时配置仍保留。无需构建 SDK，不加载项目环境文件，不关闭联网保护。需要中止时对外层命令 Ctrl-C 或 SIGTERM，沿用原进程组清理，不仅关闭浏览器调试窗口；断开 debugger 可能使测试继续执行。
+调试只接受一份 suite，避免多个测试文件重建 worker、调试目标和端口冲突。调试整次上限为 30 分钟（包含等待与暂停），普通模式保持 180 秒；原 suite 的测试超时配置仍保留。无需构建 SDK，不加载项目环境文件，不关闭联网保护。需要中止时对外层命令 Ctrl-C 或 SIGTERM，使用共享进程组清理并核对 `exit.cleanup=passed`，不仅关闭浏览器调试窗口；断开 debugger 可能使测试继续执行。
 
 调试报告额外记录 `debug.inspector`、`pauseOnStart`、`timeoutMs` 和日志确认的 `started`。由于已确认当前 Vitest 在 inspector 绑定失败时仍可能运行测试并退出成功，入口同时做端口预检和启动日志检查，失败不能报告 passed。该模式的 passed 仍只代表选定测试通过、源码未变和 inspector 成功启动；具体断点命中、局部变量或业务正确性须有独立证据，不能从端口可连接推断。
 
@@ -57,7 +57,7 @@ yarn sdk:test-offline --suite src/utils/__tests__/bigmath.spec.ts --inspect-port
 - 测试在独立临时工作目录中运行，Vite envDir 与缓存也指向该目录；只传 PATH、NODE_ENV=test、TZ=UTC、CI 和本轮参数文件路径，不继承钱包、数据库等调用方配置，不加载项目 `.env`。原 Vitest 配置及测试仍是可执行代码，本工具不承诺阻止它们主动读取任意文件。
 - 复用 [API 离线网络保护器](../tools/gmx-api-offline/network-guard.cjs)，在测试 setup 阶段阻止 Node fetch、HTTP/HTTPS、socket、TLS、HTTP/2、UDP 和 DNS；同步 builtin ESM 导出。文件结束时检查尝试次数，即使测试捕获了网络异常也失败。保护器不替换业务数据，不提供 RPC/服务兜底。
 - 网络保护作用于所选 Node 测试进程，不是操作系统沙箱；不防御恶意测试主动撤销保护或另起子进程。原 Vitest 配置加载发生在测试 setup 之前，只使用可信 checkout；需要真实服务的测试应使用对应环境，不能通过关闭保护器获得本离线入口的 passed。
-- 文件串行执行、无重试；普通模式整次 Vitest 限时 180 秒，显式调试模式为 30 分钟，超时终止所属进程组。SIGINT/SIGTERM 转发到所属测试进程组，正常退出或失败均清理临时目录及遗留子进程；SIGKILL/系统崩溃不保证清理。
+- 文件串行执行、无重试；普通模式整次 Vitest 限时 180 秒，显式调试模式为 30 分钟，超时终止所属进程组。通过共享 `scripts/lib/agent-test-process.mjs` 创建独立 POSIX 进程组；SIGINT/SIGTERM 先发送 SIGTERM，1 秒后仍未退出则强制停止，超时直接终止所属组。正常退出或失败后也检查并清理组内存活子进程，使用系统 `ps` 核实非 zombie 成员已消失，再删除临时目录；SIGKILL/系统崩溃不保证清理。
 - 退出 0 要求进程正常退出、JSON success、实际执行测试全部通过、每个所选文件都有通过断言且无 skipped/todo、结果文件范围精确一致、SDK 源码摘要未变化。其他情况退出 1。路径等前置错误输出 stderr，不进入测试。
 
 日志和报告在忽略目录 `.local/acceptance/sdk-offline/run-*/`：`vitest.log`、原生 `vitest-results.json`、汇总 `report.json`。记录选定文件、时间、进程退出、测试数、SDK Git commit/dirty、源码文件数和聚合 SHA-256，以及工具和根锁文件摘要。源码摘要覆盖 SDK `src/` 中的 TS/TSX/JS/JSON、SDK package/tsconfig/Vitest 配置；不读取 `.env`，不代表整个依赖树、构建产物或部署身份。dirty 是所处 Git 仓库状态，不能仅凭 commit 复原工作树。
@@ -84,3 +84,14 @@ yarn sdk:test-offline --suite src/utils/__tests__/bigmath.spec.ts --inspect-port
 工程检查通过：3 组工具回归、脚本语法、ESLint、Prettier、文档链接和 `git diff --check`；`yarn tscheck` 退出 0；根前端回归 299 个文件通过 / 1 个原有跳过，3014 项通过 / 1 项原有跳过，退出 0。仍有既有 Browserslist 过期提示及 happy-dom teardown AbortError 输出，本轮不修改这些无关内容。汇总为本机 `.local/acceptance/sdk-offline/acceptance.json`。
 
 实现入口：[sdk-offline-tests.mjs](../scripts/sdk-offline-tests.mjs)。本基础设施属于 `solana-integration` 个人开发基础，不携带到基于 `origin/release` 的业务 PR。
+
+
+## 进程清理统一验收（2026-10-27）
+
+SDK 入口已复用与前端/API 相同的进程组工具，移除原有只发送 SIGTERM 的中断逻辑和不核验结果的结束清理。报告 `exit` 包含 `processGroup`、`interrupted`、`timedOut`、`cleanup`，信号发送异常时包含 `signalError`；中断、超时、清理失败或信号异常均不能 passed，即使测试已写出成功结果。`temporaryDirectory` 保存本次临时路径，`temporaryDirectoryCleanup` 仍记录目录清理。共享工具源码也纳入 `toolSha256`，后续变更会改变测试证据指纹。
+
+适用于 macOS/Linux，依赖系统 `ps`；只清理所属进程组，不保证清理由测试主动脱离组的后代，外层运行器被 SIGKILL 或系统崩溃时也不能执行清理。不要为清理遗留资源而结束其他任务；核对报告中的 processGroup 和归属。
+
+隔离 SDK 源码副本实际运行成功、断言失败和执行中 SIGTERM 三条路径，均确认所属子进程消失、临时目录实际删除；副本随后清理，实际 SDK 文件未改。真实 BigMath 源码断点两次命中、BigInt 参数和调用栈保持正确，环境/网络隔离保留，恢复后原测试 6 项通过。调试初始等待时中断、端口占用、非法端口和多 suite 拒绝路径通过，占用服务保持运行。原默认 153 项通过。忽略 SIGTERM 后强制结束、超时和无关哨兵进程保留由共享真实 Node 回归覆盖，不额外等待 SDK 普通 180 秒或调试 30 分钟重复该测试。
+
+本机证据在忽略目录 `.local/acceptance/sdk-offline/`：`process-acceptance.json` 保存三条真实执行路径，`process-debug-acceptance.json` / `process-debug-negative.json` 保存调试验证，`process-default.json` 保存默认回归。没有新增重复生命周期测试框架，统一回归入口仍为 `yarn test:agent-tools`。

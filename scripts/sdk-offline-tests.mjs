@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawn, execFileSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { closeSync, openSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, readdir, realpath, rm, stat, writeFile } from "node:fs/promises";
@@ -10,6 +10,8 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
+import { runTestProcess } from "./lib/agent-test-process.mjs";
+
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const DEFAULT_SUITES = [
   "src/utils/__tests__/bigmath.spec.ts",
@@ -18,6 +20,7 @@ const DEFAULT_SUITES = [
 ];
 const TOOL_FILES = [
   "scripts/sdk-offline-tests.mjs",
+  "scripts/lib/agent-test-process.mjs",
   "tools/sdk-offline/vitest.config.mjs",
   "tools/sdk-offline/setup.mjs",
   "tools/gmx-api-offline/network-guard.cjs",
@@ -127,6 +130,7 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     logFile,
     resultsFile,
     reportFile,
+    temporaryDirectory: emptyDir,
     excluded: [
       "live services",
       "wallets and transactions",
@@ -134,22 +138,6 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
       "Solana protocol math parity",
     ],
   };
-  let child;
-  let interrupted = false;
-  const killGroup = (signal) => {
-    if (!child?.pid) return;
-    try {
-      process.kill(-child.pid, signal);
-    } catch (error) {
-      if (error.code !== "ESRCH") throw error;
-    }
-  };
-  const stop = () => {
-    interrupted = true;
-    killGroup("SIGTERM");
-  };
-  process.on("SIGINT", stop);
-  process.on("SIGTERM", stop);
   let stage = "source-evidence";
   try {
     if (inspectPort !== undefined) {
@@ -165,40 +153,28 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     const optionsFile = path.join(emptyDir, "options.json");
     await writeFile(optionsFile, JSON.stringify({ sdkDir, suites, emptyDir, resultsFile }), { mode: 0o600 });
     stage = "vitest";
-    assert.ok(!interrupted, "SDK check interrupted.");
     const fd = openSync(logFile, "wx", 0o600);
-    let timer;
     try {
-      child = spawn(
-        process.execPath,
-        [
+      report.exit = await runTestProcess({
+        args: [
           path.join(ROOT, "node_modules/vitest/vitest.mjs"),
           "run",
           "--config",
           path.join(ROOT, "tools/sdk-offline/vitest.config.mjs"),
           ...(inspectPort === undefined ? [] : [`--inspect-brk=127.0.0.1:${inspectPort}`, "--pool=forks"]),
         ],
-        {
-          cwd: emptyDir,
-          env: {
-            PATH: process.env.PATH,
-            NODE_ENV: "test",
-            TZ: "UTC",
-            CI: "true",
-            GMX_SDK_OFFLINE_OPTIONS: optionsFile,
-          },
-          stdio: ["ignore", fd, fd],
-          detached: true,
-        }
-      );
-      timer = setTimeout(() => killGroup("SIGKILL"), report.debug?.timeoutMs ?? 180000);
-      report.exit = await new Promise((resolve, reject) => {
-        child.once("error", reject);
-        child.once("exit", (code, signal) => resolve({ code, signal }));
+        cwd: emptyDir,
+        env: {
+          PATH: process.env.PATH,
+          NODE_ENV: "test",
+          TZ: "UTC",
+          CI: "true",
+          GMX_SDK_OFFLINE_OPTIONS: optionsFile,
+        },
+        logFd: fd,
+        timeoutMs: report.debug?.timeoutMs ?? 180000,
       });
     } finally {
-      clearTimeout(timer);
-      killGroup("SIGKILL");
       closeSync(fd);
     }
     stage = "results";
@@ -210,6 +186,8 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
         "SDK inspector did not start successfully; inspect vitest.log."
       );
     }
+    assert.ok(!report.exit.interrupted && !report.exit.timedOut, "SDK check interrupted or timed out.");
+    assert.ok(report.exit.cleanup === "passed" && !report.exit.signalError, "SDK test process cleanup failed.");
     const result = JSON.parse(await readFile(resultsFile, "utf8"));
     report.counts = {
       passed: result.numPassedTests,
@@ -220,7 +198,6 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     };
     report.sourceAfter = await sourceEvidence(sdkDir);
     report.sourceUnchanged = report.sourceAfter.sourceSha256 === report.sourceBefore.sourceSha256;
-    assert.ok(!interrupted, "SDK check interrupted.");
     assert.ok(report.sourceUnchanged, "SDK source changed during the check.");
     assert.ok(
       passedResults(
@@ -235,8 +212,6 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     report.failureStage = stage;
     report.error = { name: error.name, message: error.message.split("\n")[0].slice(0, 240) };
   } finally {
-    process.off("SIGINT", stop);
-    process.off("SIGTERM", stop);
     await rm(emptyDir, { recursive: true, force: true });
     report.temporaryDirectoryCleanup = "passed";
     report.finishedAt = new Date().toISOString();
