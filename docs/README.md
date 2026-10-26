@@ -8,7 +8,7 @@
 | [GMTrade 四页完整功能与依赖](../gmtrade-pages-dependency-audit.md) | 根目录完整六列表：Stake、GT My/Global/Buyback、Stats、Referrals 共 72 个功能/依赖分组；含当前启用分支、源码证据、线上只读核验和推进条件 |
 | [GMX 当前线上服务地址](gmx-live-services.md) | 从真实线上页面请求核实各链 API、价格 keeper/fallback、SQD、Goldsky、RPC 与其他依赖，区分线上调用和发布脚本配置 |
 | [Solana gmx-api 进度与联调协调](../solana-api-coordination.md)（[英文版](../solana-api-coordination.en.md)） | 待发送给负责人的沟通草稿：真实交易数据、联调节点、外部依赖及 FESOL-87 独立切片价值确认 |
-| [Linear 需求开发与 PR 交付流程](linear-development-workflow.md) | 一需求一分支、开发与交付基础隔离；只读 delivery-check 核对提交来源与显式文件清单，支持独立目录、显式 HEAD/干净状态及前端、SDK、浏览器和 API 测试证据绑定；命名规范、Draft PR、自测表格及人工确认 |
+| [Linear 需求开发与 PR 交付流程](linear-development-workflow.md) | 一需求一分支、开发与交付基础隔离；只读 delivery-check 核对提交来源与显式文件清单，支持独立目录、显式 HEAD/干净状态及前端、SDK、浏览器和 API 测试证据绑定（含已声明的生成路由来源复核）；命名规范、Draft PR、自测表格及人工确认 |
 | [Linear 需求查阅与复盘](linear-requirements.md) | FESOL 实时查询、全量快照、项目筛选和进度差异工具的配置、命令与验收记录 |
 | [需求推荐与就绪核验](solana-next-task.md) | 综合 Linear、GitHub PR、最新上游代码和实际前置，推荐下一条迁移需求 |
 | [Solana 迁移实际进度评估](solana-progress.md) | 跨仓库取证、去重与工作量估算，输出两个进度口径及中英文简述 |
