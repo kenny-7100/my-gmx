@@ -98,7 +98,9 @@
     "test:regression:funded:types": "tsc -p autotests/regression/funded/tsconfig.json",
     "build:gmsol-sdk": "vite build --config vite.gmsol.config.ts",
     "sdk:artifacts": "node scripts/sdk-artifacts.mjs",
-    "test:sdk-artifacts": "node --test scripts/sdk-artifacts.test.mjs"
+    "test:sdk-artifacts": "node --test scripts/sdk-artifacts.test.mjs",
+    "agent:delivery-check": "node scripts/agent-delivery-check.mjs",
+    "test:agent-delivery-check": "node --test scripts/agent-delivery-check.test.mjs"
   },
   "dependencies": {
     "@apollo/client": "3.5.6",
