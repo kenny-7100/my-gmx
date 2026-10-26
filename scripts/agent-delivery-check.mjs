@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -14,6 +15,7 @@ import {
   verifyRequiredRoutes,
 } from "./gmx-api-integration-tests.mjs";
 import { passedResults as passedApiResults } from "./gmx-api-offline-tests.mjs";
+import { typecheckInputs, typecheckTooling } from "./gmx-api-tscheck.mjs";
 import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { apiTestTooling, readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
 import {
@@ -110,7 +112,10 @@ export function validateApiRoutes(evidence, current) {
     assert.deepEqual(routes, { status: "not-checked" }, "Unchecked routes contain validation evidence");
     return;
   }
-  assert.equal(evidence.mode, "isolated-postgres-integration", "Unexpected generated route test mode");
+  assert.ok(
+    ["isolated-postgres-integration", "api-typescript-no-emit"].includes(evidence.mode),
+    "Unexpected generated route mode"
+  );
   assert.equal(routes.status, "passed", "Generated route validation did not pass");
   for (const report of [routes.before, routes.after, current]) {
     assert.ok(report && report.schemaVersion === 2 && report.status === "passed", "Missing valid route evidence");
@@ -118,6 +123,32 @@ export function validateApiRoutes(evidence, current) {
   }
   sameGeneratedRoutes(routes.before, routes.after);
   sameGeneratedRoutes(routes.after, current);
+}
+
+export function validateApiTypecheckEvidence({ evidence, apiDir, head, source, inputs, runtime, log, routes }) {
+  assert.equal(evidence.schemaVersion, 1, "Unsupported API typecheck schema");
+  assert.equal(evidence.mode, "api-typescript-no-emit", "Expected an API typecheck report");
+  assert.equal(evidence.status, "passed", "API typecheck did not pass");
+  assert.equal(evidence.apiDir, apiDir, "API typecheck targets another checkout");
+  assert.equal(source.commit, head, "Current API checkout does not match delivery head");
+  assert.equal(source.dirty, false, "Current API checkout is dirty");
+  assert.equal(evidence.sourceUnchanged, true, "API typecheck inputs changed during compilation");
+  assert.equal(evidence.toolingUnchanged, true, "API typecheck tooling changed during compilation");
+  for (const key of ["source", "sourceAfter"])
+    assert.deepEqual(evidence[key], source, "API typecheck identity is stale");
+  for (const key of ["sourceInputs", "sourceInputsAfter"])
+    assert.deepEqual(evidence[key], inputs, "API typecheck inputs are stale");
+  for (const key of ["runtime", "runtimeAfter"])
+    assert.deepEqual(evidence[key], runtime, "API typecheck compiler or tools are stale");
+  assert.equal(evidence.logSha256, createHash("sha256").update(log).digest("hex"), "API typecheck log changed");
+  assert.equal(evidence.exit.code, 0, "API typecheck compiler failed");
+  assert.ok(
+    !evidence.exit.signal && !evidence.exit.interrupted && !evidence.exit.timedOut && !evidence.exit.signalError,
+    "API typecheck was interrupted or timed out"
+  );
+  assert.equal(evidence.exit.cleanup, "passed", "API typecheck process cleanup did not pass");
+  assert.equal(evidence.generatedRoutes?.status, "passed", "API typecheck route evidence is missing or failed");
+  validateApiRoutes(evidence, routes);
 }
 
 export function validateApiEvidence({ evidence, apiDir, head, source, inputs, tooling, results, suites, network }) {
@@ -224,6 +255,7 @@ export async function checkDelivery({
   sdkReport,
   browserReport,
   apiReports = [],
+  apiTypecheckReport,
 }) {
   assert.ok(
     Array.isArray(apiReports) && apiReports.every((file) => typeof file === "string" && file.length > 0),
@@ -246,6 +278,11 @@ export async function checkDelivery({
     "Use a nonempty browser report path"
   );
   assert.ok(browserReport === undefined || requireClean, "--browser-report requires --require-clean");
+  assert.ok(
+    apiTypecheckReport === undefined || (typeof apiTypecheckReport === "string" && apiTypecheckReport.length > 0),
+    "Use a nonempty API typecheck report path"
+  );
+  assert.ok(apiTypecheckReport === undefined || requireClean, "--api-typecheck-report requires --require-clean");
   assert.ok(typeof head === "string" && head.length > 0, "An explicit --head ref is required");
   assert.ok(Array.isArray(allowPaths) && allowPaths.length > 0, "At least one explicit --allow-path is required");
   for (const file of allowPaths) {
@@ -280,6 +317,7 @@ export async function checkDelivery({
     sdkEvidence: { status: "not-checked" },
     browserEvidence: { status: "not-checked" },
     apiEvidence: [],
+    apiTypecheckEvidence: { status: "not-checked" },
     refs: {
       base: { ref: base, sha: baseSha },
       developmentBase: { ref: developmentBase, sha: developmentSha },
@@ -479,6 +517,40 @@ export async function checkDelivery({
       });
     }
   }
+  if (apiTypecheckReport !== undefined) {
+    const reportFile = path.resolve(apiTypecheckReport);
+    report.apiTypecheckEvidence = { status: "blocked", reportFile };
+    let stage = "report";
+    try {
+      const evidence = JSON.parse(await readFile(reportFile, "utf8"));
+      stage = "source-and-tooling";
+      const source = await readApiTestSource(cwd, []);
+      const inputs = await typecheckInputs(cwd);
+      const runtime = await typecheckTooling(cwd);
+      stage = "compiler-log";
+      const log = await readFile(evidence.logFile);
+      stage = "generated-routes";
+      const routes = await verifyRequiredRoutes(cwd);
+      stage = "source-and-results";
+      validateApiTypecheckEvidence({ evidence, apiDir: cwd, head: headSha, source, inputs, runtime, log, routes });
+      Object.assign(report.apiTypecheckEvidence, {
+        status: "passed",
+        testedCommit: source.commit,
+        sourceSha256: inputs.sha256,
+        typescript: runtime.typescript,
+        logSha256: evidence.logSha256,
+      });
+    } catch (error) {
+      report.findings.push({
+        code: "api-typecheck-evidence-invalid",
+        reportFile,
+        stage,
+        ...(["ERR_ASSERTION", "generated-routes-prerequisite"].includes(error.code)
+          ? { message: error.message.split("\n")[0].slice(0, 240) }
+          : {}),
+      });
+    }
+  }
   report.status = report.findings.length ? "blocked" : "passed";
   return report;
 }
@@ -493,6 +565,7 @@ async function runCli() {
         "sdk-report": { type: "string" },
         "browser-report": { type: "string" },
         "api-report": { type: "string", multiple: true },
+        "api-typecheck-report": { type: "string" },
         base: { type: "string", default: "origin/release" },
         "development-base": { type: "string", default: "solana-integration" },
         head: { type: "string" },
@@ -503,7 +576,7 @@ async function runCli() {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--project-dir PATH] [--require-clean] [--frontend-report PATH] [--sdk-report PATH] [--browser-report PATH] [--api-report PATH ...] [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. --require-clean also checks checkout HEAD, index, working files and untracked paths. API reports require an API checkout and may be repeated for offline and integration evidence. Does not fetch refs or assess business correctness.\n"
+        "Usage: yarn agent:delivery-check --head REF --allow-path FILE [--project-dir PATH] [--require-clean] [--frontend-report PATH] [--sdk-report PATH] [--browser-report PATH] [--api-report PATH ...] [--api-typecheck-report PATH] [--allow-path FILE ...] [--base origin/release] [--development-base solana-integration] [--expected-base SHA]\nRead-only committed-history and exact-path isolation check. --require-clean also checks checkout HEAD, index, working files and untracked paths. API reports require an API checkout and may be repeated for offline and integration evidence. Does not fetch refs or assess business correctness.\n"
       );
       return;
     }
@@ -514,6 +587,7 @@ async function runCli() {
       sdkReport: values["sdk-report"],
       browserReport: values["browser-report"],
       apiReports: values["api-report"],
+      apiTypecheckReport: values["api-typecheck-report"],
       base: values.base,
       developmentBase: values["development-base"],
       head: values.head,

@@ -34,7 +34,7 @@ export async function typecheckInputs(apiDir) {
   return { sha256: hash(JSON.stringify(Object.entries(files).sort())), fileCount: Object.keys(files).length };
 }
 
-async function tooling(apiDir) {
+export async function typecheckTooling(apiDir) {
   const directory = path.join(apiDir, "node_modules/typescript");
   const pkg = JSON.parse(await readFile(path.join(directory, "package.json"), "utf8"));
   const compiler = {
@@ -66,7 +66,7 @@ export async function runTypecheck(apiDir) {
   const source = await readApiTestSource(apiDir, []);
   const routesBefore = await verifyRequiredRoutes(apiDir);
   const before = await typecheckInputs(apiDir);
-  const runtime = await tooling(apiDir);
+  const runtime = await typecheckTooling(apiDir);
   const output = path.join(ROOT, ".local/acceptance/gmx-api-tscheck");
   await mkdir(output, { recursive: true });
   const runDir = await mkdtemp(path.join(output, "run-"));
@@ -105,12 +105,13 @@ export async function runTypecheck(apiDir) {
     generatedRoutes: { status: "failed", before: routesBefore },
     exit,
     logFile,
+    logSha256: hash(await readFile(logFile)),
     reportFile: path.join(runDir, "report.json"),
   };
   try {
     report.sourceAfter = await readApiTestSource(apiDir, []);
     report.sourceInputsAfter = await typecheckInputs(apiDir);
-    report.runtimeAfter = await tooling(apiDir);
+    report.runtimeAfter = await typecheckTooling(apiDir);
     report.sourceUnchanged =
       JSON.stringify(source) === JSON.stringify(report.sourceAfter) &&
       JSON.stringify(before) === JSON.stringify(report.sourceInputsAfter);
