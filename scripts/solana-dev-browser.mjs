@@ -1,6 +1,5 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -10,6 +9,8 @@ import { parseArgs } from "node:util";
 
 import { sourceEvidence } from "./frontend-offline-tests.mjs";
 import { attachApiDiagnostics } from "./lib/agent-browser-diagnostics.mjs";
+import { sourceInputs } from "./lib/gmx-api-source.mjs";
+import { readApiSource } from "./solana-api-local.mjs";
 import { control } from "./solana-dev.mjs";
 import { API_PREFIX } from "../tools/solana-dev/vite.mjs";
 
@@ -33,7 +34,9 @@ export async function runCli() {
     assert.equal(workspace.webUrl, origin, "Browser origin must match the managed workspace.");
     assert.ok(workspace.services.vite && workspace.services.api, "Select both Vite and API for this probe.");
     const { projectDir } = workspace;
+    const apiDir = workspace.services.api.apiDir;
     const frontendSource = await sourceEvidence(projectDir);
+    const apiSource = { ...(await readApiSource(apiDir)).evidence, sourceInputs: await sourceInputs(apiDir) };
     const output = path.join(ROOT, ".local/acceptance/solana-dev");
     await mkdir(output, { recursive: true });
     runDir = await mkdtemp(path.join(output, "browser-"));
@@ -66,11 +69,11 @@ export async function runCli() {
       source[file] = createHash("sha256")
         .update(await readFile(path.join(projectDir, file)))
         .digest("hex");
-    source["gmx-api/src/solanaApp.ts"] = createHash("sha256")
-      .update(await readFile(path.join(ROOT, "gmx-api/src/solanaApp.ts")))
-      .digest("hex");
+    source["gmx-api/src/solanaApp.ts"] = apiSource.sha256["src/solanaApp.ts"];
     const frontendSourceAfter = await sourceEvidence(projectDir);
+    const apiSourceAfter = { ...(await readApiSource(apiDir)).evidence, sourceInputs: await sourceInputs(apiDir) };
     assert.deepEqual(frontendSourceAfter, frontendSource, "Frontend source changed during the browser probe.");
+    assert.deepEqual(apiSourceAfter, apiSource, "API source changed during the browser probe.");
     const report = await diagnostics.save(path.join(runDir, "requests.json"), {
       probeResult: "passed",
       requestSource: "explicit-tool-probe",
@@ -82,9 +85,10 @@ export async function runCli() {
       frontendCommit: frontendSource.commit,
       frontendSource,
       frontendSourceAfter,
-      apiCommit: execFileSync("git", ["-C", path.join(ROOT, "gmx-api"), "rev-parse", "HEAD"], {
-        encoding: "utf8",
-      }).trim(),
+      apiDir,
+      apiCommit: apiSource.commit,
+      apiSource,
+      apiSourceAfter,
       source,
     });
     const failure = report.records.find((record) => record.status === 400);
@@ -98,6 +102,8 @@ export async function runCli() {
           status: "passed",
           projectDir,
           frontendSource,
+          apiDir,
+          apiSource,
           ...result,
           requestsFile: path.join(runDir, "requests.json"),
           failureTraceId: failure.traceId,
@@ -108,7 +114,7 @@ export async function runCli() {
       ) + "\n"
     );
     process.stdout.write(
-      `${JSON.stringify({ status: "passed", projectDir, frontendSource, runDir, failureTraceId: failure.traceId, businessPageAcceptance: "not-run" }, null, 2)}\n`
+      `${JSON.stringify({ status: "passed", projectDir, frontendSource, apiDir, apiSource, runDir, failureTraceId: failure.traceId, businessPageAcceptance: "not-run" }, null, 2)}\n`
     );
   } catch {
     if (runDir) {
