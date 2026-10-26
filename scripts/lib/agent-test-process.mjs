@@ -12,7 +12,7 @@ async function remainingGroup(pid) {
   });
 }
 
-export async function runTestProcess({ args, cwd, env, logFd, timeoutMs = 120000 }) {
+export async function runTestProcess({ args, cwd, env, logFd, timeoutMs = 120000, stopGraceMs = 1000 }) {
   let child;
   let timer;
   let stopTimer;
@@ -30,7 +30,7 @@ export async function runTestProcess({ args, cwd, env, logFd, timeoutMs = 120000
   const stop = () => {
     interrupted = true;
     signalGroup("SIGTERM");
-    if (!stopTimer) stopTimer = setTimeout(() => signalGroup("SIGKILL"), 1000);
+    if (!stopTimer) stopTimer = setTimeout(() => signalGroup("SIGKILL"), stopGraceMs);
   };
   process.on("SIGINT", stop);
   process.on("SIGTERM", stop);

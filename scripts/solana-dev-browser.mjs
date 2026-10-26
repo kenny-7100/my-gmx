@@ -20,6 +20,13 @@ export async function runCli() {
   let runDir;
   let diagnostics;
   let stage = "arguments";
+  let interrupted = false;
+  const interrupt = () => {
+    interrupted = true;
+    browser?.close().catch(() => undefined);
+  };
+  process.on("SIGINT", interrupt);
+  process.on("SIGTERM", interrupt);
   try {
     const { values } = parseArgs({
       options: { "web-port": { type: "string", default: "3010" }, "project-dir": { type: "string", default: ROOT } },
@@ -42,6 +49,7 @@ export async function runCli() {
     runDir = await mkdtemp(path.join(output, "browser-"));
     stage = "chrome-startup";
     browser = await chromium.launch({ channel: "chrome", headless: true });
+    assert.ok(!interrupted, "Browser probe interrupted.");
     const page = await browser.newPage();
     diagnostics = attachApiDiagnostics(page, `${origin}${API_PREFIX}`);
     // Open the actual Vite origin without exercising or replacing a GMX business module.
@@ -49,9 +57,10 @@ export async function runCli() {
     await page.goto(`${origin}/__agent/probe`, { waitUntil: "domcontentloaded" });
     stage = "api-requests";
     const result = await page.evaluate(async (prefix) => {
-      const markets = await fetch(`${prefix}/v1/markets/config`);
-      const positions = await fetch(`${prefix}/v1/positions?address=11111111111111111111111111111111`);
-      const invalid = await fetch(`${prefix}/v1/positions?address=invalid-address&probe=redacted-sentinel`);
+      const request = (route) => fetch(`${prefix}${route}`, { signal: AbortSignal.timeout(10000) });
+      const markets = await request("/v1/markets/config");
+      const positions = await request("/v1/positions?address=11111111111111111111111111111111");
+      const invalid = await request("/v1/positions?address=invalid-address&probe=redacted-sentinel");
       return {
         markets: markets.status,
         marketCount: (await markets.json()).length,
@@ -74,6 +83,7 @@ export async function runCli() {
     const apiSourceAfter = { ...(await readApiSource(apiDir)).evidence, sourceInputs: await sourceInputs(apiDir) };
     assert.deepEqual(frontendSourceAfter, frontendSource, "Frontend source changed during the browser probe.");
     assert.deepEqual(apiSourceAfter, apiSource, "API source changed during the browser probe.");
+    assert.ok(!interrupted, "Browser probe interrupted.");
     const report = await diagnostics.save(path.join(runDir, "requests.json"), {
       probeResult: "passed",
       requestSource: "explicit-tool-probe",
@@ -127,6 +137,8 @@ export async function runCli() {
     process.exitCode = 1;
   } finally {
     await browser?.close();
+    process.off("SIGINT", interrupt);
+    process.off("SIGTERM", interrupt);
   }
 }
 
