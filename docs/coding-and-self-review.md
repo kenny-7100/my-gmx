@@ -4,6 +4,8 @@
 
 ## 执行前的环境检查与顺序
 
+需要同时运行前端/API/RPC 时，按[全栈工作区说明](solana-dev-workspace.md)使用 `yarn solana:dev up/status/logs/stop`，核对所选服务及 borrowed/owned 归属。浏览器请求问题使用 `solana:dev:browser` 和 `solana:dev trace --id`；contracts 的 partial 不当作完整通过。当前前端未消费开发代理路径，不为环境验收补业务接入。仅需 API 时仍使用下文的独立 API 入口。
+
 本节用于安排当前任务已获授权的检查，不要求每次任务运行所有命令。用户已长期授权本地 Vite、Chrome 及已授权任务所需的本地页面验收；构建（含 SDK 构建）、其他服务及部署仍须遵循根 `AGENTS.md` 的授权边界；用户仅要求 `push` 时直接执行推送流程，不插入本节检查。纯文档修改只检查文档路径、链接及差异。
 
 1. **先确定目标与范围。** 需求验收先按[验收映射流程](agent-acceptance-workflow.md)实时核对需求，逐项填写条件、预期、数据模式、方法和版本，再选择所需预检；不将环境工具通过当作业务需求全部通过。涉及现有线上行为或真实数据时，先按[线上核验顺序](agent-acceptance-workflow.md#线上行为与数据核验)查对应 GMX/GMTrade 服务表并核对目标页面当前请求，再做本地或 PR 版本验证，不用历史环境文件认定当前部署。确认命令的工作目录、目标仓库和检查范围，再启动批量检查。主仓库含嵌套参考仓库，不能把它们当作前端测试或 TypeScript 配置的自动发现目标。单文件格式检查使用 `yarn exec prettier --check PATH`（写入时用 `--write`）；`yarn prettier` 是仓库全量格式化脚本，追加文件参数不会缩小原有范围。
