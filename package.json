@@ -28,6 +28,7 @@
     "solana:api-local": "node scripts/solana-api-local.mjs",
     "gmx-api:test-offline": "node scripts/gmx-api-offline-tests.mjs",
     "gmx-api:test-integration": "node scripts/gmx-api-integration-tests.mjs",
+    "gmx-api:prepare": "node scripts/gmx-api-prepare.mjs",
     "test:gmx-api-integration": "node --test scripts/gmx-api-integration-tests.test.mjs",
     "test:gmx-api-offline": "node --test scripts/gmx-api-offline-tests.test.mjs",
     "agent:wallet": "node scripts/agent-wallet.mjs",
