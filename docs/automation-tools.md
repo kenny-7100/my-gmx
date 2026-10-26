@@ -6,7 +6,7 @@
 
 API 源码调试使用既有持续服务上的[断点验收入口](solana-api-local.md#agent-可重复的源码断点验收)：`yarn solana:api-debug` 自动验证真实 inspector、TypeScript 映射、请求断点、限定局部变量与恢复结果；默认启动并清理所属服务，`--attach` 保留借用服务。回归命令为 `yarn test:solana-api-debug`，使用真实隔离 Node inspector，不改业务源码。
 
-前端局部测试使用[源码离线入口](frontend-offline-tests.md) `yarn frontend:test-offline --suite src/...spec.ts`：复用原 Vite/happy-dom 配置、初始化、网络保护器和精确结果检查，在隔离 CWD/环境中运行，保存独立原生结果；不修改原 `test:ci`。`--project-dir PATH` 可验证独立交付 checkout 的源码、配置与依赖，工具和报告留在基础设施目录，不复制到业务分支。默认日期、PWA 和 Solana flag 三文件 17 项已实测通过，选择器回归自动纳入统一工具测试。单 suite 加 `--inspect-port 9240` 可在隔离的单个 Vitest fork 调试原 TypeScript 源码；已核对断点、输入、调用栈及恢复，进程清理复用共享工具并记录结果，操作见同一文档。
+前端局部测试使用[源码离线入口](frontend-offline-tests.md) `yarn frontend:test-offline --suite src/...spec.ts`：复用原 Vite/happy-dom 配置、初始化、网络保护器和精确结果检查，在隔离 CWD/环境中运行，保存独立原生结果；不修改原 `test:ci`。`--project-dir PATH` 可验证独立交付 checkout 的源码、配置与依赖，工具和报告留在基础设施目录，不复制到业务分支。默认日期、PWA 和 Solana flag 三文件 17 项已实测通过，选择器回归自动纳入统一工具测试。局部源码改动可用重复 `--related src/...ts` 按目标 Vitest 的真实依赖图发现测试，保留发现日志/清单并复用离线执行；无关联测试明确失败，不退回默认范围。单 suite 加 `--inspect-port 9240` 可在隔离的单个 Vitest fork 调试原 TypeScript 源码；已核对断点、输入、调用栈及恢复，进程清理复用共享工具并记录结果，操作见同一文档。
 
 SDK 计算使用[源码离线回归](sdk-offline-tests.md) `yarn sdk:test-offline`（独立交付目录显式使用 `--sdk-dir PATH/sdk`，准备目标依赖并核对运行器/锁文件身份）：复用原 SDK Vitest 配置，精确选测试文件，使用空环境目录和共享 Node 网络保护器，无需构建；报告保留源码摘要和原生结果，拒绝零测试、范围不符及捕获后的联网尝试。SDK 执行与取消复用共享进程组工具，报告明确中断/超时和核实后的清理状态，避免取消后长时间等待或误用成功结果。工具回归为 `yarn test:sdk-offline`，不复制业务实现或预期值。 单 suite 加 `--inspect-port 9238` 可在单个 Vitest fork 的真实 TypeScript 源码设置断点，保留离线隔离；端口预检及 inspector 启动日志核验防止绑定失败却误报成功，操作与实测见同一文档。
 
