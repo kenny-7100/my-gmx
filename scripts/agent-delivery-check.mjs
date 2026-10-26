@@ -66,6 +66,8 @@ function validateOfflineEvidence({
   assert.deepEqual(evidence.sourceBefore, source, "Tested source does not match current checkout");
   assert.deepEqual(evidence.sourceAfter, source, "Final tested source does not match current checkout");
   assert.deepEqual(evidence.toolSha256, toolSha256, "Offline tools changed since testing");
+  assert.equal(evidence.toolingUnchanged, true, "Offline tools were not verified stable during testing");
+  assert.deepEqual(evidence.toolSha256After, toolSha256, "Final offline tools do not match current tools");
   assert.ok(
     !evidence.exit.interrupted && !evidence.exit.timedOut && !evidence.exit.signalError,
     "Test execution was interrupted or failed"
