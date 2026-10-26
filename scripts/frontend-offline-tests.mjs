@@ -27,6 +27,7 @@ const TOOL_FILES = [
   "scripts/sdk-offline-tests.mjs",
   "tools/frontend-offline/vitest.config.mjs",
   "tools/frontend-offline/setup.mjs",
+  "tools/frontend-offline/discovery.mjs",
   "tools/gmx-api-offline/network-guard.cjs",
 ];
 
@@ -49,6 +50,24 @@ export async function resolveSuites(projectDir, requested = DEFAULT_SUITES) {
     assert.ok((await stat(resolved)).isFile(), "Select a regular test file.");
     assert.ok(!selected.includes(relative), "Duplicate frontend test selection.");
     selected.push(relative);
+  }
+  return selected;
+}
+
+export async function resolveRelated(projectDir, requested) {
+  assert.ok(requested.length > 0, "Select at least one related frontend source file.");
+  const root = await realpath(projectDir);
+  const selected = [];
+  for (const file of requested) {
+    assert.ok(
+      /^(src|landing)\/[a-zA-Z0-9_./-]+\.(json|[jt]sx?)$/.test(file) && path.posix.normalize(file) === file,
+      "Use a literal src or landing source path."
+    );
+    const resolved = await realpath(path.join(root, file));
+    assert.equal(resolved, path.join(root, file), "Related source must not traverse symlinks.");
+    assert.ok((await stat(resolved)).isFile(), "Select a regular related source file.");
+    assert.ok(!selected.includes(file), "Duplicate related source selection.");
+    selected.push(file);
   }
   return selected;
 }
@@ -109,10 +128,17 @@ export async function frontendToolHashes() {
   return hashes;
 }
 
-export async function runFrontendOffline({ suites, inspectPort, projectDir = ROOT }) {
+export async function runFrontendOffline({ suites, related, inspectPort, projectDir = ROOT }) {
   projectDir = await realpath(projectDir);
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
-  suites = await resolveSuites(projectDir, suites);
+  assert.ok(related === undefined || suites === undefined, "Do not combine --related with --suite.");
+  assert.ok(
+    related === undefined || inspectPort === undefined,
+    "Use --suite for debugging after related test discovery."
+  );
+  related = related === undefined ? undefined : await resolveRelated(projectDir, related);
+  suites = related === undefined ? await resolveSuites(projectDir, suites) : [];
+
   if (inspectPort !== undefined) {
     assert.ok(
       Number.isInteger(inspectPort) && inspectPort > 0 && inspectPort <= 65535,
@@ -152,6 +178,7 @@ export async function runFrontendOffline({ suites, inspectPort, projectDir = ROO
     projectDir,
     runtime,
     suites,
+    ...(related ? { related } : {}),
     startedAt: new Date().toISOString(),
     logFile,
     resultsFile,
@@ -175,6 +202,75 @@ export async function runFrontendOffline({ suites, inspectPort, projectDir = ROO
     await symlink(path.join(projectDir, "node_modules"), path.join(emptyDir, "node_modules"), "dir");
     const optionsFile = path.join(emptyDir, "options.json");
     await writeFile(optionsFile, JSON.stringify({ projectDir, suites, emptyDir, resultsFile }), { mode: 0o600 });
+    const env = {
+      PATH: process.env.PATH,
+      NODE_ENV: "test",
+      TZ: "UTC",
+      CI: "true",
+      GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "network-events.log"),
+      GMX_FRONTEND_OFFLINE_OPTIONS: optionsFile,
+      LINGUI_CONFIG: path.join(projectDir, ".linguirc"),
+      VITE_APP_PWA_GENERATION: `${execFileSync("git", ["-C", projectDir, "show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim()}000`,
+    };
+    if (related) {
+      stage = "related-discovery";
+      const discovery = {
+        status: "failed",
+        logFile: path.join(runDir, "discovery.log"),
+        filesFile: path.join(runDir, "discovery-files.json"),
+      };
+      report.discovery = discovery;
+      await writeFile(
+        optionsFile,
+        JSON.stringify({
+          projectDir,
+          related: related.map((file) => path.join(projectDir, file)),
+          emptyDir,
+          resultsFile,
+        })
+      );
+      const fd = openSync(discovery.logFile, "wx", 0o600);
+      try {
+        discovery.exit = await runTestProcess({
+          args: [
+            "--import",
+            path.join(ROOT, "tools/frontend-offline/discovery.mjs"),
+            path.join(projectDir, "node_modules/vitest/vitest.mjs"),
+            "list",
+            "--filesOnly",
+            "--json",
+            discovery.filesFile,
+            "--config",
+            path.join(ROOT, "tools/frontend-offline/vitest.config.mjs"),
+            "--root",
+            projectDir,
+          ],
+          cwd: emptyDir,
+          env: { ...env, GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "discovery-network-events.log") },
+          logFd: fd,
+          timeoutMs: 180000,
+        });
+      } finally {
+        closeSync(fd);
+      }
+      discovery.network = await readNetworkAudit(path.join(runDir, "discovery-network-events.log"), 1);
+      assert.ok(
+        discovery.exit.code === 0 &&
+          !discovery.exit.signal &&
+          !discovery.exit.interrupted &&
+          !discovery.exit.timedOut &&
+          !discovery.exit.signalError &&
+          discovery.exit.cleanup === "passed",
+        "Related test discovery failed or was interrupted; inspect discovery.log."
+      );
+      assert.equal(discovery.network.status, "passed", "Related test discovery network audit did not pass.");
+      const files = JSON.parse(await readFile(discovery.filesFile, "utf8"));
+      assert.ok(Array.isArray(files), "Invalid Vitest discovery result.");
+      suites = await resolveSuites(projectDir, files.map(({ file }) => path.relative(projectDir, file)).sort());
+      report.suites = suites;
+      discovery.status = "passed";
+      await writeFile(optionsFile, JSON.stringify({ projectDir, suites, emptyDir, resultsFile }));
+    }
     stage = "vitest";
     const fd = openSync(logFile, "wx", 0o600);
     try {
@@ -189,16 +285,7 @@ export async function runFrontendOffline({ suites, inspectPort, projectDir = ROO
           ...(inspectPort === undefined ? [] : [`--inspect-brk=127.0.0.1:${inspectPort}`, "--pool=forks"]),
         ],
         cwd: emptyDir,
-        env: {
-          PATH: process.env.PATH,
-          NODE_ENV: "test",
-          TZ: "UTC",
-          CI: "true",
-          GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "network-events.log"),
-          GMX_FRONTEND_OFFLINE_OPTIONS: optionsFile,
-          LINGUI_CONFIG: path.join(projectDir, ".linguirc"),
-          VITE_APP_PWA_GENERATION: `${execFileSync("git", ["-C", projectDir, "show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim()}000`,
-        },
+        env,
         logFd: fd,
         timeoutMs: report.debug?.timeoutMs ?? 180000,
       });
@@ -257,6 +344,7 @@ export async function runCli(args = process.argv.slice(2)) {
       args,
       options: {
         suite: { type: "string", multiple: true },
+        related: { type: "string", multiple: true },
         "project-dir": { type: "string", default: ROOT },
         "inspect-port": { type: "string" },
         help: { type: "boolean", short: "h" },
@@ -264,13 +352,14 @@ export async function runCli(args = process.argv.slice(2)) {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn frontend:test-offline [--project-dir PATH] [--suite src/...spec.ts ...] [--inspect-port 9240]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes. Debug mode requires one suite, pauses a single fork on loopback and allows 30 minutes.\n"
+        "Usage: yarn frontend:test-offline [--project-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ...] [--inspect-port 9240]\nRuns existing frontend source tests with an empty environment directory and a Node network guard. Defaults to date, PWA decision and Solana flag suites. No build, services or business source changes. Debug mode requires one suite, pauses a single fork on loopback and allows 30 minutes.\n"
       );
       return 0;
     }
     const report = await runFrontendOffline({
       projectDir: values["project-dir"],
       suites: values.suite,
+      related: values.related,
       inspectPort:
         values["inspect-port"] === undefined
           ? undefined

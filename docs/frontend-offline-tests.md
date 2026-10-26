@@ -18,6 +18,31 @@ yarn frontend:test-offline --suite src/lib/dates.spec.ts --suite src/domain/gmso
 
 支持 `src/` 或 `landing/` 下真实存在的 `.spec` / `.test` 文件（JS/JSX/TS/TSX）。拒绝重复、缺失、glob、绝对路径、目录及越界符号链接；原 Vite exclude 继续有效，被排除或空文件不能通过。只运行明确选定的文件，不递归发现参考仓库。需要真实浏览器、外部服务或业务集成时使用相应验收环境。
 
+## 按源码依赖图选择关联测试
+
+已知本轮修改的前端源码，但不确定哪些现有测试导入它时，从基础设施目录执行：
+
+```sh
+yarn frontend:test-offline --related src/lib/pwa/appUpdateDecision.ts
+yarn frontend:test-offline --project-dir /path/to/delivery-checkout \
+  --related src/lib/pwa/appUpdateDecision.ts \
+  --related src/lib/dates.spec.ts
+```
+
+`--related` 可重复，接受目标 `src/`、`landing/` 下存在的 TS/TSX/JS/JSX/JSON 普通文件，测试文件本身也可作为输入；拒绝重复、glob、绝对路径、规范化前后不同的路径和符号链接。不能与 `--suite` 混用。需要断点时，先读取结果中的精确 `suites`，再用原有 `--suite FILE --inspect-port PORT` 单文件调试。
+
+运行器先调用目标 Vitest 的 `list --filesOnly --json`，用原 Vite 配置、原 include/exclude（未设置 include 时使用当前 Vitest 官方默认值）和真实依赖图选择测试，多个输入取关联测试并集。发现阶段不执行测试或 global setup；它会变换依赖模块，因此仍要求完整目标依赖与资源。结果文件经过既有精确路径选择器校验，随后只执行发现的 suite，沿用原有零测试/skip/todo/原生结果检查、运行器侧网络审计、源码指纹与清理规则。无关联测试或发现失败整次退出 1，保留 `failureStage=related-discovery`；不退回默认三文件，不把零测试当通过。
+
+报告新增 `related` 和 `discovery`；后者记录发现阶段的退出与清理、网络审计、`discovery.log`、`discovery-files.json`。发现进程在加载 Vite 配置前安装现有 Node 网络保护器，另存 `discovery-network-events.log`，要求一次安装且零拒绝事件；正式测试继续按 suite 数独立审计。发现和执行各限时 180 秒，共享现有进程组取消/清理。临时目录退出后清理，日志与原生发现清单留在本次 run 目录。
+
+发现阶段与正式测试共用隔离环境和目标 PWA HEAD 时间，Vite 环境目录、缓存仍指向临时目录；配置只在空 CWD 加载。发现完整依赖图时，子进程随后将 CWD 指向目标目录，使 Lingui 能按原配置查找 catalog；正式执行是另一个进程，继续使用空 CWD，不加载目标 `.env`。测试包装配置显式使用 `127.0.0.1`，避免 Vite 为 localhost 做 DNS 查询而触发网络拒绝；不放宽保护器。
+
+这是局部回归选择工具，不证明需求覆盖完整。Vitest 的依赖分析无法保证识别运行时拼接的导入、外部数据或所有副作用；删除文件、SDK、配置或非代码资源变化仍需按实际影响显式选择测试或运行完整回归，不用关联结果代替这些判断。源码指纹和依赖验证边界沿用本页既有范围。交付检查仍绑定报告中实际执行的 suite，不将关联选择当作业务覆盖证明。
+
+关联选择验收（2026-10-27）：当前分支对 PWA 决策源码发现并通过 1 个 suite / 9 项。独立 `origin/release` checkout 不含个人运行器，显式复用锁文件相同的已安装依赖；同一源码 9 项、两个输入并集 14 项及临时副本中的真实传递导入 1 项均通过。无关联源码明确 failed 且未创建正式测试日志；临时 Vite 配置中的 HTTPS 请求在发现阶段被 guard 拒绝，事件独立记录，整次 failed，未发出外部请求。旧显式日期测试 5 项与 release 默认三文件 16 项通过；release 默认数量与当前开发分支的 17 项不同，未修改原测试。目标 HEAD、索引字节与 Git clean 状态保持一致，临时源码/配置注入及 checkout 均已清理，真实业务代码未改。证据在本机忽略目录 `.local/acceptance/frontend-offline/related-acceptance.json` 及其中列出的原始报告。
+
+本轮工程检查：当前分支默认离线 17 项、统一工具回归 108 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、136 个文档本地链接和差异检查通过；完整前端回归 299 个文件、3,014 项通过，1 个文件及其 1 项既有跳过，退出 0。当前分支默认报告为同目录 `related-current-default.json`，工程日志为 `related-{tools.tap,sdk.json,types.log,tests.log}`。
+
 ## 结束时核对网络审计
 
 2026-10-27 起，前端、SDK 和 API 离线入口共用运行器侧的网络事件审计。保护器在每个所选文件安装时记录 `installed`，拒绝连接时记录 `blocked`；日志路径在安装时固定，测试修改环境变量不会关闭记录。运行器结束后独立读取 `network-events.log`，报告 `network.status/installations/blockedAttempts/eventsFile`。安装数须等于所选文件数、拒绝数为 0，缺日志或未知事件也失败；不能只凭原生测试 JSON 的 success 判断通过。

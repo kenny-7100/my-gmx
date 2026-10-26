@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { resolveSuites, runFrontendOffline } from "./frontend-offline-tests.mjs";
+import { resolveRelated, resolveSuites, runFrontendOffline } from "./frontend-offline-tests.mjs";
 
 test("frontend selection accepts only unique existing tests inside src or landing", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "gmx-frontend-selection-"));
@@ -62,5 +62,39 @@ test("frontend targets fail before execution when checkout or installed runtime 
     await assert.rejects(runFrontendOffline({ projectDir: dir, suites }), /Target vite must match/);
   } finally {
     await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("related source selection rejects ambiguous modes, missing files, duplicates and symlink traversal", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "gmx-related-"));
+  try {
+    await mkdir(path.join(root, "src"));
+    await writeFile(path.join(root, "src/input.ts"), "export {};\n");
+    await symlink(path.join(root, "src/input.ts"), path.join(root, "src/alias.ts"));
+    await writeFile(path.join(root, "outside.ts"), "export {};\n");
+    await symlink(path.join(root, "outside.ts"), path.join(root, "src/escape.ts"));
+    assert.deepEqual(await resolveRelated(root, ["src/input.ts"]), ["src/input.ts"]);
+    for (const related of [
+      [],
+      ["src/missing.ts"],
+      ["src/input.ts", "src/input.ts"],
+      ["src/alias.ts"],
+      ["src/escape.ts"],
+      ["src/../outside.ts"],
+      ["/src/input.ts"],
+      ["src/*.ts"],
+      ["sdk/input.ts"],
+    ])
+      await assert.rejects(resolveRelated(root, related));
+    await assert.rejects(
+      runFrontendOffline({ projectDir: root, related: ["src/input.ts"], suites: [] }),
+      /Do not combine/
+    );
+    await assert.rejects(
+      runFrontendOffline({ projectDir: root, related: ["src/input.ts"], inspectPort: 9240 }),
+      /Use --suite/
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
   }
 });
