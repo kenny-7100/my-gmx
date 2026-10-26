@@ -4,7 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { loadConfigFromFile } from "vite";
-import { defineConfig, mergeConfig } from "vitest/config";
+import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
 export default defineConfig(async () => {
   const options = JSON.parse(await readFile(process.env.GMX_SDK_OFFLINE_OPTIONS, "utf8"));
@@ -18,7 +18,8 @@ export default defineConfig(async () => {
     envDir: options.emptyDir,
     cacheDir: path.join(options.emptyDir, "vite-cache"),
     test: {
-      include: options.suites,
+      include: options.suites ?? loaded.config.test?.include ?? configDefaults.include,
+      related: options.related,
       setupFiles: [fileURLToPath(new URL("./setup.mjs", import.meta.url))],
       fileParallelism: false,
       maxWorkers: 1,
@@ -30,6 +31,6 @@ export default defineConfig(async () => {
     },
   });
   // Selection is exact even if the SDK later adds its own include patterns.
-  config.test.include = options.suites;
+  config.test.include = options.suites ?? loaded.config.test?.include ?? configDefaults.include;
   return config;
 });
