@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { passedResults, sourceInputs } from "./gmx-api-offline-tests.mjs";
+import { passedResults, runOfflineTests, sourceInputs } from "./gmx-api-offline-tests.mjs";
 
 test("offline guard blocks Node network transports and records swallowed attempts", () => {
   const guard = fileURLToPath(new URL("../tools/gmx-api-offline/network-guard.cjs", import.meta.url));
@@ -89,6 +90,27 @@ test("API source identity detects dependency edits and added files beyond the se
     await writeFile(path.join(dir, "src/new.json"), "{}");
     assert.equal((await sourceInputs(dir)).fileCount, before.fileCount + 1);
   } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("API debugging rejects invalid ports, multiple suites and occupied ports without taking ownership", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "gmx-api-debug-options-"));
+  const server = net.createServer();
+  try {
+    await mkdir(path.join(dir, "src"));
+    const suites = ["src/one.test.ts", "src/two.test.ts"];
+    for (const suite of suites) await writeFile(path.join(dir, suite), "");
+    for (const inspectPort of [0, -1, 65536, 1.5, NaN])
+      await assert.rejects(runOfflineTests(dir, [suites[0]], { inspectPort }), /inspector port/);
+    await assert.rejects(runOfflineTests(dir, suites, { inspectPort: 9239 }), /exactly one API suite/);
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    await assert.rejects(runOfflineTests(dir, [suites[0]], { inspectPort: server.address().port }), {
+      code: "EADDRINUSE",
+    });
+    assert.equal(server.listening, true);
+  } finally {
+    if (server.listening) await new Promise((resolve) => server.close(resolve));
     await rm(dir, { recursive: true, force: true });
   }
 });

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { openSync, closeSync } from "node:fs";
 import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
+import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -72,10 +73,23 @@ export function passedResults(result, suites, exit) {
   );
 }
 
-export async function runOfflineTests(apiDir, requested = SUITES) {
+export async function runOfflineTests(apiDir, requested = SUITES, { inspectPort } = {}) {
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
   apiDir = await realpath(apiDir);
   const suites = await resolveSuites(apiDir, requested);
+  if (inspectPort !== undefined) {
+    assert.ok(
+      Number.isInteger(inspectPort) && inspectPort > 0 && inspectPort <= 65535,
+      "Use an inspector port from 1 to 65535."
+    );
+    assert.equal(suites.length, 1, "Debug exactly one API suite using --suite.");
+    const probe = net.createServer();
+    await new Promise((resolve, reject) => {
+      probe.once("error", reject);
+      probe.listen(inspectPort, "127.0.0.1", resolve);
+    });
+    await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
+  }
   const { evidence } = await readApiSource(apiDir);
   const sourceBefore = await sourceInputs(apiDir);
   const sourceHashes = {};
@@ -114,11 +128,24 @@ export async function runOfflineTests(apiDir, requested = SUITES) {
   const cwd = await mkdtemp(path.join(tmpdir(), "gmx-api-offline-"));
   const logFile = path.join(runDir, "jest.log");
   const resultsFile = path.join(runDir, "jest-results.json");
+  const debug =
+    inspectPort === undefined
+      ? undefined
+      : {
+          inspector: `127.0.0.1:${inspectPort}`,
+          pauseOnStart: true,
+          timeoutMs: 1_800_000,
+        };
+  if (debug)
+    process.stderr.write(
+      `API offline debug session: ${JSON.stringify({ ...debug, logFile, reportFile: path.join(runDir, "report.json") })}\n`
+    );
   const fd = openSync(logFile, "wx", 0o600);
   let exit;
   try {
     exit = await runTestProcess({
       args: [
+        ...(debug ? [`--inspect-brk=${debug.inspector}`] : []),
         jest,
         "--config",
         JSON.stringify(config),
@@ -133,10 +160,16 @@ export async function runOfflineTests(apiDir, requested = SUITES) {
       cwd,
       env: { PATH: process.env.PATH, NODE_ENV: "test", TZ: "UTC", CI: "true", JEST_RETRY_TIMES: "0" },
       logFd: fd,
+      timeoutMs: debug?.timeoutMs ?? 120000,
     });
   } finally {
     closeSync(fd);
     await rm(cwd, { recursive: true, force: true });
+  }
+  if (debug) {
+    const log = await readFile(logFile, "utf8");
+    debug.started =
+      log.includes(`Debugger listening on ws://${debug.inspector}/`) && !log.includes("Starting inspector on");
   }
   let result;
   try {
@@ -149,6 +182,7 @@ export async function runOfflineTests(apiDir, requested = SUITES) {
   const unchanged =
     JSON.stringify(after) === JSON.stringify(evidence) && JSON.stringify(sourceAfter) === JSON.stringify(sourceBefore);
   const passed =
+    (!debug || debug.started) &&
     !exit.interrupted &&
     !exit.timedOut &&
     exit.cleanup === "passed" &&
@@ -180,6 +214,7 @@ export async function runOfflineTests(apiDir, requested = SUITES) {
       skipped: result?.numPendingTests,
     },
     exit,
+    ...(debug ? { debug } : {}),
     logFile,
     resultsFile,
     excluded: ["database integration", "HTTP service", "live RPC/keeper/SQD", "wallet signing and transactions"],
@@ -195,21 +230,29 @@ export async function runCli(args = process.argv.slice(2)) {
       options: {
         "api-dir": { type: "string", default: path.join(ROOT, "gmx-api") },
         suite: { type: "string", multiple: true },
+        "inspect-port": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn gmx-api:test-offline [--api-dir PATH] [--suite src/...test.ts ...]\nRuns exactly selected API source tests without database setup. Defaults to two Solana calculation suites. Network access is forbidden.\n"
+        "Usage: yarn gmx-api:test-offline [--api-dir PATH] [--suite src/...test.ts ...] [--inspect-port 9239]\nRuns exactly selected API source tests without database setup. Defaults to two Solana calculation suites. Network access is forbidden. Debug mode requires one suite, pauses on loopback and allows 30 minutes. See docs/solana-api-local.md.\n"
       );
       return 0;
     }
-    const report = await runOfflineTests(path.resolve(values["api-dir"]), values.suite);
+    const report = await runOfflineTests(path.resolve(values["api-dir"]), values.suite, {
+      inspectPort:
+        values["inspect-port"] === undefined
+          ? undefined
+          : /^\d+$/.test(values["inspect-port"])
+            ? Number(values["inspect-port"])
+            : NaN,
+    });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return report.status === "passed" ? 0 : 1;
-  } catch {
+  } catch (error) {
     process.stderr.write(
-      `${JSON.stringify({ status: "failed", code: "offline-test-prerequisite", message: "Check Node 22, API checkout, selected src test paths, fixtures and installed Jest/ts-jest. See docs/solana-api-local.md." })}\n`
+      `${JSON.stringify({ status: "failed", code: "offline-test-prerequisite", message: error.message.split("\n")[0].slice(0, 240) })}\n`
     );
     return 1;
   }
