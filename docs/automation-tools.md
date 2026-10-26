@@ -36,6 +36,8 @@ API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测�
 
 API 局部改动先使用[原生依赖发现](solana-api-local.md#按源码依赖发现-api-测试) `yarn gmx-api:discover-tests --api-dir PATH --related src/...ts`：复用目标 Jest 配置、别名及依赖图，保存原生清单和源码/工具身份，不执行测试或数据库初始化。零匹配及联网尝试明确失败；检查实际依赖后显式选择既有离线或隔离数据库执行器，不自动分类环境。路径组合回归纳入统一工具测试。
 
+SDK 局部源码回归支持[原生关联选择](sdk-offline-tests.md#按源码依赖选择回归) `sdk:test-offline --related src/...ts`，独立 checkout 加 `--sdk-dir PATH/sdk`：使用目标 Vitest 依赖图发现后精确离线执行，保留两个阶段的日志、清单、网络审计和清理结果。零匹配失败；依赖真实服务的已选测试仍明确失败，不自动跳过或关闭网络保护。
+
 ## 统一离线工具回归
 
 2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：

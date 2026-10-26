@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { passedResults, resolveSuites, runSdkOffline } from "./sdk-offline-tests.mjs";
+import { passedResults, resolveRelated, resolveSuites, runSdkOffline } from "./sdk-offline-tests.mjs";
 
 test("SDK suite selection rejects missing, duplicate, escaped and symlinked paths", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "gmx-sdk-selection-"));
@@ -71,6 +71,39 @@ test("SDK debug rejects an occupied inspector port before starting tests and pre
     assert.ok(listener.listening);
   } finally {
     await new Promise((resolve) => listener.close(resolve));
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("SDK related selection rejects ambiguous paths and symlink traversal", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "gmx-related-paths-"));
+  try {
+    await mkdir(path.join(dir, "src"));
+    await writeFile(path.join(dir, "src/module.ts"), "export {};\n");
+    await writeFile(path.join(dir, "outside.ts"), "export {};\n");
+    await symlink(path.join(dir, "outside.ts"), path.join(dir, "src/external.ts"));
+    await symlink(path.join(dir, "src/module.ts"), path.join(dir, "src/internal.ts"));
+    const selected = ["src/module.ts"];
+    assert.deepEqual(await resolveRelated(dir, selected), selected);
+    await assert.rejects(runSdkOffline({ sdkDir: dir, suites: [], related: selected }), /Do not combine/);
+    await assert.rejects(
+      runSdkOffline({ sdkDir: dir, related: selected, inspectPort: 9238 }),
+      /Use --suite for debugging/
+    );
+    for (const files of [
+      undefined,
+      [],
+      ["src/module.ts", "src/module.ts"],
+      ["src/missing.ts"],
+      ["src/../outside.ts"],
+      [path.join(dir, "src/module.ts")],
+      ["src/*.ts"],
+      ["src//module.ts"],
+      ["src/external.ts"],
+      ["src/internal.ts"],
+    ])
+      await assert.rejects(resolveRelated(dir, files));
+  } finally {
     await rm(dir, { recursive: true, force: true });
   }
 });

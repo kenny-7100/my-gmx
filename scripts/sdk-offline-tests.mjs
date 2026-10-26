@@ -25,6 +25,7 @@ const TOOL_FILES = [
   "scripts/lib/agent-network-audit.mjs",
   "tools/sdk-offline/vitest.config.mjs",
   "tools/sdk-offline/setup.mjs",
+  "tools/sdk-offline/discovery.mjs",
   "tools/gmx-api-offline/network-guard.cjs",
 ];
 
@@ -41,6 +42,24 @@ export async function resolveSuites(sdkDir, requested = DEFAULT_SUITES) {
     assert.ok((await stat(resolved)).isFile(), "Select a regular test file.");
     assert.ok(!selected.includes(relative), "Duplicate SDK test selection.");
     selected.push(relative);
+  }
+  return selected;
+}
+
+export async function resolveRelated(sdkDir, requested) {
+  assert.ok(requested.length > 0, "Select at least one related SDK source file.");
+  const root = await realpath(sdkDir);
+  const selected = [];
+  for (const file of requested) {
+    assert.ok(
+      /^src\/[a-zA-Z0-9_./-]+\.(json|tsx?|js)$/.test(file) && path.posix.normalize(file) === file,
+      "Use a literal SDK src source path."
+    );
+    const resolved = await realpath(path.join(root, file));
+    assert.equal(resolved, path.join(root, file), "Related source must not traverse symlinks.");
+    assert.ok((await stat(resolved)).isFile(), "Select a regular related source file.");
+    assert.ok(!selected.includes(file), "Duplicate related source selection.");
+    selected.push(file);
   }
   return selected;
 }
@@ -123,10 +142,16 @@ export function passedResults(result, suites, exit) {
   );
 }
 
-export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
+export async function runSdkOffline({ sdkDir, suites, related, inspectPort }) {
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
   sdkDir = await realpath(sdkDir);
-  suites = await resolveSuites(sdkDir, suites);
+  assert.ok(suites === undefined || related === undefined, "Do not combine --suite and --related.");
+  assert.ok(
+    related === undefined || inspectPort === undefined,
+    "Use --suite for debugging after related test discovery."
+  );
+  related = related === undefined ? undefined : await resolveRelated(sdkDir, related);
+  suites = related === undefined ? await resolveSuites(sdkDir, suites) : [];
   if (inspectPort !== undefined) {
     assert.ok(
       Number.isInteger(inspectPort) && inspectPort > 0 && inspectPort <= 65535,
@@ -155,6 +180,7 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     sdkDir,
     runtime,
     suites,
+    ...(related ? { related } : {}),
     startedAt: new Date().toISOString(),
     logFile,
     resultsFile,
@@ -177,6 +203,74 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
     report.toolSha256 = await sdkToolHashes();
     const optionsFile = path.join(emptyDir, "options.json");
     await writeFile(optionsFile, JSON.stringify({ sdkDir, suites, emptyDir, resultsFile }), { mode: 0o600 });
+    const env = {
+      PATH: process.env.PATH,
+      NODE_ENV: "test",
+      TZ: "UTC",
+      CI: "true",
+      GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "network-events.log"),
+      GMX_SDK_OFFLINE_OPTIONS: optionsFile,
+    };
+    if (related) {
+      stage = "related-discovery";
+      const discovery = {
+        status: "failed",
+        logFile: path.join(runDir, "discovery.log"),
+        filesFile: path.join(runDir, "discovery-files.json"),
+      };
+      report.discovery = discovery;
+      await writeFile(
+        optionsFile,
+        JSON.stringify({
+          sdkDir,
+          related: related.map((file) => path.join(sdkDir, file)),
+          emptyDir,
+          resultsFile,
+        })
+      );
+      const fd = openSync(discovery.logFile, "wx", 0o600);
+      try {
+        discovery.exit = await runTestProcess({
+          args: [
+            "--import",
+            path.join(ROOT, "tools/sdk-offline/discovery.mjs"),
+            path.join(sdkDir, "node_modules/vitest/vitest.mjs"),
+            "list",
+            "--filesOnly",
+            "--json",
+            discovery.filesFile,
+            "--config",
+            path.join(ROOT, "tools/sdk-offline/vitest.config.mjs"),
+            "--root",
+            sdkDir,
+          ],
+          cwd: emptyDir,
+          env: { ...env, GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "discovery-network-events.log") },
+          logFd: fd,
+          timeoutMs: 180000,
+        });
+      } finally {
+        closeSync(fd);
+      }
+      discovery.network = await readNetworkAudit(path.join(runDir, "discovery-network-events.log"), 1);
+      assert.ok(
+        discovery.exit.code === 0 &&
+          !discovery.exit.signal &&
+          !discovery.exit.interrupted &&
+          !discovery.exit.timedOut &&
+          !discovery.exit.signalError &&
+          discovery.exit.cleanup === "passed",
+        "Related test discovery failed or was interrupted; inspect discovery.log."
+      );
+      assert.equal(discovery.network.status, "passed", "Related test discovery network audit did not pass.");
+      const files = JSON.parse(await readFile(discovery.filesFile, "utf8"));
+      assert.ok(Array.isArray(files), "Invalid Vitest discovery result.");
+      assert.ok(files.length > 0, "No related SDK tests found; review coverage and select --suite explicitly.");
+      suites = await resolveSuites(sdkDir, files.map(({ file }) => path.relative(sdkDir, file)).sort());
+      report.suites = suites;
+      discovery.status = "passed";
+      await writeFile(optionsFile, JSON.stringify({ sdkDir, suites, emptyDir, resultsFile }));
+    }
     stage = "vitest";
     const fd = openSync(logFile, "wx", 0o600);
     try {
@@ -189,14 +283,7 @@ export async function runSdkOffline({ sdkDir, suites, inspectPort }) {
           ...(inspectPort === undefined ? [] : [`--inspect-brk=127.0.0.1:${inspectPort}`, "--pool=forks"]),
         ],
         cwd: emptyDir,
-        env: {
-          PATH: process.env.PATH,
-          NODE_ENV: "test",
-          TZ: "UTC",
-          CI: "true",
-          GMX_AGENT_NETWORK_EVENTS_FILE: path.join(runDir, "network-events.log"),
-          GMX_SDK_OFFLINE_OPTIONS: optionsFile,
-        },
+        env,
         logFd: fd,
         timeoutMs: report.debug?.timeoutMs ?? 180000,
       });
@@ -257,19 +344,21 @@ export async function runCli(args = process.argv.slice(2)) {
       options: {
         "sdk-dir": { type: "string", default: path.join(ROOT, "sdk") },
         suite: { type: "string", multiple: true },
+        related: { type: "string", multiple: true },
         "inspect-port": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ...] [--inspect-port 9238]\nRuns existing SDK source tests using the target SDK's installed Vitest (must match the infrastructure version), an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. No SDK build, services or business source changes. Debug mode requires exactly one suite, pauses a single fork on loopback and allows 30 minutes; see the emitted session log path.\n"
+        "Usage: yarn sdk:test-offline [--sdk-dir PATH] [--suite src/...spec.ts ... | --related src/...ts ...] [--inspect-port 9238]\nRuns existing SDK source tests using the target SDK's installed Vitest (must match the infrastructure version), an empty environment directory and a Node network guard. Defaults to BigInt, numbers and fees. --related discovers tests from the target dependency graph before exact offline execution; no matches fails. No SDK build, services or business source changes. Debug mode requires exactly one suite, pauses a single fork on loopback and allows 30 minutes; see the emitted session log path.\n"
       );
       return 0;
     }
     const report = await runSdkOffline({
       sdkDir: values["sdk-dir"],
       suites: values.suite,
+      related: values.related,
       inspectPort:
         values["inspect-port"] === undefined
           ? undefined

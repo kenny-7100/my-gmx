@@ -20,6 +20,27 @@ yarn test:sdk-offline
 
 默认三份原有测试是 `bigmath.spec.ts`、`numbers.spec.ts`、`fees.spec.ts`，位于 `sdk/src/utils/__tests__/`。本轮实际执行共 153 项；单选 BigInt 为 6 项。选择器要求真实存在、位于所选 SDK `src/` 内的 `.spec.ts` / `.test.ts`（含 tsx）文件，拒绝重复、越界、逃逸符号链接及 glob。原配置的 exclude 继续生效；被排除的文件、空文件或零测试不能通过。
 
+## 按源码依赖选择回归
+
+在主仓库根目录执行，路径相对于所选 SDK 根目录：
+
+```sh
+yarn sdk:test-offline --related src/utils/stats/api.ts
+yarn sdk:test-offline --sdk-dir /path/to/delivery/sdk --related src/utils/stats/api.ts
+```
+
+可重复传入 `--related`，只接受 SDK `src/` 内真实存在、不经过符号链接的 TS/TSX/JS/JSON 文件；拒绝空选择、重复、glob、非规范路径或越界路径。它与 `--suite` 互斥；需要断点时先从报告确认范围，再使用单份 `--suite --inspect-port`，不能把 `--related` 与调试模式混用。
+
+工具先通过目标 SDK 安装的 Vitest `list --filesOnly` 和 `test.related`，复用原 `vitest.config.ts` 的别名、include/exclude 及依赖图，获得直接及间接受影响的测试；随后将精确清单交给同一个离线执行流程。发现阶段不执行测试正文，零匹配明确失败，不回退默认三份测试。原默认范围和显式 `--suite` 行为保持不变。
+
+报告新增 `related` 与 `discovery`，后者保留原生 `discovery-files.json`、日志、进程退出/清理及独立网络审计。发现子进程在加载配置前安装既有 Node 网络保护器，阻断意外联网；被捕获的尝试仍令发现失败。发现与执行各自限时 180 秒，共用临时空 CWD/环境和所属进程组清理，报告保留覆盖整个过程的源码指纹。发现成功后执行失败时，顶层仍为 failed，不能只看 `discovery.status`。
+
+静态依赖图可能因共享索引文件而扩大范围，也不覆盖任意动态加载。**自动选中不代表可离线运行。** 本机实际 `src/utils/bigmath/utils.ts` 发现 35 个测试文件，其中原有 Accounts 测试尝试真实 RPC；离线保护器正确阻断，整次失败，没有忽略该文件或修改业务测试。此时检查报告中的实际依赖，按任务要求使用完整环境，或明确选择本次可离线验证的 suite 并记录覆盖边界，不关闭保护器或把部分通过当作全部通过。
+
+2026-10-27 独立临时 Git checkout 验收：原 Stats 源码选中原测试并通过 7 项；原 BigMath 测试文件通过 `--related` 精确选中后通过 6 项。临时 fixture 验证多个关联源码去重、传递依赖、环境隔离、零匹配不执行、断言失败及配置捕获联网异常后仍失败；目标 HEAD、索引、业务源码保持不变，临时副本已清理。依赖准备沿用下节方式，显式复制目标 Vitest、链接其他已安装依赖，仅用于隔离验收，不代表全新安装通过。证据在本机忽略的 `.local/acceptance/sdk-offline/related-acceptance.json`；路径及参数冲突回归纳入 `yarn test:agent-tools`。
+
+本轮兼容性与工程检查通过：默认三份 SDK suite 共 153 项，显式单 suite 的真实源码断点、BigInt 参数与恢复后 6 项测试；统一工具回归 111 项、SDK 产物只读核验、根类型检查、相关 ESLint/Prettier、143 个文档本地目标及差异检查。完整前端回归 299 个文件 / 3,014 项通过，另有 1 个文件 / 1 项既有跳过，退出 0。没有构建 SDK 或启动外部服务；真实 RPC 依赖仍是上述离线覆盖边界。
+
 ## 独立交付目录验收
 
 从当前基础设施目录调用 `--sdk-dir /absolute/path/to/delivery/sdk`，无需把个人工具复制进交付分支。先在目标 SDK 目录准备其锁定依赖；确实需要安装且已获授权时，在目标 `sdk/` 下执行 `yarn install --immutable --mode=skip-build`，不要借用开发基础目录的 `node_modules`，也不要通过普通根安装触发 SDK 构建。完整 checkout 需保留 Yarn 配置引用的根 `.yarn/` 文件。工具本身不安装、不构建、不切换分支。
