@@ -8,7 +8,19 @@ import { setImmediate } from "node:timers";
 
 import { safeApiPath } from "./lib/agent-request-path.mjs";
 import { checkContracts, differences, shape } from "./lib/solana-dev-contracts.mjs";
-import { devTarget } from "./solana-dev.mjs";
+import { devTarget, validateApiService } from "./solana-dev.mjs";
+
+test("workspace API identity requires a ready matching checkout and preserves the selected instance", () => {
+  const service = { status: "ready", apiDir: "/api", supervisorPid: 123 };
+  validateApiService(service, "/api");
+  validateApiService(service, "/api", 123);
+  for (const changed of [
+    { ...service, status: "failed" },
+    { ...service, apiDir: "/other-api" },
+    { ...service, supervisorPid: 456 },
+  ])
+    assert.throws(() => validateApiService(changed, "/api", 123));
+});
 
 test("development targets require their own Git root, source and compatible installed Vite", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "gmx-dev-target-"));

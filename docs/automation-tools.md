@@ -24,6 +24,8 @@ API 离线和隔离数据库测试共用 `scripts/lib/gmx-api-source.mjs` 的 Gi
 
 API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测试运行时；[交付检查](linear-development-workflow.md#api-测试证据绑定)可重复传 `--api-report PATH`，重新核对当前 API 源码、原生 Jest 结果、网络事件和清理，避免复用其他目录或旧版本的 passed。
 
+[组合联调](solana-dev-workspace.md#独立-api-checkout-的组合联调)复用既有 API manager：up 用 `--api-dir` 选择独立 API，健康检查绑定路径和实例，浏览器诊断读取实际 API checkout 的源码身份；不从基础设施固定路径猜测 API 版本，owned/borrowed 清理规则保持一致。
+
 ## 统一离线工具回归
 
 2026-10-27 已验收。修改 Agent 工具或公共辅助能力后，先在主仓库根目录运行：
