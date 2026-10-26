@@ -2,12 +2,14 @@ import assert from "node:assert/strict";
 import { fork, spawn, execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { openSync, closeSync } from "node:fs";
-import { chmod, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, realpath, writeFile } from "node:fs/promises";
 import net from "node:net";
 import path from "node:path";
+import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
+import { sourceEvidence } from "./frontend-offline-tests.mjs";
 import { checkContracts } from "./lib/solana-dev-contracts.mjs";
 import { control as apiControl } from "./solana-api-dev.mjs";
 import { startVite, API_PREFIX } from "../tools/solana-dev/vite.mjs";
@@ -15,10 +17,14 @@ import { startVite, API_PREFIX } from "../tools/solana-dev/vite.mjs";
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const SCRIPT = fileURLToPath(import.meta.url);
 const exec = promisify(execFile);
-const socketFile = `/tmp/gmx-solana-stack-${process.getuid()}-${createHash("sha256").update(ROOT).digest("hex").slice(0, 12)}.sock`;
+function workspaceSocket(projectDir) {
+  const key = path.resolve(projectDir) === path.resolve(ROOT) ? ROOT : projectDir;
+  return `/tmp/gmx-solana-stack-${process.getuid()}-${createHash("sha256").update(key).digest("hex").slice(0, 12)}.sock`;
+}
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function control(command) {
+export async function control(command, projectDir = ROOT) {
+  const socketFile = workspaceSocket(await realpath(projectDir));
   return new Promise((resolve, reject) => {
     const client = net.connect(socketFile);
     let bytes = "";
@@ -39,6 +45,22 @@ function control(command) {
   });
 }
 
+export async function devTarget(projectDir) {
+  projectDir = await realpath(projectDir);
+  const { stdout } = await exec("git", ["-C", projectDir, "rev-parse", "--show-toplevel"], {
+    env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
+  });
+  assert.equal(await realpath(stdout.trim()), projectDir, "Select the frontend Git checkout root.");
+  const installedVite = async (dir) =>
+    JSON.parse(await readFile(path.join(dir, "node_modules/vite/package.json"), "utf8")).version;
+  assert.equal(
+    await installedVite(projectDir),
+    await installedVite(ROOT),
+    "Target Vite must match the infrastructure runtime version."
+  );
+  return { projectDir, source: await sourceEvidence(projectDir) };
+}
+
 async function freePort(port) {
   const server = net.createServer();
   await new Promise((resolve, reject) => {
@@ -49,6 +71,7 @@ async function freePort(port) {
 }
 
 async function supervise(options) {
+  const socketFile = workspaceSocket(options.projectDir);
   const output = path.join(ROOT, ".local/acceptance/solana-dev");
   await mkdir(output, { recursive: true });
   const runDir = await mkdtemp(path.join(output, "run-"));
@@ -60,20 +83,22 @@ async function supervise(options) {
       { cwd: ROOT, env: { PATH: process.env.PATH }, timeout: 40000, maxBuffer: 1048576 }
     );
   const requestsFile = path.join(runDir, "requests.jsonl");
-  const frontendFiles = ["vite.config.ts", "src/config/api.ts", "sdk/src/configs/api.ts", "tools/solana-dev/vite.mjs"];
+  const frontendFiles = ["vite.config.ts", "src/config/api.ts", "sdk/src/configs/api.ts"];
   const frontendHashes = {};
   for (const file of frontendFiles) {
     frontendHashes[file] = createHash("sha256")
-      .update(await readFile(path.join(ROOT, file)))
+      .update(await readFile(path.join(options.projectDir, file)))
       .digest("hex");
   }
-  const git = async (...args) =>
-    (await exec("git", ["-C", ROOT, ...args], { env: { PATH: process.env.PATH } })).stdout.trim();
   const frontendSourceAtStart = {
-    commit: await git("rev-parse", "HEAD"),
-    dirty: (await git("status", "--porcelain")).length > 0,
+    ...(await devTarget(options.projectDir)).source,
     configurationSha256: frontendHashes,
   };
+  const frontendToolSha256 = {};
+  for (const file of ["scripts/solana-dev.mjs", "tools/solana-dev/vite.mjs"])
+    frontendToolSha256[file] = createHash("sha256")
+      .update(await readFile(path.join(ROOT, file)))
+      .digest("hex");
   await writeFile(requestsFile, "", { mode: 0o600 });
   let journal = Promise.resolve();
   const record = (entry) => {
@@ -86,7 +111,9 @@ async function supervise(options) {
     schemaVersion: 1,
     status: "starting",
     mode: "sample",
+    projectDir: options.projectDir,
     frontendSourceAtStart,
+    frontendToolSha256,
     startedAt: new Date().toISOString(),
     supervisorPid: process.pid,
     services: {},
@@ -317,7 +344,7 @@ async function supervise(options) {
     if (options.services.includes("vite")) {
       await freePort(options.webPort);
       vite = await startVite({
-        root: ROOT,
+        root: options.projectDir,
         webPort: options.webPort,
         apiPort: options.apiPort,
         rpcPort: options.services.includes("rpc") ? options.rpcPort : undefined,
@@ -364,6 +391,7 @@ export async function runCli(args = process.argv.slice(2)) {
       tokens: true,
       options: {
         services: { type: "string", default: "api,vite" },
+        "project-dir": { type: "string", default: ROOT },
         "web-port": { type: "string", default: "3010" },
         "api-port": { type: "string", default: "3004" },
         "rpc-port": { type: "string", default: "3030" },
@@ -374,7 +402,7 @@ export async function runCli(args = process.argv.slice(2)) {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn solana:dev <up|status|logs|stop|trace|contracts> [--services api,vite,rpc] [--web-port 3010 --api-port 3004 --rpc-port 3030] [--id TRACE_ID] [--offline]\nDevelopment tools only. The local API proxy is /__agent/solana-api; no frontend business consumer is added. Contracts are unreviewed structural baselines (partial exits 2).\n"
+        "Usage: yarn solana:dev <up|status|logs|stop|trace|contracts> [--project-dir PATH] [--services api,vite,rpc] [--web-port 3010 --api-port 3004 --rpc-port 3030] [--id TRACE_ID] [--offline]\nUse --project-dir to select an independent frontend checkout and its workspace. Up requires its installed dependencies and matching Vite version. Development tools only. The local API proxy is /__agent/solana-api; no frontend business consumer is added. Contracts are unreviewed structural baselines (partial exits 2).\n"
       );
       return 0;
     }
@@ -390,6 +418,7 @@ export async function runCli(args = process.argv.slice(2)) {
     }
     const options = {
       services: values.services.split(","),
+      projectDir: values["project-dir"],
       webPort: Number(values["web-port"]),
       apiPort: Number(values["api-port"]),
       rpcPort: Number(values["rpc-port"]),
@@ -409,6 +438,7 @@ export async function runCli(args = process.argv.slice(2)) {
     }
     let result;
     if (command === "up") {
+      options.projectDir = (await devTarget(options.projectDir)).projectDir;
       const output = path.join(ROOT, ".local/acceptance/solana-dev");
       await mkdir(output, { recursive: true });
       const launcherDir = await mkdtemp(path.join(output, "launcher-"));
@@ -418,6 +448,8 @@ export async function runCli(args = process.argv.slice(2)) {
         SCRIPT,
         [
           "_serve",
+          "--project-dir",
+          options.projectDir,
           "--services",
           values.services,
           "--web-port",
@@ -428,7 +460,7 @@ export async function runCli(args = process.argv.slice(2)) {
           values["rpc-port"],
         ],
         {
-          cwd: ROOT,
+          cwd: options.projectDir,
           detached: true,
           env: { PATH: process.env.PATH, SOLANA_DEV_LOG_FILE: workspaceLog },
           stdio: ["ignore", logFd, logFd, "ipc"],
@@ -458,13 +490,13 @@ export async function runCli(args = process.argv.slice(2)) {
     } else if (command === "contracts" && values.offline) result = await checkContracts();
     else {
       if (command === "trace") assert.ok(values.id && /^[a-zA-Z0-9_-]{1,80}$/.test(values.id));
-      result = await control(command === "trace" ? `trace ${values.id}` : command);
+      result = await control(command === "trace" ? `trace ${values.id}` : command, options.projectDir);
     }
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
     return result.status === "partial" ? 2 : ["ready", "passed", "stopped"].includes(result.status) ? 0 : 1;
-  } catch {
+  } catch (error) {
     process.stderr.write(
-      `${JSON.stringify({ status: "failed", code: "workspace-unavailable", message: "Check arguments, service ownership, installed dependencies and .local/acceptance/solana-dev/run-*/report.json. This workspace never takes over unknown listeners." })}\n`
+      `${JSON.stringify({ status: "failed", code: "workspace-unavailable", reason: error.message.split("\n")[0].slice(0, 240), message: "Check arguments, service ownership, installed dependencies and .local/acceptance/solana-dev/run-*/report.json. This workspace never takes over unknown listeners." })}\n`
     );
     return 1;
   }

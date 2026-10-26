@@ -1,11 +1,51 @@
 import assert from "node:assert/strict";
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { cp, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { setImmediate } from "node:timers";
 
 import { safeApiPath } from "./lib/agent-request-path.mjs";
 import { checkContracts, differences, shape } from "./lib/solana-dev-contracts.mjs";
+import { devTarget } from "./solana-dev.mjs";
+
+test("development targets require their own Git root, source and compatible installed Vite", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "gmx-dev-target-"));
+  try {
+    const git = (...args) => execFileSync("git", ["-C", dir, ...args], { stdio: "pipe" });
+    git("init", "--quiet");
+    for (const directory of ["src", "landing", "sdk/src"]) await mkdir(path.join(dir, directory), { recursive: true });
+    for (const file of [
+      "package.json",
+      "yarn.lock",
+      "vite.config.ts",
+      ".linguirc",
+      "vitest.global-setup.js",
+      "tsconfig.json",
+      "landing/tsconfig.json",
+      "sdk/tsconfig.json",
+    ])
+      await writeFile(path.join(dir, file), "{}");
+    git("add", ".");
+    git("-c", "user.name=Agent Test", "-c", "user.email=agent@example.invalid", "commit", "--quiet", "-m", "Seed");
+    await assert.rejects(devTarget(path.join(dir, "missing")), /ENOENT/);
+    await assert.rejects(devTarget(path.join(dir, "src")), /checkout root/);
+    await assert.rejects(devTarget(dir), /ENOENT/);
+    await mkdir(path.join(dir, "node_modules/vite"), { recursive: true });
+    const manifest = path.join(dir, "node_modules/vite/package.json");
+    await writeFile(manifest, JSON.stringify({ version: "0.0.0" }));
+    await assert.rejects(devTarget(dir), /runtime version/);
+    await writeFile(manifest, await readFile(new URL("../node_modules/vite/package.json", import.meta.url)));
+    const target = await devTarget(dir);
+    assert.equal(target.projectDir, await realpath(dir));
+    assert.equal(target.source.commit, git("rev-parse", "HEAD").toString().trim());
+    await writeFile(path.join(dir, "src/changed.ts"), "export const changed = true;");
+    assert.notEqual((await devTarget(dir)).source.sourceSha256, target.source.sourceSha256);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 
 test("request records omit query values and unknown path segments", () => {
   for (const [input, prefix, expected] of [
