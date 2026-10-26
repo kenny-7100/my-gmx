@@ -109,3 +109,6 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 已沉淀 [gmx-api 路由准备与过期检查](solana-api-local.md#gmx-api-路由生成准备与过期检查)：`yarn gmx-api:prepare` 复用原 v1/v2 TSOA 配置生成路由及 OpenAPI；`--verify` 只读比较输入和产物摘要，缺失、损坏或过期返回非零。真实路由映射/Express HTTP 测试共 6 项通过；不替代契约评审、部署或实时服务验证。
 
 已沉淀 [Solana 持续联调服务](solana-api-local.md#持续运行的-solana-联调环境)：`yarn solana:api-dev up/status/logs/stop` 管理原 Solana 入口及 tsx watch，提供显式 loopback inspector、环境隔离、状态验证、所属进程清理和持久日志；16 项生命周期/异常检查及真实 Chrome 跨域访问已通过。当前入口仍为 sample，不启动数据库/采集，不修改前端 host 或业务代码。
+
+
+交付隔离复用[既有 delivery-check](linear-development-workflow.md#交付隔离自动检查)：`--project-dir PATH --require-clean` 可从基础设施目录核对独立交付 checkout 的 HEAD 与暂存、未暂存、未跟踪状态；默认仍仅看提交历史，检查不改 Git 或文件。真实 Git 回归覆盖三种脏状态、目标身份、特殊文件名、忽略产物及只读保持，不复制工具到业务分支。
