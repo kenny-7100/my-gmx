@@ -83,6 +83,56 @@ Node inspector 仅绑定 `127.0.0.1`；Chrome `chrome://inspect` 或 IDE 可连�
 
 ## 执行前准备与顺序
 
+### Agent 可重复的源码断点验收
+
+2026-10-26 新增 `yarn solana:api-debug`。用途是让后续 Agent 独立核实“当前 API checkout 可以命中 TypeScript 源码断点、查看局部变量并恢复真实请求”，复用已有持续服务和 Node inspector。工具只位于主仓库 `scripts/`，不修改 API、前端或 SDK 业务代码，不新增依赖。
+
+在主仓库根目录执行：
+
+```bash
+# Start an owned sample API, verify debugging, then stop it
+yarn solana:api-debug
+# Choose unused ports explicitly
+yarn solana:api-debug --port 3017 --inspect-port 9237
+# Attach to an existing managed API with inspector enabled; keep it running
+yarn solana:api-debug --attach --port 3016
+# Regression checks use an isolated real Node inspector fixture
+yarn test:solana-api-debug
+```
+
+默认独立使用 API 3017 / inspector 9237；不会停止或重配默认 3004 上的已有服务。借用模式只连接本工作区 `solana:api-dev` 管理且启用了 inspector 的服务，核对 `--api-dir`（默认 `gmx-api`）与实际 checkout；inspector 地址从服务记录取得，`--inspect-port` 仅用于独立启动。未知端口占用或未启用 inspector 均失败，不接管、不重启、不降级成普通 HTTP 验收。请串行执行调试验收，使用专门的调试服务，避免与人工调试同时操作同一进程。
+
+实际验证步骤：
+
+1. 连接服务记录中的 loopback Node inspector，读取已加载脚本。
+2. 核对 `src/solanaApp.ts` 路径及 tsx inline source map 中的源码与当前文件逐字一致；把 `/positions` handler 的地址校验行映射到可执行断点。路径、源码、映射或 handler 结构变化时明确失败，需要人工核对场景，不猜测其他位置。
+3. 设置只对本次随机 `X-Trace-Id` 生效的断点，用公开固定地址及 `invalid` 分别发送真实 GET 请求。其他请求不命中该断点；进程暂停期间仍会暂时阻塞该 API 的其他请求。
+4. 两次均核对实际断点、源码行和调用栈；使用无副作用求值读取 `req.query.address`、`req.method`、`req.path`。不读取钱包、环境变量或任意完整作用域。
+5. 恢复执行，分别核对 200 样例内容和 400 原始错误；比较验收前后 API commit、dirty 和既有关键文件摘要。
+6. 清除自身断点、禁用本调试会话并断开；独立模式按 supervisor 身份关闭所属服务，借用模式保留服务。普通 SIGINT/SIGTERM 会进入清理；SIGKILL/系统崩溃不能保证清理，沿用持续服务的归属核实规则。
+
+退出 0 表示该调试场景及清理通过；退出 1 表示失败。正常运行在 `.local/acceptance/solana-api-local/debug-*/report.json` 保存报告，包含阶段、错误摘要、源码位置、限定变量、前五层调用栈、HTTP 结果及资源清理状态；参数或目录配置错误在 stderr 报告。单条 inspector 命令/断点事件默认限时 5 秒，HTTP 请求限时 12 秒。报告不保存完整 inspector 输出或 API 响应正文。
+
+这里验证 source map 与当前源码的对应关系，不是整个进程所有已加载依赖的身份认证，也不证明业务契约、真实链上持仓、钱包或交易已验收。HTTP 场景继续明确标为 sample，`businessAcceptance=not-run`。
+
+实现入口为 [solana-api-debug.mjs](../scripts/solana-api-debug.mjs)，CDP 通信辅助为 [agent-inspector.mjs](../scripts/lib/agent-inspector.mjs)。后续排查源码断点问题可先运行此命令，不需要启动前端、数据库、RPC 或旧后端。
+
+2026-10-26 本机真实验收：
+
+| 验收条件 | 结果 |
+| --- | --- |
+| 独立启动、源码映射、断点、变量、请求恢复及停服 | 通过；正常/非法地址两次命中 `solanaApp.ts:48`，恢复后分别为 200 样例和 400 错误 |
+| 借用管理服务 | 通过；报告 `preserved-borrowed`，检查后 status 仍 ready；最终由本轮启动者另行 stop |
+| 未启用 inspector | 正确失败，报告失败阶段；原 3004 服务和 supervisor 身份保持不变 |
+| 未知端口占用 | 正确失败，原监听进程继续存活；不接管、不误停 |
+| 执行中 SIGTERM | 正确失败并记录中断；启动中的所属服务完成后被清理 |
+| 源码变化与调试协议失败 | 两组工具回归通过；覆盖不同 checkout、旧源码、缺失映射、handler 变化，以及真实 Node inspector 的暂停事件先于命令回复、恢复、协议错误、事件超时及断开 |
+| 资源与业务源码 | API checkout 保持干净；本轮临时 API/inspector 端口全部释放，原 3004 服务继续运行 |
+
+汇总在本机 `.local/acceptance/solana-api-local/debug-acceptance.json`，逐次报告位于该目录下 `debug-*/report.json`，不随 Git 共享。证据只代表本次执行；换机器或 API 源码变化后按需重跑。
+
+工程验证通过：新增脚本语法、ESLint、Prettier、文档相对链接和 `git diff --check`；`yarn tscheck` 退出 0；完整前端回归 299 个文件通过 / 1 个原有跳过，3014 项通过 / 1 项原有跳过，退出 0。回归仍输出已有 Browserslist 过期提示及 happy-dom teardown AbortError，本轮未修改这些无关内容。仅新增工具、命令和协作文档，无业务源码或依赖版本改动。
+
 ### Agent 默认入口
 
 在主仓库根目录执行：

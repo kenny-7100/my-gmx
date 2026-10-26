@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "solana:api-debug": "node scripts/solana-api-debug.mjs",
+    "test:solana-api-debug": "node --test scripts/solana-api-debug.test.mjs",
     "solana:browser-preflight": "node scripts/solana-browser-preflight.mjs",
     "test:solana-browser-preflight": "node --test scripts/solana-browser-preflight.test.mjs",
     "test:solana-readonly": "playwright test -c playwright-solana-readonly.config.ts",

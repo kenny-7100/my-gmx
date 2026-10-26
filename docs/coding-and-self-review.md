@@ -56,6 +56,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 同一任务中已完成且仍有效的准备工作应复用；源码、依赖、工具链或相关配置发生变化时，再判断哪些前置条件和检查失效。不要在每次小改动后重复整套准备。
 
+**API 源码调试验收：** 需要确认 Agent 能连接 inspector、命中当前 TypeScript 源码并读取变量时，使用[源码断点验收](solana-api-local.md#agent-可重复的源码断点验收) `yarn solana:api-debug`，默认独立端口并自动停服；仅在明确要复用已启用 inspector 的管理服务时加 `--attach --port PORT`。源码映射不一致或断点未命中应检查报告的失败阶段，不把 HTTP 健康检查当成调试通过；无断点需求的任务不增加此项。
+
 以上经验来自 2026-10-24 的[本地 RPC 代理验收记录](agent-acceptance-infrastructure.md)；具体事实与验证边界保留在主题文档，本节维护影响后续执行顺序的通用步骤。
 
 ## 查阅入口
