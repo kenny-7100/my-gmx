@@ -17,7 +17,7 @@
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
 | [SDK 源码离线回归](sdk-offline-tests.md) | 复用 SDK 原 Vitest 配置，默认运行 BigInt、数值及费用原有测试；支持精确选文件、环境隔离、阻止意外联网及记录结果，不需要 SDK 构建 |
 | [Solana 统计索引只读预检](solana-index-preflight.md) | A16：核实实际 volume 索引的 GraphQL 契约、高度和最新事件年龄；不推断处理延迟或历史完整性 |
-| [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：环境预检检查依赖、Chrome、SDK 与测试发现；本地开关/网络选择/刷新持久化已通过真实 Chrome 验收，含导航等待排障顺序 |
+| [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：`solana:browser-check` 一条命令完成预检、独立 Vite、真实 Chrome、独立报告和停服；复用网络选择/刷新持久化原有用例，保留手动运行和导航排障入口 |
 | [Agent 本地 PR 预览定位](agent-preview.md) | A09/A14：复用 CI 解析器，从实时 PR head 定位成功部署的不可变 URL；不打开页面或执行 UI 测试 |
 | [Agent 验收证据包](agent-evidence.md) | A07/A14：显式选取工具报告，可绑定并携带 Markdown 工作表，离线验证完整性、结论/统计及包外预期摘要；不推断业务验收通过或自动上传 |
 | [Agent 统一只读预检](agent-preflight.md) | 按任务选择 RPC/keeper/样例 API/可选钱包检查，统一状态、退出码和本地版本证据；不自动启动服务；支持历史报告源码指纹离线比较 |
