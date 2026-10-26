@@ -359,6 +359,25 @@ stdout JSON 的 `mode` 为 `isolated-postgres-integration`，包括 API commit/d
 
 共享真实 Node 回归已覆盖成功、失败、超时、SIGINT / SIGTERM、忽略 SIGTERM 及无关哨兵进程保留，通过 `yarn test:agent-tools` 执行；本轮没有让数据库 fixture 等待完整 180 秒来重复共享超时测试。API 运行器仍显式使用 180 秒时限，不降低原测试范围。真实默认 2 个 suite / 5 项、指定数据库与市场模型 2 个 suite / 11 项均通过，两类清理结果均为 passed；统一工具回归 93 项通过。证据在本机忽略目录 `.local/acceptance/solana-api-local/integration-process-{repro,success,failure,interrupt}.json`。
 
+### 数据库集成测试源码断点调试
+
+2026-10-27 已实现并真实验收。排查数据库读写、迁移或时间戳问题时，复用原测试及临时 PostgreSQL，显式选择一份 suite：
+
+```sh
+yarn gmx-api:test-integration --suite src/domain/market/marketModel.test.ts --inspect-port 9241
+```
+
+1. 入口在 Docker 操作前检查端口及单 suite 约束，随后按原流程创建所属容器。stderr 的 `API integration debug session` 给出本次 inspector、日志和报告路径，只代表启动安排；日志出现 `Debugger listening on ws://127.0.0.1:9241/...` 才说明调试器已监听。
+2. Chrome `chrome://inspect` 配置 `127.0.0.1:9241` 后 Inspect，或用 IDE Node attach；Agent 复用 `scripts/lib/agent-inspector.mjs` 连接该端口 `/json/list` 的 WebSocket。Jest 保留 `--runInBand`，仅监听 `127.0.0.1`，在运行原数据库 setup、迁移和测试之前等待连接。
+3. 开启 source maps，按[API 离线调试步骤](#api-离线测试源码断点调试)在目标 TypeScript 文件设置断点，核对 inline source map 与磁盘源码一致，再恢复初始暂停。数据库调用含异步边界，Agent 可先设置 `Debugger.setAsyncCallStackDepth` 的 `maxDepth=32`，结合暂停事件的同步与异步调用栈定位原测试，不能只把初始暂停当作模型函数断点。
+4. 本机已在 `src/domain/market/marketModel.ts` 的 `updateMarkets` 序列化输入行命中，读取原测试传入的 `marketConfigUpdatedAt` 并核对 UTC 时间戳及原测试调用栈。仅读取所需变量，不读取完整环境或连接密码。完成后移除自身断点、恢复测试并断开 debugger；需要中止时对外层命令 Ctrl-C / SIGTERM，核对 `exit.cleanup`、资源 `cleanup`、端口关闭及 `temporaryDirectory` 不再存在。
+
+Jest 调试进程上限 30 分钟，包含等待连接和暂停；普通模式仍为 180 秒，原 Jest 单项 120 秒超时、数据库准备及清理时限保留。调试期间容器保持存在，结束时仍按 owner label 删除，不复用其他数据库。不改变原数据库 setup/teardown、迁移、UTC、环境白名单或失败重试配置；缺 Docker、镜像或目标依赖时明确失败，不自动安装或改用共享服务。
+
+报告新增 `debug.inspector`、`pauseOnStart`、`timeoutMs`、`started`，同时记录 `temporaryDirectory`；inspector 启动日志不成立时不得 passed。日志确认不代表源码断点已验收，具体命中、参数和恢复仍需独立证据。非法端口、多 suite 和端口占用退出 1，stderr 给出具体诊断，占用服务保持运行。
+
+真实验收：source map 源码匹配，在模型函数读取 `2026-06-03T12:00:00.000Z` 参数，异步调用栈追溯到原测试；UTC 和环境哨兵隔离保留，恢复后原市场模型 4 项通过，源码未变，端口、所属容器与临时目录均消失。初始等待时 SIGTERM 正确失败并清理；非法端口、多 suite 及占用端口明确拒绝。普通默认 5 项、指定数据库/市场模型 11 项和统一工具 94 项通过。未修改 API 源码、原测试、配置或依赖。证据在本机忽略目录 `.local/acceptance/solana-api-local/integration-debug-{acceptance,negative,default,selected}.json` 和 `integration-debug-tools.tap`。
+
 ### 按需求选择测试文件
 
 默认范围不变；需要验证其他 API 模块时，重复传入 `--suite`，文件路径相对于 `--api-dir` 指定的 API checkout：
