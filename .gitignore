@@ -71,6 +71,7 @@ claude.md
 /.local/acceptance/sdk-offline/
 /.local/acceptance/keeper/
 /.local/acceptance/solana-api-local/
+/.local/acceptance/gmx-api-tscheck/
 /.local/acceptance/solana-dev/
 /.local/acceptance/agent-preflight/
 /.local/acceptance/agent-wallet/
