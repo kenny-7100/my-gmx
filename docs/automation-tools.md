@@ -12,7 +12,7 @@ SDK 计算使用[源码离线回归](sdk-offline-tests.md) `yarn sdk:test-offlin
 
 SDK 产物使用[构建产物准备入口](sdk-artifacts.md)：`yarn sdk:artifacts verify` 只读核对源码、工具链与完整产物，已获构建授权后用 `yarn sdk:artifacts build` 隔离预生成和编译，成功后才替换产物。回归入口 `yarn test:sdk-artifacts` 覆盖拒绝错误来源、完整性及替换失败恢复旧产物。
 
-独立网络选择 UI 验收使用[管理浏览器冒烟](solana-browser-smoke.md#一条命令执行并保存独立报告) `yarn solana:browser-check`：复用已有预检、只读用例和 Playwright `webServer`，自动启动/停止 Vite，每次保存独立 JSON/HTML/诊断，不覆盖历史结果、不接管既有服务。回归入口为 `yarn test:solana-browser-check`。
+独立网络选择 UI 验收使用[管理浏览器冒烟](solana-browser-smoke.md#一条命令执行并保存独立报告) `yarn solana:browser-check`：复用已有预检、只读用例和 Playwright `webServer`，自动启动/停止 Vite，每次保存独立 JSON/HTML/诊断，不覆盖历史结果、不接管既有服务。功能分支可显式加 `--project-dir PATH`，核对目标依赖及已批准资源后启动目标 Vite，报告和用例留在基础设施目录。回归入口为 `yarn test:solana-browser-check`。
 
 更新日期：2026-10-25。用户已授权 Agent 在实际协作中主动发现、实现并积累有复用价值的自动化能力，减少重复推理、人工操作、执行时间和成本。
 

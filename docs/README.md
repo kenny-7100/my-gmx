@@ -19,7 +19,7 @@
 | [前端源码离线测试](frontend-offline-tests.md) | 精确运行当前或独立 checkout 的 src/landing 原有单测，复用 Vite/happy-dom 初始化，隔离本机环境并阻止意外联网；单 suite 可进行源码断点调试，不启动应用服务或浏览器 |
 | [SDK 源码离线回归](sdk-offline-tests.md) | 复用 SDK 原 Vitest 配置与目标目录测试运行器，支持独立交付 checkout 和锁文件身份，默认运行 BigInt、数值及费用原有测试；支持精确选文件、环境隔离、阻止意外联网及记录结果；单 suite 可启用 loopback 源码断点调试，共享进程组工具核实取消与清理，不需要 SDK 构建 |
 | [Solana 统计索引只读预检](solana-index-preflight.md) | A16：核实实际 volume 索引的 GraphQL 契约、高度和最新事件年龄；不推断处理延迟或历史完整性 |
-| [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：`solana:browser-check` 一条命令完成预检、独立 Vite、真实 Chrome、独立报告和停服；复用网络选择/刷新持久化原有用例，保留手动运行和导航排障入口 |
+| [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：`solana:browser-check` 一条命令完成预检、独立 Vite、真实 Chrome、独立报告和停服；支持独立功能 checkout 的目标 Vite 与源码/资源身份，复用网络选择/刷新持久化原有用例，保留手动运行和导航排障入口 |
 | [Agent 本地 PR 预览定位](agent-preview.md) | A09/A14：复用 CI 解析器，从实时 PR head 定位成功部署的不可变 URL；不打开页面或执行 UI 测试 |
 | [Agent 验收证据包](agent-evidence.md) | A07/A14：显式选取工具报告，可绑定并携带 Markdown 工作表，离线验证完整性、结论/统计及包外预期摘要；不推断业务验收通过或自动上传 |
 | [Agent 统一只读预检](agent-preflight.md) | 按任务选择 RPC/keeper/样例 API/可选钱包检查，统一状态、退出码和本地版本证据；不自动启动服务；支持历史报告源码指纹离线比较 |
