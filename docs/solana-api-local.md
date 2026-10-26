@@ -391,7 +391,7 @@ yarn gmx-api:test-integration --api-dir /path/to/api-checkout --require-routes \
 
 `--require-routes` 在 API 目录规范化后、Docker 环境及容器准备之前，复用 prepare 的只读 verify；收据缺失、旧版本、输入/生成器/产物过期或生成锁存在时，返回退出 1 / `generated-routes-prerequisite`。它不会自动生成、安装或修复产物。已明确需要运行测试时可直接调用带此参数的集成入口，无需先重复 verify；预先 prepare 的操作与授权仍按上节处理。
 
-Jest 执行、进程和容器清理结束后，再次 verify 并逐项比较 schema、API 目录、源码输入、工具与四个产物摘要。报告 `generatedRoutes.before/after` 保留两次证据，全部一致为 passed；缺失、过期或变化为 failed / `generated-routes-changed`，即使原生 Jest 断言全通过也不接受整体结果。`generatedRoutes=not-checked` 表示未选择该前置，不代表产物已验证。默认纯计算/数据库场景保持原流程；不根据文件名猜测是否需要路由，调用者须按真实导入选择。API 测试工具指纹已包含准备脚本，工具变化后旧测试证据需要重跑。
+Jest 执行、进程和容器清理结束后，再次 verify 并逐项比较 schema、API 目录、源码输入、工具与四个产物摘要。报告 `generatedRoutes.before/after` 保留两次证据，全部一致为 passed；缺失、过期或变化为 failed / `generated-routes-changed`，即使原生 Jest 断言全通过也不接受整体结果。`generatedRoutes=not-checked` 表示未选择该前置，不代表产物已验证。默认纯计算/数据库场景保持原流程；不根据文件名猜测是否需要路由，调用者须按真实导入选择。API 测试工具指纹已包含准备脚本，工具变化后旧测试证据需要重跑。用于[API 交付证据绑定](linear-development-workflow.md#api-测试证据绑定)时，delivery-check 会再次只读 verify，并比较测试前、测试后与当前来源；测试通过后改动生成器或忽略产物、丢失收据也会 blocked。未启用路由校验的报告在交付结果中明确标记 not-checked。
 
 该检查不锁住整个测试期间的产物，也不能证明外部消费者没有并发修改后又恢复文件；测试期间避免同时生成或人工修改。它验证来源与前后稳定性，不替代业务路由契约、线上部署或完整 API 测试。
 

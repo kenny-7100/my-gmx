@@ -9,6 +9,7 @@ import { promisify } from "node:util";
 import {
   checkDelivery,
   validateApiEvidence,
+  validateApiRoutes,
   validateBrowserEvidence,
   validateFrontendEvidence,
   validateSdkEvidence,
@@ -328,5 +329,36 @@ test("API evidence binds both profiles to clean source, tooling, native results 
     assert.throws(() => validateApiEvidence({ ...options, source: { ...source, commit: "later-head" } }));
     assert.throws(() => validateApiEvidence({ ...options, results: { ...results, numFailedTests: 1 } }));
     assert.throws(() => validateApiEvidence({ ...options, network: { ...network, status: "failed" } }));
+  }
+});
+
+test("delivery rejects incomplete or stale generated route evidence without requiring it for unrelated reports", () => {
+  const current = {
+    schemaVersion: 2,
+    status: "passed",
+    apiDir: "/api",
+    source: { sha256: "source" },
+    tooling: { sha256: "generator" },
+    artifacts: { routes: "output" },
+  };
+  const evidence = {
+    mode: "isolated-postgres-integration",
+    apiDir: "/api",
+    generatedRoutes: { status: "passed", before: current, after: current },
+  };
+  assert.doesNotThrow(() => validateApiRoutes(evidence, current));
+  for (const generatedRoutes of [undefined, { status: "not-checked" }])
+    assert.doesNotThrow(() => validateApiRoutes({ ...evidence, generatedRoutes }));
+  for (const generatedRoutes of [
+    null,
+    { status: "failed" },
+    { status: "not-checked", before: current },
+    { status: "passed", before: current },
+    { status: "passed", after: current },
+  ])
+    assert.throws(() => validateApiRoutes({ ...evidence, generatedRoutes }, current));
+  assert.throws(() => validateApiRoutes(evidence));
+  for (const change of [{ status: "blocked" }, { source: {} }, { tooling: {} }, { artifacts: {} }]) {
+    assert.throws(() => validateApiRoutes(evidence, { ...current, ...change }));
   }
 });

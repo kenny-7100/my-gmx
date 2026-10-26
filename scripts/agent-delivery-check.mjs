@@ -7,7 +7,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
 import { frontendToolHashes, resolveSuites, sourceEvidence } from "./frontend-offline-tests.mjs";
-import { readTestSource, resolveSuites as resolveApiSuites } from "./gmx-api-integration-tests.mjs";
+import {
+  readTestSource,
+  resolveSuites as resolveApiSuites,
+  sameGeneratedRoutes,
+  verifyRequiredRoutes,
+} from "./gmx-api-integration-tests.mjs";
 import { passedResults as passedApiResults } from "./gmx-api-offline-tests.mjs";
 import { readNetworkAudit } from "./lib/agent-network-audit.mjs";
 import { apiTestTooling, readApiTestSource, sourceInputs } from "./lib/gmx-api-source.mjs";
@@ -95,6 +100,24 @@ export function validateFrontendEvidence(options) {
 export function validateSdkEvidence(options) {
   validateOfflineEvidence({ ...options, targetDir: options.sdkDir, targetField: "sdkDir", mode: "sdk-source-offline" });
   assert.deepEqual(options.evidence.runtime, options.runtime, "SDK runtime changed since testing");
+}
+
+export function validateApiRoutes(evidence, current) {
+  const routes = evidence.generatedRoutes;
+  if (routes === undefined) return;
+  assert.ok(routes && typeof routes === "object", "Invalid generated route evidence");
+  if (routes.status === "not-checked") {
+    assert.deepEqual(routes, { status: "not-checked" }, "Unchecked routes contain validation evidence");
+    return;
+  }
+  assert.equal(evidence.mode, "isolated-postgres-integration", "Unexpected generated route test mode");
+  assert.equal(routes.status, "passed", "Generated route validation did not pass");
+  for (const report of [routes.before, routes.after, current]) {
+    assert.ok(report && report.schemaVersion === 2 && report.status === "passed", "Missing valid route evidence");
+    assert.equal(report.apiDir, evidence.apiDir, "Generated routes target another checkout");
+  }
+  sameGeneratedRoutes(routes.before, routes.after);
+  sameGeneratedRoutes(routes.after, current);
 }
 
 export function validateApiEvidence({ evidence, apiDir, head, source, inputs, tooling, results, suites, network }) {
@@ -429,6 +452,11 @@ export async function checkDelivery({
       const tooling = await apiTestTooling(cwd, evidence.mode);
       stage = "network-audit";
       const network = await readNetworkAudit(evidence.network.eventsFile, suites.length);
+      stage = "generated-routes";
+      const routes = evidence.generatedRoutes;
+      const currentRoutes =
+        routes !== undefined && routes?.status !== "not-checked" ? await verifyRequiredRoutes(cwd) : undefined;
+      validateApiRoutes(evidence, currentRoutes);
       stage = "source-and-results";
       validateApiEvidence({ evidence, apiDir: cwd, head: headSha, source, inputs, tooling, results, suites, network });
       Object.assign(entry, {
@@ -438,13 +466,16 @@ export async function checkDelivery({
         sourceSha256: inputs.sha256,
         suites,
         counts: evidence.counts,
+        generatedRoutes: { status: currentRoutes ? "passed" : "not-checked" },
       });
     } catch (error) {
       report.findings.push({
         code: "api-evidence-invalid",
         reportFile,
         stage,
-        ...(error.code === "ERR_ASSERTION" ? { message: error.message.split("\n")[0].slice(0, 240) } : {}),
+        ...(["ERR_ASSERTION", "generated-routes-prerequisite"].includes(error.code)
+          ? { message: error.message.split("\n")[0].slice(0, 240) }
+          : {}),
       });
     }
   }

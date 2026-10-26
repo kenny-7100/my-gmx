@@ -127,6 +127,8 @@ API 运行器现在保存 schema、测试前后 Git 身份、源码聚合指纹�
 
 检查还会重新读取报告引用的原生 Jest JSON 与网络事件日志，要求精确且唯一的所选 suite、实际断言全部执行通过、无 skip/todo、正常退出和所属进程清理完成；离线临时目录或集成容器/目录清理必须通过。网络安装数须等于 suite 数，拒绝数为 0，guard 摘要及集成网络策略保持一致。计数须与原生结果相同。保留这些原始文件；旧报告缺字段、文件缺失或指纹变化时重跑相关测试，不手改历史报告。
 
+若集成报告声明 `generatedRoutes.status=passed`，检查还会只读运行路由 verify，并逐项比较测试前、测试后及当前的 schema、API 目录、源码输入、实际生成器与产物摘要。任一证据缺失、失败、收据缺失或当前产物/生成器过期，均在 `generated-routes` 阶段 blocked；不会自动生成或启动数据库。未记录此字段的历史报告和严格的 `{status: "not-checked"}` 保持原行为，结果明确标记 not-checked；它们不能证明路由已验收，依赖路由的任务必须使用 `--require-routes` 重跑。
+
 逐份结果在 `apiEvidence` 中，包含报告路径、模式、testedCommit、sourceSha256、suite 和计数；无效证据产生 `api-evidence-invalid` finding，整次 blocked / 退出 2。检查只读取本地文件并运行只读 Git 命令，不启动数据库、HTTP 服务或测试，不 fetch、安装、构建、切分支或修复文件。
 
 本项核对测试结果与交付版本的对应关系，不证明需求覆盖充分、真实数据正确或完整已安装依赖的字节一致；工具摘要和版本也不是签名或原子快照，检查后变更须重新验收。
@@ -134,6 +136,8 @@ API 运行器现在保存 schema、测试前后 Git 身份、源码聚合指纹�
 真实验收：以本地 API `origin/release` 建立独立 clone，仅为验收显式链接 package/lock 一致的已有依赖，以 README 的临时提交建立非空交付差异。原收益计算 6 项和市场数据库 4 项通过后，两份报告共同绑定成功；事件日志追加拒绝事件、缺日志、原生结果失败、错误目录、旧工具/运行时、dirty 源码均拒绝，恢复后通过。再提交新的 HEAD，旧报告在 clean 状态下仍拒绝。检查未改变 Git 索引字节，验收 clone 已删除，真实业务源码未改动。证据为本机忽略目录 `.local/acceptance/solana-api-local/api-delivery-{acceptance,passed,offline,integration}.json`。
 
 本轮工程检查：API 默认离线 12 项、隔离数据库 5 项及统一工具 99 项通过，SDK 产物 verify、根类型检查、相关 ESLint/Prettier、140 个文档本地目标与差异检查通过；完整前端回归 3,014 项通过、1 项既有跳过，退出 0。默认报告及工具、类型、前端日志分别为同目录 `api-delivery-default-{offline,integration}.json`、`api-delivery-tools.tap`、`api-delivery-tscheck.log`、`api-delivery-test-ci.log`。
+
+生成路由交付复核验收（2026-10-27）：独立 API release clone 的既有 routeMap/HTTP 两个 suite 共 6 项通过，带路由来源的报告绑定成功；生成产物变更、实际生成器变更、收据丢失、测试后证据缺失及失败状态均被拒绝，恢复后通过。默认数据库 5 项报告在移除路由收据后仍可绑定，明确返回 not-checked。交付检查前后目标 Git 索引字节、原报告及容器清单不变，真实 API 源码和既有调试服务不变，临时 clone 已清理。本机证据为忽略目录 `.local/acceptance/solana-dev/delivery-routes-acceptance.json`，该文件记录原始测试报告路径；复用 package/lock 一致的已安装依赖，没有执行全新安装或构建。 工程检查：统一工具回归 105 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、149 个文档本地链接及差异检查通过；完整前端回归 3,014 项通过、1 项既有跳过，退出 0。日志位于同目录 `delivery-routes-{tools.tap,tscheck.log,test-ci.log}`。
 
 ### 基础设施验收记录（2026-10-26）
 
