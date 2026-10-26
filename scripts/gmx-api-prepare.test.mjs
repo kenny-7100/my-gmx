@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { execFileSync } from "node:child_process";
-import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { generationTarget } from "./gmx-api-prepare.mjs";
+import { generationTarget, restoreGenerationFiles } from "./gmx-api-prepare.mjs";
 
 test("API generation requires its Git root, fixed ignored outputs and no output symlinks", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "gmx-route-target-"));
@@ -57,6 +58,27 @@ test("API generation requires its Git root, fixed ignored outputs and no output 
     await writeFile(route, "fixture");
     git("add", "--force", "src/codegen/tsoa/routes.ts");
     await assert.rejects(generationTarget(dir));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("failed API generation restores existing artifacts and removes newly created files", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "gmx-route-restore-"));
+  try {
+    const files = ["routes.ts", "routes-v2.ts", "swagger.json", "swagger-v2.json", "receipt.json"].map((name) =>
+      path.join(dir, name)
+    );
+    const saved = files.map((file, index) => ({
+      file,
+      bytes: index % 2 === 0 ? Buffer.from(`original-${index}`) : undefined,
+    }));
+    for (const file of files) await writeFile(file, "partial generation");
+    await restoreGenerationFiles(saved);
+    for (const { file, bytes } of saved) {
+      if (bytes) assert.deepEqual(await readFile(file), bytes);
+      else await assert.rejects(readFile(file), { code: "ENOENT" });
+    }
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
