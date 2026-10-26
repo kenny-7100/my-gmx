@@ -353,6 +353,20 @@ node ../scripts/gmx-api-integration-tests.mjs --api-dir .
 
 stdout JSON 的 `mode` 为 `isolated-postgres-integration`，包括 API commit/dirty、原有 Jest/DB setup/选定测试及迁移文件摘要、镜像 ID、随机端口、测试数量和 cleanup。`exit` 单独记录测试进程的 `processGroup`、`interrupted`、`timedOut`、`cleanup`，信号异常时包含 `signalError`；顶层 `cleanup` 仍表示所属容器及临时目录清理。中断、超时、进程或容器清理失败均不能 passed，`errorCode` 分别标识 `interrupted`、`test-timeout` 或 `process-cleanup-failed` 等执行问题。只有所有选定 suite 全部通过、无 skip/todo、退出 0、源码未变化且清理成功，才报告 passed。前置条件不足在 stderr 报告固定错误；实际测试失败仍输出带日志位置的失败报告。连接密码不写入工具报告。
 
+### 集成测试的网络范围
+
+2026-10-27 起，`gmx-api:test-integration` 默认在所选 Jest suite 执行前安装[网络限制](../tools/gmx-api-integration/network-guard.cjs)。仅允许 loopback 上本次临时 PostgreSQL 端口，以及测试进程自己创建且仍在监听的 TCP 服务器，保留 Supertest 临时 HTTP 服务；外部地址、无关本地服务及 Unix socket 均拒绝。阻断 TLS、UDP、外部 DNS 查询及独立 DNS Resolver；普通 HTTP/fetch 的底层 socket 同样受限。数据库的 `localhost` 解析保留，不将真实服务响应替换成模拟数据。
+
+运行器读取原 Jest 配置的 `setupFilesAfterEnv`，在其前面加入 guard，保留原有 setup 顺序、迁移、全局 setup/teardown 和断言。每个 suite 检查捕获后的网络尝试；另外将安装和拒绝事件记录到本次 `network-events.log`，运行器独立核对。因此即使测试捕获异常，或在最终 afterAll 中捕获异常且原生 Jest 仍成功，整体验收也会失败。`network.installations` 必须等于选定 suite 数，`blockedAttempts` 必须为 0；报告另保留 policy、guardSha256 和作用范围。
+
+出现 `errorCode=network-access-forbidden` 时查看本次 Jest 日志，核对所选测试是否确实需要真实外部依赖；不要关闭限制、捕获异常压过失败或连接共享数据库。确实需要外部服务的场景使用其完整验收环境。`network-guard-not-installed` 表示未完整安装，应检查本次启动/配置失败，不能只复用原生成功结果。该入口没有绕过开关，源码断点模式同样保留限制。
+
+保护作用于所选 Jest 测试进程的常见 Node 网络入口，不是操作系统沙箱。原有全局 setup/teardown、配置加载仍作为可信测试基础；不防御测试主动撤销保护、另起外连子进程或使用原生扩展。它不代表整个 API 已完全离线，也不代替所选测试范围及真实业务需求的验收。
+
+2026-10-27 实测：默认 Solana 两 suite / 5 项、数据库与市场模型两 suite / 11 项全部通过，安装次数均为 2、拒绝次数为 0，原 Supertest 和数据库清理保留。隔离 API 副本分别在 test 和末尾 afterAll 中捕获对无关本地服务、外部域名的连接异常：均记录两次拒绝并返回失败；后者原生 Jest 显示 success，仍被运行器正确拒绝。无关服务收到 0 个连接并继续监听，所属测试子进程、临时容器及副本均已清理，实际 API checkout 未修改。
+
+网络传输回归使用真实 Node 子进程及本地监听，覆盖数据库、即时启动的 HTTP 服务、跨 suite 重复安装、外部/无关本地 socket、Unix socket、TLS、UDP、DNS/Resolver 和 fetch；自动纳入 `yarn test:agent-tools`。本机证据在忽略的 `.local/acceptance/solana-api-local/network-acceptance.json`、`network-default.json`、`network-selected.json`，原生结果及 `network-events.log` 留在对应 integration 运行目录。 本轮统一工具回归 97 项、根类型检查、相关静态检查及 121 个文档本地目标检查通过；全量前端回归 3,014 项通过、1 项既有跳过。
+
 ### 集成测试的完整源码指纹
 
 2026-10-27 已补齐。原有 `source.sha256` 继续记录选定测试、数据库配置、Jest setup/teardown 及迁移等文件；报告另有 `sourceInputs` / `sourceInputsAfter`，由与 API 离线入口共享的 `scripts/lib/gmx-api-source.mjs` 计算。聚合指纹覆盖全部 `src/` 下 TS/JS/JSON，以及 `package.json`、`yarn.lock`、`tsconfig.json` 的相对路径和内容，报告摘要及文件数；已有依赖修改、文件新增/删除都会改变指纹。源码符号链接明确拒绝，不自动跟随。普通模式和调试模式使用同一检查，不新增参数。
