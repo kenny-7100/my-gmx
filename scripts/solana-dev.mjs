@@ -10,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
 import { sourceEvidence } from "./frontend-offline-tests.mjs";
+import { readApiTestSource } from "./lib/gmx-api-source.mjs";
 import { checkContracts } from "./lib/solana-dev-contracts.mjs";
 import { control as apiControl } from "./solana-api-dev.mjs";
 import { startVite, API_PREFIX } from "../tools/solana-dev/vite.mjs";
@@ -22,6 +23,13 @@ function workspaceSocket(projectDir) {
   return `/tmp/gmx-solana-stack-${process.getuid()}-${createHash("sha256").update(key).digest("hex").slice(0, 12)}.sock`;
 }
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export function validateApiService(service, apiDir, supervisorPid) {
+  assert.equal(service.status, "ready", "The selected API service is not ready.");
+  assert.equal(service.apiDir, apiDir, "The API port belongs to another checkout.");
+  if (supervisorPid !== undefined)
+    assert.equal(service.supervisorPid, supervisorPid, "The API service instance changed.");
+}
 
 export async function control(command, projectDir = ROOT) {
   const socketFile = workspaceSocket(await realpath(projectDir));
@@ -79,7 +87,14 @@ async function supervise(options) {
   const apiCli = (...args) =>
     exec(
       process.execPath,
-      [path.join(ROOT, "scripts/solana-api-dev.mjs"), ...args, "--port", String(options.apiPort)],
+      [
+        path.join(ROOT, "scripts/solana-api-dev.mjs"),
+        ...args,
+        "--api-dir",
+        options.apiDir,
+        "--port",
+        String(options.apiPort),
+      ],
       { cwd: ROOT, env: { PATH: process.env.PATH }, timeout: 40000, maxBuffer: 1048576 }
     );
   const requestsFile = path.join(runDir, "requests.jsonl");
@@ -112,6 +127,7 @@ async function supervise(options) {
     status: "starting",
     mode: "sample",
     projectDir: options.projectDir,
+    apiDir: options.apiDir,
     frontendSourceAtStart,
     frontendToolSha256,
     startedAt: new Date().toISOString(),
@@ -139,7 +155,7 @@ async function supervise(options) {
     if (options.services.includes("api")) {
       try {
         const result = await apiControl(options.apiPort, "status");
-        assert.equal(result.status, "ready");
+        validateApiService(result, options.apiDir, report.services.api.supervisorPid);
         checks.push({ service: "api", status: "passed", mode: result.mode, apiDir: result.apiDir });
       } catch {
         checks.push({ service: "api", status: "failed" });
@@ -188,6 +204,7 @@ async function supervise(options) {
         else if (command === "logs") result = { status: "passed", runDir, requestsFile, services: report.services };
         else if (command === "contracts")
           result = await checkContracts({
+            apiDir: options.apiDir,
             baseUrl: options.services.includes("vite") ? `${report.webUrl}${API_PREFIX}` : report.apiUrl,
           });
         else if (command.startsWith("trace ")) {
@@ -288,10 +305,10 @@ async function supervise(options) {
         if (!["ENOENT", "ECONNREFUSED"].includes(error.code)) throw error;
       }
       if (existing) {
-        assert.equal(existing.status, "ready");
-        assert.equal(existing.apiDir, path.join(ROOT, "gmx-api"));
+        validateApiService(existing, options.apiDir);
         report.services.api = {
           ownership: "borrowed",
+          apiDir: existing.apiDir,
           supervisorPid: existing.supervisorPid,
           logFile: existing.logFile,
           source: existing.sourceAtStart,
@@ -301,6 +318,7 @@ async function supervise(options) {
         apiOwned = true;
         report.services.api = {
           ownership: "owned",
+          apiDir: started.apiDir,
           supervisorPid: started.supervisorPid,
           logFile: started.logFile,
           source: started.sourceAtStart,
@@ -374,6 +392,7 @@ async function supervise(options) {
     await stop();
     report.status = "failed";
     report.code = error.code === "EADDRINUSE" ? "port-or-workspace-in-use" : "startup-failed";
+    report.reason = error.message.split("\n")[0].slice(0, 240);
     await save();
     if (process.connected) {
       process.send(report);
@@ -392,6 +411,7 @@ export async function runCli(args = process.argv.slice(2)) {
       options: {
         services: { type: "string", default: "api,vite" },
         "project-dir": { type: "string", default: ROOT },
+        "api-dir": { type: "string", default: path.join(ROOT, "gmx-api") },
         "web-port": { type: "string", default: "3010" },
         "api-port": { type: "string", default: "3004" },
         "rpc-port": { type: "string", default: "3030" },
@@ -402,7 +422,7 @@ export async function runCli(args = process.argv.slice(2)) {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn solana:dev <up|status|logs|stop|trace|contracts> [--project-dir PATH] [--services api,vite,rpc] [--web-port 3010 --api-port 3004 --rpc-port 3030] [--id TRACE_ID] [--offline]\nUse --project-dir to select an independent frontend checkout and its workspace. Up requires its installed dependencies and matching Vite version. Development tools only. The local API proxy is /__agent/solana-api; no frontend business consumer is added. Contracts are unreviewed structural baselines (partial exits 2).\n"
+        "Usage: yarn solana:dev <up|status|logs|stop|trace|contracts> [--project-dir PATH] [--api-dir PATH] [--services api,vite,rpc] [--web-port 3010 --api-port 3004 --rpc-port 3030] [--id TRACE_ID] [--offline]\nUse --project-dir to select a frontend checkout and its workspace; up may select an independent API checkout using --api-dir. Up requires installed target dependencies, matching Vite and the API Solana sample entry. Development tools only. The local API proxy is /__agent/solana-api; no frontend business consumer is added. Contracts are unreviewed structural baselines (partial exits 2).\n"
       );
       return 0;
     }
@@ -411,7 +431,7 @@ export async function runCli(args = process.argv.slice(2)) {
     assert.ok(["up", "_serve", "status", "logs", "stop", "trace", "contracts"].includes(command));
     assert.equal(process.versions.node.split(".")[0], "22");
     for (const token of tokens.filter((token) => token.kind === "option")) {
-      if (["services", "web-port", "api-port", "rpc-port"].includes(token.name))
+      if (["api-dir", "services", "web-port", "api-port", "rpc-port"].includes(token.name))
         assert.ok(["up", "_serve"].includes(command));
       if (token.name === "id") assert.equal(command, "trace");
       if (token.name === "offline") assert.equal(command, "contracts");
@@ -419,6 +439,7 @@ export async function runCli(args = process.argv.slice(2)) {
     const options = {
       services: values.services.split(","),
       projectDir: values["project-dir"],
+      apiDir: values["api-dir"],
       webPort: Number(values["web-port"]),
       apiPort: Number(values["api-port"]),
       rpcPort: Number(values["rpc-port"]),
@@ -439,6 +460,10 @@ export async function runCli(args = process.argv.slice(2)) {
     let result;
     if (command === "up") {
       options.projectDir = (await devTarget(options.projectDir)).projectDir;
+      if (options.services.includes("api")) {
+        options.apiDir = await realpath(options.apiDir);
+        await readApiTestSource(options.apiDir, []);
+      }
       const output = path.join(ROOT, ".local/acceptance/solana-dev");
       await mkdir(output, { recursive: true });
       const launcherDir = await mkdtemp(path.join(output, "launcher-"));
@@ -450,6 +475,8 @@ export async function runCli(args = process.argv.slice(2)) {
           "_serve",
           "--project-dir",
           options.projectDir,
+          "--api-dir",
+          options.apiDir,
           "--services",
           values.services,
           "--web-port",

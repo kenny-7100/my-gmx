@@ -6,6 +6,7 @@ import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promise
 import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
@@ -31,7 +32,11 @@ export async function readApiSource(apiDir) {
     if (file.endsWith(".json") && file.includes("/samples/")) samples[path.basename(file, ".json")] = JSON.parse(bytes);
   }
   const git = (...args) =>
-    execFileSync("git", ["-C", apiDir, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+    execFileSync("git", ["-C", apiDir, ...args], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
+    }).trim();
   return {
     samples,
     evidence: { commit: git("rev-parse", "HEAD"), dirty: git("status", "--porcelain").length > 0, sha256: hashes },
