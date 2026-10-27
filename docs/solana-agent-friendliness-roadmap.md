@@ -35,7 +35,7 @@
 | P1 | 统一本地运行版本矩阵 | README、`.nvmrc`、子项目和不同执行入口可能使用不同 Node 版本 | 明确 Node/Yarn、SDK/API checkout、Playwright/Chrome 和 Docker 的支持版本 | 不同 checkout 或机器不会因版本差异得到难以解释的结果 | 待开始 | 先核对当前本地入口和各子仓库要求，再决定是否调整配置 |
 | P1 | 建立真实数据最小样本集 | 没有固定市场、账户、持仓、订单和空状态样本时，验收难以重复 | 准备脱敏且可重复的市场、账户、持仓、挂单、成交、错误和空结果样本，记录来源、时间、网络和版本 | Agent 能稳定验证金额、精度、枚举、排序、分页和空状态 | 部分完成 | 已有 sample 和钱包/只读预检；协议持仓、挂单等样本仍待准备，见 A05/A08 |
 | P1 | 前端与本地 API 正式联调入口 | 当前 API sample 服务可运行，但前端尚未正式消费 Solana API | 沿用主项目统一数据流接入 API host、配置、parser、状态和组件 | Agent 能从本地 API 请求一路追到前端状态和组件 | 部分完成 | 当前工具明确不代表业务消费已实现；应随对应业务需求实施 |
-| P1 | 失败诊断手册和错误分类 | 工具能报告失败，但新 Agent 仍可能需要从长日志判断下一步 | 按 configuration、dependency、network、contract、source identity、test failure、external resource 分类，给出检查顺序 | Agent 能快速决定修代码、重跑、补资源或标记 blocked | 已具备基础 | 现有专题文档已有大量边界说明，后续按真实失败补充，不单独制造重复入口 |
+| P1 | 失败诊断手册和错误分类 | 工具能报告失败，但新 Agent 仍可能需要从长日志判断下一步 | 按 configuration、dependency、network、contract、source identity、test failure、external resource 分类，给出检查顺序 | Agent 能快速决定修代码、重跑、补资源或标记 blocked | 已完成 | 2026-10-27：[失败诊断](agent-failure-diagnosis.md)覆盖 12 类特征、顺序、入口及停止条件；5 个真实前置拒绝场景及 SDK 产物只读核验符合预期，已接入启动卡、执行入口和索引；见下方记录。未执行真实业务或远端失败演练 |
 | P2 | 真实钱包连接验收环境 | CLI 钱包工具不能证明页面钱包连接、拒签和断开行为 | 准备专用浏览器 profile、钱包扩展、连接/断开/拒签/网络切换场景 | 能验收真实钱包连接、恢复、拒签和会话隔离 | 待开始 | 依赖明确的钱包、账户和浏览器环境；不能用 CLI 地址检查替代 |
 | P2 | 小规模 Solana 交易验收 runner | 当前有交易回执证据，但没有签名、发送、确认、恢复和清理闭环 | 在明确网络、钱包、预算、停止条件和恢复策略后，逐步支持模拟、签名、广播、确认、取消和清理 | 有完整交易证据；不确定状态可恢复或阻断，不重复广播 | 待开始 | 当前钱包工具和 RPC 代理不提供签名或写操作；依赖单独授权和真实资源 |
 | P2 | 复杂协议数学独立基准 | 基础 WASM 向量不能证明 funding、borrowing、PnL 和清算价 | 使用独立模型、链上 view 或核实的程序版本生成基准，绑定输入、精度、版本和容差 | SDK、API、前端可分别与独立基准核对 | 部分完成 | 基础 WASM/定点向量已存在；复杂业务数学仍未完成，不能用两端互相比对替代 |
@@ -71,3 +71,24 @@
 以上为逐行对照当前脚本、CLI 帮助及专题文档的静态导航走查，不代表执行了这些业务测试，也不是新 Agent 完成真实需求的实战证明。“真实需求全流程试运行”继续保持待真实需求验证。
 
 命令核验：从基础设施根目录执行下列 16 个入口的 `--help`，全部退出 0；未执行其业务动作：`frontend:test-offline`、`sdk:test-offline`、`agent:test-plan`、`agent:test-run`、`gmx-api:discover-tests`、`gmx-api:test-offline`、`gmx-api:test-integration`、`gmx-api:tscheck`、`solana:browser-check`、`agent:preflight`、`agent:acceptance`、`agent:evidence`、`agent:delivery-check`、`agent:preview`、`linear`、`solana:dev`。启动卡参数与帮助及实现一致。最终检查通过：3 份文档中的 73 处本地文件/章节链接、启动卡引用的 16 个 package scripts 均有效；`git diff --check` 及新文件空白检查通过。修改范围仅为启动卡、本文和文档索引。
+
+## 失败诊断实施与验收记录（2026-10-27）
+
+本轮选择已具备基础且不依赖外部资源的 P1 诊断手册：复用现有工具，把分散的错误解释归并为诊断顺序和专题跳转。状态按“已具备基础 → 实施中 → 已完成”更新。P0 环境状态清单仍为待开始，真实 API/契约和真实需求试运行状态未改变。
+
+完成[失败诊断](agent-failure-diagnosis.md)，涵盖参数/路径、范围/覆盖、运行时依赖、SDK/路由产物、目标身份、离线网络、真实服务、契约语义、原生断言、中断/清理、证据和外部资源共 12 类；每类包含检查顺序、后续入口及停止条件。已接入启动卡、文档索引和编码执行入口；操作细节继续维护在原专题，未增加新诊断运行器。
+
+| 本轮实际执行的命令（主仓库根目录） | 观察结果与诊断路径 | 验收结果 |
+| --- | --- | --- |
+| `yarn frontend:test-offline --suite ../outside.spec.ts` | 退出 1，`frontend-offline-prerequisite`，纠正前端相对路径 | passed（预期拒绝） |
+| `yarn sdk:test-offline --suite ../outside.spec.ts` | 退出 1，`sdk-offline-prerequisite`，纠正 SDK 相对路径 | passed（预期拒绝） |
+| `yarn gmx-api:test-offline --suite ../outside.test.ts` | 退出 1，`offline-test-prerequisite`，纠正 API src 测试路径 | passed（预期拒绝） |
+| `yarn agent:test-run` | 退出 2，blocked，要求显式 scope；不能据此认为测试已执行 | passed（预期拒绝） |
+| `yarn agent:preflight --checks unknown` | 退出 3，`configuration-or-evidence-error`，纠正检查项；未访问 RPC/keeper/API/wallet | passed（预期拒绝） |
+| `yarn sdk:artifacts verify` | 退出 0，passed，550 个来源输入、1090 个产物；可复用当前产物，无需构建 | passed |
+
+原始 stdout/stderr、摘要、时间、命令和退出码保存于本机忽略目录 `.local/acceptance/agent-tools/failure-diagnosis/`，汇总为 `report.json`；其他机器不保证有这些文件。前置拒绝演练前后核对前端、SDK、API 的验收目录，没有创建新的测试 run 目录。验收脚本只用于本轮收集结果，未沉淀为额外工具或测试框架。
+
+其余错误分类通过当前脚本字段、错误码及专题文档静态核对，没有实际制造网络故障、进程残留、业务断言失败或契约漂移；对应历史验收不刷新为本轮实测。此处 passed 表示诊断手册及本轮预期拒绝行为符合验收条件，不表示业务需求通过。
+
+本轮仅修改基础设施文档，未修改业务源码、测试、配置、依赖或 CI，未启动服务、浏览器、容器、构建、部署或读取钱包。最终文档检查通过：5 份改动文档中的 172 处本地链接/章节锚点有效，手册使用的 package script 存在，`git diff --check` 和新文件空白检查通过，完整修改范围仅为上述 5 份文档。检查结果保存在同目录 `document-check.json`；纯文档变更未运行类型检查或全量业务测试。
