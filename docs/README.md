@@ -40,7 +40,8 @@ Solana 集成开发与验收从[Agent 任务启动卡](agent-task-start.md)选�
 | [keeper 只读预检](keeper-preflight.md) | A02 真实价格、图表与开关预检；本地 `solanaTrading` 覆盖配置、环境边界及真实交易前置 |
 | [本地 Agent 验收钱包](agent-wallet.md) | A05：助记词配置、固定 EVM/Solana 地址、Mainnet 原生 SOL 及 SPL/Token-2022 账户盘点与失败诊断；已通过自动测试和真实只读验收，Devnet 暂缓 |
 | [Agent Solana 全栈联调工具](solana-dev-workspace.md) | 双 checkout 启动前只读 doctor、个人开发专用 API 代理路径、API/Vite/RPC 工作区管理、一条命令运行 Chrome/可选断点验收并停服、显式 API inspector、目标身份诊断、浏览器 trace 关联及未评审样例结构回归；不新增业务消费、不随业务 PR 交付 |
-| [本地 Solana API 样例验收服务](solana-api-local.md) | A08：持续服务、热更新与断点调试；`solana:api-debug` 自动核对源码映射、真实断点、变量与请求恢复；doctor/check、支持精确选文件、源码断点及所属进程清理的离线回归、带实际生成器/TypeScript 来源指纹、输出边界检查、并发锁与失败恢复的 TSOA 路由准备、可强制核对路由前后来源的隔离 PostgreSQL 集成测试、独立 API checkout 的全项目无输出类型检查、按目标 Jest 原生依赖图及固定 API Git 变更范围发现测试、显式选择执行环境、通用模块测试、完整源码指纹、数据库源码断点、测试网络范围限制及所属进程/容器清理 |
+| [本地 Solana API 样例验收服务](solana-api-local.md) | A08 当前操作入口：按任务定位样例 HTTP、持续服务、源码断点、关联测试发现、离线回归、路由准备、API 类型与隔离 PostgreSQL 测试；保留独立 checkout、网络/源码身份及清理要求，历史执行结果另见归档 |
+| [本地 Solana API 基础设施历史验收记录](solana-api-local-history.md) | 追溯 API 工具历次实际执行、失败演练及本机产物；保留原日期与证明边界，不作为当前环境就绪证明 |
 | [Solana 迁移参考仓库](solana-reference-repositories.md) | 查找仓库用途、协议与 SDK 资料、ADR-0015 分支、版本注意事项和 remote 规则 |
 | [旧 Solana 后端参考说明](gmtrade-web-backend-reference.md) | 旧后端源码快照的数据流、接口和缺失依赖；当前线上地址另见独立服务文档 |
 | [文档维护约定](documentation-maintenance.md) | 主动沉淀协作知识，把环境排障经验提升为执行前置，维护索引及接手资料 |
