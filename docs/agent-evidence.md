@@ -169,7 +169,7 @@ yarn agent:evidence verify --dir .local/acceptance/evidence/fesol-55-worksheet
 输出目录必须新建，示例路径不保证在其他机器存在。扩展沿用原命令：
 
 - 一个包只绑定一份工作表和一份 scope 为 acceptance-worksheet-consistency 的报告，仍可同时包含其他支持的工具报告。该报告与 `--worksheet` 必须成对提供；不自动寻找仓库文件。
-- 原样保存工作表为 `worksheet.md`，核对其字节数、SHA-256、报告中的 worksheetSha256。复用当前版本 checkWorksheet，逐项比较报告的 scope/status、汇总结论、五种状态统计、证据记录数及 not-evaluated 边界；report.checkerSha256 作为历史身份记录，只校验格式，不伪称验证了其源码来源。
+- 原样保存工作表为 `worksheet.md`，核对其字节数、SHA-256、报告中的 worksheetSha256。复用当前版本 checkWorksheet，逐项比较报告的 scope/status、汇总结论、五种状态统计、证据记录数及 not-evaluated 边界；使用 `agent:acceptance --include-mapping` 时，同时重新计算并核对报告的完整 mapping；未带该字段的旧报告保持兼容。report.checkerSha256 作为历史身份记录，只校验格式，不伪称验证了其源码来源。
 - 无附件的工作表包 schemaVersion=2；manifest.worksheet 绑定文件、摘要、报告名与 requirementAcceptance。普通包继续为版本 1。当前工具支持版本 1/2/3；只支持版本 1 的旧工具会拒绝版本 2，接收侧应使用本次或更新的兼容工具。
 - verify 只需包及工具，不需源工作表、原始 JSON 路径或被引用的日志；复制到独立目录后仍可校验。只重新运行无副作用的工作表一致性逻辑，不执行表内命令、不读取表内原始证据路径，也不重查业务或链上数据。
 - 包的顶层 requirementAcceptance 始终为 not-evaluated；worksheet.requirementAcceptance 反映所列条件的原结论，partial/blocked/failed 不被提升为 passed。报告的原状态与观察时间保留，verify 不刷新历史 checkedAt。

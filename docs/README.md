@@ -22,7 +22,7 @@ Solana 集成开发与验收从[Agent 任务启动卡](agent-task-start.md)选�
 | [Agent 验收基础设施调研与实施清单](agent-acceptance-infrastructure.md) | RPC、keeper、API、钱包等验收条件与实施记录；A01/A02 访问工具已完成；A09 首个本地网络选择冒烟及环境预检已通过真实验收；A03 仍待实际部署入口 |
 | [Solana 集成 Agent 友好度推进路线](solana-agent-friendliness-roadmap.md) | Solana 集成专项的 Agent 开发、测试、验收和交付改进优先级；包含当前实施状态和备注，历史验收按需进入独立记录，不代表整个项目的通用路线 |
 | [Solana 集成 Agent 友好度历史实施记录](solana-agent-friendliness-history.md) | 按需追溯路线表的历史验收、命令、结果与本机证据位置；不是日常启动入口或实时环境就绪证明 |
-| [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，涉及现有行为/真实数据时先核对线上基线，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；新增 Markdown 工作表一致性检查，拒绝错误汇总与无效证据引用 |
+| [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，涉及现有行为/真实数据时先核对线上基线，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；Markdown 工作表一致性检查及可选逐条件 JSON 映射，拒绝错误汇总与无效证据引用 |
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
 | [SDK 构建产物准备与过期检查](sdk-artifacts.md) | 根类型检查前只读 verify；显式隔离 prebuild/编译，成功后替换忽略的产物，保留来源收据与日志 |
 | [前端源码离线测试](frontend-offline-tests.md) | 精确运行当前或独立 checkout 的 src/landing 原有单测，支持按真实依赖图从前端/SDK 源码或显式 Git 基线的变更范围选择前端关联测试，可只发现清单后决定执行范围；复用 Vite/happy-dom 初始化，隔离本机环境并阻止意外联网，运行器独立核对网络事件及执行前后工具指纹；单 suite 可进行源码断点调试，不启动应用服务或浏览器 |
