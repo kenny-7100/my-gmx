@@ -1,5 +1,7 @@
 # 自动化工具沉淀约定
 
+全栈需求使用[实际目标环境检查](agent-environment.md#实际目标目录检查)、[全栈目标计划与执行](agent-test-plan.md#全栈目标配置)和[运行材料收集](agent-evidence.md#从全栈执行结果收集材料)：复用现有前端/SDK/API 运行器，各仓库独立选择基线，API 明确分配离线/数据库 profile；保留未覆盖变更与失败结论。只扩展个人基础设施，不修改业务实现或测试预期。
+
 本机条件未知时使用[本地环境清单](agent-environment.md) `yarn agent:environment` 或显式 `--checks`，复用 SDK/WASM、浏览器依赖核验，记录关键包版本、选定范围、时间及前后输入身份；外部服务和秘密资源始终 not-checked。回归 `yarn test:agent-environment` 自动纳入统一工具范围，不将本地 ready 当成业务验收通过。
 
 交付分支使用[隔离检查](linear-development-workflow.md#交付隔离自动检查) `yarn agent:delivery-check --head REF --allow-path FILE ...`：只读固定 release、开发基础及交付 SHA，检查祖先关系、混入的基础提交/等价补丁及清单外文件；不 fetch、切分支或转移补丁。回归 `yarn test:agent-delivery-check` 使用真实临时 Git 历史，工具通过仍需审查清单内的完整内容。 已完成离线测试时，使用 `--require-clean` 并显式选择 `--frontend-report` / `--sdk-report` / `--browser-report`，复核原生结果、目标目录、交付 commit 与当前源码/工具身份；三项可同时核对，检查不重新执行测试或启动服务。

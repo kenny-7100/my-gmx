@@ -8,6 +8,8 @@
 
 执行前先按[运行版本矩阵](agent-runtime-matrix.md)区分根 Node 20 声明、个人工具 Node 22 前置及 API patch 差异；进入目标目录后重新确认运行时，不自动修改配置或安装。Node patch 变化也可能使 SDK 来源收据失效：核验绑定实际 Node 完整版本，源码测试通过不能绕过产物 verify；具体实测与范围见版本矩阵。
 
+跨前端/API checkout 的任务先用[实际目标环境检查](agent-environment.md#实际目标目录检查)传入目标目录，按[全栈测试计划](agent-test-plan.md#全栈目标配置)分别选择基线和 API 离线/数据库 profile；配置、资源、迁移和删除等 uncovered 必须保留，不能用自动项通过代替。
+
 本机依赖状态未知时，可先按[本地环境清单](agent-environment.md)选择 `yarn agent:environment --checks node,yarn,frontend` 等必要项。该入口不启动服务或读取秘密，只盘点基础设施 checkout；已有有效准备可复用，不额外重复所有检查，独立交付目录仍验证目标自己的依赖。
 
 需要同时运行前端/API/RPC 时，按[全栈工作区说明](solana-dev-workspace.md)使用 `yarn solana:dev up/status/logs/stop`，核对所选服务及 borrowed/owned 归属。新启动持续工作区前，先按[组合预检](solana-dev-workspace.md#启动前的组合预检)用相同目录/服务/端口运行 `yarn solana:dev doctor`，一次处理依赖、Chrome 和占用缺项；已运行工作区的健康用 status，不为 doctor 自动停服。一次性 `solana:dev:check` 已内置同一预检，无需重复。持续调试独立前端 checkout 时，按同一说明显式传 `--project-dir PATH`，为目标选择空闲 Vite 端口；同时联调 API 功能分支时，up 显式加 `--api-dir PATH --api-port PORT`，先按同一说明确认 API 自身前置和服务启动授权，核对路径及 PID。status/logs/stop 和浏览器诊断也传同一前端目录，核对报告的目标身份，不误用基础设施目录的既有工作区。浏览器请求问题使用 `solana:dev:browser` 和 `solana:dev trace --id`；contracts 的 partial 不当作完整通过。当前前端未消费开发代理路径，不为环境验收补业务接入。仅需 API 时仍使用下文的独立 API 入口。

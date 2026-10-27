@@ -2,6 +2,25 @@
 
 更新日期：2026-10-27。对应 A14 的本地证据移交阶段。工具将显式选择的现有 JSON 报告、可选的绑定 Markdown 工作表和原始产物附件复制为独立目录，生成清单并离线检查完整性与工作表一致性，不重新执行验收、不启动服务、不上传、不修改业务代码。
 
+
+## 从全栈执行结果收集材料
+
+schemaVersion 2 的全栈执行结果支持确定范围的材料收集，不再逐个手写原始附件：
+
+```sh
+# Read-only inventory; inspect diagnostics and sharing suitability first.
+yarn agent:evidence collect-run --run /path/to/run/report.json
+# Explicitly package the known materials after review.
+yarn agent:evidence collect-run --run /path/to/run/report.json \
+  --issue INFRA-1 --out /path/to/new-package
+```
+
+实现：[运行材料收集](../scripts/lib/agent-run-materials.mjs)。只读取本次执行汇总、绑定计划、原始单侧报告以及已知 logFile/resultsFile/network.eventsFile，不递归扫描目录。输入必须位于基础设施 `.local/acceptance/`，拒绝符号链接与越界引用。执行器保存的报告/附件摘要与本次读取不一致、引用缺失、文件类型或现有大小限制不满足时，清单 blocked / 退出 2；非法报告/参数退出 1。
+
+不传 --out 时仅输出清单，不写文件；--issue 与 --out 必须一起提供才归档。清单逐项记录 originalPath、packageFile、bytes、sha256；归档沿用原 pack/verify，并将清单与实际附件字节交叉核对。失败、受阻和 partial 执行也可保存，`executionStatus` 保留原结论，材料完整 passed 不升级执行或业务结论。
+
+当前最多 20 个附件、单个 16 MiB、合计 64 MiB，四个执行 scope 的常规材料为 18 个附件。超限明确报告，不悄悄截断。发现阶段的原始产物、浏览器完整目录、源 checkout 和业务验收不在自动收集范围；计划中的发现报告路径仍为历史引用，不声明已全部打包。不脱敏、不上传，归档前仍需确认原日志可分享。接收方使用下文 verify 和包外摘要核对。
+
 ## 交付默认步骤
 
 更新日期：2026-10-27。用于[需求交付流程](linear-development-workflow.md#默认交付证据归档)中创建或更新 Draft PR 前的材料准备。只准备当前任务已经产生的证据，不为打包运行无关检查；工具能力和输入白名单见下文。
