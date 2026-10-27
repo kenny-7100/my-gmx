@@ -24,6 +24,8 @@ const STATUSES = new Set(["passed", "failed", "blocked", "not-run", "partial"]);
 const NAME = /^[a-z][a-z0-9-]{0,39}$/;
 const HASH = /^[0-9a-f]{64}$/;
 const MAX_BYTES = 16 * 1024 * 1024;
+const ARTIFACT_EXTENSIONS = new Set([".json", ".log", ".txt", ".png", ".zip"]);
+const MAX_ARTIFACT_BYTES = 64 * 1024 * 1024;
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const check = (condition) => {
   if (!condition) throw new Error("Invalid evidence input or package.");
@@ -57,6 +59,12 @@ function describe(name, bytes) {
   };
 }
 
+function describeArtifact(name, extension, bytes) {
+  check(typeof name === "string" && NAME.test(name) && name !== "manifest");
+  check(ARTIFACT_EXTENSIONS.has(extension));
+  return { name, file: `artifact-${name}${extension}`, bytes: bytes.length, sha256: hash(bytes) };
+}
+
 function bindWorksheet(bytes, entries) {
   const matches = entries.filter((entry) => entry.descriptor.scope === "acceptance-worksheet-consistency");
   if (bytes === undefined) {
@@ -82,10 +90,11 @@ function bindWorksheet(bytes, entries) {
   };
 }
 
-export async function packEvidence({ issue, reports, outDir, worksheet }) {
+export async function packEvidence({ issue, reports, outDir, worksheet, artifacts = [] }) {
   check(typeof issue === "string" && /^[A-Z][A-Z0-9]*-[1-9][0-9]*$/.test(issue));
   check(Array.isArray(reports) && reports.length > 0 && reports.length <= 20);
   check(typeof outDir === "string" && outDir.length > 0);
+  check(Array.isArray(artifacts) && artifacts.length <= 20);
   const entries = [];
   const names = new Set();
   for (const report of reports) {
@@ -104,9 +113,26 @@ export async function packEvidence({ issue, reports, outDir, worksheet }) {
   check(worksheet === undefined || (typeof worksheet === "string" && path.extname(worksheet) === ".md"));
   const worksheetBytes = worksheet === undefined ? undefined : await regularFile(worksheet);
   const worksheetDescriptor = bindWorksheet(worksheetBytes, entries);
+  const artifactEntries = [];
+  const files = new Set(["manifest.json", "worksheet.md", ...entries.map((entry) => entry.descriptor.file)]);
+  let artifactBytes = 0;
+  for (const artifact of artifacts) {
+    check(plain(artifact) && typeof artifact.file === "string" && !names.has(artifact.name));
+    const extension = path.extname(artifact.file);
+    check(ARTIFACT_EXTENSIONS.has(extension));
+    const bytes = await regularFile(artifact.file);
+    const descriptor = describeArtifact(artifact.name, extension, bytes);
+    check(!files.has(descriptor.file));
+    artifactBytes += bytes.length;
+    check(artifactBytes <= MAX_ARTIFACT_BYTES);
+    names.add(artifact.name);
+    files.add(descriptor.file);
+    artifactEntries.push({ bytes, descriptor });
+  }
   const manifest = {
-    schemaVersion: worksheetDescriptor ? 2 : 1,
+    schemaVersion: artifactEntries.length ? 3 : worksheetDescriptor ? 2 : 1,
     ...(worksheetDescriptor ? { worksheet: worksheetDescriptor } : {}),
+    ...(artifactEntries.length ? { artifacts: artifactEntries.map((entry) => entry.descriptor) } : {}),
     scope: "acceptance-evidence-package",
     issue,
     createdAt: new Date().toISOString(),
@@ -118,6 +144,8 @@ export async function packEvidence({ issue, reports, outDir, worksheet }) {
   // Exclusive directory creation prevents overwriting an earlier evidence package.
   await mkdir(outDir);
   for (const entry of entries) await writeFile(path.join(outDir, entry.descriptor.file), entry.bytes, { flag: "wx" });
+  for (const entry of artifactEntries)
+    await writeFile(path.join(outDir, entry.descriptor.file), entry.bytes, { flag: "wx" });
   if (worksheetBytes) await writeFile(path.join(outDir, "worksheet.md"), worksheetBytes, { flag: "wx" });
   await writeFile(path.join(outDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, { flag: "wx" });
   return verifyEvidence({ dir: outDir });
@@ -135,8 +163,19 @@ export async function verifyEvidence({ dir, expectedManifestSha256 }) {
   const manifestSha256 = hash(manifestBytes);
   check(expectedManifestSha256 === undefined || expectedManifestSha256 === manifestSha256);
   const manifest = JSON.parse(manifestBytes.toString("utf8"));
-  check(plain(manifest) && [1, 2].includes(manifest.schemaVersion) && manifest.scope === "acceptance-evidence-package");
-  check(manifest.schemaVersion === 2 ? plain(manifest.worksheet) : manifest.worksheet === undefined);
+  check(
+    plain(manifest) && [1, 2, 3].includes(manifest.schemaVersion) && manifest.scope === "acceptance-evidence-package"
+  );
+  check(
+    manifest.schemaVersion === 2 || (manifest.schemaVersion === 3 && manifest.worksheet !== undefined)
+      ? plain(manifest.worksheet)
+      : manifest.worksheet === undefined
+  );
+  check(
+    manifest.schemaVersion === 3
+      ? Array.isArray(manifest.artifacts) && manifest.artifacts.length > 0 && manifest.artifacts.length <= 20
+      : manifest.artifacts === undefined
+  );
   check(typeof manifest.issue === "string" && /^[A-Z][A-Z0-9]*-[1-9][0-9]*$/.test(manifest.issue));
   check(
     manifest.requirementAcceptance === "not-evaluated" &&
@@ -147,23 +186,38 @@ export async function verifyEvidence({ dir, expectedManifestSha256 }) {
   check(Array.isArray(manifest.reports) && manifest.reports.length > 0 && manifest.reports.length <= 20);
   const files = new Set(["manifest.json"]);
   const entries = [];
+  const names = new Set();
   for (const entry of manifest.reports) {
     check(plain(entry) && typeof entry.name === "string" && NAME.test(entry.name));
     check(entry.file === `${entry.name}.json` && !files.has(entry.file));
     files.add(entry.file);
+    names.add(entry.name);
     const bytes = await regularFile(path.join(dir, entry.file));
     const actual = describe(entry.name, bytes);
     entries.push({ bytes, descriptor: actual });
     check(isDeepStrictEqual(actual, entry));
   }
   let worksheet;
-  if (manifest.schemaVersion === 2) {
+  if (manifest.worksheet !== undefined) {
     check(manifest.worksheet.file === "worksheet.md");
     files.add("worksheet.md");
     worksheet = bindWorksheet(await regularFile(path.join(dir, "worksheet.md")), entries);
     check(isDeepStrictEqual(manifest.worksheet, worksheet));
   } else {
     bindWorksheet(undefined, entries);
+  }
+  let artifactBytes = 0;
+  for (const entry of manifest.artifacts ?? []) {
+    check(plain(entry) && typeof entry.file === "string" && !names.has(entry.name));
+    const extension = path.extname(entry.file);
+    check(ARTIFACT_EXTENSIONS.has(extension) && entry.file === `artifact-${entry.name}${extension}`);
+    check(typeof entry.name === "string" && NAME.test(entry.name) && !files.has(entry.file));
+    const bytes = await regularFile(path.join(dir, entry.file));
+    artifactBytes += bytes.length;
+    check(artifactBytes <= MAX_ARTIFACT_BYTES);
+    check(isDeepStrictEqual(describeArtifact(entry.name, extension, bytes), entry));
+    names.add(entry.name);
+    files.add(entry.file);
   }
   check(isDeepStrictEqual((await readdir(dir)).sort(), [...files].sort()));
   return {
@@ -174,6 +228,7 @@ export async function verifyEvidence({ dir, expectedManifestSha256 }) {
     manifestIdentity: expectedManifestSha256 === undefined ? "not-checked" : "matched",
     requirementAcceptance: "not-evaluated",
     reports: manifest.reports,
+    ...(manifest.artifacts ? { artifacts: manifest.artifacts, artifactSemantics: "not-evaluated" } : {}),
     ...(worksheet ? { worksheet } : {}),
   };
 }
@@ -186,6 +241,7 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
       options: {
         issue: { type: "string" },
         report: { type: "string", multiple: true },
+        artifact: { type: "string", multiple: true },
         out: { type: "string" },
         dir: { type: "string" },
         worksheet: { type: "string" },
@@ -195,7 +251,7 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
     });
     if (values.help) {
       stdout.write(
-        "Usage: yarn agent:evidence pack --issue FESOL-123 --report name=report.json [--report other=other.json] [--worksheet PATH.md] --out PATH\n       yarn agent:evidence verify --dir PATH [--expected-manifest-sha256 SHA256]\nOffline integrity and optional worksheet consistency only. Does not execute recorded commands, infer acceptance coverage, or upload files.\n"
+        "Usage: yarn agent:evidence pack --issue FESOL-123 --report name=report.json [--report other=other.json] [--worksheet PATH.md] [--artifact name=PATH ...] --out PATH\n       yarn agent:evidence verify --dir PATH [--expected-manifest-sha256 SHA256]\nOffline integrity and optional worksheet consistency only. Explicit opaque artifacts: .json/.log/.txt/.png/.zip, up to 20 files, 16 MiB each, 64 MiB total. Does not discover files, execute contents, infer acceptance coverage, or upload files.\n"
       );
       return 0;
     }
@@ -205,17 +261,24 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
       check(
         values.dir === undefined && values["expected-manifest-sha256"] === undefined && Array.isArray(values.report)
       );
-      const reports = values.report.map((item) => {
+      const parseFile = (item) => {
         const separator = item.indexOf("=");
         check(separator > 0);
         return { name: item.slice(0, separator), file: item.slice(separator + 1) };
+      };
+      report = await packEvidence({
+        issue: values.issue,
+        reports: values.report.map(parseFile),
+        artifacts: values.artifact?.map(parseFile),
+        outDir: values.out,
+        worksheet: values.worksheet,
       });
-      report = await packEvidence({ issue: values.issue, reports, outDir: values.out, worksheet: values.worksheet });
     } else {
       check(
         positionals[0] === "verify" &&
           values.issue === undefined &&
           values.report === undefined &&
+          values.artifact === undefined &&
           values.out === undefined &&
           values.worksheet === undefined
       );

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
-import { cp, mkdtemp, readFile, rm, symlink, unlink, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, symlink, truncate, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -202,4 +203,98 @@ test("pins both package formats and rejects internally valid replacements", asyn
     assert.equal((await verifyEvidence({ dir: f.outDir })).manifestIdentity, "not-checked");
     await assert.rejects(verifyEvidence({ dir: f.outDir, expectedManifestSha256 }));
   }
+});
+
+test("transfers opaque artifacts with or without a worksheet and rejects damaged copies", async (t) => {
+  for (const makeFixture of [fixture, worksheetFixture]) {
+    const f = await makeFixture(t);
+    const artifacts = [];
+    for (const extension of ["json", "log", "txt", "png", "zip"]) {
+      const file = path.join(f.dir, `source.${extension}`);
+      await writeFile(file, Buffer.from([0, 10, 255, 42]));
+      artifacts.push({ name: extension, file });
+    }
+    const result = await packEvidence({ ...f, artifacts });
+    const manifest = JSON.parse(await readFile(path.join(f.outDir, "manifest.json")));
+    assert.equal(manifest.schemaVersion, 3);
+    assert.equal(result.artifactSemantics, "not-evaluated");
+    assert.equal(result.requirementAcceptance, "not-evaluated");
+    if (f.worksheet) assert.equal(result.worksheet.requirementAcceptance, "partial");
+    const copy = path.join(f.dir, "received");
+    await cp(f.outDir, copy, { recursive: true });
+    for (const artifact of artifacts) {
+      assert.deepEqual(
+        await readFile(artifact.file),
+        await readFile(path.join(copy, `artifact-${artifact.name}.${artifact.name}`))
+      );
+      await unlink(artifact.file);
+    }
+    await unlink(f.file);
+    if (f.worksheet) await unlink(f.worksheet);
+    const verify = () => verifyEvidence({ dir: copy, expectedManifestSha256: result.manifestSha256 });
+    assert.deepEqual(await verify(), { ...result, manifestIdentity: "matched" });
+    const file = path.join(copy, "artifact-log.log");
+    const bytes = await readFile(file);
+    await writeFile(file, "changed");
+    await assert.rejects(verify);
+    await unlink(file);
+    await assert.rejects(verify);
+    await symlink(path.join(copy, "artifact-txt.txt"), file);
+    await assert.rejects(verify);
+    await unlink(file);
+    await writeFile(file, bytes);
+    for (const mutate of [
+      (m) => {
+        m.artifacts[0].file = "../source.json";
+      },
+      (m) => {
+        m.artifacts.push(m.artifacts[0]);
+      },
+      (m) => {
+        m.artifacts[0].sha256 = "0".repeat(64);
+      },
+      (m) => {
+        m.artifacts[0].bytes++;
+      },
+      (m) => {
+        m.schemaVersion = 2;
+      },
+    ]) {
+      const changed = structuredClone(manifest);
+      mutate(changed);
+      await writeFile(path.join(copy, "manifest.json"), JSON.stringify(changed));
+      await assert.rejects(verifyEvidence({ dir: copy }));
+    }
+  }
+});
+
+test("rejects invalid artifact selection and limits before creating output", async (t) => {
+  const f = await fixture(t);
+  const file = path.join(f.dir, "test.log");
+  await writeFile(file, "private-test-output");
+  const link = path.join(f.dir, "linked.log");
+  await symlink(file, link);
+  for (const artifacts of [
+    [{ name: "../escape", file }],
+    [{ name: "receipt", file }],
+    [
+      { name: "same", file },
+      { name: "same", file },
+    ],
+    [{ name: "log", file: link }],
+    [{ name: "log", file: f.dir }],
+    [{ name: "log", file: path.join(f.dir, "missing.log") }],
+    [{ name: "env", file: path.join(f.dir, ".env") }],
+    Array.from({ length: 21 }, (_, i) => ({ name: `log-${i}`, file })),
+  ])
+    await assert.rejects(packEvidence({ ...f, artifacts }));
+  await writeFile(file, "");
+  await assert.rejects(packEvidence({ ...f, artifacts: [{ name: "log", file }] }));
+  await truncate(file, 16 * 1024 * 1024 + 1);
+  await assert.rejects(packEvidence({ ...f, artifacts: [{ name: "log", file }] }));
+  await truncate(file, 16 * 1024 * 1024);
+  await assert.rejects(
+    packEvidence({ ...f, artifacts: Array.from({ length: 5 }, (_, i) => ({ name: `log-${i}`, file })) })
+  );
+  await assert.rejects(readFile(path.join(f.outDir, "manifest.json")));
 });
