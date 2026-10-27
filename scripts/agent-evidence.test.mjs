@@ -135,13 +135,13 @@ test("rejects tampered bytes, conflicting manifests, missing and extra files and
   await assert.rejects(verifyEvidence({ dir: link }));
 });
 
-async function worksheetFixture(t) {
+async function worksheetFixture(t, includeMapping = false) {
   const f = await fixture(t);
   const bytes = await readFile(new URL("../docs/acceptance/FESOL-55.md", import.meta.url));
   const worksheet = path.join(f.dir, "acceptance.md");
   await writeFile(worksheet, bytes);
   const report = {
-    ...checkWorksheet(bytes.toString("utf8")),
+    ...checkWorksheet(bytes.toString("utf8"), { includeMapping }),
     checkedAt: "2026-10-24T22:08:04.000Z",
     worksheetSha256: createHash("sha256").update(bytes).digest("hex"),
     checkerSha256: createHash("sha256")
@@ -153,17 +153,19 @@ async function worksheetFixture(t) {
 }
 
 test("transfers the exact worksheet and bound report without upgrading partial acceptance", async (t) => {
-  const f = await worksheetFixture(t);
-  const result = await packEvidence(f);
-  assert.equal(result.worksheet.requirementAcceptance, "partial");
-  assert.equal(result.requirementAcceptance, "not-evaluated");
-  assert.deepEqual(await readFile(path.join(f.outDir, "worksheet.md")), f.bytes);
-  assert.deepEqual(JSON.parse(await readFile(path.join(f.outDir, "receipt.json"))), f.report);
-  const copy = path.join(f.dir, "transferred");
-  await cp(f.outDir, copy, { recursive: true });
-  await unlink(f.worksheet);
-  await unlink(f.file);
-  assert.deepEqual(await verifyEvidence({ dir: copy }), result);
+  for (const includeMapping of [false, true]) {
+    const f = await worksheetFixture(t, includeMapping);
+    const result = await packEvidence(f);
+    assert.equal(result.worksheet.requirementAcceptance, "partial");
+    assert.equal(result.requirementAcceptance, "not-evaluated");
+    assert.deepEqual(await readFile(path.join(f.outDir, "worksheet.md")), f.bytes);
+    assert.deepEqual(JSON.parse(await readFile(path.join(f.outDir, "receipt.json"))), f.report);
+    const copy = path.join(f.dir, "transferred");
+    await cp(f.outDir, copy, { recursive: true });
+    await unlink(f.worksheet);
+    await unlink(f.file);
+    assert.deepEqual(await verifyEvidence({ dir: copy }), result);
+  }
 });
 
 test("rejects missing or mismatched worksheet bindings before creating output", async (t) => {
@@ -177,6 +179,7 @@ test("rejects missing or mismatched worksheet bindings before creating output", 
     { evidenceSufficiency: "passed" },
     { checkerSha256: "unknown" },
     { scope: "transaction-receipt" },
+    { mapping: { schemaVersion: 1, conditions: [], executions: [] } },
   ]) {
     await writeFile(f.file, JSON.stringify({ ...f.report, ...changes }));
     await assert.rejects(packEvidence(f));

@@ -83,25 +83,72 @@ test("returns distinct CLI exit codes and only hashes the current input without 
   const dir = await mkdtemp(path.join(tmpdir(), "gmx-worksheet-"));
   t.after(() => rm(dir, { recursive: true, force: true }));
   const file = path.join(dir, "worksheet.md");
-  for (const [content, expected, acceptance] of [
-    [example, 2, "partial"],
-    [worksheet(["passed"], "passed"), 0, "passed"],
-    [worksheet(["failed"], "failed"), 1, "failed"],
-    [await readFile(new URL("../docs/acceptance/template.md", import.meta.url), "utf8"), 1, "not-evaluated"],
-    ["private-input-content", 1, "not-evaluated"],
-  ]) {
-    await writeFile(file, content);
-    let output = "";
-    const stream = {
-      write: (text) => {
-        output += text;
-      },
-    };
-    assert.equal(await runCli({ args: ["--file", file], stdout: stream, stderr: stream }), expected);
-    const report = JSON.parse(output);
-    assert.equal(report.requirementAcceptance, acceptance);
-    assert.ok(!output.includes("private-input-content"));
-    if (acceptance !== "not-evaluated") assert.match(report.worksheetSha256, /^[0-9a-f]{64}$/);
-    assert.equal(await readFile(file, "utf8"), content);
-  }
+  for (const includeMapping of [false, true])
+    for (const [content, expected, acceptance] of [
+      [example, 2, "partial"],
+      [worksheet(["passed"], "passed"), 0, "passed"],
+      [worksheet(["failed"], "failed"), 1, "failed"],
+      [await readFile(new URL("../docs/acceptance/template.md", import.meta.url), "utf8"), 1, "not-evaluated"],
+      ["private-input-content", 1, "not-evaluated"],
+    ]) {
+      await writeFile(file, content);
+      let output = "";
+      const stream = {
+        write: (text) => {
+          output += text;
+        },
+      };
+      assert.equal(
+        await runCli({
+          args: ["--file", file, ...(includeMapping ? ["--include-mapping"] : [])],
+          stdout: stream,
+          stderr: stream,
+        }),
+        expected
+      );
+      const report = JSON.parse(output);
+      assert.equal(report.requirementAcceptance, acceptance);
+      assert.equal(report.mapping !== undefined, includeMapping && acceptance !== "not-evaluated");
+      assert.ok(!output.includes("private-input-content"));
+      if (acceptance !== "not-evaluated") assert.match(report.worksheetSha256, /^[0-9a-f]{64}$/);
+      assert.equal(await readFile(file, "utf8"), content);
+    }
+});
+
+test("exports ordered text and unique evidence links without inventing missing executions", () => {
+  const input = worksheet(["partial", "not-run"], "partial")
+    .replace("E1: unit only", "E2, E1, E2: limited evidence")
+    .replace("E1: unit only", "No execution yet")
+    .replace("run tests", "node missing-command.mjs")
+    .concat("| E2 | historical observation | manual review | manual-passed | /missing/evidence.json |\n");
+  const { mapping, ...summary } = checkWorksheet(input, { includeMapping: true });
+  assert.deepEqual(summary, checkWorksheet(input));
+  assert.equal(mapping.schemaVersion, 1);
+  assert.deepEqual(mapping.conditions[0], {
+    id: "R1",
+    requirement: "Scope 1",
+    environmentAndExpected: "unit-mock",
+    method: "node missing-command.mjs",
+    status: "partial",
+    evidenceAndBoundary: "E2, E1, E2: limited evidence",
+    remainingAction: "Verify live behavior",
+    evidenceIds: ["E2", "E1"],
+  });
+  assert.deepEqual(mapping.conditions[1].evidenceIds, []);
+  assert.equal(mapping.conditions[1].status, "not-run");
+  assert.deepEqual(
+    mapping.executions.map((record) => record.id),
+    ["E1", "E2"]
+  );
+  assert.deepEqual(mapping.executions[1], {
+    id: "E2",
+    time: "historical observation",
+    operation: "manual review",
+    result: "manual-passed",
+    artifactsAndSummary: "/missing/evidence.json",
+  });
+  const actual = checkWorksheet(example, { includeMapping: true });
+  assert.equal(actual.requirementAcceptance, "partial");
+  assert.equal(actual.mapping.conditions.length, 8);
+  assert.equal(actual.mapping.executions.length, 3);
 });

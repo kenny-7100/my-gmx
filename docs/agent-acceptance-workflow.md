@@ -1,6 +1,6 @@
 # Agent 需求验收映射
 
-更新日期：2026-10-25。对应 A07；首阶段交付为工作表、执行流程与 [FESOL-55 实例](acceptance/FESOL-55.md)。已补充 `yarn agent:acceptance` 对现有 Markdown 工作表做离线一致性检查，见下文。这是个人测试验收基础设施，不修改业务实现或 Linear 状态，也不替代[需求交付流程](linear-development-workflow.md)。
+更新日期：2026-10-27。对应 A07；首阶段交付为工作表、执行流程与 [FESOL-55 实例](acceptance/FESOL-55.md)。已补充 `yarn agent:acceptance` 对现有 Markdown 工作表做离线一致性检查，见下文。这是个人测试验收基础设施，不修改业务实现或 Linear 状态，也不替代[需求交付流程](linear-development-workflow.md)。
 
 ## 先映射，再执行
 
@@ -88,6 +88,29 @@ JSON 中 `scope: acceptance-worksheet-consistency` 与 `status` 仅表示内部�
 
 FESOL-55 实例是历史工作表，适配本格式后仍为 partial，不视为本轮重新执行业务验收。新增条件、修改状态或证据后重新运行此命令；历史不受影响的原始执行不机械重跑。
 
+
+### 导出逐条件机器可读映射
+
+后续 Agent 需要按条件定位方法、证据和剩余操作时，使用同一个入口的可选参数：
+
+```sh
+yarn agent:acceptance --file docs/acceptance/FESOL-55.md --include-mapping
+```
+
+JSON 在原有摘要之外增加 `mapping`，默认不带该字段，原有退出码不变。可由调用方将 stdout 保存到忽略的验收目录；退出 2 仍可能包含合法映射，不能以退出非零直接丢弃 partial/blocked/not-run 结果。输入无效时只在 stderr 输出错误报告，不输出映射；保存输出时应区分 stdout、stderr，并核对退出码和报告 scope。
+
+| 字段 | 内容 |
+| --- | --- |
+| `mapping.schemaVersion` | 当前为 1，独立于证据包版本 |
+| `mapping.conditions[]` | 按工作表顺序保留 `id`、`requirement`、`environmentAndExpected`、`method`、`status`、`evidenceAndBoundary`、`remainingAction` |
+| 条件的 `evidenceIds[]` | 从该行证据列提取 E 编号，按首次出现顺序去重；用编号关联 `mapping.executions`，无引用时为空数组 |
+| `mapping.executions[]` | 按执行表顺序保留全部记录，包括未被条件引用的记录；字段为 `id`、`time`、`operation`、`result`、`artifactsAndSummary`，均为文本 |
+
+文本保留表格解析后的原文（去除单元格首尾空白），包括反引号、历史时间、证明边界及未执行原因；不会单独猜测测试层次、将方法转成可执行参数、推断证据路径或将历史时间更新为本次检查时间。测试层次仍由填写者在环境和方法中明确，`requirementCoverage`、`evidenceSufficiency` 仍为 not-evaluated。原有工作表与执行记录是事实来源，映射只是其机器可读表示。
+
+带映射的检查报告可沿用[工作表归档](agent-evidence.md#工作表与检查报告一起移交)。归档和接收验证会重新解析包内工作表，核对 mapping 的全部内容；没有 mapping 的旧报告继续按原摘要核对，不要求为了新字段重跑业务。增加映射不表示原始日志已随包携带，原始文件仍按需显式添加附件。
+
+本功能实施验收见[历史记录](solana-agent-friendliness-history.md#工作表映射导出实施与验收记录2026-10-27)；FESOL-55 仅用于历史文档导出演练，业务结论仍为 partial，未重新执行该需求。
 
 ### 一致性检查验收记录（2026-10-25）
 
