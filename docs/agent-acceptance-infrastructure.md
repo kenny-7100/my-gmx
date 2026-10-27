@@ -18,7 +18,7 @@
 | 产物与证据复核 | [SDK 产物来源](sdk-artifacts.md)、API 路由准备、[证据包](agent-evidence.md)及交付绑定 | 核对来源、源码/工具/目标身份、网络事件、退出与清理；发现、规划、执行和业务验收分别判定，不互相替代 |
 | Solana 只读前置 | 本文 A01/A02，以及钱包、SDK/WASM 向量、程序版本、ALT、交易回执等主题入口 | 已有读取和诊断工具；使用前按任务核实当前资源，工具通过不代表可交易或 keeper 流程完成 |
 
-最近几轮已形成“源码/Git 变化 → 两侧测试发现 → 显式选择执行 → 原始结果 → 交付证据复核”的开发验证链路。最新已推送提交为 `944abffc91`（`Execute selected regression scopes from validated test plans`），位于个人 `my-gmx/solana-integration`；这只表示开发基础已推送，不表示已交付上游。
+最近几轮已形成“源码/Git 变化 → 两侧测试发现 → 显式选择执行 → 原始结果 → 交付证据复核”的开发验证链路。该链路当轮记录的已推送提交为 `944abffc91`（`Execute selected regression scopes from validated test plans`），位于个人 `my-gmx/solana-integration`；这是历史基线，不是当前最新 HEAD，也不表示已交付上游。后续基础设施状态见[推进路线](solana-agent-friendliness-roadmap.md)，历史验收按需查[实施记录](solana-agent-friendliness-history.md)。
 
 ### 已完成验证与实际限制
 
@@ -52,7 +52,7 @@ Agent 仍需根据需求判断实际测试范围、外部依赖、页面/真实�
 4. 最终交付基于最新 `origin/release`，范围干净、不混入个人基础设施，按既定流程形成含英文自测结果的 Draft PR。
 5. 只将真实任务中出现、可复用且影响推进的问题沉淀为工具或执行入口，不为增加工具数量继续包装现有能力。
 
-本节为当前接手摘要；下方保留 A01–A17 的原调研与历史实施证据。历史日期、服务状态和当时授权不能代替当前核验，具体操作授权以根 `AGENTS.md` 和当前用户指令为准。
+本节为带观察日期的阶段摘要；后续能力及状态增量见[推进路线](solana-agent-friendliness-roadmap.md)。下方保留 A01–A17 的原调研与历史实施证据，日常接手无需逐条阅读。历史日期、服务状态和当时授权不能代替当前核验，具体操作授权以根 `AGENTS.md` 和当前用户指令为准。
 
 ## 历史调研与实施记录
 
