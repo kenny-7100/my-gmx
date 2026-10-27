@@ -63,4 +63,4 @@ yarn agent:environment > .local/acceptance/agent-tools/environment/current.json
 
 回归命令：`yarn test:agent-environment`，已由 `scripts/*.test.mjs` 自动纳入 `yarn test:agent-tools`。回归覆盖依赖版本匹配/偏离/缺失/格式异常、检查异常脱敏、选项错误、未检查项保留、输入身份变化和退出码。
 
-新增资源先复用已有核验器，写清本地观察与服务/业务就绪的界限；远端检查和秘密读取不加入默认清单。详细执行结果见[路线表实施记录](solana-agent-friendliness-roadmap.md)。失败时按[诊断入口](agent-failure-diagnosis.md)回到相应原工具，不自动安装、构建或换数据源。
+新增资源先复用已有核验器，写清本地观察与服务/业务就绪的界限；远端检查和秘密读取不加入默认清单。详细执行结果见[环境清单历史验收](solana-agent-friendliness-history.md#环境清单实施与验收记录2026-10-27)。失败时按[诊断入口](agent-failure-diagnosis.md)回到相应原工具，不自动安装、构建或换数据源。

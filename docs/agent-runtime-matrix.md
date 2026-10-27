@@ -53,4 +53,4 @@ node scripts/agent-environment.mjs --checks node,api
 
 后续需要统一配置时，先明确验证范围：根原生前端开发/类型/测试/构建、SDK 发布消费与源码测试、API 测试/路由生成，以及页面和进程清理；再在候选 Node 与目标锁定依赖上验证受影响入口。不得仅因本机 Node 22.17.0 曾通过测试，就改写所有仓库的支持范围。安装、构建和其他服务启动仍按原授权执行；本矩阵不新增权限，也不要求当前任务为补矩阵执行这些动作。
 
-文档维护时同步核对根/SDK/API package、各 `.nvmrc`/`.yarnrc.yml`、工具的 Node/依赖检查及实际报告。版本升级后保留历史核验日期，更新当前观察，避免把旧机器状态改写成新的验证事实。本轮验收证据见[路线表记录](solana-agent-friendliness-roadmap.md)。
+文档维护时同步核对根/SDK/API package、各 `.nvmrc`/`.yarnrc.yml`、工具的 Node/依赖检查及实际报告。版本升级后保留历史核验日期，更新当前观察，避免把旧机器状态改写成新的验证事实。本轮验收证据见[版本矩阵历史验收](solana-agent-friendliness-history.md#运行版本矩阵实施与验收记录2026-10-27)。
