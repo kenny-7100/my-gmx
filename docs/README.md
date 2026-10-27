@@ -8,7 +8,7 @@ Solana 集成开发与验收从[Agent 任务启动卡](agent-task-start.md)选�
 
 | 文档 | 适用场景 |
 | --- | --- |
-| [Agent 本地运行版本矩阵](agent-runtime-matrix.md) | 区分仓库版本声明、Agent 工具前置和本机观察；解释 Node 20/22 及 API patch 差异，记录本机 22.17.0/22.22.0 指定入口实测与产物收据边界，指导独立 checkout 的版本核对 |
+| [Agent 本地运行版本矩阵](agent-runtime-matrix.md) | 区分仓库版本声明、Agent 工具前置和本机观察；解释 Node 20/22 及 API patch 差异，记录本机 22.17.0/22.22.0 离线测试、真实 Chrome 页面冒烟实测与产物收据边界，指导独立 checkout 的版本核对 |
 | [Agent 本地环境与依赖清单](agent-environment.md) | 只读盘点 Node/Yarn、关键依赖、Chrome/Docker CLI、SDK/WASM；显式保留尚未核验的 RPC、API、钱包、程序和样本，避免将本机条件当业务就绪 |
 | [Agent 基础设施当前阶段与接手结论](agent-acceptance-infrastructure.md#当前阶段与接手结论2026-10-27) | 2026-10-27 能力与验证摘要、真实环境及业务验收边界；开发与局部验收已可用，建议下一阶段用真实需求检验，避免继续无目标扩展工具 |
 | [GMTrade 当前线上服务地址](gmtrade-live-services.md) | 当前正式 Web 后端 HTTP/WS、keeper GraphQL、SQD、RPC 与发布配置；线上行为/真实数据验收优先查阅 |

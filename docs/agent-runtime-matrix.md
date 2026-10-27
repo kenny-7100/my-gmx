@@ -1,6 +1,6 @@
 # Agent 本地运行版本矩阵
 
-核验日期：2026-10-27。适用于本仓库个人基础设施及其指向的前端、SDK、API checkout。用于执行测试和验收前选择运行时与依赖；不是整个项目的跨版本兼容性承诺，也不代表 Solana 业务就绪。已核对声明、检查器和本机状态，并补充本机 Node 22.17.0/22.22.0 的指定入口比较；不修改版本配置、不安装或升级依赖。
+核验日期：2026-10-27。适用于本仓库个人基础设施及其指向的前端、SDK、API checkout。用于执行测试和验收前选择运行时与依赖；不是整个项目的跨版本兼容性承诺，也不代表 Solana 业务就绪。已核对声明、检查器和本机状态，并补充本机 Node 22.17.0/22.22.0 的指定离线入口及真实 Chrome 页面冒烟比较；不修改版本配置、不安装或升级依赖。
 
 ## 先选择执行环境
 
@@ -21,7 +21,7 @@ node scripts/agent-environment.mjs --checks node,api
 
 ## 声明、入口要求与本机观察
 
-下表保留首次只读 `agent:environment` 和 package 元数据盘点的观察；ready 的含义限于[环境清单](agent-environment.md)定义的检查范围。本轮 Node patch 的实际测试单独列在下方，不用测试结果刷新 Chrome、Docker daemon、真实服务或业务状态。历史结果仍按原观察日期理解。
+下表保留首次只读 `agent:environment` 和 package 元数据盘点的观察；ready 的含义限于[环境清单](agent-environment.md)定义的检查范围。Node patch 的离线测试与后续真实页面冒烟分别列在下方；首次盘点不刷新，Chrome 版本与页面运行仅以下方新增实测为准，Docker daemon、真实服务或业务状态不因此刷新。历史结果仍按原观察日期理解。
 
 | 范围 | 仓库声明 / 固定配置 | 现有入口的实际要求 | 本轮本机观察与限制 |
 | --- | --- | --- | --- |
@@ -32,8 +32,8 @@ node scripts/agent-environment.mjs --checks node,api
 | 前端测试依赖 | 根 package 精确声明 Vite 6.4.3、Vitest 4.1.11、tsx 4.19.0、TypeScript 5.4.2 | 前端独立目标必须有自身依赖，目标 Vite/Vitest 与基础设施安装版本相同；其余实际加载前置见[前端离线说明](frontend-offline-tests.md) | 四项安装版本与声明一致；这不是完整依赖树审计 |
 | SDK 测试依赖 | SDK package 精确声明 Vitest 4.1.11、tsx 4.19.0、TypeScript 5.4.2 | SDK 独立目标使用自身 Vitest 可执行文件，Vitest 版本须与基础设施一致；见[SDK 独立目录说明](sdk-offline-tests.md) | 三项安装版本与声明一致；SDK Vitest 与根一致 |
 | API 测试依赖 | API package 精确声明 Jest 30.2.0、ts-jest 29.4.6、tsx 4.20.5、TypeScript 5.4.2 | 使用目标 API 自己的 Jest/转换器/TypeScript，沿用目标配置和路由前置；不要求 tsx 与前端相同，见[API 说明](solana-api-local.md) | 四项安装版本与声明一致；版本号不同不能单独判定 Jest/ts-jest 不兼容，也不能因此升级依赖 |
-| Playwright | 根 package 精确声明 `@playwright/test` 1.58.2；[浏览器预检](../scripts/solana-browser-preflight.mjs) 比较安装与声明 | 使用基础设施锁定的 runner；[页面配置](../playwright-solana-readonly.config.ts) 指定 channel=chrome；独立目标仍准备自己的依赖/资源，见[页面验收](solana-browser-smoke.md) | Playwright 1.58.2 匹配；未重新执行页面测试 |
-| Chrome / 系统 | 浏览器预检固定 macOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` 和 Linux `/opt/google/chrome/chrome`；未固定 Chrome 版本 | 环境清单只检查文件及执行权限；预检不支持的平台明确 blocked。进程组清理等工具使用 POSIX 能力；不承诺 Windows 兼容 | 本机 macOS Chrome 文件可访问；本轮未启动 Chrome 或采集版本，未验证 Linux/Windows。需要版本证据时另行记录该次实际浏览器版本，不能从 channel 或 Playwright 版本推断 |
+| Playwright | 根 package 精确声明 `@playwright/test` 1.58.2；[浏览器预检](../scripts/solana-browser-preflight.mjs) 比较安装与声明 | 使用基础设施锁定的 runner；[页面配置](../playwright-solana-readonly.config.ts) 指定 channel=chrome；独立目标仍准备自己的依赖/资源，见[页面验收](solana-browser-smoke.md) | 首次盘点 Playwright 1.58.2 匹配；后续两项真实页面运行结果见下方浏览器实测 |
+| Chrome / 系统 | 浏览器预检固定 macOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` 和 Linux `/opt/google/chrome/chrome`；未固定 Chrome 版本 | 环境清单只检查文件及执行权限；预检不支持的平台明确 blocked。进程组清理等工具使用 POSIX 能力；不承诺 Windows 兼容 | 首次盘点仅确认本机 macOS Chrome 文件可访问；后续已补充下方两个 Node patch 的真实页面实测及可执行文件版本。Linux/Windows 未验证。需要版本证据时另行记录该次实际浏览器版本，不能从 channel 或 Playwright 版本推断 |
 | Docker / PostgreSQL | [API 集成工具](../scripts/gmx-api-integration-tests.mjs) 固定本地 `postgres:15`，无 Docker CLI 支持版本区间声明 | 集成测试还需 daemon 可达、镜像已准备；入口只 inspect、不自动 pull，使用独立临时容器；见[API 集成说明](solana-api-local.md) | Docker CLI 29.8.2 可调用；本轮未连接 daemon、检查镜像或启动容器，不能据此认为数据库就绪 |
 | SDK 构建 / WASM | 构建产物按[来源收据](sdk-artifacts.md)核验；WASM 按[运行时指纹](solana-runtime-preflight.md)核验 | 源码测试无需构建；根类型检查先 verify SDK 产物。Node/工具链变化可能使收据失效，需按原入口重新核验；构建仍遵守独立授权 | 1090 个 SDK 产物 verify 通过，本地 WASM 0.9.0-test.2；不证明链上程序兼容或协议数学正确 |
 
@@ -71,6 +71,21 @@ env PATH="$(dirname "$MATRIX_NODE"):$PATH" "$MATRIX_NODE" scripts/sdk-artifacts.
 
 保留每次实际 Node 版本/路径、命令、退出码、原始报告和锁文件/工具身份。切换 Node 后旧报告不能自动代表新运行时；某一检查受阻时按其前置处理，不将预期拒绝改成通过。工程测试及本机证据详见[patch 实测记录](solana-agent-friendliness-history.md#node-patch-兼容性实施与验收记录2026-10-27)。
 
+## Node 22 patch 真实浏览器实测
+
+2026-10-27 在同一 macOS checkout 顺序使用本机已有 Node 22.17.0、22.22.0，通过现有 `solana:browser-check` 执行两项本地网络选择用例。使用锁定 Playwright 1.58.2 和 stable Chrome channel；执行前后调用其实际可执行文件 `--version`，均为 Google Chrome `156.0.8078.48`。该版本来自可执行文件输出，不从 Playwright 版本推断，也未新增浏览器版本支持承诺。
+
+| 实际 Node | 真实页面结果 | 原生测试耗时 | 身份与清理 |
+| --- | --- | --- | --- |
+| 22.17.0 | 2 passed，0 skipped / flaky / unexpected，无重试，退出 0 | 48.5 秒 | 相关源码/工具前后一致，Vite 停止、3015 端口释放 |
+| 22.22.0 | 2 passed，0 skipped / flaky / unexpected，无重试，退出 0 | 47.0 秒 | 与首轮目标及相关源码/工具摘要一致，Vite 停止、3015 端口释放 |
+
+两轮目标均为 `e9465deb00dbe3acd7bf00001882c0e71f908aa7`、dirty=true（路线表实施中状态），不是干净业务交付证据。每轮独立保存原生 JSON/HTML、日志及状态/诊断附件，首轮报告未覆盖。复核实际断言：关闭开关保持 Arbitrum 且没有 SDK/WASM 请求；开启可选择 Solana、刷新保持、切回退出；EVM 网络及结算 ID 保持 42161。每轮关闭/开启用例均无未处理 JS 错误，分别保留 2/29 条外部请求失败或刷新中断记录，不据此认为所有 RPC/keeper/Privy 等服务正常。
+
+重跑时复用上方 `MATRIX_NODE` 模板，将命令改为 `"$MATRIX_NODE" scripts/solana-browser-check.mjs --port 3015`，同时仅在该进程 PATH 前置对应 bin；不切换终端默认 Node。管理入口已包含预检，不额外先跑相同预检。端口占用时选其他未用端口，不接管服务；运行身份、报告和停止条件见[浏览器说明](solana-browser-smoke.md#一条命令执行并保存独立报告)。本次不安装、不构建、不修改版本配置或用例，不连接钱包、签名或广播。
+
+本轮只补齐既有两项页面冒烟的 patch 比较；SDK 产物收据在 22.22.0 下的既有受阻结论不变，未绕过 verify 做类型检查。其他页面、完整构建、数据库、跨系统、新安装、真实钱包及交易仍未验证。原始报告、Node 绝对路径/版本/命令/退出码、Chrome 版本输出和联合复核保存于本机忽略目录 `.local/acceptance/agent-tools/node-browser-matrix/`；完整目录与摘要见[本轮历史记录](solana-agent-friendliness-history.md#node-patch-浏览器兼容性验收记录2026-10-27)。它是本机测试观察，不使历史环境状态自动续期。
+
 ## 独立 checkout 与版本变化的处理顺序
 
 1. **记录目标。** 前端用 `--project-dir PATH`，SDK 用 `--sdk-dir PATH/sdk`，API 用 `--api-dir PATH`；从基础设施根目录调用入口，检查报告实际路径、commit、dirty 和 runtime。嵌套 API 有自己的 Git 身份及锁文件，不能把主仓库的 SHA 当作 API 版本。
@@ -81,7 +96,7 @@ env PATH="$(dirname "$MATRIX_NODE"):$PATH" "$MATRIX_NODE" scripts/sdk-artifacts.
 
 ## 尚未统一及后续验证
 
-本轮已完成版本矩阵、当前差异和操作顺序的沉淀。路线表“统一本地运行版本矩阵”保持**部分完成**：当前入口选择已清楚，已有本机两个 Node 22 patch 的指定测试入口实测，但完整构建/页面/数据库、跨系统和全新安装兼容性尚未验证；根 Node 20 与个人工具 Node 22、API README 与 `.nvmrc` 差异也未收敛。
+本轮已完成版本矩阵、当前差异和操作顺序的沉淀。路线表“统一本地运行版本矩阵”保持**部分完成**：当前入口选择已清楚，已有本机两个 Node 22 patch 的指定离线测试和两项真实页面冒烟实测，但其他页面、完整构建/数据库、跨系统和全新安装兼容性尚未验证；根 Node 20 与个人工具 Node 22、API README 与 `.nvmrc` 差异也未收敛。
 
 后续需要统一配置时，先明确验证范围：根原生前端开发/类型/测试/构建、SDK 发布消费与源码测试、API 测试/路由生成，以及页面和进程清理；再在候选 Node 与目标锁定依赖上验证受影响入口。不得仅因本机 Node 22.17.0 曾通过测试，就改写所有仓库的支持范围。安装、构建和其他服务启动仍按原授权执行；本矩阵不新增权限，也不要求当前任务为补矩阵执行这些动作。
 

@@ -300,3 +300,29 @@
 | 完成边界 | 本子项已完成；P2 文档整理整体仍部分完成。未重新查询 Linear、GitHub 或远端服务，未刷新历史测试/环境状态，也未执行真实业务需求 |
 
 复核从主仓库根目录运行 `yarn agent:docs-check --file docs/agent-acceptance-infrastructure.md --file docs/agent-acceptance-infrastructure-history.md`；其他修改/引用文档亦纳入本轮实际检查，完整选择清单和结果保存在本机忽略目录 `.local/acceptance/agent-tools/infrastructure-docs/` 的 `acceptance.json`、`documents.json`，迁移前副本为 `original.md`。这些本机证据不随仓库共享；可共享归档正文与旧标题导航保留在文档中。链接检查遵循工具的 Markdown 支持边界，不证明内容正确、线上可达或业务就绪。纯文档按既定规则仅验内容、路径、锚点和差异，不运行类型、UI 测试或构建。
+
+## Node patch 浏览器兼容性验收记录（2026-10-27）
+
+本轮先提交并推送上一轮文档分层改动到个人 `my-gmx/solana-integration`，提交 `e9465deb00`。随后选择路线 P1 运行版本矩阵的真实浏览器子项：之前两个 Node patch 只有指定离线入口比较，真实页面运行尚未纳入矩阵。本机已有两个运行时和 Chrome，复用现有管理入口，无需安装、构建或实施业务需求。
+
+| 阶段 | 状态与验收结果 |
+| --- | --- |
+| 选项与明确条件 | 已完成：两个 patch 各执行两项真实页面用例，无跳过/重试/flaky；身份一致、报告独立、服务停止、诊断保留及状态沉淀 |
+| 实施进度 | 已完成：路线表先标实施中；按执行前规则复用管理入口内置的 Playwright/Chrome/SDK/发现预检，不额外重复，不修改现有工具或断言 |
+| Node 22.17.0 | passed，退出 0；2 项通过，0 skipped/flaky/unexpected，无重试；原生测试 48.5 秒 |
+| Node 22.22.0 | passed，退出 0；2 项通过，0 skipped/flaky/unexpected，无重试；原生测试 47.0 秒 |
+| 身份与状态断言 | 已通过：每轮源码/工具前后一致，两轮相关摘要也一致；原生结果的目标身份一致。关闭开关不请求 SDK/WASM，开启可选择、刷新保持并切回退出，EVM/结算 ID 均为 42161 |
+| 报告与清理 | 已通过：两轮独立原生 JSON/HTML、日志和附件，首轮未覆盖；所属 Vite 正常停止，两轮 port-released，联合复核确认 3015 可重新绑定 |
+| 诊断与限制 | 每轮关闭/开启用例各 0 个未处理 JS 错误、2/29 条失败请求记录，原样保留；不代表全部外部服务正常 |
+| 文档与收尾 | 版本矩阵、浏览器说明、索引和路线表已更新；本轮修改文档的受支持本地链接/锚点与差异检查通过；浏览器子项完成，版本矩阵整体仍部分完成 |
+
+运行目标均为本机主仓库 `e9465deb00dbe3acd7bf00001882c0e71f908aa7`、dirty=true（路线表实施中），不作为干净业务交付证据。命令从主仓库根目录执行，分别显式使用 `/Users/kenny/.nvm/versions/node/v22.17.0/bin/node`、`/Users/kenny/.nvm/versions/node/v22.22.0/bin/node` 运行 `scripts/solana-browser-check.mjs --port 3015`；仅子进程 PATH 前置对应 bin，不切换终端默认 Node。现有 Playwright 配置使用 `process.execPath` 启动目标 Vite。Chrome channel 对应的可执行文件执行前后 `--version` 均为 `Google Chrome 156.0.8078.48`；Playwright 1.58.2。未安装或更换浏览器。
+
+| Node | 管理报告 | 原生结果 SHA-256 |
+| --- | --- | --- |
+| 22.17.0 | `.local/acceptance/solana-browser/managed-uBcWf0/report.json` | `cb93fff075a2ee572ff9900b66168559fb6b4491d4655de1fccf034959be9df8` |
+| 22.22.0 | `.local/acceptance/solana-browser/managed-o6WCQA/report.json` | `4926a4bfc1033bf3f7ab00a8b01603e4c95f1251325284ea899d7e47028d07be` |
+
+上述报告同目录保留 `playwright-results.json`、`playwright.log`、`html/`、`preflight.json` 和附件。联合证据在本机忽略目录 `.local/acceptance/agent-tools/node-browser-matrix/acceptance.json`，包含 Node 绝对路径、实际版本、命令、起止时间、退出码、两轮报告及原生结果摘要、诊断计数、相同相关源码和端口复核；`chrome-version.txt` 与 `chrome-version-after.txt` 保存可执行文件版本输出。原始本机证据不随仓库共享。后续按[版本矩阵](agent-runtime-matrix.md#node-22-patch-真实浏览器实测)与[浏览器管理入口](solana-browser-smoke.md#一条命令执行并保存独立报告)按需复跑，不将两轮结果当作性能基准或所有 Node 22 patch 的支持证明。
+
+本轮未修改业务代码、用例、依赖、Node 配置或 CI，未连接钱包、签名、广播或部署。未运行类型检查、完整前端/SDK/API 回归或构建：本轮无代码改动，验收目标为两套运行时的真实页面入口，且 22.22.0 下旧 SDK 产物收据受阻的既有结论仍保留。其他页面、完整构建、数据库、跨系统、新安装和根/API 版本配置差异继续待验证，不把该行整体改成已完成。

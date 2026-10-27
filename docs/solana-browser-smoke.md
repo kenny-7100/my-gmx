@@ -59,6 +59,12 @@ Playwright 正常退出或失败时负责清理所属 Vite；外层收到 SIGINT
 
 工程检查通过：2 组工具回归、根 `yarn tscheck`、`yarn test:regression:types`、脚本语法、指定文件 ESLint/Prettier、文档链接及 `git diff --check`；完整前端回归 299 个文件通过 / 1 个原有跳过，3014 项通过 / 1 项原有跳过，退出 0。仍有既有 Browserslist、Sass/Vite 及 happy-dom teardown 提示，本轮保留日志，不修改这些无关内容。
 
+## Node patch 页面运行边界
+
+2026-10-27 已在同一 macOS 环境、Chrome 可执行文件版本 `156.0.8078.48` 下，使用 Node 22.17.0 与 22.22.0 分别运行本管理入口：两轮各 2 项 passed，无跳过、重试或 flaky，相关源码/工具一致，独立报告保留，端口释放。两轮各有关闭/开启用例 2/29 条失败请求诊断，均无未处理 JS 错误；不将页面断言通过扩大为外部依赖全部可用。
+
+这是现有两项用例在本机已安装依赖上的运行观察，不证明任意 Node 22 patch、其他 Chrome 版本或跨系统兼容。实际 Node 路径、目标身份、耗时、报告和未验证范围见[版本矩阵实测](agent-runtime-matrix.md#node-22-patch-真实浏览器实测)，后续按任务选择所需运行时，不为普通页面任务机械重跑两套版本。
+
 ## 验证独立功能 checkout
 
 从基础设施 checkout 调用入口，显式传入目标 Git 根目录；无需将个人脚本、Playwright 配置或用例复制进功能分支：
