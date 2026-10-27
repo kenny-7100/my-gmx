@@ -156,3 +156,6 @@ API 数据库集成入口也复用共享测试进程组工具：`yarn gmx-api:te
 
 
 前端交付证据绑定复用 `agent:delivery-check --require-clean --frontend-report PATH`，校验现有报告与目标 checkout、head、当前源码/工具指纹及原生测试结果的一致性；不重跑测试、不更新历史报告。具体命令、拒绝条件和真实独立 checkout 验收见[交付说明](linear-development-workflow.md#前端测试证据绑定)。前端运行器与该检查共享原有源码、工具摘要计算，读取 Git 状态禁用可选索引写入。
+
+
+文档维护复用[本地链接检查](documentation-maintenance.md#本地链接与锚点检查)：`yarn agent:docs-check --file docs/PATH.md` 可重复显式选文件，离线检查本地路径和受支持 Markdown 标题锚点，输出文件/行号诊断与输入摘要；`yarn test:agent-docs-check` 使用真实临时文件，自动纳入工具回归。复杂语法明确保留边界，不联网、不执行内容、不自动修改文档或 Git。
