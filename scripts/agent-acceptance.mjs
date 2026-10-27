@@ -57,7 +57,7 @@ function table(lines, columns, allowEmpty = false) {
   return rows;
 }
 
-export function checkWorksheet(markdown) {
+export function checkWorksheet(markdown, { includeMapping = false } = {}) {
   check(typeof markdown === "string" && !/<[^>\n]+>/.test(markdown), "unfilled-placeholder");
   // Fenced examples cannot supply tables or conclusions for the actual report.
   check(!/^\s*(`{3,}|~{3,})/m.test(markdown), "fenced-block-not-supported");
@@ -113,6 +113,32 @@ export function checkWorksheet(markdown) {
     requirementCoverage: "not-evaluated",
     counts,
     evidenceRecords: records.size,
+    ...(includeMapping
+      ? {
+          mapping: {
+            schemaVersion: 1,
+            conditions: conditions.map(
+              ([id, requirement, environmentAndExpected, method, status, proof, remainingAction]) => ({
+                id,
+                requirement,
+                environmentAndExpected,
+                method,
+                status,
+                evidenceAndBoundary: proof,
+                remainingAction,
+                evidenceIds: [...new Set([...proof.matchAll(/\bE[0-9]+\b/g)].map((match) => match[0]))],
+              })
+            ),
+            executions: evidence.map(([id, time, operation, result, artifactsAndSummary]) => ({
+              id,
+              time,
+              operation,
+              result,
+              artifactsAndSummary,
+            })),
+          },
+        }
+      : {}),
   };
 }
 
@@ -120,11 +146,15 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
   try {
     const { values } = parseArgs({
       args,
-      options: { file: { type: "string" }, help: { type: "boolean", short: "h" } },
+      options: {
+        file: { type: "string" },
+        "include-mapping": { type: "boolean" },
+        help: { type: "boolean", short: "h" },
+      },
     });
     if (values.help) {
       stdout.write(
-        "Usage: yarn agent:acceptance --file PATH.md\nOffline worksheet consistency only; does not assess evidence sufficiency or requirement coverage.\nExit 0: consistent and all passed; 2: consistent but incomplete; 1: invalid or requirement failed.\n"
+        "Usage: yarn agent:acceptance --file PATH.md [--include-mapping]\nOptional mapping preserves worksheet text and evidence references; never executes commands or reads referenced artifacts.\nOffline worksheet consistency only; does not assess evidence sufficiency or requirement coverage.\nExit 0: consistent and all passed; 2: consistent but incomplete; 1: invalid or requirement failed.\n"
       );
       return 0;
     }
@@ -134,7 +164,7 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
     const bytes = await readFile(values.file);
     check(bytes.length <= 1024 * 1024, "invalid-input-file");
     const report = {
-      ...checkWorksheet(bytes.toString("utf8")),
+      ...checkWorksheet(bytes.toString("utf8"), { includeMapping: values["include-mapping"] }),
       checkedAt: new Date().toISOString(),
       worksheetSha256: hash(bytes),
       checkerSha256: hash(await readFile(fileURLToPath(import.meta.url))),

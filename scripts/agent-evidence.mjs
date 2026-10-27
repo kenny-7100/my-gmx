@@ -74,7 +74,7 @@ function bindWorksheet(bytes, entries) {
   check(bytes.length <= 1024 * 1024 && matches.length === 1);
   const entry = matches[0];
   const report = JSON.parse(entry.bytes.toString("utf8"));
-  const actual = checkWorksheet(bytes.toString("utf8"));
+  const actual = checkWorksheet(bytes.toString("utf8"), { includeMapping: report.mapping !== undefined });
   check(Object.entries(actual).every(([key, value]) => isDeepStrictEqual(report[key], value)));
   check(
     report.worksheetSha256 === hash(bytes) &&
