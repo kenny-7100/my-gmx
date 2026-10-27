@@ -94,6 +94,44 @@ verify 重新读取每个附件、比较字节数/摘要，并拒绝遗漏、改
 
 原报告中引用的绝对路径保留原样，移交说明必须写清原路径/执行记录与附件名的对应。verify 只证明选定字节随包完整到达，不证明已收齐全部嵌套依赖，也不替代 `agent:delivery-check` 的目标版本和原生结果验证。需要按原路径复核时，由接收者根据清单在受控目录整理材料，再使用原验收工具；不自动恢复到报告内指定位置。
 
+## 前端、SDK、API 离线证据联合交接
+
+适用于同一任务确实运行过其中多个入口，并需要接收方离开原执行目录复核结果时。只选本任务产生的报告，不为了打包补跑三类默认范围；默认范围也不能代表某条需求的全部回归。三个运行器的汇总不是本工具 report scope 白名单，作为显式附件携带，不改写其 scope 或伪装成预检。
+
+### 选择与记录原始产物
+
+从各次实际 stdout 的 JSON 读取路径，逐文件显式选择：
+
+| 每个执行入口 | 所需材料 | 接收侧作用 |
+| --- | --- | --- |
+| `frontend:test-offline` | 汇总 JSON、`resultsFile`、`logFile`、`network.eventsFile` | 核对目标前端、所选 suite、原生断言、网络与清理 |
+| `sdk:test-offline` | 汇总 JSON、`resultsFile`、`logFile`、`network.eventsFile` | 核对目标 SDK、所选 suite、原生断言、网络与清理 |
+| `gmx-api:test-offline` | 汇总 JSON、`resultsFile`、`logFile`、`network.eventsFile` | 核对目标 API、所选 suite、原生 Jest 断言、网络与清理 |
+
+不要把 stdout 汇总与其相同的 `reportFile` 再算成两份独立证据。明确每个附件的执行命令、最终退出码、原路径、包内文件名、字节数与 SHA-256；注明目标目录、commit/dirty、数据模式和原执行时间，不能假定前端、SDK、API 来自同一仓库版本。三类入口各选四文件共 12 个附件，另加一份 JSON 对应清单为 13 个，仍需核对单文件/合计大小及最多 20 个附件的限制；真实任务若需要更多材料，按前述包外清单处理。
+
+下列仅为在已有 pack 命令上追加的参数示例，其他入口同样逐文件明确指定；`/path/to/` 均替换为已核对的实际文件：
+
+```sh
+--artifact frontend-report=/path/to/frontend-report.json
+--artifact frontend-native=/path/to/vitest-results.json
+--artifact frontend-log=/path/to/vitest.log
+--artifact frontend-network=/path/to/network-events.log
+--artifact handoff=/path/to/handoff.json
+```
+
+例如 `frontend-native` 会保存为 `artifact-frontend-native.json`。对应清单可沿用任务自己的 JSON 或交接表，无需新增统一 schema；至少让接收者能从“执行入口 + 报告字段”定位唯一包内文件。对应清单也作为附件时仍在包外独立保存 manifest 摘要，不将摘要写入被打包的清单或工作表。
+
+### 接收检查顺序
+
+1. 先运行 `verify --expected-manifest-sha256` 并确认 matched；再按对应清单读取包内文件。原报告的绝对路径仅作为历史标识，不直接按该路径打开文件，不恢复到原路径，不运行日志或报告中的命令。
+2. 分别核对汇总的目标目录、commit/dirty、suite 清单、数据模式、执行时间及退出码。确认 `sourceUnchanged`、`toolingUnchanged`、`exit.cleanup`、`temporaryDirectoryCleanup`，检查未中断/超时；API 同时保留 `sourceInputs/sourceInputsAfter`。这是对原执行证据的复核，不是重新验证当前源码；干净交付仍须原 delivery-check。
+3. 原生 Vitest/Jest JSON 要检查 success、通过/失败/跳过/todo、每个文件的 assertionResults，逐项对应所选 suite。**文件数应看 `testResults` 的实际文件清单，不直接用 `numTotalTestSuites`。** Vitest 该字段包含测试分组：本轮前端/SDK 均为 3 个文件，但分别输出 6/36 个 suite。文件路径、逐文件状态、断言数与汇总计数应一致，不能只看总 success。
+4. 网络结果与包内 `network-events.log` 一起复核。当前三类离线入口的事件格式为每次安装一行 `installed`，拒绝事件为 `blocked`；安装数应等于所选文件数，拒绝数应为 0。未知或不匹配内容先查运行器版本和原始事件，不忽略异常行。该格式来自[网络审计实现](../scripts/lib/agent-network-audit.mjs)，将来工具变化时重新核对，不视为永久协议。
+5. 保留接收复核记录和未覆盖项。包完整、原生测试通过只证明本次所选离线范围，不证明真实 API、真实协议数据、浏览器、钱包、交易或需求覆盖充分；没有实际外部移交时仍写本机演练。
+
+2026-10-27 联合演练已通过：前端 17、SDK 153、API 12 项；13 个附件及三条件基础设施输入工作表独立复制/校验、包内结果复核、缺失/篡改/错误摘要拒绝均符合预期。见[本轮记录](solana-agent-friendliness-history.md#三类离线证据联合交接验收记录2026-10-27)。这是同机目录隔离演练，未执行业务需求或真实跨机器交付。
+
 ## 接受的输入与清单
 
 当前接受已有工具产生且带 status、scope 和 checkedAt（或 finishedAt）的 JSON：
