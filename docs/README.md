@@ -2,14 +2,14 @@
 
 后续 Agent 先阅读根目录 [AGENTS.md](../AGENTS.md)，再根据当前任务查阅以下资料。文档是查阅入口，易变状态仍需对照实际代码、配置及上游确认。
 
-Solana 集成开发与验收从[Agent 任务启动卡](agent-task-start.md)选择所需命令、目标目录和验证层次，再进入专题文档。
+全栈开发与 Solana 专项验收从[Agent 任务启动卡](agent-task-start.md)选择所需命令、目标目录和验证层次，再进入专题文档。
 
 遇到测试或验收失败时，先按[Agent 失败诊断](agent-failure-diagnosis.md)定位参数、依赖、网络、身份、断言、清理或外部资源问题，再进入对应专题排查。
 
 | 文档 | 适用场景 |
 | --- | --- |
 | [Agent 本地运行版本矩阵](agent-runtime-matrix.md) | 区分仓库版本声明、Agent 工具前置和本机观察；解释 Node 20/22 及 API patch 差异，记录本机 22.17.0/22.22.0 离线测试、真实 Chrome 页面冒烟实测与产物收据边界，指导独立 checkout 的版本核对 |
-| [Agent 本地环境与依赖清单](agent-environment.md) | 只读盘点 Node/Yarn、关键依赖、Chrome/Docker CLI、SDK/WASM；显式保留尚未核验的 RPC、API、钱包、程序和样本，避免将本机条件当业务就绪 |
+| [Agent 本地环境与依赖清单](agent-environment.md) | 支持实际前端/API 目标目录、关键依赖逐项问题、SDK 消费来源、SDK 产物/API 路由和本地数据库前置检查；兼容原本机清单，不将所选前置 ready 当业务就绪 |
 | [Agent 基础设施当前阶段与接手结论](agent-acceptance-infrastructure.md#当前阶段与接手结论2026-10-27) | 2026-10-27 能力与验证摘要、真实环境及业务验收边界；开发与局部验收已可用，建议下一阶段用真实需求检验，避免继续无目标扩展工具 |
 | [GMTrade 当前线上服务地址](gmtrade-live-services.md) | 当前正式 Web 后端 HTTP/WS、keeper GraphQL、SQD、RPC 与发布配置；线上行为/真实数据验收优先查阅 |
 | [GMTrade 四页完整功能与依赖](../gmtrade-pages-dependency-audit.md) | 根目录完整六列表：Stake、GT My/Global/Buyback、Stats、Referrals 共 72 个功能/依赖分组；含当前启用分支、源码证据、线上只读核验和推进条件 |
@@ -27,7 +27,7 @@ Solana 集成开发与验收从[Agent 任务启动卡](agent-task-start.md)选�
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
 | [SDK 构建产物准备与过期检查](sdk-artifacts.md) | 根类型检查前只读 verify；显式隔离 prebuild/编译，成功后替换忽略的产物，保留来源收据与日志 |
 | [前端源码离线测试](frontend-offline-tests.md) | 精确运行当前或独立 checkout 的 src/landing 原有单测，支持按真实依赖图从前端/SDK 源码或显式 Git 基线的变更范围选择前端关联测试，可只发现清单后决定执行范围；复用 Vite/happy-dom 初始化，隔离本机环境并阻止意外联网，运行器独立核对网络事件及执行前后工具指纹；单 suite 可进行源码断点调试，不启动应用服务或浏览器 |
-| [前端与 SDK 联合测试范围规划](agent-test-plan.md) | 对独立功能 checkout 一次收集 Git 源码范围，分别发现 SDK 自身测试和前端消费者，保留两侧清单、原始报告及执行参数；可显式选择 SDK/前端/两侧按有效规划执行，汇总报告不作为单侧交付证据 |
+| [全栈测试范围规划与执行](agent-test-plan.md) | 前端/SDK/API 各自 Git 基线或显式源码发现，API profile 明确选择离线/隔离数据库；保留混合变更与未分配项，按计划执行并汇总原生失败；兼容原两侧模式，汇总不作为单侧交付证据 |
 | [SDK 源码离线回归](sdk-offline-tests.md) | 复用 SDK 原 Vitest 配置与目标目录测试运行器，支持独立交付 checkout 和锁文件身份，默认运行 BigInt、数值及费用原有测试；支持精确选文件、按源码依赖图或目标 Git 基线变更范围自动选择后离线执行，也可只发现清单再选择执行环境；支持环境隔离、阻止意外联网及执行前后工具指纹复核；单 suite 可启用 loopback 源码断点调试，共享进程组工具核实取消与清理，不需要 SDK 构建 |
 | [Solana 统计索引只读预检](solana-index-preflight.md) | A16：核实实际 volume 索引的 GraphQL 契约、高度和最新事件年龄；不推断处理延迟或历史完整性 |
 | [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：`solana:browser-check` 一条命令完成预检、独立 Vite、真实 Chrome、独立报告和停服；支持独立功能 checkout 的目标 Vite 与源码/资源身份，复用网络选择/刷新持久化原有用例，保留手动运行和导航排障入口 |
