@@ -20,7 +20,8 @@ Solana 集成开发与验收从[Agent 任务启动卡](agent-task-start.md)选�
 | [需求推荐与就绪核验](solana-next-task.md) | 综合 Linear、GitHub PR、最新上游代码和实际前置，推荐下一条迁移需求 |
 | [Solana 迁移实际进度评估](solana-progress.md) | 跨仓库取证、去重与工作量估算，输出两个进度口径及中英文简述 |
 | [Agent 验收基础设施调研与实施清单](agent-acceptance-infrastructure.md) | RPC、keeper、API、钱包等验收条件与实施记录；A01/A02 访问工具已完成；A09 首个本地网络选择冒烟及环境预检已通过真实验收；A03 仍待实际部署入口 |
-| [Solana 集成 Agent 友好度推进路线](solana-agent-friendliness-roadmap.md) | Solana 集成专项的 Agent 开发、测试、验收和交付改进优先级；包含实施状态和实施备注，不代表整个项目的通用路线 |
+| [Solana 集成 Agent 友好度推进路线](solana-agent-friendliness-roadmap.md) | Solana 集成专项的 Agent 开发、测试、验收和交付改进优先级；包含当前实施状态和备注，历史验收按需进入独立记录，不代表整个项目的通用路线 |
+| [Solana 集成 Agent 友好度历史实施记录](solana-agent-friendliness-history.md) | 按需追溯路线表的历史验收、命令、结果与本机证据位置；不是日常启动入口或实时环境就绪证明 |
 | [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，涉及现有行为/真实数据时先核对线上基线，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；新增 Markdown 工作表一致性检查，拒绝错误汇总与无效证据引用 |
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
 | [SDK 构建产物准备与过期检查](sdk-artifacts.md) | 根类型检查前只读 verify；显式隔离 prebuild/编译，成功后替换忽略的产物，保留来源收据与日志 |
