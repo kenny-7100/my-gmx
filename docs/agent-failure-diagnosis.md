@@ -26,7 +26,7 @@
 | **原生测试失败**：Vitest/Jest/Playwright 断言失败、零断言、跳过、重试、runner errors | 读取精确 suite、原生结果和第一个实际失败断言；核对输入、时间/时区、环境和版本，确认预期后追踪调用方；不要仅看汇总计数 | [前端结果](frontend-offline-tests.md#结果版本与清理)、[SDK 结果](sdk-offline-tests.md#隔离与结果)、[API 时区](solana-api-local.md#时区前置与排障经验)；确认业务 bug 时按明确需求处理，基础设施任务不擅自改业务预期或删测试 |
 | **中断/超时/清理**：`exit.interrupted`、`exit.timedOut`、`exit.cleanup` 非 passed、临时目录/容器或端口未释放 | 先等待外层命令最终退出，读本次进程组/端口/容器身份及清理字段；原生断言通过不能覆盖清理失败。超时先核对测试范围和真实依赖，不直接提高限制 | [进程清理](sdk-offline-tests.md#进程清理统一验收2026-10-27)、[浏览器停服](solana-browser-smoke.md#一条命令执行并保存独立报告)、[API 清理](solana-api-local.md#测试派生进程清理验收2026-10-27)；只处理本任务所属资源，不盲目 kill。SIGKILL/系统崩溃后先人工核实归属 |
 | **工作表/证据包**：工作表不合法、结论不一致、缺原始文件或包摘要不匹配 | 先区分工作表内部一致性与业务结论；检查条件编号/引用/退出码和未覆盖项，再检查原报告、manifest 与包外预期摘要；已冻结包不写回摘要 | [工作表检查](agent-acceptance-workflow.md#工作表自动一致性检查)、[证据包](agent-evidence.md)；保留失败/受阻，缺证据就补实际执行或移交，不重写历史为 passed |
-| **外部资源/授权**：远端 API 身份、权限、reviewed contract、协议样本、交易预算或签名授权缺失 | 明确缺什么、用途、责任方和用户需完成的动作；秘密只配置到文档指定的本地位置，不要求在对话中发送。启动 Vite/Chrome 的长期授权不包含其他服务、构建、签名或广播 | [根规则](../AGENTS.md)、[资源协调记录](agent-acceptance-infrastructure.md#下一步就绪复核与-a03-协调2026-10-25)；暂停依赖项、标 blocked，继续独立工作；不注册、采购、换源或用 mock 绕过 |
+| **外部资源/授权**：远端 API 身份、权限、reviewed contract、协议样本、交易预算或签名授权缺失 | 明确缺什么、用途、责任方和用户需完成的动作；秘密只配置到文档指定的本地位置，不要求在对话中发送。启动 Vite/Chrome 的长期授权不包含其他服务、构建、签名或广播 | [根规则](../AGENTS.md)、[资源协调记录](agent-acceptance-infrastructure.md#待协调资源与-a03-验收门槛)；暂停依赖项、标 blocked，继续独立工作；不注册、采购、换源或用 mock 绕过 |
 
 ## 向后续 Agent 交接
 
