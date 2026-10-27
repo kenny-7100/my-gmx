@@ -1,6 +1,6 @@
 # Agent 本地运行版本矩阵
 
-核验日期：2026-10-27。适用于本仓库个人基础设施及其指向的前端、SDK、API checkout。用于执行测试和验收前选择运行时与依赖；不是整个项目的跨版本兼容性承诺，也不代表 Solana 业务就绪。本轮只核对声明、检查器和本机状态，不修改版本配置、不安装或升级依赖。
+核验日期：2026-10-27。适用于本仓库个人基础设施及其指向的前端、SDK、API checkout。用于执行测试和验收前选择运行时与依赖；不是整个项目的跨版本兼容性承诺，也不代表 Solana 业务就绪。已核对声明、检查器和本机状态，并补充本机 Node 22.17.0/22.22.0 的指定入口比较；不修改版本配置、不安装或升级依赖。
 
 ## 先选择执行环境
 
@@ -21,7 +21,7 @@ node scripts/agent-environment.mjs --checks node,api
 
 ## 声明、入口要求与本机观察
 
-本机观察来自本轮只读 `agent:environment` 和 package 元数据读取。ready 的含义限于[环境清单](agent-environment.md)定义的检查范围；本轮没有重新运行单元测试、页面、API 服务或数据库。历史测试结果继续以各专题原日期为准。
+下表保留首次只读 `agent:environment` 和 package 元数据盘点的观察；ready 的含义限于[环境清单](agent-environment.md)定义的检查范围。本轮 Node patch 的实际测试单独列在下方，不用测试结果刷新 Chrome、Docker daemon、真实服务或业务状态。历史结果仍按原观察日期理解。
 
 | 范围 | 仓库声明 / 固定配置 | 现有入口的实际要求 | 本轮本机观察与限制 |
 | --- | --- | --- | --- |
@@ -39,6 +39,38 @@ node scripts/agent-environment.mjs --checks node,api
 
 具体 package 版本以目标 checkout 的 package/锁文件与本次报告为准。依赖包自己的 engines 仅是包声明，不把它们的并集当成整个项目已测试范围。例如 SDK engines `>=18.0.0` 与 SDK 测试入口 major=22 可以同时成立，分别描述发布消费和个人开发工具两个范围。
 
+## Node 22 patch 实测范围
+
+2026-10-27 使用本机已有 Node 22.17.0 和 22.22.0，沿用当前 checkout 及各自已安装的锁定依赖，不做新安装或版本配置修改。每个子进程显式使用所选 Node 绝对路径，并仅在该进程的 PATH 前置其 bin；离线测试子进程由现有运行器通过 process.execPath 启动，没有切换当前终端默认 Node。
+
+| 入口 | Node 22.17.0 | Node 22.22.0 | 证明边界 |
+| --- | --- | --- | --- |
+| `test:agent-tools` | 118 项通过 | 118 项通过 | 个人工具离线回归，不是业务/服务就绪 |
+| `frontend:test-offline` 默认范围 | 3 文件 / 17 项通过 | 3 文件 / 17 项通过 | 原默认局部前端测试，非完整需求覆盖 |
+| `sdk:test-offline` 默认范围 | 3 文件 / 153 项通过 | 3 文件 / 153 项通过 | BigMath、numbers、fees 源码测试，不需 SDK 构建 |
+| `gmx-api:test-offline` 默认范围 | 2 suite / 12 项通过 | 2 suite / 12 项通过 | API 纯计算，不启动服务或数据库 |
+| 根 `test:ci` 完整前端 | 本轮未重复；上一轮 22.17.0 的结果保留原记录 | 299 文件 / 3014 项通过，1 文件 / 1 项既有跳过 | 本轮只对候选 patch 扩大到完整前端；不是 SDK/API 全量或页面验收 |
+| `solana:runtime-preflight --local-only` | passed | passed | 固定本地 SDK/WASM 指纹，未读链上部署 |
+| `sdk:artifacts verify` | passed / 退出 0 | blocked / 退出 2 | 现有产物来源收据绑定 22.17.0；切换 patch 后须重新准备才能供该版本的类型检查使用 |
+
+上述报告核对了所选范围、原生结果、源码/工具前后一致及进程清理。本次检查的本机 NVM 已安装列表不含 Node 20 或 API `.nvmrc` 指定的 22.23.4，本轮未安装它们，也不推断这些版本的结果。其他系统、浏览器、数据库、完整构建、全新安装和 SDK 发布包消费仍未验证。
+
+**实际可复用结论：** 两个已测 patch 的上述源码测试入口可在当前依赖环境运行；这不是把 22.x 全部标为 ready。22.22.0 下旧 SDK 产物 verify 正确拒绝，故没有跳过前置运行该版本的根类型检查，也没有构建或替换产物。需要切换开发/类型检查 Node 时，先核实已有产物的 Node 来源；完整版本变化也会失效，不能只比较 major。
+
+从基础设施仓库根目录重复某一入口时，使用本机实际已准备的 Node 路径；下面为命令模板，不安装运行时或改变终端默认版本：
+
+```sh
+MATRIX_NODE=/path/to/node-22/bin/node
+"$MATRIX_NODE" --version
+env PATH="$(dirname "$MATRIX_NODE"):$PATH" "$MATRIX_NODE" .yarn/releases/yarn-4.12.0.cjs test:agent-tools
+env PATH="$(dirname "$MATRIX_NODE"):$PATH" "$MATRIX_NODE" scripts/frontend-offline-tests.mjs
+env PATH="$(dirname "$MATRIX_NODE"):$PATH" "$MATRIX_NODE" scripts/sdk-offline-tests.mjs
+env PATH="$(dirname "$MATRIX_NODE"):$PATH" "$MATRIX_NODE" scripts/gmx-api-offline-tests.mjs
+env PATH="$(dirname "$MATRIX_NODE"):$PATH" "$MATRIX_NODE" scripts/sdk-artifacts.mjs verify
+```
+
+保留每次实际 Node 版本/路径、命令、退出码、原始报告和锁文件/工具身份。切换 Node 后旧报告不能自动代表新运行时；某一检查受阻时按其前置处理，不将预期拒绝改成通过。工程测试及本机证据详见[patch 实测记录](solana-agent-friendliness-history.md#node-patch-兼容性实施与验收记录2026-10-27)。
+
 ## 独立 checkout 与版本变化的处理顺序
 
 1. **记录目标。** 前端用 `--project-dir PATH`，SDK 用 `--sdk-dir PATH/sdk`，API 用 `--api-dir PATH`；从基础设施根目录调用入口，检查报告实际路径、commit、dirty 和 runtime。嵌套 API 有自己的 Git 身份及锁文件，不能把主仓库的 SHA 当作 API 版本。
@@ -49,7 +81,7 @@ node scripts/agent-environment.mjs --checks node,api
 
 ## 尚未统一及后续验证
 
-本轮已完成版本矩阵、当前差异和操作顺序的沉淀。路线表“统一本地运行版本矩阵”保持**部分完成**：当前入口选择已清楚，但还没有跨 Node patch、操作系统或全新机器安装的兼容性验收，根 Node 20 与个人工具 Node 22、API README 与 `.nvmrc` 差异也未收敛。
+本轮已完成版本矩阵、当前差异和操作顺序的沉淀。路线表“统一本地运行版本矩阵”保持**部分完成**：当前入口选择已清楚，已有本机两个 Node 22 patch 的指定测试入口实测，但完整构建/页面/数据库、跨系统和全新安装兼容性尚未验证；根 Node 20 与个人工具 Node 22、API README 与 `.nvmrc` 差异也未收敛。
 
 后续需要统一配置时，先明确验证范围：根原生前端开发/类型/测试/构建、SDK 发布消费与源码测试、API 测试/路由生成，以及页面和进程清理；再在候选 Node 与目标锁定依赖上验证受影响入口。不得仅因本机 Node 22.17.0 曾通过测试，就改写所有仓库的支持范围。安装、构建和其他服务启动仍按原授权执行；本矩阵不新增权限，也不要求当前任务为补矩阵执行这些动作。
 
