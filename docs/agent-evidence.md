@@ -1,6 +1,46 @@
 # Agent 验收证据包
 
-更新日期：2026-10-25。对应 A14 的本地证据移交阶段。工具将显式选择的现有 JSON 报告及可选的绑定 Markdown 工作表复制为独立目录，生成清单并离线检查完整性与工作表一致性，不重新执行验收、不启动服务、不上传、不修改业务代码。
+更新日期：2026-10-27。对应 A14 的本地证据移交阶段。工具将显式选择的现有 JSON 报告及可选的绑定 Markdown 工作表复制为独立目录，生成清单并离线检查完整性与工作表一致性，不重新执行验收、不启动服务、不上传、不修改业务代码。
+
+## 交付默认步骤
+
+更新日期：2026-10-27。用于[需求交付流程](linear-development-workflow.md#默认交付证据归档)中创建或更新 Draft PR 前的材料准备。只准备当前任务已经产生的证据，不为打包运行无关检查；工具能力和输入白名单见下文。
+
+1. **核对版本并冻结工作表。** 在最终交付版本完成实际需要的测试与隔离检查，记录目标目录、commit/dirty、相关输入身份、命令、退出码、时间和未覆盖项。未执行、失败或阻塞条件保留原状态。冻结后检查一致性，确认报告与工作表绑定；退出 2 可表示合法 partial/blocked/not-run，不能据此声称需求通过。
+2. **显式选择支持的报告并打包。** 默认归档工作表及其检查报告，再按需要追加白名单中的实际报告；不支持的测试/类型/交付报告及日志另行列出，不伪装成受支持 scope。使用新的、含需求编号及本次版本或时间的输出目录，旧目录不覆盖。
+3. **将摘要记在包外。** 保存 pack 返回的 manifestSha256、打包器版本、包含的报告及观察时间。被打包工作表不要再写回摘要；如内容需要变化，重新检查并创建新包。
+4. **整理未入包的原始产物。** JSON 中的路径不会自动归档；将所需原生测试结果、日志、网络事件、截图/trace、交付检查报告等按原工具的相对目录结构另行准备，记录文件清单与摘要。单独产物放在包目录之外，否则 verify 会因额外文件拒绝。核实可分享内容不含秘密，不能只移动汇总而丢失其引用文件。
+5. **交接并接收核对。** 本机 pack/verify 成功只写“本地归档已准备”。经已授权渠道实际复制后才记录“已移交”；接收方从包外可信记录取得预期摘要，使用兼容工具离线 verify，确认 manifestIdentity=matched，并核对独立产物可用、版本和覆盖缺口。独立产物的摘要与原生结果由原工具/接收者另行检查，不属于 evidence verify 的验证范围。
+
+从基础设施仓库根目录执行，替换路径、需求编号和唯一输出目录；这是命令模板，不是已执行结果：
+
+```sh
+yarn agent:acceptance --file /path/to/frozen-worksheet.md > /path/to/worksheet-check.json
+# Confirm the JSON status and requirementAcceptance, including incomplete results.
+yarn agent:evidence pack --issue FESOL-123 \
+  --worksheet /path/to/frozen-worksheet.md \
+  --report worksheet=/path/to/worksheet-check.json \
+  --out .local/acceptance/evidence/fesol-123-DELIVERY_SHA-UTC_TIME
+# Verify the received copy using the digest recorded outside the package.
+yarn agent:evidence verify --dir /path/to/received-package \
+  --expected-manifest-sha256 EXPECTED_SHA256
+```
+
+第一条命令的 stdout 是工作表 JSON 报告；显式重定向到所选 `worksheet-check.json` 并保留最终退出码后，才可用于 pack。未填写的模板或不一致报告不能打包；合法但结论不完整的工作表可以归档，结论仍是不完整。更多报告使用重复 `--report name=PATH`，只选本次确实需要的白名单输入。
+
+交接记录放在**包外**的共享说明或获准的 PR 验证说明中，至少填写以下字段；这里的占位内容必须替换，不能作为真实验收结论：
+
+| 字段 | 必填内容 |
+| --- | --- |
+| 需求与交付版本 | Linear 编号/链接、各目标仓库 commit、相关 dirty/输入摘要、交付 base；打包器 commit 或文件摘要 |
+| 业务结论 | passed/failed/blocked/partial/not-run、覆盖范围及剩余条件；与包完整性结论分开 |
+| 包定位与身份 | 包目录名、manifestSha256、实际已批准共享位置；只有本机路径时标未移交 |
+| 报告清单 | 每份报告的 scope、原始观察时间、目标/数据模式及来源；打包时间不替代观察时间 |
+| 独立产物清单 | 包外相对路径、文件摘要、对应执行记录/原生报告、可用性；没有时写明确原因，不假定引用文件已包含 |
+| 接收验证 | 执行时间、工具身份、完整命令、最终退出码、manifestIdentity；尚未接收写 not-run |
+| 未覆盖与下一步 | 缺失产物、未验证环境/业务条件、资源或协调人，以及下一步操作 |
+
+接收后只验证包完整、不查阅原生结果和需求映射，仍不能完成业务验收。当前工具不收集任意日志或完整测试运行目录；以后真实交付暴露缺口时再决定是否扩展，不在本轮增加通用归档器。
 
 ## 用法与顺序
 

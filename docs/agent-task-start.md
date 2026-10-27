@@ -25,7 +25,7 @@
 | API/Vite 组合联调和断点 | 先 `yarn solana:dev doctor --project-dir /path/to/feature --api-dir /path/to/api`；按[工作区说明](solana-dev-workspace.md)选择服务、空闲端口和授权，再 up 或一次性 check | 核对目标目录、owned/borrowed、trace 和 cleanup；sample 代理探测不证明业务页面消费 API，不关闭借用服务 |
 | 真实只读依赖检查 | 按[预检文档](agent-preflight.md)选择 `yarn agent:preflight --checks rpc,keeper`；RPC 先有已授权代理；只有任务确需钱包时才显式选择 wallet | 读取逐项状态、时间和退出码；`api` 项仅检查默认本机 3004 sample，不是远端 API 部署验收；自定义 API 路径/端口走独立入口 |
 | PR 预览页面验收 | `yarn agent:preview --pr 123 --expected-sha FULL_PR_HEAD_SHA` | [预览入口](agent-preview.md)只定位不可变 URL；另按需求执行页面验收，生产基线不能替代当前 PR 版本 |
-| 工作表与证据移交 | `yarn agent:acceptance --file /path/to/worksheet.md`；按[证据包说明](agent-evidence.md)使用 `yarn agent:evidence pack` 显式选择报告和工作表，再用 `yarn agent:evidence verify` 核对独立保存的 manifest 摘要 | 工作表一致不等于覆盖完整；证据完整不等于业务通过。原始报告在忽略的 `.local/acceptance/`，移交时需实际携带包 |
+| 工作表与证据移交 | `yarn agent:acceptance --file /path/to/worksheet.md`；按[证据包说明](agent-evidence.md)使用 `yarn agent:evidence pack` 显式选择报告和工作表，再用 `yarn agent:evidence verify` 核对独立保存的 manifest 摘要 | 工作表一致不等于覆盖完整；需求交付默认按[交接步骤](agent-evidence.md#交付默认步骤)准备包和包外原始产物清单；未实际移交写仅本机可用。证据完整不等于业务通过，包外保存摘要，不修改冻结工作表 |
 | 业务交付隔离 | 按[交付流程](linear-development-workflow.md#交付隔离自动检查)在干净交付版本使用 `yarn agent:delivery-check --require-clean`，显式传目标目录、head、base、开发基础、允许文件和原始测试报告 | 基于最新上游 release，只交付当前需求；个人工具留在基础设施目录。规划报告及联合执行汇总不能代替单侧原始测试报告；Git 写操作遵循根授权 |
 
 离线测试、规划、浏览器和工作区报告保存在基础设施目录的 `.local/acceptance/` 对应主题子目录；以本次 stdout 给出的实际路径为准，保留报告引用的日志、原生结果和网络事件文件。`agent:preflight` 默认只输出 JSON，需自行重定向保存；工作表检查同样只输出检查结果，不修改输入。不要把其他 checkout 的历史结果当作当前目标的证据。
