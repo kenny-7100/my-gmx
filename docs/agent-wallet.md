@@ -6,6 +6,22 @@
 
 ## 配置与入口
 
+CLI 与以下 Node 钱包工具使用不同的配置入口，不应假定两者的钱包地址相同。
+
+## 本地 Solana CLI 排障约定
+
+2026-10-27 用户确认：不依赖 UI 定位问题时，尤其是链上问题，在合适场合优先使用本地 Solana CLI。账户、余额、程序部署、交易确认及回执优先独立核对，再结合 SDK、API 或 UI 分析；CLI 不覆盖前端交互或业务数据转换的验收。
+
+本机已安装 Agave Solana CLI 4.3.2，PATH 入口在 `~/.zprofile`，默认密钥文件为 `~/.config/solana/dev-wallet.json`。已验证 CLI 可读取该文件且本地密钥验证成功，权限为 `600`；未发送交易。上述为本机观察，换机器或配置变化后重新核实。
+
+执行前使用 `solana config get` 和 `solana address` 核对网络及账户；必要时通过 `--url` 单次指定目标，不擅自更改默认配置。用户倾向 Devnet，但并非只使用 Devnet；钱包文件名不决定网络。CLI 与项目 Node 钱包工具应分别核对公开地址，不读取或输出助记词、私钥。
+
+当前公共 Mainnet 默认 RPC 可作为低频查询入口，按实际响应判断可用性。用户提供的 `https://rpc-1.gmtrade.xyz/` 已通过带 `Origin: https://gmtrade.xyz` 的只读请求确认是 Mainnet；无 Origin 返回 403。CLI 无自定义 Header 参数时，可按需复用旧前端 `rpc-proxy/scripts/local-proxy.ts` 的 `dev:local:prod` 配置补充 Origin，启动服务仍遵循现有授权。该代理未限制写方法且未显式绑定 loopback，不应视为只读隔离。其 `dev:local:devnet` 配置的真实可用性尚未核验；旧文档关于 Alchemy Devnet 未启用的结论只适用于对应供应商配置。
+
+优先执行只读命令；CLI 使用偏好不授予交易签名、广播、转账、空投或链上状态修改权限。必要时使用现有 RPC/SDK 工具补充 CLI 无法直接表达的查询，不为使用 CLI 强行增加代理或替代业务验收。
+
+## Node 钱包工具配置
+
 配置文件为主仓库根目录 `.env.local`，变量名为 `AGENT_TEST_WALLET_MNEMONIC`。本机已由用户填写英文 BIP-39 助记词；其他机器由用户自行配置：
 
 ```dotenv
