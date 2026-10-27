@@ -136,7 +136,7 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 
 已沉淀[真实 SDK/WASM 基础向量](solana-sdk-vectors.md)：`yarn solana:sdk-vectors` 复用本地指纹检查后，实例化真实固定 WASM 并逐项对照独立 Python 整数生成的 apply_factor 参考值。测试入口 `yarn test:solana-sdk-vectors`；无 RPC/钱包/构建，不把基础数值结果当复杂业务计算或链上兼容证明。
 
-已沉淀[验收工作表一致性检查](agent-acceptance-workflow.md#工作表自动一致性检查)：`yarn agent:acceptance --file PATH.md` 直接读取既有 Markdown 条件/执行表，核对唯一编号、引用、执行结果和汇总状态，输出工作表/检查器摘要；验证入口 `yarn test:agent-acceptance`。不执行表内命令、不读取凭据或原始证据，不评判需求完整覆盖及证据充分性。
+已沉淀[验收工作表一致性检查](agent-acceptance-workflow.md#工作表自动一致性检查)：`yarn agent:acceptance --file PATH.md` 直接读取既有 Markdown 条件/执行表，核对唯一编号、引用、执行结果和汇总状态，输出工作表/检查器摘要；`--include-mapping` 可附加逐条件原文、证据编号与执行记录，归档时核对其与工作表一致；验证入口 `yarn test:agent-acceptance`。不执行表内命令、不读取凭据或原始证据，不评判需求完整覆盖及证据充分性。
 
 已沉淀[Solana 浏览器环境预检](solana-browser-smoke.md#先准备再执行)：`yarn solana:browser-preflight` 将已遇到的缺包、缺浏览器、SDK 产物及测试发现检查前置，输出可归档 JSON 与阶段状态，不启动浏览器或服务。测试入口 `yarn test:solana-browser-preflight`；不将准备通过当页面或需求通过。
 
