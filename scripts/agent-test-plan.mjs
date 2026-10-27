@@ -121,6 +121,7 @@ async function runCli() {
   try {
     const { values } = parseArgs({
       options: {
+        targets: { type: "string" },
         "project-dir": { type: "string", default: ROOT },
         "changed-since": { type: "string" },
         help: { type: "boolean", short: "h" },
@@ -128,13 +129,19 @@ async function runCli() {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn agent:test-plan [--project-dir PATH] --changed-since REF\nPreviews SDK tests and frontend consumers for source-only changes using the existing discovery runners. Does not execute tests, build or start services. A passing plan is not passing test evidence. Execution commands are argument arrays, not shell strings.\n"
+        "Usage: yarn agent:test-plan [--project-dir PATH] --changed-since REF\nUse --targets PATH.json for frontend/SDK/API planning with independent Git bases, explicit API profiles and uncovered changes. Partial plans exit 2.\nPreviews SDK tests and frontend consumers for source-only changes using the existing discovery runners. Does not execute tests, build or start services. A passing plan is not passing test evidence. Execution commands are argument arrays, not shell strings.\n"
       );
       return;
     }
-    const report = await planTests({ projectDir: values["project-dir"], changedSince: values["changed-since"] });
+    assert.ok(
+      !values.targets || (!values["changed-since"] && values["project-dir"] === ROOT),
+      "Do not combine --targets with legacy selection."
+    );
+    const report = values.targets
+      ? await (await import("./lib/agent-fullstack-tests.mjs")).planFullstack(values.targets)
+      : await planTests({ projectDir: values["project-dir"], changedSince: values["changed-since"] });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-    process.exitCode = report.status === "passed" ? 0 : 1;
+    process.exitCode = report.status === "passed" ? 0 : report.status === "partial" ? 2 : 1;
   } catch (error) {
     process.stdout.write(`${JSON.stringify({ status: "blocked", error: error.message.split("\n")[0] })}\n`);
     process.exitCode = 2;

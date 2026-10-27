@@ -4,6 +4,27 @@
 
 版本选择、根 Node 20 与个人工具 Node 22 的差异、API 声明及独立 checkout 准备顺序见[运行版本矩阵](agent-runtime-matrix.md)。清单中的版本是本机观察，不是跨版本兼容范围。
 
+
+## 实际目标目录检查
+
+独立开发 checkout 使用显式目标模式；不传目标时继续使用下文原本机清单：
+
+```sh
+yarn agent:environment --project-dir /path/to/frontend --api-dir /path/to/api \
+  --checks node,yarn,frontend,sdk,api
+yarn agent:environment --api-dir /path/to/api --checks api,api-routes,database
+```
+
+实现：[目标环境检查](../scripts/lib/agent-target-environment.mjs)。前端和 API 都要求实际 Git 根目录；可只选择一侧。默认选择 Node/Yarn 及已提供目标对应的关键依赖，SDK 产物、API 路由和数据库需显式选择。目标模式新增检查 `api-routes`、`database`，不支持旧模式的 chrome/wasm；浏览器与链上前置继续使用原入口。
+
+`database` 只读取本地 Docker context、daemon 和已有 postgres:15 镜像身份，不创建容器、不拉镜像、不读现有数据库；远端 TCP context 拒绝。`api-routes` 复用只读 prepare verify。`sdk-artifacts` 在目标目录按既有收据格式核对源码、工具链及完整产物，工具脚本身份来自基础设施目录；目标无需含个人工具。缺产物不构建，过期不修改收据。
+
+目标 Yarn 有 yarnPath 时核验该本地 runner；没有 yarnPath 时显式使用基础设施固定的 Yarn 4.12.0，并与目标 packageManager 比较，报告记录实际 runner 来源。不调用 Corepack 下载、不猜测安装版本。独立 checkout 的相对 yarnPath 缺失会准确受阻，不借用其他目录掩盖。
+
+报告 scope 为 `agent-target-environment-inventory`、schemaVersion 2，记录每侧路径、commit/dirty、关键配置/依赖元数据的前后摘要。SDK 消费单列：前端使用目标 sdk/src，API 记录声明和已安装的 @gmx-io/sdk 包；版本差异不自动判断不兼容、不替换依赖。selected 检查就绪且输入不变才退出 0，缺前置/偏离退出 2，参数/身份读取错误退出 1；原始异常不转发。
+
+此清单不证明完整依赖树、全量源码、Docker/浏览器二进制、业务兼容或外部服务就绪；未选择项为 not-checked，远端资源保持未核验。测试和规划仍各自核对完整目标身份。跨 checkout 时先用这一模式检查对应前置，避免拿基础设施目录的 ready 代替目标环境。
+
 ## 使用与状态
 
 从个人基础设施 checkout 根目录执行，使用现有 Node 和锁定依赖：

@@ -35,11 +35,13 @@ async function verifyPlan(plan) {
 
 export async function runPlan({ planFile, scope }) {
   assert.equal(process.versions.node.split(".")[0], "22", "Use Node 22.");
-  assert.ok(["sdk", "frontend", "both"].includes(scope), "Select --scope sdk, frontend or both.");
   assert.ok(typeof planFile === "string" && planFile.length > 0, "Provide --plan PATH.");
   planFile = await realpath(planFile);
   const planBytes = await readFile(planFile);
   const plan = JSON.parse(planBytes);
+  if (plan.schemaVersion === 2)
+    return (await import("./lib/agent-fullstack-tests.mjs")).runFullstack({ planFile, scope });
+  assert.ok(["sdk", "frontend", "both"].includes(scope), "Select --scope sdk, frontend or both.");
   await verifyPlan(plan);
   const selected = scope === "both" ? ["sdk", "frontend"] : [scope];
   const applicable = selected.filter((name) => plan.scopes[name]?.status !== "not-applicable");
@@ -136,13 +138,13 @@ async function runCli() {
     });
     if (values.help) {
       process.stdout.write(
-        "Usage: yarn agent:test-run --plan PATH --scope sdk|frontend|both\nRuns exact planned suites using existing offline runners after checking current source, Git range and tools. Does not execute command text from reports, build or start services. Summary reports are not delivery test evidence; use original scope reports.\n"
+        "Schema 2 plans support --scope all or comma-separated sdk,frontend,api-offline,api-database. Partial/blocked exits 2; original single-side reports remain delivery evidence.\nUsage: yarn agent:test-run --plan PATH --scope sdk|frontend|both\nRuns exact planned suites using existing offline runners after checking current source, Git range and tools. Does not execute command text from reports or build. Only an explicitly selected schema 2 api-database scope starts its owned temporary PostgreSQL container. Summary reports are not delivery test evidence; use original scope reports.\n"
       );
       return;
     }
     const report = await runPlan({ planFile: values.plan, scope: values.scope });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-    process.exitCode = report.status === "passed" ? 0 : 1;
+    process.exitCode = report.status === "passed" ? 0 : ["partial", "blocked"].includes(report.status) ? 2 : 1;
   } catch (error) {
     process.stdout.write(`${JSON.stringify({ status: "blocked", error: error.message.split("\n")[0] })}\n`);
     process.exitCode = 2;

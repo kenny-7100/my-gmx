@@ -1,12 +1,14 @@
-# Solana 集成 Agent 任务启动卡
+# 全栈 Agent 任务启动卡
 
-更新日期：2026-10-27。适用于 Solana 集成需求的开发、测试和验收，以及配套基础设施维护。先读根 [AGENTS.md](../AGENTS.md)，再按本卡选择当前任务需要的路径；无需逐项执行整张表。
+更新日期：2026-10-27。适用于前端、SDK、gmx-api 的全栈开发、测试与验收，以及 Solana 专项和配套基础设施维护。先读根 [AGENTS.md](../AGENTS.md)，再按本卡选择当前任务需要的路径；无需逐项执行整张表。
 
 ## 开始前
 
 1. **明确任务与授权。** 业务需求实时核对 Linear 正文、评论、关系及项目归属，按[需求工具说明](linear-requirements.md)使用 `yarn linear show FESOL-123 --live --json`；纯基础设施任务按用户范围实施，不顺带开发业务。仅要求 push 时直接按根规则执行，不插入以下检查。
 2. **明确目标身份。** 下表命令均从含个人工具的基础设施 checkout 根目录执行。将 `/path/to/feature`、`/path/to/api`、`/path/to/report.json` 等占位路径换为实际路径；目标各自具备锁定依赖。当前离线工具要求 Node 22，完整环境前置见[执行顺序](coding-and-self-review.md#执行前的环境检查与顺序)，版本选择、Node 20/22 差异及独立目录要求见[运行版本矩阵](agent-runtime-matrix.md)。
 3. **先定义验收再选工具。** 按[验收映射](agent-acceptance-workflow.md)记录条件、预期、数据模式、目标版本和未覆盖项。涉及已有线上行为或真实数据时，先查[GMX 服务表](gmx-live-services.md)、[GMTrade 服务表](gmtrade-live-services.md)和页面实际请求，再验证本地或 PR 版本。Solana 开发还需按[参考仓库说明](solana-reference-repositories.md)核对 ADR、SDK 和协议版本。
+
+跨仓库任务先按[实际目标环境检查](agent-environment.md#实际目标目录检查)显式传 --project-dir/--api-dir，按[全栈目标配置](agent-test-plan.md#全栈目标配置)记录各侧基线和 API profile，复用原运行器执行；结果用[运行材料收集](agent-evidence.md#从全栈执行结果收集材料)整理。基础设施建设不修改业务代码、业务测试预期、迁移或业务依赖。
 
 不清楚本机前置条件时，可先用[环境清单](agent-environment.md) `yarn agent:environment --checks node,yarn,frontend` 盘点所需项；它只检查基础设施 checkout，不替代目标目录自己的测试前置或真实服务预检，也不要求每个任务运行全部检查。
 
@@ -15,6 +17,7 @@
 | 当前任务 | 首选命令与前置 | 读取结果与下一步 |
 | --- | --- | --- |
 | 纯文档修改 | `yarn agent:docs-check --file docs/PATH.md` 检查本次相关文件的本地链接与锚点；另核对命令和 `git diff --check` | 按[文档维护约定](documentation-maintenance.md)更新索引；无需类型、UI 或构建检查 |
+| 前端/SDK/API 跨仓库测试 | 先 `yarn agent:environment --project-dir /path/to/frontend --api-dir /path/to/api --checks node,yarn,frontend,sdk,api`；`yarn agent:test-plan --targets /path/to/targets.json` 后显式 `agent:test-run --plan /path/to/report.json --scope all` | [全栈配置](agent-test-plan.md#全栈目标配置)分别固定基线、API profile 和未覆盖项；数据库需单独检查前置。执行结果按[材料收集](agent-evidence.md#从全栈执行结果收集材料)归档，不升级业务结论 |
 | 前端局部测试，已知 suite | `yarn frontend:test-offline --project-dir /path/to/feature --suite src/lib/dates.spec.ts`；替换为当前任务的真实 suite | [前端入口](frontend-offline-tests.md)输出精确 suite、原生 Vitest 结果、网络审计和源码身份；默认范围只覆盖少量固定测试 |
 | SDK 局部测试或影响发现 | `yarn sdk:test-offline --sdk-dir /path/to/feature/sdk --discover-only --related src/utils/stats/api.ts`；路径相对目标 SDK | [SDK 入口](sdk-offline-tests.md)发现后检查真实依赖，再用 `--suite` 执行；SDK 变化同时考虑前端消费者 |
 | 前端/SDK 源码变化，需要规划两侧范围 | `yarn agent:test-plan --project-dir /path/to/feature --changed-since origin/release`；基线必须属于目标仓库 | [联合规划](agent-test-plan.md)读取两侧清单，适合离线时显式 `yarn agent:test-run --plan /path/to/plan/report.json --scope both`；源码、范围或工具变化后重新规划 |

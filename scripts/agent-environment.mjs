@@ -7,6 +7,7 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
+import { collectTargetEnvironment } from "./lib/agent-target-environment.mjs";
 import { browserDependency, checkChromeExecutable } from "./solana-browser-preflight.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -228,15 +229,27 @@ export async function runCli({
   try {
     const { values } = parseArgs({
       args,
-      options: { checks: { type: "string" }, help: { type: "boolean", short: "h" } },
+      options: {
+        "project-dir": { type: "string" },
+        "api-dir": { type: "string" },
+        checks: { type: "string" },
+        help: { type: "boolean", short: "h" },
+      },
     });
     if (values.help) {
       stdout.write(
-        `Usage: yarn agent:environment [--checks ${Object.keys(LOCAL).join(",")}]\nLocal read-only inventory. No services, browser launch, daemon access, installation, network, wallet or .env reads. JSON on stdout; redirect explicitly to save. Exit 0: selected local checks ready; 2: blocked/stale/source changed; 1: configuration/evidence error. External resources remain not-checked.\n`
+        `Usage: yarn agent:environment [--checks ${Object.keys(LOCAL).join(",")}]\nUse --project-dir PATH and/or --api-dir PATH for actual target checks (node,yarn,frontend,sdk,api,sdk-artifacts,api-routes,database). Target database check reads local daemon/image metadata without starting containers.\nDefault inventory does not access the daemon. Neither mode launches services/browser, installs, reads wallet/.env or requests remote services. JSON on stdout; redirect explicitly to save. Exit 0: selected local checks ready; 2: blocked/stale/source changed; 1: configuration/evidence error. External resources remain not-checked.\n`
       );
       return 0;
     }
-    const report = await collect({ selected: values.checks === undefined ? undefined : values.checks.split(",") });
+    const report =
+      values["project-dir"] || values["api-dir"]
+        ? await collectTargetEnvironment({
+            projectDir: values["project-dir"],
+            apiDir: values["api-dir"],
+            selected: values.checks?.split(","),
+          })
+        : await collect({ selected: values.checks === undefined ? undefined : values.checks.split(",") });
     stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return report.status === "ready" ? 0 : 2;
   } catch {

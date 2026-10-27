@@ -8,6 +8,7 @@ import { isDeepStrictEqual, parseArgs } from "node:util";
 import { checkWorksheet } from "./agent-acceptance.mjs";
 
 const SCOPES = new Set([
+  "agent-test-run-materials",
   "solana-browser-prerequisites",
   "local-source-comparison",
   "acceptance-worksheet-consistency",
@@ -90,6 +91,23 @@ function bindWorksheet(bytes, entries) {
   };
 }
 
+function bindRunMaterials(entries, artifacts) {
+  for (const entry of entries.filter((item) => item.descriptor.scope === "agent-test-run-materials")) {
+    const report = JSON.parse(entry.bytes);
+    check(report.status === "passed" && Array.isArray(report.materials) && report.materials.length > 0);
+    check(Array.isArray(report.diagnostics) && report.diagnostics.length === 0);
+    for (const material of report.materials) {
+      const artifact = artifacts.find((item) => item.name === material.name);
+      check(
+        artifact &&
+          artifact.file === material.packageFile &&
+          artifact.bytes === material.bytes &&
+          artifact.sha256 === material.sha256
+      );
+    }
+  }
+}
+
 export async function packEvidence({ issue, reports, outDir, worksheet, artifacts = [] }) {
   check(typeof issue === "string" && /^[A-Z][A-Z0-9]*-[1-9][0-9]*$/.test(issue));
   check(Array.isArray(reports) && reports.length > 0 && reports.length <= 20);
@@ -129,6 +147,10 @@ export async function packEvidence({ issue, reports, outDir, worksheet, artifact
     files.add(descriptor.file);
     artifactEntries.push({ bytes, descriptor });
   }
+  bindRunMaterials(
+    entries,
+    artifactEntries.map((entry) => entry.descriptor)
+  );
   const manifest = {
     schemaVersion: artifactEntries.length ? 3 : worksheetDescriptor ? 2 : 1,
     ...(worksheetDescriptor ? { worksheet: worksheetDescriptor } : {}),
@@ -219,6 +241,7 @@ export async function verifyEvidence({ dir, expectedManifestSha256 }) {
     names.add(entry.name);
     files.add(entry.file);
   }
+  bindRunMaterials(entries, manifest.artifacts ?? []);
   check(isDeepStrictEqual((await readdir(dir)).sort(), [...files].sort()));
   return {
     status: "passed",
@@ -239,6 +262,7 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
       args,
       allowPositionals: true,
       options: {
+        run: { type: "string" },
         issue: { type: "string" },
         report: { type: "string", multiple: true },
         artifact: { type: "string", multiple: true },
@@ -251,11 +275,29 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
     });
     if (values.help) {
       stdout.write(
-        "Usage: yarn agent:evidence pack --issue FESOL-123 --report name=report.json [--report other=other.json] [--worksheet PATH.md] [--artifact name=PATH ...] --out PATH\n       yarn agent:evidence verify --dir PATH [--expected-manifest-sha256 SHA256]\nOffline integrity and optional worksheet consistency only. Explicit opaque artifacts: .json/.log/.txt/.png/.zip, up to 20 files, 16 MiB each, 64 MiB total. Does not discover files, execute contents, infer acceptance coverage, or upload files.\n"
+        "Usage: yarn agent:evidence collect-run --run PATH.json [--issue FESOL-123 --out PATH]\nLists known execution materials by default; --out explicitly packages them with original-to-package mapping. No recursive scan or upload.\n       yarn agent:evidence pack --issue FESOL-123 --report name=report.json [--report other=other.json] [--worksheet PATH.md] [--artifact name=PATH ...] --out PATH\n       yarn agent:evidence verify --dir PATH [--expected-manifest-sha256 SHA256]\nOffline integrity and optional worksheet consistency only. Explicit opaque artifacts: .json/.log/.txt/.png/.zip, up to 20 files, 16 MiB each, 64 MiB total. Does not discover files, execute contents, infer acceptance coverage, or upload files.\n"
       );
       return 0;
     }
     check(positionals.length === 1);
+    if (positionals[0] === "collect-run") {
+      check(
+        values.run &&
+          !values.dir &&
+          !values.report &&
+          !values.artifact &&
+          !values.worksheet &&
+          !values["expected-manifest-sha256"]
+      );
+      check(Boolean(values.out) === Boolean(values.issue));
+      const { collectRunMaterials, packRunMaterials } = await import("./lib/agent-run-materials.mjs");
+      const collected = values.out
+        ? await packRunMaterials({ runFile: values.run, issue: values.issue, outDir: values.out })
+        : await collectRunMaterials(values.run);
+      stdout.write(`${JSON.stringify(collected, null, 2)}\n`);
+      return collected.status === "passed" ? 0 : 2;
+    }
+    check(values.run === undefined);
     let report;
     if (positionals[0] === "pack") {
       check(

@@ -8,6 +8,12 @@
 
 当前判断：本项目已经具备较好的本地开发、局部测试、调试、测试范围发现、证据绑定和交付隔离能力；真实 Solana 业务验收仍受 API 部署身份、reviewed contract、真实数据样本、钱包连接和交易闭环限制。现有能力和边界见[阶段摘要](agent-acceptance-infrastructure.md#当前阶段与接手结论2026-10-27)及[验收映射](agent-acceptance-workflow.md)。历史实测见[实施记录](solana-agent-friendliness-history.md)，不是本次环境就绪证明。
 
+## 全栈基础设施增量（2026-10-27）
+
+用户进一步明确：Agent 开发环境面向前端、SDK、API 和数据库的全栈需求，基础设施实施不修改业务代码。已在原有工具上增加[目标环境检查](agent-environment.md#实际目标目录检查)、[全栈计划与执行](agent-test-plan.md#全栈目标配置)、[执行材料收集](agent-evidence.md#从全栈执行结果收集材料)。本轮验收记录见[全栈基础设施验收](agent-test-plan.md#全栈基础设施验收记录)。这批本地改进不依赖 A03；真实 API、契约、钱包和交易缺口仍各自保留。
+
+下方原 Solana 专项状态与历史“下一步门槛”不代表全栈基础设施只能等待 A03，也不将本轮测试执行能力当成真实全栈业务闭环完成。后续仍以真实需求暴露的缺口决定增量，不持续增加无明确用途的包装入口。
+
 ## 阅读顺序与证据时效
 
 日常接手先读[任务启动卡](agent-task-start.md)，再按本表选择具备条件的工作；运行前按需查[环境清单](agent-environment.md)与[版本矩阵](agent-runtime-matrix.md)。查看过去执行了什么时，再进入[历史实施记录](solana-agent-friendliness-history.md)。本表是当前协作状态，不是实时服务探测；受阻、部分完成及待真实需求验证的项不能据历史 passed 改为已完成。
