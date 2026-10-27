@@ -19,7 +19,8 @@ Solana 集成开发与验收从[Agent 任务启动卡](agent-task-start.md)选�
 | [Linear 需求查阅与复盘](linear-requirements.md) | FESOL 实时查询、全量快照、项目筛选和进度差异工具的配置、命令与验收记录 |
 | [需求推荐与就绪核验](solana-next-task.md) | 综合 Linear、GitHub PR、最新上游代码和实际前置，推荐下一条迁移需求 |
 | [Solana 迁移实际进度评估](solana-progress.md) | 跨仓库取证、去重与工作量估算，输出两个进度口径及中英文简述 |
-| [Agent 验收基础设施调研与实施清单](agent-acceptance-infrastructure.md) | RPC、keeper、API、钱包等验收条件与实施记录；A01/A02 访问工具已完成；A09 首个本地网络选择冒烟及环境预检已通过真实验收；A03 仍待实际部署入口 |
+| [Agent 验收基础设施当前入口](agent-acceptance-infrastructure.md) | 当前能力、限制、执行授权和 A03 资源协调门槛；旧章节保留导航，按日期的调研与验收正文另见历史归档 |
+| [Agent 验收基础设施历史调研与实施记录](agent-acceptance-infrastructure-history.md) | 追溯 A01–A17 原调研、候选决策和真实验收证据；旧待授权描述仅属于原时点，不作为当前操作规则 |
 | [Solana 集成 Agent 友好度推进路线](solana-agent-friendliness-roadmap.md) | Solana 集成专项的 Agent 开发、测试、验收和交付改进优先级；包含当前实施状态和备注，历史验收按需进入独立记录，不代表整个项目的通用路线 |
 | [Solana 集成 Agent 友好度历史实施记录](solana-agent-friendliness-history.md) | 按需追溯路线表的历史验收、命令、结果与本机证据位置；不是日常启动入口或实时环境就绪证明 |
 | [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，涉及现有行为/真实数据时先核对线上基线，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；Markdown 工作表一致性检查及可选逐条件 JSON 映射，拒绝错误汇总与无效证据引用 |

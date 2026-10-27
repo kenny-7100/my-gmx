@@ -19,7 +19,7 @@
 | 独立功能 checkout 的执行与交付 | [目标目录与证据身份](#在独立-api-checkout-中运行测试) | 使用目标依赖与基线，报告留在基础设施目录；交付复核当前源码和原始产物 |
 | 查询过去验证了什么 | [历史记录](solana-api-local-history.md) | 保留原日期、结果和本机证据位置，不刷新历史有效性 |
 
-本地样例、离线 fixture、隔离数据库均不能替代[真实 API 部署身份](agent-acceptance-infrastructure.md#下一步就绪复核与-a03-协调2026-10-25)或 reviewed contract。执行前仍按[环境检查与顺序](coding-and-self-review.md#执行前的环境检查与顺序)选择所需项；缺服务资源时按根规则协调，不换源或补业务实现。
+本地样例、离线 fixture、隔离数据库均不能替代[真实 API 部署身份](agent-acceptance-infrastructure.md#待协调资源与-a03-验收门槛)或 reviewed contract。执行前仍按[环境检查与顺序](coding-and-self-review.md#执行前的环境检查与顺序)选择所需项；缺服务资源时按根规则协调，不换源或补业务实现。
 
 ## 用途与边界
 
