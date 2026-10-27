@@ -5,7 +5,7 @@
 ## 开始前
 
 1. **明确任务与授权。** 业务需求实时核对 Linear 正文、评论、关系及项目归属，按[需求工具说明](linear-requirements.md)使用 `yarn linear show FESOL-123 --live --json`；纯基础设施任务按用户范围实施，不顺带开发业务。仅要求 push 时直接按根规则执行，不插入以下检查。
-2. **明确目标身份。** 下表命令均从含个人工具的基础设施 checkout 根目录执行。将 `/path/to/feature`、`/path/to/api`、`/path/to/report.json` 等占位路径换为实际路径；目标各自具备锁定依赖。当前离线工具要求 Node 22，完整环境前置见[执行顺序](coding-and-self-review.md#执行前的环境检查与顺序)，此处不宣称所有子项目版本已统一。
+2. **明确目标身份。** 下表命令均从含个人工具的基础设施 checkout 根目录执行。将 `/path/to/feature`、`/path/to/api`、`/path/to/report.json` 等占位路径换为实际路径；目标各自具备锁定依赖。当前离线工具要求 Node 22，完整环境前置见[执行顺序](coding-and-self-review.md#执行前的环境检查与顺序)，版本选择、Node 20/22 差异及独立目录要求见[运行版本矩阵](agent-runtime-matrix.md)。
 3. **先定义验收再选工具。** 按[验收映射](agent-acceptance-workflow.md)记录条件、预期、数据模式、目标版本和未覆盖项。涉及已有线上行为或真实数据时，先查[GMX 服务表](gmx-live-services.md)、[GMTrade 服务表](gmtrade-live-services.md)和页面实际请求，再验证本地或 PR 版本。Solana 开发还需按[参考仓库说明](solana-reference-repositories.md)核对 ADR、SDK 和协议版本。
 
 不清楚本机前置条件时，可先用[环境清单](agent-environment.md) `yarn agent:environment --checks node,yarn,frontend` 盘点所需项；它只检查基础设施 checkout，不替代目标目录自己的测试前置或真实服务预检，也不要求每个任务运行全部检查。
