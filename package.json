@@ -13,6 +13,8 @@
     "solana:browser-preflight": "node scripts/solana-browser-preflight.mjs",
     "test:solana-browser-preflight": "node --test scripts/solana-browser-preflight.test.mjs",
     "test:solana-readonly": "playwright test -c playwright-solana-readonly.config.ts",
+    "agent:docs-check": "node scripts/agent-docs-check.mjs",
+    "test:agent-docs-check": "node --test scripts/agent-docs-check.test.mjs",
     "agent:acceptance": "node scripts/agent-acceptance.mjs",
     "test:agent-acceptance": "node --test scripts/agent-acceptance.test.mjs",
     "solana:sdk-vectors": "tsx scripts/solana-sdk-vectors.mjs",
