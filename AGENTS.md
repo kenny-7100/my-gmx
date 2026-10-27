@@ -27,6 +27,8 @@
 
 ## 工程规范
 
+定位 Solana 链上问题时，在适合且不依赖 UI 的场景优先使用本地 Solana CLI 核对链上事实，再结合 SDK、API 或页面排查；先确认网络与账户，具体入口及授权边界见 [本地钱包与 CLI](docs/agent-wallet.md#本地-solana-cli-排障约定)。
+
 1. 编码和自我代码审查必须参考 `gmx-prompts`：开发看 `skills/gmx-interface-dev/SKILL.md`，前端及 SDK 自审看 `skills/gmx-interface-review/SKILL.md`，Solana 改动同时看 `skills/gmx-solana/SKILL.md`，测试看 `skills/gmx-tests/SKILL.md`；涉及 API 审查时看 `skills/gmx-api-review/SKILL.md`。按入口阅读相关规范与审查细则，不能仅凭通用经验检查。
 2. 查阅入口和自审重点见 [编码与自审规范](docs/coding-and-self-review.md)。同时遵循本文件的项目专属要求；上游流程不得覆盖用户已确认的 push、语言、Git 操作及 UI 运行授权约定。
 3. 执行类型检查、测试、构建或验收前，先按[执行前的环境检查与顺序](docs/coding-and-self-review.md#执行前的环境检查与顺序)处理适用的已知环境前置条件，再运行检查；该入口不扩大操作授权，也不改变直接 `push` 流程。

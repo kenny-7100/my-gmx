@@ -39,7 +39,7 @@ Solana 集成开发与验收从[Agent 任务启动卡](agent-task-start.md)选�
 | [Solana ALT 资源预检](solana-alt-preflight.md) | A05：现有 Mainnet 地址查找表的批量读取、生命周期、authority、完整地址与摘要；不创建或修改表 |
 | [本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md) | 手动启动、前端与 Agent 调用、fallback key/Origin 转发、方法限制及验证边界 |
 | [keeper 只读预检](keeper-preflight.md) | A02 真实价格、图表与开关预检；本地 `solanaTrading` 覆盖配置、环境边界及真实交易前置 |
-| [本地 Agent 验收钱包](agent-wallet.md) | A05：助记词配置、固定 EVM/Solana 地址、Mainnet 原生 SOL 及 SPL/Token-2022 账户盘点与失败诊断；已通过自动测试和真实只读验收，Devnet 暂缓 |
+| [本地 Agent 验收钱包](agent-wallet.md) | 本地 Solana CLI 优先排查链上问题的约定、网络与账户核对、Origin 代理边界；A05 Node 钱包配置、固定 EVM/Solana 地址、Mainnet SOL 及代币账户盘点 |
 | [Agent Solana 全栈联调工具](solana-dev-workspace.md) | 双 checkout 启动前只读 doctor、个人开发专用 API 代理路径、API/Vite/RPC 工作区管理、一条命令运行 Chrome/可选断点验收并停服、显式 API inspector、目标身份诊断、浏览器 trace 关联及未评审样例结构回归；不新增业务消费、不随业务 PR 交付 |
 | [本地 Solana API 样例验收服务](solana-api-local.md) | A08 当前操作入口：按任务定位样例 HTTP、持续服务、源码断点、关联测试发现、离线回归、路由准备、API 类型与隔离 PostgreSQL 测试；保留独立 checkout、网络/源码身份及清理要求，历史执行结果另见归档 |
 | [本地 Solana API 基础设施历史验收记录](solana-api-local-history.md) | 追溯 API 工具历次实际执行、失败演练及本机产物；保留原日期与证明边界，不作为当前环境就绪证明 |
