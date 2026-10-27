@@ -32,7 +32,7 @@
 | P0 | 需求条件到测试入口的结构化映射 | Agent 需要手工判断每个验收条件应该用哪种验证方式 | 为每项需求记录 `requirement → condition → test layer → command → evidence → uncovered reason` | 给定需求后能明确选择单元、SDK、API、浏览器、真实只读或人工检查 | 已具备基础 | 已有[验收映射流程](agent-acceptance-workflow.md)和 FESOL-55 实例，需在真实需求中复用和修正 |
 | P1 | 证据包作为交付默认步骤 | `.local/acceptance` 中的原始结果默认不随仓库共享，交接时容易丢上下文 | 统一需求证据包目录和命令，包含工作表、原始报告、源码身份、命令、退出码、工具指纹、未覆盖项和包摘要 | 需求交付时有可移交证据包，其他 Agent 不依赖原执行机器的临时目录 | 已具备基础 | `agent:evidence` 已存在；需要在真实交付流程中固定为默认步骤 |
 | P1 | 统一的本地任务预检入口 | RPC、keeper、wallet、browser、API 和 workspace 检查分散 | 按需求类型提供任务级检查，例如 `frontend-only`、`api-readonly`、`browser`、`transaction` | 开始任务前得到清晰的 `ready / blocked / stale` 结论，并定位阻塞资源 | 已具备基础 | `agent:preflight` 和 workspace doctor 已有基础；是否继续封装应由真实需求决定 |
-| P1 | 统一本地运行版本矩阵 | README、`.nvmrc`、子项目和不同执行入口可能使用不同 Node 版本 | 明确 Node/Yarn、SDK/API checkout、Playwright/Chrome 和 Docker 的支持版本 | 不同 checkout 或机器不会因版本差异得到难以解释的结果 | 待开始 | 先核对当前本地入口和各子仓库要求，再决定是否调整配置 |
+| P1 | 统一本地运行版本矩阵 | README、`.nvmrc`、子项目和不同执行入口可能使用不同 Node 版本 | 明确 Node/Yarn、SDK/API checkout、Playwright/Chrome 和 Docker 的支持版本 | 不同 checkout 或机器不会因版本差异得到难以解释的结果 | 部分完成 | 2026-10-27：[运行版本矩阵](agent-runtime-matrix.md)已核对根/SDK/API 声明、工具前置和本机观察并接入执行入口；本轮文档范围已验收。根 Node 20/工具 Node 22、API README/配置 patch 差异未收敛；跨版本、跨系统和全新安装兼容性待验证；见下方记录 |
 | P1 | 建立真实数据最小样本集 | 没有固定市场、账户、持仓、订单和空状态样本时，验收难以重复 | 准备脱敏且可重复的市场、账户、持仓、挂单、成交、错误和空结果样本，记录来源、时间、网络和版本 | Agent 能稳定验证金额、精度、枚举、排序、分页和空状态 | 部分完成 | 已有 sample 和钱包/只读预检；协议持仓、挂单等样本仍待准备，见 A05/A08 |
 | P1 | 前端与本地 API 正式联调入口 | 当前 API sample 服务可运行，但前端尚未正式消费 Solana API | 沿用主项目统一数据流接入 API host、配置、parser、状态和组件 | Agent 能从本地 API 请求一路追到前端状态和组件 | 部分完成 | 当前工具明确不代表业务消费已实现；应随对应业务需求实施 |
 | P1 | 失败诊断手册和错误分类 | 工具能报告失败，但新 Agent 仍可能需要从长日志判断下一步 | 按 configuration、dependency、network、contract、source identity、test failure、external resource 分类，给出检查顺序 | Agent 能快速决定修代码、重跑、补资源或标记 blocked | 已完成 | 2026-10-27：[失败诊断](agent-failure-diagnosis.md)覆盖 12 类特征、顺序、入口及停止条件；5 个真实前置拒绝场景及 SDK 产物只读核验符合预期，已接入启动卡、执行入口和索引；见下方记录。未执行真实业务或远端失败演练 |
@@ -119,3 +119,26 @@
 原始结果保存在本机忽略目录 `.local/acceptance/agent-tools/environment/`：`acceptance.json` 为 6 个 CLI 场景和索引不变摘要，`current.json`/`node-only.json` 为环境观察，`tools.tap`、`artifacts.json`、`types.log`、`frontend-tests.log` 为回归结果。其他机器不保证存在这些文件；历史 ready 不证明当前 ready，清单不能作为 `agent:delivery-check` 的测试执行报告。
 
 本轮只改基础设施脚本、回归测试、package 命令和文档，没有修改业务源码、依赖版本、锁文件或 CI。真实 RPC/keeper/API、Docker daemon/镜像、钱包、程序版本和评审契约/样本仍需按需求单独核验；`environmentReadiness` 和 `requirementAcceptance` 固定为 not-evaluated。
+
+
+## 运行版本矩阵实施与验收记录（2026-10-27）
+
+本轮选择 P1 运行版本矩阵，跳过依赖外部部署、契约评审、真实账户或业务需求的事项。已完成的环境清单提供本机观察，本轮补齐这些版本的适用范围、来源和冲突处理顺序，不增加包装工具或修改业务代码。
+
+实施状态按“待开始 → 实施中 → 部分完成”更新。本轮明确范围是文档矩阵、声明核实和导航接入，现已完成验收；路线表整体仍为部分完成，因为配置统一与跨环境兼容性尚未证明。没有将一台机器的检查通过解释为所有 Node patch、Chrome 或 Docker 版本均受支持。
+
+验收条件：覆盖前端、SDK、API、Agent 工具、Yarn、Playwright/Chrome 和 Docker；逐项区分仓库声明、工具要求与本机观察并给出依据；明确 Node 20/22 及 API patch 差异、独立 checkout 前置和未验证范围；从启动卡、环境清单、执行入口和索引可发现；本地链接、命令及差异检查通过。
+
+完成[运行版本矩阵](agent-runtime-matrix.md)。核实根 `.nvmrc`/README 声明 Node 20，前端/SDK/API 个人入口明确要求 major=22；SDK engines 为 >=18.0.0，不据此推断其开发工具链支持范围；嵌套 API engines 为 22.x、`.nvmrc` 为 v22.23.4、README 为 22.17.0。本轮保留原配置，仅明确不同来源和后续处理顺序。前端/SDK 的独立目标版本匹配检查与 API 自身依赖也分别说明。
+
+| 验收项 | 本轮核验与结果 |
+| --- | --- |
+| 声明及实现依据 | 读取根/SDK/API package、锁文件存在性、各 `.nvmrc`/`.yarnrc.yml`，核对前端/SDK/API Node 检查、独立目录版本检查、Chrome channel/路径和 postgres:15 固定配置；passed |
+| 本机状态 | `node scripts/agent-environment.mjs` 退出 0，9 个本地项 ready、8 类外部资源 not-checked，前后输入身份一致；passed |
+| 版本观察 | Node 22.17.0、Yarn 4.12.0、Playwright 1.58.2、Docker CLI 29.8.2、WASM 0.9.0-test.2；关键包与声明一致，SDK 1090 个产物 verify 通过 |
+| 范围与导航 | 启动卡、环境清单、编码执行入口和索引均链接矩阵；矩阵保留独立 checkout、服务前置、历史证据及配置未统一边界；passed |
+| 文档与差异检查 | 6 份文档的 190 处本地链接/锚点、命令入口、空白和 `git diff --check` 通过；7 个入口 Node major 检查与矩阵描述一致 |
+
+本机证据在忽略目录 `.local/acceptance/agent-tools/runtime-matrix/`：`environment.json` 为本轮环境观察，`validation.json` 为声明/实现与文档检查摘要。报告不是可移交的业务测试证据，也不代表新安装、Node 20、API 指定 patch 或跨系统验收。
+
+本轮仅修改 6 份文档；未修改运行配置、package、锁文件、依赖、业务代码或 CI，未安装、构建、启动服务/浏览器/容器或访问真实资源。按纯文档规则未重复类型检查和业务测试。后续配置收敛应先明确候选运行时及受影响入口，再按实际需求验证，不在本轮扩展范围。

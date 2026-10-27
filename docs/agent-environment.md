@@ -2,6 +2,8 @@
 
 更新日期：2026-10-27。入口：`yarn agent:environment`，实现为 [scripts/agent-environment.mjs](../scripts/agent-environment.mjs)。用于任务开始前盘点当前基础设施 checkout 的本地条件，并列出尚需单独核验的服务和资源，减少重复查包、版本、浏览器与产物。
 
+版本选择、根 Node 20 与个人工具 Node 22 的差异、API 声明及独立 checkout 准备顺序见[运行版本矩阵](agent-runtime-matrix.md)。清单中的版本是本机观察，不是跨版本兼容范围。
+
 ## 使用与状态
 
 从个人基础设施 checkout 根目录执行，使用现有 Node 和锁定依赖：
