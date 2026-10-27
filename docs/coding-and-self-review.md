@@ -6,7 +6,7 @@
 
 失败原因尚未明确时，先按[Agent 失败诊断](agent-failure-diagnosis.md)从本次退出码、目标身份和失败阶段定位，再进入下方对应准备步骤；不为排障重复整套检查或修改业务预期。
 
-执行前先按[运行版本矩阵](agent-runtime-matrix.md)区分根 Node 20 声明、个人工具 Node 22 前置及 API patch 差异；进入目标目录后重新确认运行时，不自动修改配置或安装。
+执行前先按[运行版本矩阵](agent-runtime-matrix.md)区分根 Node 20 声明、个人工具 Node 22 前置及 API patch 差异；进入目标目录后重新确认运行时，不自动修改配置或安装。Node patch 变化也可能使 SDK 来源收据失效：核验绑定实际 Node 完整版本，源码测试通过不能绕过产物 verify；具体实测与范围见版本矩阵。
 
 本机依赖状态未知时，可先按[本地环境清单](agent-environment.md)选择 `yarn agent:environment --checks node,yarn,frontend` 等必要项。该入口不启动服务或读取秘密，只盘点基础设施 checkout；已有有效准备可复用，不额外重复所有检查，独立交付目录仍验证目标自己的依赖。
 
