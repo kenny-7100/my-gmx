@@ -14,7 +14,7 @@
 
 | 当前任务 | 首选命令与前置 | 读取结果与下一步 |
 | --- | --- | --- |
-| 纯文档修改 | 检查链接、锚点、命令和 `git diff --check` | 按[文档维护约定](documentation-maintenance.md)更新索引；无需类型、UI 或构建检查 |
+| 纯文档修改 | `yarn agent:docs-check --file docs/PATH.md` 检查本次相关文件的本地链接与锚点；另核对命令和 `git diff --check` | 按[文档维护约定](documentation-maintenance.md)更新索引；无需类型、UI 或构建检查 |
 | 前端局部测试，已知 suite | `yarn frontend:test-offline --project-dir /path/to/feature --suite src/lib/dates.spec.ts`；替换为当前任务的真实 suite | [前端入口](frontend-offline-tests.md)输出精确 suite、原生 Vitest 结果、网络审计和源码身份；默认范围只覆盖少量固定测试 |
 | SDK 局部测试或影响发现 | `yarn sdk:test-offline --sdk-dir /path/to/feature/sdk --discover-only --related src/utils/stats/api.ts`；路径相对目标 SDK | [SDK 入口](sdk-offline-tests.md)发现后检查真实依赖，再用 `--suite` 执行；SDK 变化同时考虑前端消费者 |
 | 前端/SDK 源码变化，需要规划两侧范围 | `yarn agent:test-plan --project-dir /path/to/feature --changed-since origin/release`；基线必须属于目标仓库 | [联合规划](agent-test-plan.md)读取两侧清单，适合离线时显式 `yarn agent:test-run --plan /path/to/plan/report.json --scope both`；源码、范围或工具变化后重新规划 |
