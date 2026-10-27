@@ -8,6 +8,8 @@
 
 | 文档 | 适用场景 |
 | --- | --- |
+| [Solana 独立集成实施任务表](../solana-implementation-tasks.md) | 后续 Agent 的实施入口：60 个任务、5 项已有或待复核基础，含优先级、本地状态、依赖、验收与全量 Linear 覆盖；不反写线上状态 |
+| [Solana 独立集成调研依据与架构边界](solana-implementation-research.md) | 2026-10-27 全量需求、PR/版本与源码核验；统一数据流、EVM 保护、API 最新进展及待确认的契约与资源 |
 | [Agent 本地运行版本矩阵](agent-runtime-matrix.md) | 区分仓库版本声明、Agent 工具前置和本机观察；解释 Node 20/22 及 API patch 差异，记录本机 22.17.0/22.22.0 离线测试、真实 Chrome 页面冒烟实测与产物收据边界，指导独立 checkout 的版本核对 |
 | [Agent 本地环境与依赖清单](agent-environment.md) | 支持实际前端/API 目标目录、关键依赖逐项问题、SDK 消费来源、SDK 产物/API 路由和本地数据库前置检查；兼容原本机清单，不将所选前置 ready 当业务就绪 |
 | [Agent 基础设施当前阶段与接手结论](agent-acceptance-infrastructure.md#当前阶段与接手结论2026-10-27) | 2026-10-27 能力与验证摘要、真实环境及业务验收边界；开发与局部验收已可用，建议下一阶段用真实需求检验，避免继续无目标扩展工具 |
