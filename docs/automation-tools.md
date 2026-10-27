@@ -1,5 +1,7 @@
 # 自动化工具沉淀约定
 
+本机条件未知时使用[本地环境清单](agent-environment.md) `yarn agent:environment` 或显式 `--checks`，复用 SDK/WASM、浏览器依赖核验，记录关键包版本、选定范围、时间及前后输入身份；外部服务和秘密资源始终 not-checked。回归 `yarn test:agent-environment` 自动纳入统一工具范围，不将本地 ready 当成业务验收通过。
+
 交付分支使用[隔离检查](linear-development-workflow.md#交付隔离自动检查) `yarn agent:delivery-check --head REF --allow-path FILE ...`：只读固定 release、开发基础及交付 SHA，检查祖先关系、混入的基础提交/等价补丁及清单外文件；不 fetch、切分支或转移补丁。回归 `yarn test:agent-delivery-check` 使用真实临时 Git 历史，工具通过仍需审查清单内的完整内容。 已完成离线测试时，使用 `--require-clean` 并显式选择 `--frontend-report` / `--sdk-report` / `--browser-report`，复核原生结果、目标目录、交付 commit 与当前源码/工具身份；三项可同时核对，检查不重新执行测试或启动服务。
 
 全栈联调优先复用 [Agent Solana 工作区](solana-dev-workspace.md)：`yarn solana:dev` 管理选定 API/Vite/RPC 及开发代理，`solana:dev:browser` 与 trace 查询关联真实请求，contracts 提供来源固定的未评审样例形状检查。借用服务不被 stop 清理，业务消费和 reviewed contract 缺口明确报告；仅属个人开发基础，不进入上游业务交付。

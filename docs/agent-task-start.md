@@ -8,6 +8,8 @@
 2. **明确目标身份。** 下表命令均从含个人工具的基础设施 checkout 根目录执行。将 `/path/to/feature`、`/path/to/api`、`/path/to/report.json` 等占位路径换为实际路径；目标各自具备锁定依赖。当前离线工具要求 Node 22，完整环境前置见[执行顺序](coding-and-self-review.md#执行前的环境检查与顺序)，此处不宣称所有子项目版本已统一。
 3. **先定义验收再选工具。** 按[验收映射](agent-acceptance-workflow.md)记录条件、预期、数据模式、目标版本和未覆盖项。涉及已有线上行为或真实数据时，先查[GMX 服务表](gmx-live-services.md)、[GMTrade 服务表](gmtrade-live-services.md)和页面实际请求，再验证本地或 PR 版本。Solana 开发还需按[参考仓库说明](solana-reference-repositories.md)核对 ADR、SDK 和协议版本。
 
+不清楚本机前置条件时，可先用[环境清单](agent-environment.md) `yarn agent:environment --checks node,yarn,frontend` 盘点所需项；它只检查基础设施 checkout，不替代目标目录自己的测试前置或真实服务预检，也不要求每个任务运行全部检查。
+
 ## 按任务选择入口
 
 | 当前任务 | 首选命令与前置 | 读取结果与下一步 |

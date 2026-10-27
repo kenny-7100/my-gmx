@@ -25,7 +25,7 @@
 | 优先级 | 工作项 | 要解决的问题 | 具体内容 | 完成标准 | 实施状态 | 实施备注 |
 | --- | --- | --- | --- | --- | --- | --- |
 | P0 | 一页式 Agent 任务启动卡 | 资料很多，新 Agent 需要在多个文档之间跳转，容易选错入口 | 按前端、SDK、API、页面验收、真实数据验收和交付分类，列出必读文档、命令、前置条件、报告和常见阻塞 | 新 Agent 只读启动卡即可知道下一步运行什么；复杂细节再跳转专题文档 | 已完成 | 2026-10-27：[启动卡](agent-task-start.md)已接入索引；16 个 CLI 帮助入口核对、10 个场景静态走查、链接/锚点和差异检查通过，见下方验收记录；未执行真实业务需求或远端环境验收 |
-| P0 | 当前环境与依赖状态清单 | Agent 不容易区分代码已具备、环境已具备和线上资源已具备 | 建立机器可读且可人工阅读的状态文件，记录 Node/Yarn、Docker、Chrome、RPC、keeper、API、钱包、SDK/WASM、程序版本、样本和最后核验时间 | Agent 能区分 `ready`、`blocked`、`stale`、`not-checked`，减少重复排查和误判 | 待开始 | 不记录密钥；本机状态与仓库共享事实必须分开 |
+| P0 | 当前环境与依赖状态清单 | Agent 不容易区分代码已具备、环境已具备和线上资源已具备 | 建立机器可读且可人工阅读的状态文件，记录 Node/Yarn、Docker、Chrome、RPC、keeper、API、钱包、SDK/WASM、程序版本、样本和最后核验时间 | Agent 能区分 `ready`、`blocked`、`stale`、`not-checked`，减少重复排查和误判 | 已完成 | 2026-10-27：[环境清单](agent-environment.md)提供 `yarn agent:environment`；9 个本地项 ready、8 类外部资源 not-checked；6 个 CLI 场景、116 项工具回归、类型检查和前端单测通过，见下方记录；不代表真实环境或业务就绪 |
 | P0 | 取得并固定真实 Solana API 部署身份 | 当前 A03 缺少实际 API 地址、版本和访问条件，无法做可靠远端验收 | 记录实际 API 地址、鉴权方式、部署 commit/image、数据模式、可用路由和核验时间 | Agent 能定位正确服务，并把请求结果绑定到明确部署版本 | 受阻 | 依赖 API 负责人提供实际部署入口和访问条件；不使用 sample 或猜测域名替代 |
 | P0 | 固化 reviewed API contract | 当前 sample 只能验证结构，不能证明单位、精度、枚举和空状态语义 | 为市场、持仓、订单、费用和错误响应建立 reviewed schema/契约，注明金额单位、精度、地址、时间、缺失字段、空数组和错误语义 | Agent 能据此实现 parser、状态映射和验收条件；结构检查能升级为契约检查 | 受阻 | 依赖 FESOL-61、FESOL-97、FESOL-100 等契约评审结果 |
 | P0 | 用一条真实需求完成全流程试运行 | 工具很多，但尚未证明新 Agent 能独立完成一次真实需求 | 走完 Linear → 代码 → 测试规划 → 本地/页面验收 → 工作表 → 证据包 → 独立交付检查 | 能记录 Agent 仍需用户补充的知识，并只修复真实暴露的问题 | 待真实需求验证 | 不预先为所有需求生成工作表；应选择依赖适中、范围明确的需求 |
@@ -92,3 +92,30 @@
 其余错误分类通过当前脚本字段、错误码及专题文档静态核对，没有实际制造网络故障、进程残留、业务断言失败或契约漂移；对应历史验收不刷新为本轮实测。此处 passed 表示诊断手册及本轮预期拒绝行为符合验收条件，不表示业务需求通过。
 
 本轮仅修改基础设施文档，未修改业务源码、测试、配置、依赖或 CI，未启动服务、浏览器、容器、构建、部署或读取钱包。最终文档检查通过：5 份改动文档中的 172 处本地链接/章节锚点有效，手册使用的 package script 存在，`git diff --check` 和新文件空白检查通过，完整修改范围仅为上述 5 份文档。检查结果保存在同目录 `document-check.json`；纯文档变更未运行类型检查或全量业务测试。
+
+
+## 环境清单实施与验收记录（2026-10-27）
+
+本轮选择 P0 当前环境与依赖状态清单：本地工具和依赖已有，不需要新增服务、凭据或业务接入。真实 API 部署、reviewed contract、钱包连接及交易闭环继续按原状态推进。状态按“待开始 → 实施中 → 已完成”更新；这里的完成指清单能力完成，不表示清单内所有资源已经 ready。
+
+验收条件：提供机器可读且可人工阅读的 JSON；保留范围、时间、目标身份、状态和下一步；区分 ready/blocked/stale/not-checked；选定本地项的通过不能代表未核验资源或业务通过；参数错误和检查失败明确退出；不启动服务、安装、联网或读取秘密；具备可复用测试和文档入口。
+
+完成 `yarn agent:environment`，默认盘点 Node/Yarn、前端/SDK/API 关键测试依赖、Chrome 可执行文件与 Playwright、Docker CLI、SDK 产物及本地 WASM。支持 `--checks` 按需选择，不强制每次任务执行全部检查。已接入文档索引、任务启动卡、编码执行入口和工具维护入口。具体检查边界和状态语义见[环境清单](agent-environment.md)。
+
+| 验收项 | 本轮实际结果 |
+| --- | --- |
+| 默认盘点 | 退出 0，9 个本地项 ready，8 类外部资源 not-checked；前后输入身份一致 |
+| 单项盘点 `--checks node` | 退出 0，仅 Node ready；其余本地及外部资源 not-checked |
+| 非法选择 | unknown、重复 node、空值、wallet 各退出 1，固定配置错误，无原始异常泄露；共 6 个 CLI 场景均符合预期 |
+| 状态和失败回归 | 新增 3 项表驱动测试，覆盖版本匹配/偏离、缺失/异常、blocked/stale、检查异常脱敏、输入变化、参数和退出码 |
+| 统一工具回归 | `yarn test:agent-tools`：116/116 通过，无跳过 |
+| SDK 产物前置 | `yarn sdk:artifacts verify`：通过，1090 个产物；未重新构建 |
+| 工程检查 | `yarn tscheck` 退出 0；`yarn test:ci` 退出 0，299 个测试文件通过、1 个跳过，3014 项测试通过、1 项跳过；该命令是本地既有测试入口，未建设 CI |
+| 格式和静态检查 | 新增脚本的 Prettier、ESLint 通过；6 份文档中 199 处本地链接/锚点、package 入口、空白及 `git diff --check` 通过，摘要见 `document-check.json` |
+| 只读边界 | CLI 演练前后主仓库和嵌套 API Git 索引摘要一致；未安装、启动服务/浏览器/容器、连接 daemon、读取钱包或访问远端服务 |
+
+本机实际观察：Node 22.17.0、Yarn 4.12.0、Playwright 1.58.2、Docker CLI 29.8.2、WASM 0.9.0-test.2。本地包与当前精确声明一致；这些是本次机器观察，不是支持版本矩阵，也没有调整 `.nvmrc` 或解决版本统一事项。
+
+原始结果保存在本机忽略目录 `.local/acceptance/agent-tools/environment/`：`acceptance.json` 为 6 个 CLI 场景和索引不变摘要，`current.json`/`node-only.json` 为环境观察，`tools.tap`、`artifacts.json`、`types.log`、`frontend-tests.log` 为回归结果。其他机器不保证存在这些文件；历史 ready 不证明当前 ready，清单不能作为 `agent:delivery-check` 的测试执行报告。
+
+本轮只改基础设施脚本、回归测试、package 命令和文档，没有修改业务源码、依赖版本、锁文件或 CI。真实 RPC/keeper/API、Docker daemon/镜像、钱包、程序版本和评审契约/样本仍需按需求单独核验；`environmentReadiness` 和 `requirementAcceptance` 固定为 not-evaluated。
