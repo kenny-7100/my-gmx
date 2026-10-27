@@ -1,6 +1,61 @@
-# 前端与 SDK 联合测试范围规划
+# 全栈测试范围规划与执行
 
-更新日期：2026-10-27。用于功能 checkout 中只有前端和 SDK 源码变化时，一次发现 SDK 自身测试及前端消费者，减少手工拆分范围导致的遗漏。属于个人开发基础，不复制到业务交付分支。
+更新日期：2026-10-27。支持前端、SDK 和独立 gmx-api checkout 的显式全栈计划；保留原前端/SDK 源码模式。属于个人开发基础，不复制到业务交付分支。用户确认的建设目标是让 Agent 承担全栈需求开发与验收；基础设施任务不修改业务源码、业务测试预期、数据库迁移或业务依赖。
+
+
+## 全栈目标配置
+
+从基础设施 checkout 调用已有入口：
+
+```sh
+yarn agent:test-plan --targets /path/to/targets.json
+yarn agent:test-run --plan /path/to/plan/report.json --scope all
+# Execute only explicitly selected scopes; other planned scopes remain not-run.
+yarn agent:test-run --plan /path/to/plan/report.json --scope api-offline,frontend
+```
+
+配置文件仅描述目标与选择，不包含可执行命令。相对目录以配置文件所在目录解析。每个仓库必须独立选择 `base` 或 `related`，两者互斥。示例中的目录、基线和测试须换成实际目标：
+
+```json
+{
+  "frontend": {
+    "directory": "/path/to/frontend",
+    "base": "origin/release"
+  },
+  "api": {
+    "directory": "/path/to/api",
+    "base": "origin/release",
+    "profiles": {
+      "offline": ["src/domain/pairs/solanaPairsRows.test.ts"],
+      "database": ["src/domain/pairs/solanaPairsService.test.ts"]
+    },
+    "requireRoutes": false
+  }
+}
+```
+
+也可将某个仓库的 `base` 替换为 `"related": ["src/path/to/source.ts"]`，明确发现这些源码的相关测试；这只覆盖显式源码，不声明覆盖该仓库全部 Git 变化。可以只提供 frontend 或 api；不提供的仓库不参与计划。
+
+API 必须根据测试真实依赖显式分配 profile，不能按文件名猜测。`profiles.offline` 调用原 API 离线运行器；`profiles.database` 调用原隔离 PostgreSQL 运行器。每个 suite 只能属于一个 profile，而且必须出现在本次 API 原生发现清单中。未分配的 suite 保留为 `uncovered / not-run`；需配置后重新规划。`requireRoutes=true` 对数据库 scope 启用原有路由来源检查；导入生成路由的 HTTP suite 应选择此模式。工具不自动生成路由、安装依赖、下载镜像或替换 SDK。
+
+### 变化与结果边界
+
+schemaVersion 2 的计划独立保存各仓库 Git 基线 SHA、HEAD、索引/工作区/未跟踪路径及变化内容摘要。可发现的前端/SDK 源码复用原 Vitest，API 源码复用原 Jest。配置、资源、迁移、删除、gitlink、非普通文件等不能自动发现的变化原样保留为 `uncovered`，不能因自动项通过而消失。配置/迁移等需另外明确验证方法，当前工具不执行任意补充命令。
+
+- 全部发现成功、所有 API suite 已分配且没有未处理路径：计划 passed / 退出 0。
+- 发现成功但有未处理路径或未分配 API suite：计划 partial / 退出 2。可显式执行已有自动 scope；运行结果仍保留缺口。
+- 发现失败、零匹配或执行中身份变化：failed / 退出 1；参数或准备错误为 blocked / 退出 2。
+- 没有变化且未显式选择源码，不能解释为验收通过。
+
+执行 scope 为 `sdk`、`frontend`、`api-offline`、`api-database`，逗号组合或 `all`；必须显式指定，旧 schema 1 仍使用 `sdk|frontend|both`。顺序执行既有运行器，数据库仅创建所属临时容器，不启动常驻 API、worker、RPC 或浏览器。普通测试失败仍收集后续独立 scope；源码、配置、Git 范围、原始发现清单或工具变化则停止后续执行。API setup/迁移指纹也参与过期检查。
+
+结果状态按 failed 优先、blocked 次之、未覆盖为 partial、全部所选通过且无缺口为 passed 汇总；未选 scope 明确记为 not-run。原生失败摘要保留 suite、测试名、有限错误文本、阶段及日志位置；它不是根因推断，敏感程度与原测试日志相同，归档前核对可分享性。不自动重试、裁剪 suite 或改写断言。
+
+结果保存在基础设施 `.local/acceptance/fullstack/`。汇总绑定计划及原始单侧报告、日志/原生结果/网络事件摘要；交付检查仍使用原始单侧报告，不能将计划或汇总当成业务通过证据。多仓库分别通过不证明页面/API/worker 业务链路或 SDK 发布消费兼容。
+
+### 本轮全栈验收
+
+当前实施结果及本机证据见本文末尾的“全栈基础设施验收记录”；历史 schema 1 结果保留原日期，不自动升级为 schema 2 实测。
 
 ## 使用方式
 
@@ -68,3 +123,24 @@ yarn agent:test-run --plan /path/to/test-plan/report.json --scope both
 按规划执行验收（2026-10-27）：独立 release 副本内，原 SDK Stats 7 项与原前端日期 5 项通过同一规划的 `both` 实际执行；传递依赖 fixture 两侧各 1 项，SDK/前端单选各 1 项均通过。规划中的命令数组替换为写文件载荷后，执行器仍只调用所选原生测试，载荷文件未创建。源码变化、暂存范围变化、旧工具摘要、失败规划、清单与原始发现不符、发现报告缺失均在执行前 blocked；SDK 断言失败而前端通过时整体 failed，未隐藏 SDK 失败。只有前端变化时 both 执行原日期 5 项，单选不适用的 SDK 被拒绝。真实汇总报告被两侧交付证据模式校验拒绝。
 
 成功单侧报告的源码、工具、网络与两类清理均通过；目标 HEAD/索引/源码恢复及副本清理已核对。验收脚本为测试暂存范围自行执行过 add/reset，最终索引比较基准在其操作结束后重新读取，不将这些主动 Git 操作误归因于执行器。证据为本机忽略目录 `.local/acceptance/frontend-offline/test-run-acceptance.json` 及所列原始报告。本轮工具回归 113 项、SDK 产物 verify、根类型检查、相关 ESLint/Prettier、157 个文档本地链接及差异检查通过；完整前端回归 299 文件 / 3,014 项通过，既有跳过 1 文件 / 1 项。工程日志为同目录 `test-run-{tools.tap,artifacts.log,types.log,tests.log}`。仅修改个人基础设施及文档，未改业务源码、原业务测试、生产配置或依赖版本，未构建或启动服务。
+
+
+## 全栈基础设施验收记录
+
+2026-10-27，本轮只修改个人基础设施工具、基础设施测试、忽略规则和协作文档。根 src、SDK 业务源码/原测试、gmx-api checkout、数据库迁移和业务依赖均未修改；无提交、推送、部署、钱包操作或真实服务数据验收。
+
+| 验收项 | 实际结果 |
+| --- | --- |
+| 最终四层执行 | SDK Stats 原测试 7 项、前端日期原测试 5 项、API pairs rows 离线原测试 5 项、API pairs service 数据库原测试 4 项通过，0 跳过；由同一 schema 2 计划显式 all 执行 |
+| 数据库生命周期 | 原 migrations/setup/teardown 实际运行；报告进程与容器清理均 passed，另行 inspect 确认本次容器不存在 |
+| 实际目标预检 | 当前目录与独立前端/API 目录的对应所选前置 ready；独立目录不含个人工具，显式核对 package/锁文件一致后复用本机已安装依赖。不是全新安装或跨机器环境证明 |
+| 独立 Git 选择与兼容性 | 两个临时仓库各自 HEAD 基线及未跟踪基础设施 fixture 正确发现；schema 1 前端规划/执行和 schema 2 公共执行入口均实际通过 |
+| 部分执行与未覆盖 | 单选前端保留 API 未执行；混合配置变化保留 uncovered，自动 scope 仍可执行但整体 partial；API 未分配 profile 为 partial，重复 profile 在执行前拒绝 |
+| 变化拒绝 | 新路径、同一路径内容变化、原始发现报告变化均在执行前拒绝；没有通过编辑摘要制造 passed |
+| 原生失败与继续执行 | 临时 API fixture 注入实际断言失败，API failed、整体 failed，后续独立前端仍 passed；摘要保留真实失败测试与日志。真实业务源码/原预期不改动 |
+| 证据交接 | 四 scope 的 18 个执行附件收集和归档通过；复制后的接收目录以包外摘要核对 matched。另对真实失败运行归档/独立目录复核，executionStatus 保持 failed；缺文件、篡改、符号链接和缺摘要拒绝由工具回归覆盖 |
+| 工程检查 | 最终 Agent 工具回归 129 项通过；SDK 产物只读 verify、根类型检查通过；完整前端 299 文件/3014 项通过，既有跳过 1 文件/1 项；改动脚本 ESLint/Prettier 及文档链接、差异检查通过 |
+
+本机原始记录在忽略目录 `.local/acceptance/fullstack/acceptance/`：`environment-final.json`、`run-final.json`、`pack-final.json`、`receive-final.json`、`isolated-observations-final.json`、`isolated-final.log`、`tools-final.tap`、`types.log`、`frontend-tests.log` 及各汇总引用的原生报告。临时目标已删除；原始路径用于追溯，不宣称其他机器可读取。最终四层包的 manifestSha256 为 `ca372a9c7678094758a03af0a3cafde24296eff4b28ff3e86eb9b5c9b166f324`；仅同机复制接收，尚未向外部渠道移交。前端全量日志仍有既有 happy-dom teardown AbortError，原生汇总通过且最终退出 0，未修改业务测试压制日志。
+
+本轮证明前端/SDK/API 测试可以统一规划、分层执行和交接；未覆盖真实页面消费 API、worker/索引全链路、评审业务契约、全新安装、跨机器重建、构建与部署、钱包或交易。工具通过不代表任意需求已完整验收。
