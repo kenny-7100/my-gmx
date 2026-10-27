@@ -132,6 +132,52 @@ verify 重新读取每个附件、比较字节数/摘要，并拒绝遗漏、改
 
 2026-10-27 联合演练已通过：前端 17、SDK 153、API 12 项；13 个附件及三条件基础设施输入工作表独立复制/校验、包内结果复核、缺失/篡改/错误摘要拒绝均符合预期。见[本轮记录](solana-agent-friendliness-history.md#三类离线证据联合交接验收记录2026-10-27)。这是同机目录隔离演练，未执行业务需求或真实跨机器交付。
 
+## 浏览器原生结果交接
+
+用于已实际执行过 `solana:browser-check`、需要其他 Agent 离开原运行目录复核页面结果的任务。管理报告 `scope=solana-managed-browser-smoke` 和 Playwright 原生 JSON 不在 report 白名单，均作为显式附件；预检报告 `solana-browser-prerequisites` 可作为 report，但只证明准备状态，不证明页面通过。不为打包额外重跑浏览器。
+
+### 浏览器材料选择
+
+从本次管理报告读取路径，逐文件记录原路径与包内文件名对应：
+
+| 材料 | 打包方式 | 接收侧用途 |
+| --- | --- | --- |
+| `preflightFile` | `--report browser-preflight=PATH` | 核对依赖、SDK、本次 Node 和测试发现；`browserExecution=not-run` 不能算页面通过 |
+| 管理报告本身 | `--artifact browser-managed=PATH` | 核对目标、观察时间、工具/源码身份、退出码、逐项统计与服务清理 |
+| `resultsFile` | `--artifact browser-native=PATH` | 递归读取原生 suites/specs/tests/results，复核每项实际断言与附件 |
+| `logFile` | `--artifact browser-log=PATH` | 保留 Vite/Playwright 原始诊断；不从日志中的 passed 字样推断结论 |
+| 执行身份与对应清单 | 按任务实际已有的 JSON/TXT 使用 `--artifact` | 记录实际 Node 路径/版本、命令、退出码、Chrome 版本来源，以及原路径到包内文件的对应；缺失身份信息如实注明，不由接收机器当前版本反推 |
+| 路径型附件 | 截图/trace 等逐文件 `--artifact`，对应关系写入清单 | 原生 `attachments[].path` 指向的文件不会因归档 JSON 自动携带；必须明确所需材料是否完整 |
+
+从基础设施仓库根目录运行，以下为单轮命令模板，替换为实际文件、需求编号和新输出目录；多轮用不同 name 重复参数，仍遵守最多 20 个附件与大小限制：
+
+```sh
+yarn agent:evidence pack --issue FESOL-123 \
+  --report browser-preflight=/path/to/run/preflight.json \
+  --artifact browser-managed=/path/to/run/report.json \
+  --artifact browser-native=/path/to/run/playwright-results.json \
+  --artifact browser-log=/path/to/run/playwright.log \
+  --artifact handoff=/path/to/handoff.json \
+  --out .local/acceptance/evidence/fesol-123-browser-SHA-TIME
+# Record manifestSha256 outside the package before transferring the complete directory.
+yarn agent:evidence verify --dir /path/to/received-package \
+  --expected-manifest-sha256 EXPECTED_SHA256
+```
+
+若任务需要绑定工作表，继续加上唯一对应的 `--worksheet` 与工作表一致性报告；本例没有工作表，不能作为需求条件覆盖证明。对应清单沿用任务自己的 JSON 或交接表，不新增统一 schema；应使接收者从“运行记录 + 报告字段”定位唯一包内文件，并列出未包含材料及原因。不得手改原报告的 scope、状态、路径或时间来适配打包器。
+
+原生附件若使用 `body`（Base64），其字节已内嵌 JSON，接收时解码读取；若使用 `path`，必须显式带上对应文件并依清单定位，不打开原绝对路径或自动恢复到其位置。失败截图和 trace 未齐全时明确标记交接缺口，不把包完整等同于诊断齐全。HTML viewer 不属于上述 JSON 机器复核的必需材料，且 `.html` 不在附件扩展名白名单；需要移交完整 HTML 报告时，另按原目录结构准备包外材料，或将显式选定的完整材料归为 ZIP 附件并单独记录其内容清单；ZIP 完整性不证明内部引用齐全。不得把 HTML 改扩展名绕过限制。
+
+### 浏览器接收复核顺序
+
+1. 从包外可信记录取得预期摘要，先 verify 并确认 `manifestIdentity=matched`；再按文件对应清单只读包内材料。管理报告中的绝对路径只标识原执行位置，不当作本机读取路径，也不执行其记录的命令。
+2. 核对原执行 Node/命令/退出码、目标目录、commit/dirty、数据模式与时间；区分预检、管理报告及原生结果。管理报告中的 `sourceBefore/sourceAfter`、`targetBefore/targetAfter` 应一致，原生 `config.metadata` 应对应管理报告 checkout。此步骤复核历史执行身份，不重新证明接收方当前源码或服务状态。
+3. 对现有两项本地网络选择冒烟，按[浏览器管理入口判定](solana-browser-smoke.md#一条命令执行并保存独立报告)检查：恰有两项 `network.spec.ts` 实际通过、每项一次结果且 retry=0，无 skipped/flaky/unexpected、runner errors 或非零退出；预检发现两项不能替代执行。入口或用例将来变化时重新核对条件，不把本次计数当通用浏览器标准。
+4. 查看包内状态和诊断附件，核对关闭开关不加载 SDK/WASM、开启/刷新/切回及 EVM/结算 ID 断言。未处理 JS 错误与失败请求分别读取；请求失败或刷新中断原样保留，不因页面 passed 推断外部依赖全部正常。核对 `serviceCleanup=port-released`，仅代表原执行时的清理记录，不证明接收机器端口当前可用。
+5. 记录包完整性、原生用例结论、缺失附件、未覆盖业务和实际移交范围。dirty 测试结果不作为干净交付证据；正式交付仍按[浏览器证据绑定](linear-development-workflow.md#浏览器测试证据绑定)复核目标。未实际跨机器传递时只写同机目录隔离演练。
+
+2026-10-27 已用两个 Node patch 的真实浏览器结果完成本机演练：2 份预检报告、10 个显式附件，独立接收后两轮各 2 项通过、身份/附件/诊断/清理复核符合原始结果；缺失、篡改及错误预期摘要均拒绝。未重跑页面、未上传或执行跨机器交付，详见[历史记录](solana-agent-friendliness-history.md#浏览器证据交接实施与验收记录2026-10-27)。
+
 ## 接受的输入与清单
 
 当前接受已有工具产生且带 status、scope 和 checkedAt（或 finishedAt）的 JSON：
