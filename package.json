@@ -29,6 +29,8 @@
     "test:solana-alt-preflight": "tsx --test scripts/solana-alt-preflight.test.mjs",
     "solana:runtime-preflight": "tsx scripts/solana-runtime-preflight.mjs",
     "test:solana-runtime-preflight": "tsx --test scripts/solana-runtime-preflight.test.mjs",
+    "agent:environment": "node scripts/agent-environment.mjs",
+    "test:agent-environment": "node --test scripts/agent-environment.test.mjs",
     "agent:preflight": "node scripts/agent-preflight.mjs",
     "test:agent-preflight": "node --test scripts/agent-preflight.test.mjs",
     "test:solana-dev": "node --test scripts/solana-dev-tools.test.mjs",
