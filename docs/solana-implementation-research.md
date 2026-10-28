@@ -1786,3 +1786,27 @@ T17.b1首个子集现已编译并完成离线独立数值验收，**T17父项及
 收尾实际通过：三个JSON/脚本文件的Prettier、verify.mjs零warning ESLint、Rust fmt check、`git diff --check`；`yarn agent:docs-check --file docs/solana-trade-math-reference.md --file docs/README.md --file docs/solana-implementation-research.md --file solana-implementation-tasks.md --file tools/solana-trade-math-vectors/README.md` 检查194个本地链接、diagnostics为空。仅上述9个工具/文档文件变化，gmx-solana/gmx-prompts工作区无改动。
 
 收尾检查：六份相关文档 `yarn agent:docs-check` 实际检查226个本地链接、0诊断；`git diff --check`、脚本零warning lint、Prettier及Rust fmt均退出0。数学工具链的可复用检查顺序已写入运行版本矩阵；本轮没有变更Node、根Yarn依赖或SDK来源收据。
+
+## 第五十二轮实施记录：T17.b2b 即时impact增仓与限价边界（2026-10-28）
+
+沿用 `solana-independent-implementation`，初始实施基线 `5637a48912114f86df57bb409c1121d60a086070` 不变。本轮开头按用户push执行 `git add . && git commit -m 'Validate model-initialized Solana liquidation boundaries' && git push my-gmx HEAD`，前轮9文件成功提交并推送至个人my-gmx，当前HEAD `bd1108102005b89f0da6ac8145fe2990208cfb5a`。本轮新增实现与文档仍为未提交工作区改动，不包含在该次push中；没有自动同步上游、创建PR或Linear写入。
+
+恢复根AGENTS、任务表、最近交接、数学主题、参考仓库入口、项目交付/只读需求skill和gmx-prompts dev/Solana/tests/review后，接续上一轮明确的b2b。FESOL-57于 `2026-10-28T02:12:24.518Z` 实时抓取，Execution、updatedAt仍2026-10-25T23:43:47.128Z，无GMTrade标签，正文/关系及唯一评论未变化。限定open gmx-interface PR标题/分支搜索57/math/liquidat无命中，仅代表该搜索范围；tag v0.10.0仍指向 `7ce035b41a266cb5ddb0192e5d29deb0c7e67a72`。实际编译使用Cargo锁定的7ce035b checkout，没有使用本地参考repo不同的HEAD f102501，也未修改参考仓库或锁文件。取证保存在 `.local/acceptance/requirements/solana-implementation-t17b2b/` 的fesol-57.json、pr-overlap.json和tag.json。
+
+扩展同一Rust生成器的 `increase_impact` 操作及独立BigInt验收器，新增32组真实model deposit/seed increase/target increase场景：long/short、两种抵押，正冲击未限额、pool不足/为空/刚好足够、配置正上限、负冲击、零冲击和OI跨边。每组保留基线report与成交价上下各一单位及相等值，共96个限价探针；long为拒绝/通过/通过，short为通过/通过/拒绝，共32个预期模型拒绝。原71组输入/输出逐项不变，总103组。完整单位、舍入和配置边界统一维护在[数学主题](solana-trade-math-reference.md#t17b2b-即时impact增仓与限价边界子集2026-10-28)。
+
+seed通过真实动作建立OI及token size，之后impact pool通过model delta设置为输入显式快照；这只验证数学cap，不证明链上pool转入/分发。每个基线和限价trial从同一market克隆、使用全新target position，避免失败模型动作的部分状态污染下一次试验。正impact按index max截断token，负impact幅度按index min向上取整；long基础tokens向下、short向上，再即时合并signed impact，限价比较使用最终size/tokens整数成交价。配置negative cap不在increase入口误套；独立断言确认相关场景确实超过该cap。基线acceptable=None仅用于离线诊断，不能作为生产市价单省略限价的依据。指数固定为1，无时间推进，未累计borrowing/funding。
+
+实际验收命令（根目录，Cargo及verify进程PATH前置 `/Users/kenny/.cargo/bin`）：
+
+- `cargo +1.90.0 check --locked --offline --manifest-path tools/solana-trade-math-vectors/Cargo.toml` 与 `cargo +1.90.0 fmt --manifest-path tools/solana-trade-math-vectors/Cargo.toml --check`：通过。首轮缺少Balance trait导入，修正实际trait后通过，未调整依赖。
+- 两次 `cargo +1.90.0 run --locked --offline --manifest-path tools/solana-trade-math-vectors/Cargo.toml -- tools/solana-trade-math-vectors/inputs.json` 输出first.json/second.json，最终字节一致。输入先格式化再生成；首次比较因两次之间格式化改变input摘要而失败，业务case相同，固定输入后重跑，没有放宽摘要或比较条件。验证后才原子替换vectors.json，SHA-256 `4a3fb1d49ade1bb048a2f18feb70f9114b6bb4e072747a1d95cd1bbe538980d0`。
+- `node tools/solana-trade-math-vectors/verify.mjs .local/acceptance/requirements/solana-implementation-t17b2b/first.json .local/acceptance/requirements/solana-implementation-t17b2b/second.json`：103组独立核算通过（15fee、8positive cap、20PnL、28liquidation、32increase）；84个清算点、96个限价点、36类非法输入/setup整次拒绝且stdout为空、model/probe error区别于零/false、来源与重复一致性全部passed，临时目录cleanup passed。报告verification.json。
+- `yarn sdk:test-offline --suite src/utils/__tests__/fees.spec.ts --suite src/utils/__tests__/positions.spec.ts`：2文件55项passed、0failed/skip；network installations=2、blockedAttempts=0，sourceUnchanged/toolingUnchanged=true，进程/临时目录cleanup passed。日志evm-sdk.log，原生 `.local/acceptance/sdk-offline/run-P7MSTY/vitest-results.json`。未借用旧CI作为本轮回归。
+- `yarn exec eslint tools/solana-trade-math-vectors/verify.mjs --max-warnings 0`：零warning；inputs.json及verify.mjs的 `yarn exec prettier --check` 通过。额外将生成的vectors.json送Prettier检查时出现布局warning；接受文件保留Rust原生序列化与上述字节摘要，不把该项记为格式通过，也不改写已经核算的参考产物。
+
+自审重点为动作顺序、每处除法与单位、显式参数/精度限制、限价相邻值、pool/config cap、失败trial隔离及错误/零边界。没有修改生产SDK/src/API/UI、共享状态、缓存或存储，没有旧服务/EVM RPC或新的业务真源；生成器不进入应用依赖，生产lazy loading和flag-off代码未改。EVM55项通过仅覆盖相应数学基线；根类型、完整前端、最终bundle、真实页面/钱包及交易未运行，现有服务/用户Chrome未操作。未调用签名、模拟或广播。本轮解除的仅是b2b限定数学验收，T17/FESOL-57及整个集成仍未完成，页面仍占位。
+
+下一轮优先 **T17.b2c 非零impact下清算/保证金predicate**，核对正impact忽略、负impact liquidation cap和minima，再补累计费用、减仓及剩余矩阵。T19仍待完整向量与T04.b reviewed字段；T24.b2接手点保留，T04.b评审/真实账户、T10 revision、T23可控nonce、T25资源/交易授权及T28真实变体/部署身份等前置不变。Rust1.90.0及本生成器必要编译已有授权，通用环境入口已修正过期工具链状态，并记录先格式化输入再重复生成的检查顺序。
+
+收尾：六份文档 `yarn agent:docs-check --file docs/solana-trade-math-reference.md --file docs/coding-and-self-review.md --file docs/README.md --file docs/solana-implementation-research.md --file solana-implementation-tasks.md --file tools/solana-trade-math-vectors/README.md` 检查266个本地链接、0诊断；首次发现通用入口的Rust旧锚点失效，改为现有安装验收标题后通过。`git diff --check` 通过，最终仅10个工具/文档文件变化，无生产源码、Cargo.lock或参考仓库改动。本轮参考产物保留原生格式，Prettier生成物warning已如实记录。

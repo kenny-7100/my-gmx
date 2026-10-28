@@ -14,7 +14,7 @@
 
 需要同时运行前端/API/RPC 时，按[全栈工作区说明](solana-dev-workspace.md)使用 `yarn solana:dev up/status/logs/stop`，核对所选服务及 borrowed/owned 归属。新启动持续工作区前，先按[组合预检](solana-dev-workspace.md#启动前的组合预检)用相同目录/服务/端口运行 `yarn solana:dev doctor`，一次处理依赖、Chrome 和占用缺项；已运行工作区的健康用 status，不为 doctor 自动停服。一次性 `solana:dev:check` 已内置同一预检，无需重复。持续调试独立前端 checkout 时，按同一说明显式传 `--project-dir PATH`，为目标选择空闲 Vite 端口；同时联调 API 功能分支时，up 显式加 `--api-dir PATH --api-port PORT`，先按同一说明确认 API 自身前置和服务启动授权，核对路径及 PID。status/logs/stop 和浏览器诊断也传同一前端目录，核对报告的目标身份，不误用基础设施目录的既有工作区。浏览器请求问题使用 `solana:dev:browser` 和 `solana:dev trace --id`；contracts 的 partial 不当作完整通过。当前前端未消费开发代理路径，不为环境验收补业务接入。仅需 API 时仍使用下文的独立 API 入口。
 
-涉及T17独立Rust参考值时，先按[交易数学的Rust前置](solana-trade-math-reference.md#rust前置及后续验收)核对 `rustc/cargo/rustfmt`、固定协议commit及Cargo.lock；当前常见位置未找到工具链，未提供前不编译、不自行安装。源码/输入静态核验不代替Rust生成或数值一致性，工具链和构建授权明确后再执行限定generator命令。
+涉及T17独立Rust参考值时，先按[交易数学的Rust前置](solana-trade-math-reference.md#rust安装与首个子集验收2026-10-28)核对 `rustc/cargo/rustfmt`、固定协议commit及Cargo.lock。本机已按用户授权安装Rust1.90.0于 `/Users/kenny/.cargo/bin`，未改shell启动文件；命令显式选择 `+1.90.0`，必要时仅为进程前置Cargo bin。该生成器的必要编译/运行已授权，使用 `--locked --offline`，不重复索取同一授权、不例行重生成锁文件；其他机器仍先核对，缺工具链时不自行安装。先完成输入格式化，再连续生成两份输出；来源摘要变化会使字节比较失败，即使业务结果相同也应固定输入重跑，不删摘要或放宽比较。源码/输入静态核验不代替Rust生成或数值一致性，授权不扩展到其他构建或交易。
 
 本节用于安排当前任务已获授权的检查，不要求每次任务运行所有命令。用户已长期授权本地 Vite、Chrome 及已授权任务所需的本地页面验收；构建（含 SDK 构建）、其他服务及部署仍须遵循根 `AGENTS.md` 的授权边界；用户仅要求 `push` 时直接执行推送流程，不插入本节检查。纯文档修改只检查文档路径、链接及差异。
 

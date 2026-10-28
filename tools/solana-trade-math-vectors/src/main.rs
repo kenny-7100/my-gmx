@@ -11,9 +11,9 @@ use gmsol_model::{
     pool::delta::BalanceChange,
     price::{Price, Prices},
     test::{TestMarket, TestMarketConfig, TestPosition},
-    BaseMarketExt, BaseMarketMut, LiquidityMarketMutExt, MarketAction, PerpMarketExt,
-    PerpMarketMut, Pool, PositionExt, PositionImpactMarketMutExt, PositionMutExt, PositionState,
-    PositionStateMut,
+    Balance, BaseMarketExt, BaseMarketMut, LiquidityMarketMutExt, MarketAction, PerpMarketExt,
+    PerpMarketMut, Pool, PositionExt, PositionImpactMarketExt, PositionImpactMarketMutExt,
+    PositionMutExt, PositionState, PositionStateMut,
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -40,6 +40,9 @@ struct Case {
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 enum Input {
+    IncreaseImpact {
+        scenario: IncreaseInput,
+    },
     LiquidationCheck {
         scenario: LiquidationInput,
     },
@@ -135,6 +138,167 @@ struct LiquidationInput {
     liquidation_collateral_factor: Option<String>,
     order_fee_factor: String,
     liquidation_fee_factor: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct IncreaseInput {
+    is_long: bool,
+    is_long_collateral: bool,
+    index_decimals: u8,
+    long_decimals: u8,
+    short_decimals: u8,
+    prices: PricesInput,
+    deposit_long_amount: String,
+    deposit_short_amount: String,
+    seed_is_long: bool,
+    seed_size_usd20: String,
+    seed_collateral_amount: String,
+    impact_pool_amount: String,
+    positive_impact_factor: String,
+    negative_impact_factor: String,
+    max_positive_factor: String,
+    max_negative_factor: String,
+    collateral_amount: String,
+    size_usd20: String,
+    acceptable_prices: Vec<String>,
+}
+
+fn increase_impact(input: &IncreaseInput) -> Result<Value> {
+    for value in [
+        input.index_decimals,
+        input.long_decimals,
+        input.short_decimals,
+    ] {
+        decimals(value)?;
+    }
+    let prices = input.prices.parse()?;
+    let size = uint(&input.size_usd20)?;
+    let signed_size = i128::try_from(size)?;
+    if size == 0 || input.acceptable_prices.is_empty() {
+        return Err("Expected nonzero size and nonempty acceptable prices".into());
+    }
+    let acceptable_prices = input
+        .acceptable_prices
+        .iter()
+        .map(|v| {
+            let value = uint(v)?;
+            if value == 0 {
+                return Err("Expected nonzero acceptable price".into());
+            }
+            Ok(value)
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let mut config = TestMarketConfig::<u128, 20>::default();
+    config.position_params = PositionParams::new(
+        UNIT,
+        UNIT,
+        UNIT / 10,
+        factor(&input.max_positive_factor)?,
+        factor(&input.max_negative_factor)?,
+        UNIT / 100,
+    );
+    config.position_impact_params = PriceImpactParams::builder()
+        .exponent(UNIT)
+        .positive_factor(factor(&input.positive_impact_factor)?)
+        .negative_factor(factor(&input.negative_impact_factor)?)
+        .build();
+    config.swap_impact_params = PriceImpactParams::builder()
+        .exponent(UNIT)
+        .positive_factor(0)
+        .negative_factor(0)
+        .build();
+    let no_fee = FeeParams::builder()
+        .fee_receiver_factor(0)
+        .positive_impact_fee_factor(0)
+        .negative_impact_fee_factor(0)
+        .build();
+    config.order_fee_params = no_fee;
+    config.swap_fee_params = no_fee;
+    let mut market = TestMarket::<u128, 20>::with_config(config);
+    market
+        .deposit(
+            uint(&input.deposit_long_amount)?,
+            uint(&input.deposit_short_amount)?,
+            prices,
+        )?
+        .execute()?;
+    // Seed OI through a real model action. The seed is a separate position using short collateral.
+    let mut seed = if input.seed_is_long {
+        TestPosition::long(false)
+    } else {
+        TestPosition::short(false)
+    };
+    let seed_report = seed
+        .ops(&mut market)
+        .increase(
+            prices,
+            uint(&input.seed_collateral_amount)?,
+            uint(&input.seed_size_usd20)?,
+            None,
+        )?
+        .execute()?;
+    let seed_execution = json!({
+        "impact_usd20": seed_report.execution().price_impact_value().to_string(),
+        "size_tokens": seed_report.execution().size_delta_in_tokens().to_string(),
+        "execution_price": seed_report.execution().execution_price().to_string()
+    });
+    // Explicit mathematical pool snapshot, not a simulated funding transfer or distribution.
+    let pool = uint(&input.impact_pool_amount)?;
+    let previous_pool = market.position_impact_pool_amount()?;
+    market.apply_delta_to_position_impact_pool(
+        &(i128::try_from(pool)? - i128::try_from(previous_pool)?),
+    )?;
+    let initial = json!({
+        "long_oi_usd20": market.open_interest()?.long_amount()?.to_string(),
+        "short_oi_usd20": market.open_interest()?.short_amount()?.to_string(),
+        "impact_pool_amount": pool.to_string(), "seed_execution": seed_execution
+    });
+    let fresh_position = || {
+        if input.is_long {
+            TestPosition::long(input.is_long_collateral)
+        } else {
+            TestPosition::short(input.is_long_collateral)
+        }
+    };
+    let mut position = fresh_position();
+    let ops = position.ops(&mut market);
+    let raw = ops.position_price_impact(&signed_size, true)?.value;
+    let capped = ops
+        .capped_positive_position_price_impact(&prices.index_token_price, &signed_size, true)?
+        .value;
+    let collateral = uint(&input.collateral_amount)?;
+    let mut outcomes = Vec::new();
+    // Every attempt gets the same fresh state; model actions are not transactional on failure.
+    for acceptable in std::iter::once(None).chain(acceptable_prices.into_iter().map(Some)) {
+        let mut trial_market = market.clone();
+        let mut trial_position = fresh_position();
+        let mut trial_ops = trial_position.ops(&mut trial_market);
+        let result = trial_ops
+            .increase(prices, collateral, size, acceptable)?
+            .execute();
+        outcomes.push(match result {
+            Ok(report) => {
+                let execution = report.execution();
+                json!({
+                    "status": "ok", "impact_usd20": execution.price_impact_value().to_string(),
+                    "impact_amount": execution.price_impact_amount().to_string(),
+                    "size_tokens": trial_ops.size_in_tokens().to_string(),
+                    "size_usd20": trial_ops.size_in_usd().to_string(),
+                    "collateral_amount": trial_ops.collateral_amount().to_string(),
+                    "cost_amount": report.fees().total_cost_amount()?.to_string(),
+                    "execution_price": execution.execution_price().to_string(),
+                    "claimable_funding_amounts": [report.claimable_funding_amounts().0.to_string(), report.claimable_funding_amounts().1.to_string()],
+                    "impact_pool_amount": trial_market.position_impact_pool_amount()?.to_string()
+                })
+            },
+            Err(error) => model_error(error)
+        });
+    }
+    let baseline = outcomes.remove(0);
+    Ok(
+        json!({"status": "ok", "initial": initial, "uncapped_impact_usd20": raw.to_string(), "capped_impact_usd20": capped.to_string(), "baseline": baseline, "acceptable_price_probes": outcomes}),
+    )
 }
 
 fn liquidation_check(input: &LiquidationInput) -> Result<Value> {
@@ -316,6 +480,7 @@ fn model_error(error: gmsol_model::Error) -> Value {
 
 fn evaluate(input: &Input) -> Result<Value> {
     match input {
+        Input::IncreaseImpact { scenario } => increase_impact(scenario),
         Input::LiquidationCheck { scenario } => liquidation_check(scenario),
         Input::Fee {
             amount,
@@ -495,7 +660,7 @@ fn main() -> Result<()> {
             "rustc": String::from_utf8(rustc.stdout)?.trim()
         },
         "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
-        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)"],
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)"],
         "cases": cases
     });
     // Buffer all cases before writing stdout; callers must still publish output atomically.

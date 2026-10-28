@@ -1,6 +1,6 @@
 # Solana 交易数学差异与独立参考向量
 
-核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a 差异核实、b1首个子集及b2a动作初始化清算边界子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和71组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
+核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a 差异核实、b1首个子集、b2a清算及b2b即时impact增仓边界子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和103组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
 
 ## 固定版本与证据范围
 
@@ -92,3 +92,17 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 复现仍用工具README的两次 `cargo +1.90.0 run --locked --offline` 和 `verify.mjs FIRST SECOND`；rustfmt、脚本lint/Prettier及已有EVM fees/positions两文件55项/0skip通过，network拒绝次数0、source/tooling不变、cleanup passed。完整命令及原生证据见[第五十一轮记录](solana-implementation-research.md#第五十一轮实施记录t17b2a-动作初始化清算边界子集2026-10-28)。只修改工具及文档，无生产SDK/React/StateCtx/API、依赖锁或flag变化；根类型/最终bundle、真实页面/钱包/交易未验。
 
 下一步T17.b2b：先补非零position impact下increase report与acceptable-price相邻边界，再补非零impact清算、累计borrowing/funding、盈利状态、min-position/decrease限制及其余矩阵。当前向量不是一般清算价求解器；T17/FESOL-57仍实施中，T19及生产页面消费未实施。
+
+## T17.b2b 即时impact增仓与限价边界子集（2026-10-28）
+
+接续b2a，新增32组 `increase_impact`，每组先真实deposit及独立seed position increase建立OI，再通过model pool delta明确设置输入的impact pool快照。快照用于构造空池/不足/刚好足够等数学边界，不是链上转入或pool分发验收；seed action自身的impact、tokens及execution price保留。每个目标baseline和限价probe都克隆同一初始market并使用新position，避免失败动作的部分状态污染后续尝试。baseline的acceptable=None仅用于离线获取report，生产市价单仍必须显式限价。
+
+矩阵为long/short × long/short collateral × 8种情况：正impact未封顶、池不足、空池、最小可表示足够池量、配置正cap、负impact、零impact及OI跨边。每组JSON输入提供独立推导的成交价减一、相等、加一，共96个限价probe；long相等/较高通过，较低拒绝，short相等/较低通过，较高拒绝。32个预期拒绝保留为模型error，不计为工具失败，也不当作执行成功。
+
+本子集impact exponent=1；raw impact按初始/下一OI分别定点计算后相减，跨边使用正/负两项，不能把差额先相减再乘而改变舍入。模型raw正factor取positive/negative较小值，与max-positive配置cap是不同参数；后者直接使用，不能再与max-negative取小值。cap仅对正impact生效；负impact增仓在本入口保持raw值。正impact token按index max截断，负impact绝对值按index min向上取整；long基础tokens按max截断，short按min向上取整，随后立即加/减signed impact token，最后执行价为size/tokens整除。配置正cap场景为0.5%、max-negative为0.1%、raw正impact约2%，实际按0.5%封顶。负场景约-3%，未套用该0.1%上限。seed/target的size USD20和index spread有余数，独立核算覆盖这些舍入顺序。
+
+输入显式给价格、流动性、seed/target size与抵押、impact factors、两个cap与pool数量。订单/swap费与swap impact为0，不执行时间推进或funding/borrowing更新；minimum position/collateral为1 USD、普通margin factor10%、liquidation impact cap1%，其余reserve/OI/PnL限额及模型精度调整使用固定tag测试defaults。成功report保留raw/capped impact、token impact、size、collateral、cost、execution、funding输出及pool剩余，确认即时impact进入实际仓位结果。没有pending/lent impact。非线性指数、virtual inventory及非零impact清算尚未验。
+
+参考集累计103组；之前71组case输入/输出完全不变。固定输入格式后两次Rust输出字节一致，SHA-256 `4a3fb1d49ade1bb048a2f18feb70f9114b6bb4e072747a1d95cd1bbe538980d0`。独立BigInt核对全部结果及96个限价点，36种非法输入/无效setup整次拒绝且stdout为空，原有model/probe错误区分通过。Rust fmt/check、脚本lint/格式及EVM fees/positions两文件55项/0skip/0联网通过。完整命令与原生证据见[第五十二轮记录](solana-implementation-research.md#第五十二轮实施记录t17b2b-即时impact增仓与限价边界2026-10-28)。
+
+下一轮T17.b2c：复用动作初始化，补非零impact下的清算/保证金predicate，验证关闭时正impact忽略、负impact按liquidation cap及minima处理；之后补累计borrowing/funding、decrease/限额等余下矩阵。T17/FESOL-57仍实施中，T19仍需完整参考矩阵及T04.b reviewed字段；本轮没有生产数学或页面接线，不代表前端交易可用。

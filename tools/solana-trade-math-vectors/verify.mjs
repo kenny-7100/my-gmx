@@ -28,13 +28,102 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 71);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 71);
+assert.equal(reference.cases.length, 103);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 103);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
 const operations = {};
 let liquidationProbes = 0;
+let increasePriceProbes = 0;
+
+function verifyIncrease(c) {
+  const p = c.input.scenario;
+  const b = (key) => BigInt(p[key]);
+  const size = b("size_usd20"),
+    seed = b("seed_size_usd20"),
+    pool = b("impact_pool_amount");
+  const low = BigInt(p.prices.index.min),
+    high = BigInt(p.prices.index.max);
+  const positive = min(b("positive_impact_factor"), b("negative_impact_factor"));
+  const negative = b("negative_impact_factor");
+  const apply = (value, factor) => (value < unit ? 0n : (value * factor) / unit);
+  const next = p.seed_is_long === p.is_long ? seed + size : seed > size ? seed - size : size - seed;
+  let raw;
+  if (p.seed_is_long !== p.is_long && size > seed) {
+    raw = apply(seed, positive) - apply(next, negative);
+  } else if (next < seed) {
+    raw = apply(seed, positive) - apply(next, positive);
+  } else {
+    raw = apply(seed, negative) - apply(next, negative);
+  }
+  const impact = raw > 0n ? min(raw, pool * low, (size * b("max_positive_factor")) / unit) : raw;
+  const amount = impact > 0n ? impact / high : -ceil(-impact, low);
+  const base = p.is_long ? size / high : ceil(size, low);
+  const tokens = p.is_long ? base + amount : base - amount;
+  const execution = size / tokens;
+  const seedImpact = -apply(seed, negative);
+  const seedAmount = -ceil(-seedImpact, low);
+  const seedBase = p.seed_is_long ? seed / high : ceil(seed, low);
+  const seedTokens = p.seed_is_long ? seedBase + seedAmount : seedBase - seedAmount;
+  const baseline = {
+    status: "ok",
+    impact_usd20: String(impact),
+    impact_amount: String(amount),
+    size_tokens: String(tokens),
+    size_usd20: String(size),
+    collateral_amount: p.collateral_amount,
+    cost_amount: "0",
+    execution_price: String(execution),
+    claimable_funding_amounts: ["0", "0"],
+    impact_pool_amount: String(pool - amount),
+  };
+  assert.deepEqual(
+    p.acceptable_prices,
+    [-1n, 0n, 1n].map((delta) => String(execution + delta)),
+    c.id
+  );
+  const probes = p.acceptable_prices.map((price) =>
+    (p.is_long ? execution <= BigInt(price) : execution >= BigInt(price))
+      ? baseline
+      : {
+          status: "error",
+          message: "invalid argument: order not fulfillable at acceptable price",
+        }
+  );
+  assert.deepEqual(
+    c.output,
+    {
+      status: "ok",
+      uncapped_impact_usd20: String(raw),
+      capped_impact_usd20: String(impact),
+      initial: {
+        long_oi_usd20: p.seed_is_long ? String(seed) : "0",
+        short_oi_usd20: p.seed_is_long ? "0" : String(seed),
+        impact_pool_amount: String(pool),
+        seed_execution: {
+          impact_usd20: String(seedImpact),
+          size_tokens: String(seedTokens),
+          execution_price: String(seed / seedTokens),
+        },
+      },
+      baseline,
+      acceptable_price_probes: probes,
+    },
+    c.id
+  );
+  if (c.id.endsWith("-positive-factor-capped")) {
+    assert(impact > (size * b("max_negative_factor")) / unit && impact < raw, c.id);
+  }
+  if (c.id.endsWith("-positive-pool-capped")) assert(impact > 0n && impact === pool * low && impact < raw, c.id);
+  if (c.id.endsWith("-positive-empty-pool")) assert(raw > 0n && impact === 0n, c.id);
+  if (c.id.endsWith("-positive-exact-pool")) assert(pool === ceil(raw, low) && impact === raw, c.id);
+  if (c.id.endsWith("-positive-uncapped")) assert(raw > 0n && impact === raw, c.id);
+  if (c.id.endsWith("-negative") || c.id.endsWith("-crossover")) assert(raw < 0n && impact === raw, c.id);
+  if (c.id.endsWith("-negative")) assert(-raw > (size * b("max_negative_factor")) / unit, c.id);
+  if (c.id.endsWith("-zero")) assert.equal(impact, 0n, c.id);
+  increasePriceProbes += probes.length;
+}
 
 function verifyLiquidation(c) {
   const p = c.input.scenario;
@@ -122,6 +211,11 @@ for (let index = 0; index < reference.cases.length; index++) {
   assert.equal(c.id, inputs.cases[index].id);
   assert.deepEqual(c.input, inputs.cases[index].input);
   const p = c.input;
+  if (p.operation === "increase_impact") {
+    verifyIncrease(c);
+    operations[p.operation] = (operations[p.operation] ?? 0) + 1;
+    continue;
+  }
   if (p.operation === "liquidation_check") {
     verifyLiquidation(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
@@ -270,6 +364,37 @@ try {
     ].map((mutate) => (s) => {
       mutate(s.cases[43].input.scenario);
     }),
+    ...[
+      (p) => {
+        p.acceptable_prices = [];
+      },
+      (p) => {
+        p.acceptable_prices[0] = "0";
+      },
+      (p) => {
+        p.prices.index.max = "1";
+      },
+      (p) => {
+        p.index_decimals = 21;
+      },
+      (p) => {
+        p.positive_impact_factor = String(unit + 1n);
+      },
+      (p) => {
+        p.impact_pool_amount = String(1n << 127n);
+      },
+      (p) => {
+        p.unknown = true;
+      },
+      (p) => {
+        p.seed_collateral_amount = "1";
+      },
+      (p) => {
+        p.size_usd20 = "0";
+      },
+    ].map((mutate) => (s) => {
+      mutate(s.cases[71].input.scenario);
+    }),
   ];
 
   for (const mutate of invalid) {
@@ -312,6 +437,7 @@ process.stdout.write(
       cases: reference.cases.length,
       operations,
       liquidationProbes,
+      increasePriceProbes,
       malformedRejected: rejected,
       modelErrorDistinctFromZero: true,
       liquidationProbeErrorDistinctFromResult: true,

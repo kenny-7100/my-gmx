@@ -3221,6 +3221,1286 @@
           "liquidation_fee_factor": "90000000000000000000"
         }
       }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-uncapped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9803921570548", "9803921570549", "9803921570550"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-pool-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9999000101988", "9999000101989", "9999000101990"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-empty-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "0",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10000000000999", "10000000001000", "10000000001001"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-exact-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "200000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9803921570548", "9803921570549", "9803921570550"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-factor-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "500000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9950248758198", "9950248758199", "9950248758200"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-negative",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10309278351577", "10309278351578", "10309278351579"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-zero",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "0",
+          "negative_impact_factor": "0",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10000000000999", "10000000001000", "10000000001001"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-crossover",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "40000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10101010102029", "10101010102030", "10101010102031"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-uncapped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9803921570548", "9803921570549", "9803921570550"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-pool-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9999000101988", "9999000101989", "9999000101990"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-empty-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "0",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10000000000999", "10000000001000", "10000000001001"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-exact-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "200000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9803921570548", "9803921570549", "9803921570550"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-factor-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "500000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9950248758198", "9950248758199", "9950248758200"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-negative",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10309278351577", "10309278351578", "10309278351579"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-zero",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "0",
+          "negative_impact_factor": "0",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10000000000999", "10000000001000", "10000000001001"]
+        }
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-crossover",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "40000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10101010102029", "10101010102030", "10101010102031"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-uncapped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10204081631610", "10204081631611", "10204081631612"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-pool-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10001000099008", "10001000099009", "10001000099010"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-empty-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "0",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9999999999999", "10000000000000", "10000000000001"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-exact-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "200000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10204081631610", "10204081631611", "10204081631612"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-factor-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "500000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10050251255270", "10050251255271", "10050251255272"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-negative",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9708737864076", "9708737864077", "9708737864078"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-zero",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "0",
+          "negative_impact_factor": "0",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9999999999999", "10000000000000", "10000000000001"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-crossover",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "40000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "100000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9900990099008", "9900990099009", "9900990099010"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-uncapped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10204081631610", "10204081631611", "10204081631612"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-pool-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10001000099008", "10001000099009", "10001000099010"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-empty-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "0",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9999999999999", "10000000000000", "10000000000001"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-exact-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "200000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10204081631610", "10204081631611", "10204081631612"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-factor-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "500000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["10050251255270", "10050251255271", "10050251255272"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-negative",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9708737864076", "9708737864077", "9708737864078"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-zero",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "0",
+          "negative_impact_factor": "0",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9999999999999", "10000000000000", "10000000000001"]
+        }
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-crossover",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000003"
+            }
+          },
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "40000000000000000000011",
+          "seed_collateral_amount": "10000000000",
+          "impact_pool_amount": "1000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "collateral_amount": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "acceptable_prices": ["9900990099008", "9900990099009", "9900990099010"]
+        }
+      }
     }
   ]
 }

@@ -4808,14 +4808,3534 @@
         ],
         "status": "ok"
       }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-uncapped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9803921570548",
+            "9803921570549",
+            "9803921570550"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9803921570549",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "800000001",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "10199999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9803921570549",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "800000001",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "10199999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "9803921570549",
+          "impact_amount": "199999999",
+          "impact_pool_amount": "800000001",
+          "impact_usd20": "2000000000000000000001",
+          "size_tokens": "10199999998",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "2000000000000000000001",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-pool-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9999000101988",
+            "9999000101989",
+            "9999000101990"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9999000101989",
+            "impact_amount": "999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "10000000000007000000",
+            "size_tokens": "10000999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9999000101989",
+            "impact_amount": "999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "10000000000007000000",
+            "size_tokens": "10000999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "9999000101989",
+          "impact_amount": "999999",
+          "impact_pool_amount": "1",
+          "impact_usd20": "10000000000007000000",
+          "size_tokens": "10000999998",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "10000000000007000000",
+        "initial": {
+          "impact_pool_amount": "1000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-empty-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10000000000999",
+            "10000000001000",
+            "10000000001001"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "0",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000001000",
+            "impact_amount": "0",
+            "impact_pool_amount": "0",
+            "impact_usd20": "0",
+            "size_tokens": "9999999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000001000",
+            "impact_amount": "0",
+            "impact_pool_amount": "0",
+            "impact_usd20": "0",
+            "size_tokens": "9999999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10000000001000",
+          "impact_amount": "0",
+          "impact_pool_amount": "0",
+          "impact_usd20": "0",
+          "size_tokens": "9999999999",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "0",
+        "initial": {
+          "impact_pool_amount": "0",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-exact-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9803921570548",
+            "9803921570549",
+            "9803921570550"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "200000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9803921570549",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "10199999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9803921570549",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "10199999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "9803921570549",
+          "impact_amount": "199999999",
+          "impact_pool_amount": "1",
+          "impact_usd20": "2000000000000000000001",
+          "size_tokens": "10199999998",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "2000000000000000000001",
+        "initial": {
+          "impact_pool_amount": "200000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-positive-factor-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9950248758198",
+            "9950248758199",
+            "9950248758200"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "500000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9950248758199",
+            "impact_amount": "49999999",
+            "impact_pool_amount": "950000001",
+            "impact_usd20": "500000000000000000000",
+            "size_tokens": "10049999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9950248758199",
+            "impact_amount": "49999999",
+            "impact_pool_amount": "950000001",
+            "impact_usd20": "500000000000000000000",
+            "size_tokens": "10049999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "9950248758199",
+          "impact_amount": "49999999",
+          "impact_pool_amount": "950000001",
+          "impact_usd20": "500000000000000000000",
+          "size_tokens": "10049999998",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "500000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-negative",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10309278351577",
+            "10309278351578",
+            "10309278351579"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10309278351578",
+            "impact_amount": "-300000000",
+            "impact_pool_amount": "1300000000",
+            "impact_usd20": "-3000000000000000000000",
+            "size_tokens": "9699999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10309278351578",
+            "impact_amount": "-300000000",
+            "impact_pool_amount": "1300000000",
+            "impact_usd20": "-3000000000000000000000",
+            "size_tokens": "9699999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10309278351578",
+          "impact_amount": "-300000000",
+          "impact_pool_amount": "1300000000",
+          "impact_usd20": "-3000000000000000000000",
+          "size_tokens": "9699999999",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "-3000000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "-3000000000000000000000"
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-zero",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10000000000999",
+            "10000000001000",
+            "10000000001001"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "0",
+          "positive_impact_factor": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000001000",
+            "impact_amount": "0",
+            "impact_pool_amount": "1000000000",
+            "impact_usd20": "0",
+            "size_tokens": "9999999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000001000",
+            "impact_amount": "0",
+            "impact_pool_amount": "1000000000",
+            "impact_usd20": "0",
+            "size_tokens": "9999999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10000000001000",
+          "impact_amount": "0",
+          "impact_pool_amount": "1000000000",
+          "impact_usd20": "0",
+          "size_tokens": "9999999999",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "0",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "10000000000000",
+            "impact_usd20": "0",
+            "size_tokens": "30000000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "0"
+      }
+    },
+    {
+      "id": "increase-long-long-collateral-crossover",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10101010102029",
+            "10101010102030",
+            "10101010102031"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "40000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10101010102030",
+            "impact_amount": "-100000000",
+            "impact_pool_amount": "1100000000",
+            "impact_usd20": "-1000000000000000000000",
+            "size_tokens": "9899999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10101010102030",
+            "impact_amount": "-100000000",
+            "impact_pool_amount": "1100000000",
+            "impact_usd20": "-1000000000000000000000",
+            "size_tokens": "9899999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10101010102030",
+          "impact_amount": "-100000000",
+          "impact_pool_amount": "1100000000",
+          "impact_usd20": "-1000000000000000000000",
+          "size_tokens": "9899999999",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "-1000000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-1200000000000000000000",
+            "size_tokens": "4120000000"
+          },
+          "short_oi_usd20": "40000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "-1000000000000000000000"
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-uncapped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9803921570548",
+            "9803921570549",
+            "9803921570550"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9803921570549",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "800000001",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "10199999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9803921570549",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "800000001",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "10199999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "9803921570549",
+          "impact_amount": "199999999",
+          "impact_pool_amount": "800000001",
+          "impact_usd20": "2000000000000000000001",
+          "size_tokens": "10199999998",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "2000000000000000000001",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-pool-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9999000101988",
+            "9999000101989",
+            "9999000101990"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9999000101989",
+            "impact_amount": "999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "10000000000007000000",
+            "size_tokens": "10000999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9999000101989",
+            "impact_amount": "999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "10000000000007000000",
+            "size_tokens": "10000999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "9999000101989",
+          "impact_amount": "999999",
+          "impact_pool_amount": "1",
+          "impact_usd20": "10000000000007000000",
+          "size_tokens": "10000999998",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "10000000000007000000",
+        "initial": {
+          "impact_pool_amount": "1000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-empty-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10000000000999",
+            "10000000001000",
+            "10000000001001"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "0",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000001000",
+            "impact_amount": "0",
+            "impact_pool_amount": "0",
+            "impact_usd20": "0",
+            "size_tokens": "9999999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000001000",
+            "impact_amount": "0",
+            "impact_pool_amount": "0",
+            "impact_usd20": "0",
+            "size_tokens": "9999999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10000000001000",
+          "impact_amount": "0",
+          "impact_pool_amount": "0",
+          "impact_usd20": "0",
+          "size_tokens": "9999999999",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "0",
+        "initial": {
+          "impact_pool_amount": "0",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-exact-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9803921570548",
+            "9803921570549",
+            "9803921570550"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "200000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9803921570549",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "10199999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9803921570549",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "10199999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "9803921570549",
+          "impact_amount": "199999999",
+          "impact_pool_amount": "1",
+          "impact_usd20": "2000000000000000000001",
+          "size_tokens": "10199999998",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "2000000000000000000001",
+        "initial": {
+          "impact_pool_amount": "200000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-positive-factor-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9950248758198",
+            "9950248758199",
+            "9950248758200"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "500000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9950248758199",
+            "impact_amount": "49999999",
+            "impact_pool_amount": "950000001",
+            "impact_usd20": "500000000000000000000",
+            "size_tokens": "10049999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9950248758199",
+            "impact_amount": "49999999",
+            "impact_pool_amount": "950000001",
+            "impact_usd20": "500000000000000000000",
+            "size_tokens": "10049999998",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "9950248758199",
+          "impact_amount": "49999999",
+          "impact_pool_amount": "950000001",
+          "impact_usd20": "500000000000000000000",
+          "size_tokens": "10049999998",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "500000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-negative",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10309278351577",
+            "10309278351578",
+            "10309278351579"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10309278351578",
+            "impact_amount": "-300000000",
+            "impact_pool_amount": "1300000000",
+            "impact_usd20": "-3000000000000000000000",
+            "size_tokens": "9699999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10309278351578",
+            "impact_amount": "-300000000",
+            "impact_pool_amount": "1300000000",
+            "impact_usd20": "-3000000000000000000000",
+            "size_tokens": "9699999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10309278351578",
+          "impact_amount": "-300000000",
+          "impact_pool_amount": "1300000000",
+          "impact_usd20": "-3000000000000000000000",
+          "size_tokens": "9699999999",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "-3000000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "-3000000000000000000000"
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-zero",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10000000000999",
+            "10000000001000",
+            "10000000001001"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "0",
+          "positive_impact_factor": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000001000",
+            "impact_amount": "0",
+            "impact_pool_amount": "1000000000",
+            "impact_usd20": "0",
+            "size_tokens": "9999999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000001000",
+            "impact_amount": "0",
+            "impact_pool_amount": "1000000000",
+            "impact_usd20": "0",
+            "size_tokens": "9999999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10000000001000",
+          "impact_amount": "0",
+          "impact_pool_amount": "1000000000",
+          "impact_usd20": "0",
+          "size_tokens": "9999999999",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "0",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "10000000000000",
+            "impact_usd20": "0",
+            "size_tokens": "30000000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "0"
+      }
+    },
+    {
+      "id": "increase-long-short-collateral-crossover",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10101010102029",
+            "10101010102030",
+            "10101010102031"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "40000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10101010102030",
+            "impact_amount": "-100000000",
+            "impact_pool_amount": "1100000000",
+            "impact_usd20": "-1000000000000000000000",
+            "size_tokens": "9899999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10101010102030",
+            "impact_amount": "-100000000",
+            "impact_pool_amount": "1100000000",
+            "impact_usd20": "-1000000000000000000000",
+            "size_tokens": "9899999999",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10101010102030",
+          "impact_amount": "-100000000",
+          "impact_pool_amount": "1100000000",
+          "impact_usd20": "-1000000000000000000000",
+          "size_tokens": "9899999999",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "-1000000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-1200000000000000000000",
+            "size_tokens": "4120000000"
+          },
+          "short_oi_usd20": "40000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "-1000000000000000000000"
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-uncapped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10204081631610",
+            "10204081631611",
+            "10204081631612"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10204081631611",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "800000001",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "9800000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10204081631611",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "800000001",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "9800000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10204081631611",
+          "impact_amount": "199999999",
+          "impact_pool_amount": "800000001",
+          "impact_usd20": "2000000000000000000001",
+          "size_tokens": "9800000001",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "2000000000000000000001",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-pool-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10001000099008",
+            "10001000099009",
+            "10001000099010"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10001000099009",
+            "impact_amount": "999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "10000000000007000000",
+            "size_tokens": "9999000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10001000099009",
+            "impact_amount": "999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "10000000000007000000",
+            "size_tokens": "9999000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10001000099009",
+          "impact_amount": "999999",
+          "impact_pool_amount": "1",
+          "impact_usd20": "10000000000007000000",
+          "size_tokens": "9999000001",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "10000000000007000000",
+        "initial": {
+          "impact_pool_amount": "1000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-empty-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9999999999999",
+            "10000000000000",
+            "10000000000001"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "0",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000000000",
+            "impact_amount": "0",
+            "impact_pool_amount": "0",
+            "impact_usd20": "0",
+            "size_tokens": "10000000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000000000",
+            "impact_amount": "0",
+            "impact_pool_amount": "0",
+            "impact_usd20": "0",
+            "size_tokens": "10000000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10000000000000",
+          "impact_amount": "0",
+          "impact_pool_amount": "0",
+          "impact_usd20": "0",
+          "size_tokens": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "0",
+        "initial": {
+          "impact_pool_amount": "0",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-exact-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10204081631610",
+            "10204081631611",
+            "10204081631612"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "200000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10204081631611",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "9800000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10204081631611",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "9800000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10204081631611",
+          "impact_amount": "199999999",
+          "impact_pool_amount": "1",
+          "impact_usd20": "2000000000000000000001",
+          "size_tokens": "9800000001",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "2000000000000000000001",
+        "initial": {
+          "impact_pool_amount": "200000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-positive-factor-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10050251255270",
+            "10050251255271",
+            "10050251255272"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "500000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10050251255271",
+            "impact_amount": "49999999",
+            "impact_pool_amount": "950000001",
+            "impact_usd20": "500000000000000000000",
+            "size_tokens": "9950000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10050251255271",
+            "impact_amount": "49999999",
+            "impact_pool_amount": "950000001",
+            "impact_usd20": "500000000000000000000",
+            "size_tokens": "9950000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10050251255271",
+          "impact_amount": "49999999",
+          "impact_pool_amount": "950000001",
+          "impact_usd20": "500000000000000000000",
+          "size_tokens": "9950000001",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "500000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-negative",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9708737864076",
+            "9708737864077",
+            "9708737864078"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9708737864077",
+            "impact_amount": "-300000000",
+            "impact_pool_amount": "1300000000",
+            "impact_usd20": "-3000000000000000000000",
+            "size_tokens": "10300000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9708737864077",
+            "impact_amount": "-300000000",
+            "impact_pool_amount": "1300000000",
+            "impact_usd20": "-3000000000000000000000",
+            "size_tokens": "10300000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "9708737864077",
+          "impact_amount": "-300000000",
+          "impact_pool_amount": "1300000000",
+          "impact_usd20": "-3000000000000000000000",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "-3000000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "-3000000000000000000000"
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-zero",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9999999999999",
+            "10000000000000",
+            "10000000000001"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "0",
+          "positive_impact_factor": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000000000",
+            "impact_amount": "0",
+            "impact_pool_amount": "1000000000",
+            "impact_usd20": "0",
+            "size_tokens": "10000000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000000000",
+            "impact_amount": "0",
+            "impact_pool_amount": "1000000000",
+            "impact_usd20": "0",
+            "size_tokens": "10000000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "10000000000000",
+          "impact_amount": "0",
+          "impact_pool_amount": "1000000000",
+          "impact_usd20": "0",
+          "size_tokens": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "0",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10000000000333",
+            "impact_usd20": "0",
+            "size_tokens": "29999999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "0"
+      }
+    },
+    {
+      "id": "increase-short-long-collateral-crossover",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9900990099008",
+            "9900990099009",
+            "9900990099010"
+          ],
+          "collateral_amount": "100000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "40000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9900990099009",
+            "impact_amount": "-100000000",
+            "impact_pool_amount": "1100000000",
+            "impact_usd20": "-1000000000000000000000",
+            "size_tokens": "10100000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "100000000000",
+            "cost_amount": "0",
+            "execution_price": "9900990099009",
+            "impact_amount": "-100000000",
+            "impact_pool_amount": "1100000000",
+            "impact_usd20": "-1000000000000000000000",
+            "size_tokens": "10100000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "100000000000",
+          "cost_amount": "0",
+          "execution_price": "9900990099009",
+          "impact_amount": "-100000000",
+          "impact_pool_amount": "1100000000",
+          "impact_usd20": "-1000000000000000000000",
+          "size_tokens": "10100000000",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "-1000000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "40000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278353172",
+            "impact_usd20": "-1200000000000000000000",
+            "size_tokens": "3879999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "-1000000000000000000000"
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-uncapped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10204081631610",
+            "10204081631611",
+            "10204081631612"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10204081631611",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "800000001",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "9800000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10204081631611",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "800000001",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "9800000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10204081631611",
+          "impact_amount": "199999999",
+          "impact_pool_amount": "800000001",
+          "impact_usd20": "2000000000000000000001",
+          "size_tokens": "9800000001",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "2000000000000000000001",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-pool-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10001000099008",
+            "10001000099009",
+            "10001000099010"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10001000099009",
+            "impact_amount": "999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "10000000000007000000",
+            "size_tokens": "9999000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10001000099009",
+            "impact_amount": "999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "10000000000007000000",
+            "size_tokens": "9999000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10001000099009",
+          "impact_amount": "999999",
+          "impact_pool_amount": "1",
+          "impact_usd20": "10000000000007000000",
+          "size_tokens": "9999000001",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "10000000000007000000",
+        "initial": {
+          "impact_pool_amount": "1000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-empty-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9999999999999",
+            "10000000000000",
+            "10000000000001"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "0",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000000000",
+            "impact_amount": "0",
+            "impact_pool_amount": "0",
+            "impact_usd20": "0",
+            "size_tokens": "10000000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000000000",
+            "impact_amount": "0",
+            "impact_pool_amount": "0",
+            "impact_usd20": "0",
+            "size_tokens": "10000000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10000000000000",
+          "impact_amount": "0",
+          "impact_pool_amount": "0",
+          "impact_usd20": "0",
+          "size_tokens": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "0",
+        "initial": {
+          "impact_pool_amount": "0",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-exact-pool",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10204081631610",
+            "10204081631611",
+            "10204081631612"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "200000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10204081631611",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "9800000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10204081631611",
+            "impact_amount": "199999999",
+            "impact_pool_amount": "1",
+            "impact_usd20": "2000000000000000000001",
+            "size_tokens": "9800000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10204081631611",
+          "impact_amount": "199999999",
+          "impact_pool_amount": "1",
+          "impact_usd20": "2000000000000000000001",
+          "size_tokens": "9800000001",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "2000000000000000000001",
+        "initial": {
+          "impact_pool_amount": "200000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-positive-factor-capped",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "10050251255270",
+            "10050251255271",
+            "10050251255272"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "500000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10050251255271",
+            "impact_amount": "49999999",
+            "impact_pool_amount": "950000001",
+            "impact_usd20": "500000000000000000000",
+            "size_tokens": "9950000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10050251255271",
+            "impact_amount": "49999999",
+            "impact_pool_amount": "950000001",
+            "impact_usd20": "500000000000000000000",
+            "size_tokens": "9950000001",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10050251255271",
+          "impact_amount": "49999999",
+          "impact_pool_amount": "950000001",
+          "impact_usd20": "500000000000000000000",
+          "size_tokens": "9950000001",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "500000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278350869",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "29099999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "2000000000000000000001"
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-negative",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9708737864076",
+            "9708737864077",
+            "9708737864078"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": false,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9708737864077",
+            "impact_amount": "-300000000",
+            "impact_pool_amount": "1300000000",
+            "impact_usd20": "-3000000000000000000000",
+            "size_tokens": "10300000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9708737864077",
+            "impact_amount": "-300000000",
+            "impact_pool_amount": "1300000000",
+            "impact_usd20": "-3000000000000000000000",
+            "size_tokens": "10300000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "9708737864077",
+          "impact_amount": "-300000000",
+          "impact_pool_amount": "1300000000",
+          "impact_usd20": "-3000000000000000000000",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "-3000000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "0",
+          "seed_execution": {
+            "execution_price": "9708737864077",
+            "impact_usd20": "-9000000000000000000000",
+            "size_tokens": "30900000000"
+          },
+          "short_oi_usd20": "300000000000000000000011"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "-3000000000000000000000"
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-zero",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9999999999999",
+            "10000000000000",
+            "10000000000001"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "0",
+          "positive_impact_factor": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "300000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000000000",
+            "impact_amount": "0",
+            "impact_pool_amount": "1000000000",
+            "impact_usd20": "0",
+            "size_tokens": "10000000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "10000000000000",
+            "impact_amount": "0",
+            "impact_pool_amount": "1000000000",
+            "impact_usd20": "0",
+            "size_tokens": "10000000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "10000000000000",
+          "impact_amount": "0",
+          "impact_pool_amount": "1000000000",
+          "impact_usd20": "0",
+          "size_tokens": "10000000000",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "0",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "300000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10000000000333",
+            "impact_usd20": "0",
+            "size_tokens": "29999999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "0"
+      }
+    },
+    {
+      "id": "increase-short-short-collateral-crossover",
+      "input": {
+        "operation": "increase_impact",
+        "scenario": {
+          "acceptable_prices": [
+            "9900990099008",
+            "9900990099009",
+            "9900990099010"
+          ],
+          "collateral_amount": "10000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "impact_pool_amount": "1000000000",
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "max_negative_factor": "100000000000000000",
+          "max_positive_factor": "5000000000000000000",
+          "negative_impact_factor": "3000000000000000000",
+          "positive_impact_factor": "2000000000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000003",
+              "min": "100000000000000"
+            }
+          },
+          "seed_collateral_amount": "10000000000",
+          "seed_is_long": true,
+          "seed_size_usd20": "40000000000000000000011",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "acceptable_price_probes": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9900990099009",
+            "impact_amount": "-100000000",
+            "impact_pool_amount": "1100000000",
+            "impact_usd20": "-1000000000000000000000",
+            "size_tokens": "10100000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "10000000000",
+            "cost_amount": "0",
+            "execution_price": "9900990099009",
+            "impact_amount": "-100000000",
+            "impact_pool_amount": "1100000000",
+            "impact_usd20": "-1000000000000000000000",
+            "size_tokens": "10100000000",
+            "size_usd20": "100000000000000000000017",
+            "status": "ok"
+          },
+          {
+            "message": "invalid argument: order not fulfillable at acceptable price",
+            "status": "error"
+          }
+        ],
+        "baseline": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "collateral_amount": "10000000000",
+          "cost_amount": "0",
+          "execution_price": "9900990099009",
+          "impact_amount": "-100000000",
+          "impact_pool_amount": "1100000000",
+          "impact_usd20": "-1000000000000000000000",
+          "size_tokens": "10100000000",
+          "size_usd20": "100000000000000000000017",
+          "status": "ok"
+        },
+        "capped_impact_usd20": "-1000000000000000000000",
+        "initial": {
+          "impact_pool_amount": "1000000000",
+          "long_oi_usd20": "40000000000000000000011",
+          "seed_execution": {
+            "execution_price": "10309278353172",
+            "impact_usd20": "-1200000000000000000000",
+            "size_tokens": "3879999999"
+          },
+          "short_oi_usd20": "0"
+        },
+        "status": "ok",
+        "uncapped_impact_usd20": "-1000000000000000000000"
+      }
     }
   ],
   "generator": {
-    "input_sha256": "6d06669056410113340b9f7d0c614e32ec616185444304f5d13d2bfe476787d2",
+    "input_sha256": "62e29fac4c6f19cd3aba9b088a3c6a7ae3c4966465a90bffbe3076cd081172ef",
     "lock_sha256": "6b6160a8b9e1d1c1eaeb4a472852edb34fda1c8f5c4ff7188313f66f8924e346",
     "manifest_sha256": "1b952a339d1d8f65e83a897dc5b530421dd7f176335a3fa93cb131f98c95e93d",
     "rustc": "rustc 1.90.0 (1159e78c4 2025-09-14)",
-    "source_sha256": "985641bcca83df52881edaec969e59e773fbfedf0f9a02931e5f4615af29454b"
+    "source_sha256": "5fc9ec9bf44b0f79e9cdbd63c43386306fc966e656d6bfb9d39882634bf6f88a"
   },
   "reference": {
     "commit": "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72",
@@ -4827,7 +8347,8 @@
     "FeeParams::fee",
     "PerpMarketExt::cap_positive_position_price_impact",
     "PositionExt::pnl_value",
-    "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)"
+    "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)",
+    "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)"
   ],
   "units": {
     "factor_decimals": "20",
