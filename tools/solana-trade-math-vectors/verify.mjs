@@ -28,8 +28,8 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 159);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 159);
+assert.equal(reference.cases.length, 175);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 175);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
@@ -39,6 +39,127 @@ let increasePriceProbes = 0;
 let impactLiquidationProbes = 0;
 let borrowingCheckpoints = 0;
 let borrowingSettlements = 0;
+let fundingCheckpoints = 0;
+let fundingSettlements = 0;
+
+function verifyFunding(c) {
+  const p = c.input.scenario;
+  const matrix = [
+    [true, true],
+    [true, false],
+    [false, true],
+    [false, false],
+  ];
+  const long = 2n * BigInt(p.long_size_usd20),
+    short = 2n * BigInt(p.short_size_usd20);
+  const longsPay = long > short;
+  const payer = longsPay ? long : short,
+    receiver = longsPay ? short : long;
+  const difference = long > short ? long - short : short - long;
+  const rawRate = (((difference * unit) / (long + short)) * BigInt(p.funding_factor)) / unit;
+  const rate = min(rawRate, BigInt(p.max_factor_per_second));
+  const adjustment = 10n ** 10n,
+    scale = adjustment * unit;
+  const fees = [0n, 0n, 0n, 0n],
+    claims = [0n, 0n, 0n, 0n];
+  const posSize = (side) => BigInt(side ? p.long_size_usd20 : p.short_size_usd20);
+  const pending = (side, col, index) => ({
+    cost_amount: String(ceil(posSize(side) * fees[index], scale)),
+    claimable_amounts: [
+      String((posSize(side) * claims[side ? 0 : 2]) / scale),
+      String((posSize(side) * claims[side ? 1 : 3]) / scale),
+    ],
+  });
+  const opened = matrix.map(([side]) => {
+    const size = posSize(side),
+      price = BigInt(side ? p.prices.index.max : p.prices.index.min);
+    return {
+      cost_amount: "0",
+      size_tokens: String(side ? size / price : ceil(size, price)),
+      claimable_funding_amounts: ["0", "0"],
+    };
+  });
+  const checkpoints = p.elapsed_seconds.map((seconds) => {
+    const value = (payer * rate * BigInt(seconds)) / unit;
+    const deltas = matrix.map(([side, col], index) => {
+      const collateralValue = (value * posSize(longsPay)) / payer;
+      const price = BigInt((col ? p.prices.long : p.prices.short).max);
+      const fee = side === longsPay ? ceil(ceil(collateralValue * scale, posSize(side)), price) : 0n;
+      const claim = side !== longsPay ? (collateralValue * scale) / receiver / price : 0n;
+      fees[index] += fee;
+      claims[index] += claim;
+      return { funding_per_size: String(fee), claimable_per_size: String(claim) };
+    });
+    return {
+      elapsed_seconds: seconds,
+      next_factor_per_second: "0",
+      deltas,
+      pending: matrix.map(([side, col], index) => pending(side, col, index)),
+    };
+  });
+  const settlements = matrix.map(([side, col], index) => {
+    const due = pending(side, col, index);
+    const cost = BigInt(due.cost_amount);
+    return [1n, 2n].map((attempt) => ({
+      cost_amount: attempt === 1n ? due.cost_amount : "0",
+      claimable_funding_amounts: attempt === 1n ? due.claimable_amounts : ["0", "0"],
+      collateral_amount: String(
+        BigInt(col ? p.long_collateral_amount : p.short_collateral_amount) +
+          attempt * BigInt(col ? p.next_long_collateral_amount : p.next_short_collateral_amount) -
+          cost
+      ),
+      size_usd20: String(posSize(side) + attempt * BigInt(p.next_size_usd20)),
+      funding_snapshot: String(fees[index]),
+      claimable_snapshots: [String(claims[side ? 0 : 2]), String(claims[side ? 1 : 3])],
+      pending_cost_amount: "0",
+      pending_claimable_amounts: ["0", "0"],
+      market_funding_per_size: String(fees[index]),
+    }));
+  });
+  assert.deepEqual(c.output, { status: "ok", adjustment: String(adjustment), opened, checkpoints, settlements }, c.id);
+  for (const col of [true, false]) {
+    const paid = matrix.reduce(
+      (total, [, collateral], index) => total + (collateral === col ? BigInt(settlements[index][0].cost_amount) : 0n),
+      0n
+    );
+    const claimed = settlements.reduce(
+      (total, attempts) => total + BigInt(attempts[0].claimable_funding_amounts[col ? 0 : 1]),
+      0n
+    );
+    assert(paid >= claimed, c.id);
+  }
+  if (c.id.endsWith("-rate-capped")) assert(rate > 0n && rate < rawRate, c.id);
+  if (c.id.endsWith("-tiny-rounding")) {
+    assert(
+      settlements.some((a) => BigInt(a[0].cost_amount) > 0n),
+      c.id
+    );
+    assert(
+      settlements.every((a) => a[0].claimable_funding_amounts.every((v) => v === "0")),
+      c.id
+    );
+  }
+  if (c.id.endsWith("-elapsed") && !c.id.endsWith("-no-elapsed")) {
+    for (const [index, [side]] of matrix.entries())
+      if (side !== longsPay)
+        assert(
+          settlements[index][0].claimable_funding_amounts.every((v) => BigInt(v) > 0n),
+          c.id
+        );
+  }
+  if (
+    c.id.endsWith("-zero-cap") ||
+    c.id.endsWith("-zero-factor") ||
+    c.id.endsWith("-balanced") ||
+    c.id.endsWith("-no-elapsed")
+  )
+    assert(
+      settlements.every((a) => a[0].cost_amount === "0" && a[0].claimable_funding_amounts.every((v) => v === "0")),
+      c.id
+    );
+  fundingCheckpoints += checkpoints.length;
+  fundingSettlements += settlements.length * 2;
+}
 
 function verifyBorrowing(c) {
   const p = c.input.scenario;
@@ -343,6 +464,11 @@ for (let index = 0; index < reference.cases.length; index++) {
   assert.equal(c.id, inputs.cases[index].id);
   assert.deepEqual(c.input, inputs.cases[index].input);
   const p = c.input;
+  if (p.operation === "funding_accrual") {
+    verifyFunding(c);
+    operations[p.operation] = (operations[p.operation] ?? 0) + 1;
+    continue;
+  }
   if (p.operation === "borrowing_accrual") {
     verifyBorrowing(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
@@ -586,6 +712,37 @@ try {
     ].map((mutate) => (s) => {
       mutate(s.cases[131].input.scenario);
     }),
+    ...[
+      (p) => {
+        p.elapsed_seconds = [];
+      },
+      (p) => {
+        p.elapsed_seconds = [31_536_001];
+      },
+      (p) => {
+        delete p.funding_factor;
+      },
+      (p) => {
+        p.funding_factor = String(unit + 1n);
+      },
+      (p) => {
+        p.max_factor_per_second = String(unit + 1n);
+      },
+      (p) => {
+        p.long_size_usd20 = "0";
+      },
+      (p) => {
+        p.next_size_usd20 = "0";
+      },
+      (p) => {
+        p.short_collateral_amount = "1";
+      },
+      (p) => {
+        p.unknown = true;
+      },
+    ].map((mutate) => (s) => {
+      mutate(s.cases[159].input.scenario);
+    }),
   ];
 
   for (const mutate of invalid) {
@@ -632,6 +789,8 @@ process.stdout.write(
       impactLiquidationProbes,
       borrowingCheckpoints,
       borrowingSettlements,
+      fundingCheckpoints,
+      fundingSettlements,
       malformedRejected: rejected,
       modelErrorDistinctFromZero: true,
       liquidationProbeErrorDistinctFromResult: true,

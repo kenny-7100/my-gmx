@@ -15304,14 +15304,4936 @@
         ],
         "status": "ok"
       }
+    },
+    {
+      "id": "funding-longs-pay-no-elapsed",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            0
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "200000000000000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "100000000000000000000011"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 0,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-longs-pay-tiny-rounding",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            1
+          ],
+          "funding_factor": "10000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "200000000000000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "100000000000000000000011"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "3334"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "334"
+              },
+              {
+                "claimable_per_size": "3333",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "333",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 1,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "1"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "1"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4199999999",
+              "cost_amount": "1",
+              "funding_snapshot": "3334",
+              "market_funding_per_size": "3334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4399999999",
+              "cost_amount": "0",
+              "funding_snapshot": "3334",
+              "market_funding_per_size": "3334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "419999999",
+              "cost_amount": "1",
+              "funding_snapshot": "334",
+              "market_funding_per_size": "334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "439999999",
+              "cost_amount": "0",
+              "funding_snapshot": "334",
+              "market_funding_per_size": "334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3333",
+                "333"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3333",
+                "333"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3333",
+                "333"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3333",
+                "333"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-longs-pay-elapsed",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "200000000000000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "100000000000000000000011"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "119999999999789"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "12000000000001"
+              },
+              {
+                "claimable_per_size": "119999999999788",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "12000000000000",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "24000000"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "2400001"
+              },
+              {
+                "claimable_amounts": [
+                  "11999999",
+                  "1200000"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "11999999",
+                  "1200000"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4176000000",
+              "cost_amount": "24000000",
+              "funding_snapshot": "119999999999789",
+              "market_funding_per_size": "119999999999789",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4376000000",
+              "cost_amount": "0",
+              "funding_snapshot": "119999999999789",
+              "market_funding_per_size": "119999999999789",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "417599999",
+              "cost_amount": "2400001",
+              "funding_snapshot": "12000000000001",
+              "market_funding_per_size": "12000000000001",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "437599999",
+              "cost_amount": "0",
+              "funding_snapshot": "12000000000001",
+              "market_funding_per_size": "12000000000001",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "11999999",
+                "1200000"
+              ],
+              "claimable_snapshots": [
+                "119999999999788",
+                "12000000000000"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "119999999999788",
+                "12000000000000"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "11999999",
+                "1200000"
+              ],
+              "claimable_snapshots": [
+                "119999999999788",
+                "12000000000000"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "119999999999788",
+                "12000000000000"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-longs-pay-zero-factor",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "0",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "200000000000000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "100000000000000000000011"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-longs-pay-balanced",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "100000000000000000000011",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "100000000000000000000011"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-longs-pay-rate-capped",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "200000000000000000000017",
+          "max_factor_per_second": "1000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "100000000000000000000011"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "3599999999994"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "360000000000"
+              },
+              {
+                "claimable_per_size": "3599999999993",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "359999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "720000"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "72001"
+              },
+              {
+                "claimable_amounts": [
+                  "359999",
+                  "35999"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "359999",
+                  "35999"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4199280000",
+              "cost_amount": "720000",
+              "funding_snapshot": "3599999999994",
+              "market_funding_per_size": "3599999999994",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4399280000",
+              "cost_amount": "0",
+              "funding_snapshot": "3599999999994",
+              "market_funding_per_size": "3599999999994",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "419927999",
+              "cost_amount": "72001",
+              "funding_snapshot": "360000000000",
+              "market_funding_per_size": "360000000000",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "439927999",
+              "cost_amount": "0",
+              "funding_snapshot": "360000000000",
+              "market_funding_per_size": "360000000000",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "359999",
+                "35999"
+              ],
+              "claimable_snapshots": [
+                "3599999999993",
+                "359999999999"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3599999999993",
+                "359999999999"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "359999",
+                "35999"
+              ],
+              "claimable_snapshots": [
+                "3599999999993",
+                "359999999999"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3599999999993",
+                "359999999999"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-longs-pay-zero-cap",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "200000000000000000000017",
+          "max_factor_per_second": "0",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "100000000000000000000011"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-longs-pay-split-intervals",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            17,
+            23
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "200000000000000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "100000000000000000000011"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "566666666666"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "56666666667"
+              },
+              {
+                "claimable_per_size": "566666666665",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "56666666666",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 17,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "113334"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "11334"
+              },
+              {
+                "claimable_amounts": [
+                  "56666",
+                  "5666"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "56666",
+                  "5666"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          },
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "766666666666"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "76666666667"
+              },
+              {
+                "claimable_per_size": "766666666665",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "76666666666",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 23,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "266667"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "26667"
+              },
+              {
+                "claimable_amounts": [
+                  "133333",
+                  "13333"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "133333",
+                  "13333"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "19999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4199733333",
+              "cost_amount": "266667",
+              "funding_snapshot": "1333333333332",
+              "market_funding_per_size": "1333333333332",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4399733333",
+              "cost_amount": "0",
+              "funding_snapshot": "1333333333332",
+              "market_funding_per_size": "1333333333332",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "419973333",
+              "cost_amount": "26667",
+              "funding_snapshot": "133333333334",
+              "market_funding_per_size": "133333333334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "439973333",
+              "cost_amount": "0",
+              "funding_snapshot": "133333333334",
+              "market_funding_per_size": "133333333334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "133333",
+                "13333"
+              ],
+              "claimable_snapshots": [
+                "1333333333330",
+                "133333333332"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "1333333333330",
+                "133333333332"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "133333",
+                "13333"
+              ],
+              "claimable_snapshots": [
+                "1333333333330",
+                "133333333332"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "1333333333330",
+                "133333333332"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-shorts-pay-no-elapsed",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            0
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "100000000000000000000011",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "200000000000000000000017"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 0,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-shorts-pay-tiny-rounding",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            1
+          ],
+          "funding_factor": "10000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "100000000000000000000011",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "200000000000000000000017"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "3333",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "333",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "3334"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "334"
+              }
+            ],
+            "elapsed_seconds": 1,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "1"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "1"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3333",
+                "333"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3333",
+                "333"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3333",
+                "333"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3333",
+                "333"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4199999999",
+              "cost_amount": "1",
+              "funding_snapshot": "3334",
+              "market_funding_per_size": "3334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4399999999",
+              "cost_amount": "0",
+              "funding_snapshot": "3334",
+              "market_funding_per_size": "3334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "419999999",
+              "cost_amount": "1",
+              "funding_snapshot": "334",
+              "market_funding_per_size": "334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "439999999",
+              "cost_amount": "0",
+              "funding_snapshot": "334",
+              "market_funding_per_size": "334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-shorts-pay-elapsed",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "100000000000000000000011",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "200000000000000000000017"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "119999999999788",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "12000000000000",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "119999999999789"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "12000000000001"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "11999999",
+                  "1200000"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "11999999",
+                  "1200000"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "24000000"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "2400001"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "11999999",
+                "1200000"
+              ],
+              "claimable_snapshots": [
+                "119999999999788",
+                "12000000000000"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "119999999999788",
+                "12000000000000"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "11999999",
+                "1200000"
+              ],
+              "claimable_snapshots": [
+                "119999999999788",
+                "12000000000000"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "119999999999788",
+                "12000000000000"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4176000000",
+              "cost_amount": "24000000",
+              "funding_snapshot": "119999999999789",
+              "market_funding_per_size": "119999999999789",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4376000000",
+              "cost_amount": "0",
+              "funding_snapshot": "119999999999789",
+              "market_funding_per_size": "119999999999789",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "417599999",
+              "cost_amount": "2400001",
+              "funding_snapshot": "12000000000001",
+              "market_funding_per_size": "12000000000001",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "437599999",
+              "cost_amount": "0",
+              "funding_snapshot": "12000000000001",
+              "market_funding_per_size": "12000000000001",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-shorts-pay-zero-factor",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "0",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "100000000000000000000011",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "200000000000000000000017"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-shorts-pay-balanced",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "100000000000000000000011",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "100000000000000000000011"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "10000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-shorts-pay-rate-capped",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "100000000000000000000011",
+          "max_factor_per_second": "1000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "200000000000000000000017"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "3599999999993",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "359999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "3599999999994"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "360000000000"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "359999",
+                  "35999"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "359999",
+                  "35999"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "720000"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "72001"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "359999",
+                "35999"
+              ],
+              "claimable_snapshots": [
+                "3599999999993",
+                "359999999999"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3599999999993",
+                "359999999999"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "359999",
+                "35999"
+              ],
+              "claimable_snapshots": [
+                "3599999999993",
+                "359999999999"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "3599999999993",
+                "359999999999"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4199280000",
+              "cost_amount": "720000",
+              "funding_snapshot": "3599999999994",
+              "market_funding_per_size": "3599999999994",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4399280000",
+              "cost_amount": "0",
+              "funding_snapshot": "3599999999994",
+              "market_funding_per_size": "3599999999994",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "419927999",
+              "cost_amount": "72001",
+              "funding_snapshot": "360000000000",
+              "market_funding_per_size": "360000000000",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "439927999",
+              "cost_amount": "0",
+              "funding_snapshot": "360000000000",
+              "market_funding_per_size": "360000000000",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-shorts-pay-zero-cap",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "100000000000000000000011",
+          "max_factor_per_second": "0",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "200000000000000000000017"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "elapsed_seconds": 3600,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "funding-shorts-pay-split-intervals",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            17,
+            23
+          ],
+          "funding_factor": "100000000000017",
+          "index_decimals": 9,
+          "long_collateral_amount": "4000000000",
+          "long_decimals": 9,
+          "long_size_usd20": "100000000000000000000011",
+          "max_factor_per_second": "100000000000000000000",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "short_collateral_amount": "400000000",
+          "short_decimals": 6,
+          "short_size_usd20": "200000000000000000000017"
+        }
+      },
+      "output": {
+        "adjustment": "10000000000",
+        "checkpoints": [
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "566666666665",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "56666666666",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "566666666666"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "56666666667"
+              }
+            ],
+            "elapsed_seconds": 17,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "56666",
+                  "5666"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "56666",
+                  "5666"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "113334"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "11334"
+              }
+            ]
+          },
+          {
+            "deltas": [
+              {
+                "claimable_per_size": "766666666665",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "76666666666",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "766666666666"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "76666666667"
+              }
+            ],
+            "elapsed_seconds": 23,
+            "next_factor_per_second": "0",
+            "pending": [
+              {
+                "claimable_amounts": [
+                  "133333",
+                  "13333"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "133333",
+                  "13333"
+                ],
+                "cost_amount": "0"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "266667"
+              },
+              {
+                "claimable_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "26667"
+              }
+            ]
+          }
+        ],
+        "opened": [
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "9999999999"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          },
+          {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "cost_amount": "0",
+            "size_tokens": "20000000000"
+          }
+        ],
+        "settlements": [
+          [
+            {
+              "claimable_funding_amounts": [
+                "133333",
+                "13333"
+              ],
+              "claimable_snapshots": [
+                "1333333333330",
+                "133333333332"
+              ],
+              "collateral_amount": "4200000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "1333333333330",
+                "133333333332"
+              ],
+              "collateral_amount": "4400000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "133333",
+                "13333"
+              ],
+              "claimable_snapshots": [
+                "1333333333330",
+                "133333333332"
+              ],
+              "collateral_amount": "420000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "110000000000000000000018"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "1333333333330",
+                "133333333332"
+              ],
+              "collateral_amount": "440000000",
+              "cost_amount": "0",
+              "funding_snapshot": "0",
+              "market_funding_per_size": "0",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "120000000000000000000025"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4199733333",
+              "cost_amount": "266667",
+              "funding_snapshot": "1333333333332",
+              "market_funding_per_size": "1333333333332",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "4399733333",
+              "cost_amount": "0",
+              "funding_snapshot": "1333333333332",
+              "market_funding_per_size": "1333333333332",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ],
+          [
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "419973333",
+              "cost_amount": "26667",
+              "funding_snapshot": "133333333334",
+              "market_funding_per_size": "133333333334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "210000000000000000000024"
+            },
+            {
+              "claimable_funding_amounts": [
+                "0",
+                "0"
+              ],
+              "claimable_snapshots": [
+                "0",
+                "0"
+              ],
+              "collateral_amount": "439973333",
+              "cost_amount": "0",
+              "funding_snapshot": "133333333334",
+              "market_funding_per_size": "133333333334",
+              "pending_claimable_amounts": [
+                "0",
+                "0"
+              ],
+              "pending_cost_amount": "0",
+              "size_usd20": "220000000000000000000031"
+            }
+          ]
+        ],
+        "status": "ok"
+      }
     }
   ],
   "generator": {
-    "input_sha256": "fad51dc1bb1913da2556bf702e44854eb7eb7111e24d959c2ebbc4aec4ff6f46",
+    "input_sha256": "bbd61a40cd88fb6dd7b4b961fa05fc29ee97db7fe70db4c0f0da175ced06ac83",
     "lock_sha256": "6b6160a8b9e1d1c1eaeb4a472852edb34fda1c8f5c4ff7188313f66f8924e346",
     "manifest_sha256": "1b952a339d1d8f65e83a897dc5b530421dd7f176335a3fa93cb131f98c95e93d",
     "rustc": "rustc 1.90.0 (1159e78c4 2025-09-14)",
-    "source_sha256": "095560203135765d57ce2ea8db8f8997941268d7dcf9a8f0fb4fdf5c79d3afc2"
+    "source_sha256": "68a1d4da5937df226ab91c3cf8eca972ac5b5eabd514547ccc7f637cb1d74cbe"
   },
   "reference": {
     "commit": "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72",
@@ -15326,7 +20248,8 @@
     "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)",
     "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)",
     "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)",
-    "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)"
+    "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)",
+    "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)"
   ],
   "units": {
     "factor_decimals": "20",

@@ -9,7 +9,10 @@ use std::{
 
 use gmsol_model::{
     params::{
-        fee::{BorrowingFeeKinkModelParamsForOneSide, BorrowingFeeParams, LiquidationFeeParams},
+        fee::{
+            BorrowingFeeKinkModelParamsForOneSide, BorrowingFeeParams, FundingFeeParams,
+            LiquidationFeeParams,
+        },
         FeeParams, PositionParams, PriceImpactParams,
     },
     pool::delta::BalanceChange,
@@ -17,8 +20,9 @@ use gmsol_model::{
     test::{TestMarket, TestMarketConfig, TestPosition},
     Balance, BalanceExt, BaseMarket, BaseMarketExt, BaseMarketMut, BorrowingFeeMarket,
     BorrowingFeeMarketExt, BorrowingFeeMarketMutExt, LiquidityMarketMutExt, MarketAction,
-    PerpMarketExt, PerpMarketMut, Pool, Position, PositionExt, PositionImpactMarketExt,
-    PositionImpactMarketMutExt, PositionMutExt, PositionState, PositionStateMut,
+    PerpMarket, PerpMarketExt, PerpMarketMut, PerpMarketMutExt, Pool, Position, PositionExt,
+    PositionImpactMarketExt, PositionImpactMarketMutExt, PositionMutExt, PositionState,
+    PositionStateMut,
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -45,6 +49,9 @@ struct Case {
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 enum Input {
+    FundingAccrual {
+        scenario: FundingInput,
+    },
     BorrowingAccrual {
         scenario: BorrowingInput,
     },
@@ -127,6 +134,161 @@ impl PricesInput {
             short_token_price: price(&self.short)?,
         })
     }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct FundingInput {
+    prices: PricesInput,
+    index_decimals: u8,
+    long_decimals: u8,
+    short_decimals: u8,
+    deposit_long_amount: String,
+    deposit_short_amount: String,
+    long_size_usd20: String,
+    short_size_usd20: String,
+    long_collateral_amount: String,
+    short_collateral_amount: String,
+    funding_factor: String,
+    max_factor_per_second: String,
+    elapsed_seconds: Vec<u64>,
+    next_size_usd20: String,
+    next_long_collateral_amount: String,
+    next_short_collateral_amount: String,
+}
+
+fn funding_accrual(input: &FundingInput) -> Result<Value> {
+    for value in [
+        input.index_decimals,
+        input.long_decimals,
+        input.short_decimals,
+    ] {
+        decimals(value)?;
+    }
+    if input.elapsed_seconds.is_empty() || input.elapsed_seconds.iter().any(|v| *v > 31_536_000) {
+        return Err("Expected nonempty funding intervals of at most one year each".into());
+    }
+    let long_size = uint(&input.long_size_usd20)?;
+    let short_size = uint(&input.short_size_usd20)?;
+    let next_size = uint(&input.next_size_usd20)?;
+    if long_size == 0 || short_size == 0 || next_size == 0 {
+        return Err("Expected nonzero funding position sizes".into());
+    }
+    let prices = input.prices.parse()?;
+    let mut config = TestMarketConfig::<u128, 20>::default();
+    let no_impact = PriceImpactParams::builder()
+        .exponent(UNIT)
+        .positive_factor(0)
+        .negative_factor(0)
+        .build();
+    let no_fee = FeeParams::builder()
+        .fee_receiver_factor(0)
+        .positive_impact_fee_factor(0)
+        .negative_impact_fee_factor(0)
+        .build();
+    config.position_impact_params = no_impact;
+    config.swap_impact_params = no_impact;
+    config.order_fee_params = no_fee;
+    config.swap_fee_params = no_fee;
+    config.funding_fee_params = FundingFeeParams::builder()
+        .exponent(UNIT)
+        .funding_factor(factor(&input.funding_factor)?)
+        .max_factor_per_second(factor(&input.max_factor_per_second)?)
+        .min_factor_per_second(0)
+        .increase_factor_per_second(0)
+        .decrease_factor_per_second(0)
+        .threshold_for_stable_funding(0)
+        .threshold_for_decrease_funding(0)
+        .build();
+    let mut market = TestMarket::<u128, 20>::with_config(config);
+    market
+        .deposit(
+            uint(&input.deposit_long_amount)?,
+            uint(&input.deposit_short_amount)?,
+            prices,
+        )?
+        .execute()?;
+    if market
+        .update_funding(&prices)?
+        .execute()?
+        .duration_in_seconds()
+        != 0
+    {
+        return Err("Expected funding clock initialization without elapsed time".into());
+    }
+    const MATRIX: [(bool, bool); 4] = [(true, true), (true, false), (false, true), (false, false)];
+    let mut positions = [
+        TestPosition::long(true),
+        TestPosition::long(false),
+        TestPosition::short(true),
+        TestPosition::short(false),
+    ];
+    let mut opened = Vec::new();
+    for (position, (is_long, is_long_collateral)) in positions.iter_mut().zip(MATRIX) {
+        let mut ops = position.ops(&mut market);
+        let report = ops
+            .increase(
+                prices,
+                uint(if is_long_collateral {
+                    &input.long_collateral_amount
+                } else {
+                    &input.short_collateral_amount
+                })?,
+                if is_long { long_size } else { short_size },
+                None,
+            )?
+            .execute()?;
+        opened.push(json!({"cost_amount":report.fees().total_cost_amount()?.to_string(),"size_tokens":ops.size_in_tokens().to_string(),"claimable_funding_amounts":[report.claimable_funding_amounts().0.to_string(),report.claimable_funding_amounts().1.to_string()]}));
+    }
+    let mut checkpoints = Vec::new();
+    for seconds in &input.elapsed_seconds {
+        market.move_clock_forward(Duration::from_secs(*seconds));
+        let report = market.update_funding(&prices)?.execute()?;
+        if report.duration_in_seconds() != *seconds {
+            return Err("Funding clock drift: rerun without wall-clock delay".into());
+        }
+        let mut deltas = Vec::new();
+        let mut pending = Vec::new();
+        for (position, (is_long, is_long_collateral)) in positions.iter_mut().zip(MATRIX) {
+            let fees = position.ops(&mut market).pending_funding_fees()?;
+            deltas.push(json!({"funding_per_size":report.delta_funding_amount_per_size(is_long,is_long_collateral).to_string(),"claimable_per_size":report.delta_claimable_funding_amount_per_size(is_long,is_long_collateral).to_string()}));
+            pending.push(json!({"cost_amount":fees.amount().to_string(),"claimable_amounts":[fees.claimable_long_token_amount().to_string(),fees.claimable_short_token_amount().to_string()]}));
+        }
+        checkpoints.push(json!({"elapsed_seconds":seconds,"next_factor_per_second":report.next_funding_factor_per_second().to_string(),"deltas":deltas,"pending":pending}));
+    }
+    let mut settlements = Vec::new();
+    for (position, (is_long, is_long_collateral)) in positions.iter_mut().zip(MATRIX) {
+        let mut attempts = Vec::new();
+        for _ in 0..2 {
+            let mut ops = position.ops(&mut market);
+            let report = ops
+                .increase(
+                    prices,
+                    uint(if is_long_collateral {
+                        &input.next_long_collateral_amount
+                    } else {
+                        &input.next_short_collateral_amount
+                    })?,
+                    next_size,
+                    None,
+                )?
+                .execute()?;
+            let pending = ops.pending_funding_fees()?;
+            attempts.push(json!({
+                "cost_amount":report.fees().total_cost_amount()?.to_string(),
+                "claimable_funding_amounts":[report.claimable_funding_amounts().0.to_string(),report.claimable_funding_amounts().1.to_string()],
+                "collateral_amount":ops.collateral_amount().to_string(),"size_usd20":ops.size_in_usd().to_string(),
+                "funding_snapshot":ops.funding_fee_amount_per_size().to_string(),
+                "claimable_snapshots":[ops.claimable_funding_fee_amount_per_size(true).to_string(),ops.claimable_funding_fee_amount_per_size(false).to_string()],
+                "pending_cost_amount":pending.amount().to_string(),"pending_claimable_amounts":[pending.claimable_long_token_amount().to_string(),pending.claimable_short_token_amount().to_string()],
+                "market_funding_per_size":ops.market().funding_fee_amount_per_size(is_long,is_long_collateral)?.to_string()
+            }));
+        }
+        settlements.push(attempts);
+    }
+    Ok(
+        json!({"status":"ok","adjustment":market.funding_amount_per_size_adjustment().to_string(),"opened":opened,"checkpoints":checkpoints,"settlements":settlements}),
+    )
 }
 
 #[derive(Deserialize)]
@@ -711,6 +873,7 @@ fn model_error(error: gmsol_model::Error) -> Value {
 
 fn evaluate(input: &Input) -> Result<Value> {
     match input {
+        Input::FundingAccrual { scenario } => funding_accrual(scenario),
         Input::BorrowingAccrual { scenario } => borrowing_accrual(scenario),
         Input::IncreaseImpact { scenario } => increase_impact(scenario),
         Input::LiquidationCheck { scenario } => liquidation_check(scenario, None),
@@ -893,7 +1056,7 @@ fn main() -> Result<()> {
             "rustc": String::from_utf8(rustc.stdout)?.trim()
         },
         "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
-        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)"],
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)"],
         "cases": cases
     });
     // Buffer all cases before writing stdout; callers must still publish output atomically.

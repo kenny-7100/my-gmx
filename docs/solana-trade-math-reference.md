@@ -1,6 +1,6 @@
 # Solana 交易数学差异与独立参考向量
 
-核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2c及b2d1累计借款费限定子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和159组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
+核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2d2限定数学子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和175组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
 
 ## 固定版本与证据范围
 
@@ -130,3 +130,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 固定TestMarket时钟为Instant加显式advanced时间。每次update报告的秒数必须与输入相等，否则整次拒绝且不发布JSON；不修改参考模型、不归一化时间。先格式化输入再生成两份，避免来源摘要变化。每段时间必填、非空且不超过一年；这是该工具的有限数学输入域，非生产协议时间限制。swap/order费用与impact为0，不调用funding update，其他reserve/minima/PnL/精度参数使用固定tag defaults；零claimable输出不证明真实资金费结算。
 
 最终159组两次字节一致、独立BigInt核算和51类非法输入/setup拒绝通过，SHA-256 `704e25b09cc11270b3aae815cf59cce6531e18682e918da07390fe6eb7225306`。EVM两文件55项/0skip/0联网尝试、Rust check/fmt、脚本lint/格式通过，完整命令及原生证据见[第五十四轮记录](solana-implementation-research.md#第五十四轮实施记录t17b2d1-累计借款费与增仓结算2026-10-28)。本轮无生产SDK/共享状态/UI接线，T17/FESOL-57仍实施中。下一轮从b2d2真实funding update及下一动作claimable report继续；kink/skip-smaller-side、累计费用清算边界、盈利状态、减仓/min-position/限额、程序折扣与rent/keeper转账及T19消费仍待，不能以本子集完成累计费用父范围。
+
+## T17.b2d2 线性funding累计与claimable报告子集（2026-10-28）
+
+同一生成器新增 `funding_accrual`，真实deposit后创建四仓位（long/short×两种抵押），初始化时钟、推进输入秒数、执行update_funding，再逐仓位两次真实增仓。16组覆盖两种付款方向×零时间、微量舍入、普通累计、零factor、平衡OI、rate封顶、零cap及分段累计；共18次funding update、128次后续增仓。旧159组输入/业务输出不变，总175组。固定tag来源不变，未使用WASM status或JS生成参考结果。
+
+本子集指数1、increase/decrease rate参数0，使用协议fallback funding factor并显式配置max rate。每side两种抵押的OI相等，side总OI为输入size的两倍。先按 `abs(longOI-shortOI)*UNIT/totalOI` 截断，再乘funding factor并以max cap封顶；funding USD值由payer OI×rate×seconds截断，按payer各抵押OI比例再次截断。两种抵押采用各自max价格，不能换成min；模型adjustment=10^10。payer先将 `value*adjustment*UNIT/该抵押payerOI` 向上取整，再除price向上取整；receiver按整个receiver side OI和price分别向下取整。pending再按仓位size解包，payer向上、claimable向下；独立BigInt核对每一步，避免把两次除法合并。
+
+每个receiver无论自身抵押类型，都能有long/short两种token claimable。首次下一动作report返回这两项并更新funding和两个claimable快照，pending归零；第二次在没有funding update时收费/claimable均0。按token比较总收费≥总claimable，余数不凭空分配。微量场景付款非零而两项领取均0，保留不同舍入；零时间/factor/cap及平衡OI场景实际均0。fallback模式stored next factor为0仍可累计非零funding，不能误把这个字段当实际rate。四仓位的下一动作顺序变化了OI，但没有再次update，因此不应追溯修改既有累计值。
+
+本轮只验证report应付数量与快照重置，**不是vault转账或真实钱包到账验收**。固定模型调用者必须使用report的claimable数量完成外部转账；本工具不广播/签名。borrow update未调用，order/swap费用和impact为0，其余固定tag test defaults保留。时间间隔显式、非空且各不超过一年；沿用秒级clock drift整次拒绝。动态funding rate、方向反转、不对称抵押OI、单边OI、累计费用清算、真实部署参数及付款仍未覆盖。
+
+两次输出字节一致，175组独立核算、60类非法输入/setup拒绝通过；JSON SHA-256 `cc9cc56273f6d4add742f24cecf6d54236c2c2408313c0954f5bc0421204c4f5`。EVM两文件55项、Rust check/fmt及脚本lint/格式通过，详见[第五十五轮记录](solana-implementation-research.md#第五十五轮实施记录t17b2d2-线性funding与claimable报告2026-10-28)。T17与b2d父范围仍实施中，下一轮优先T17.b2d3动态funding rate及方向反转，复用同一生成器补真实update路径；之后累计费用清算/减仓等余下矩阵。T19仍待完整矩阵/T04.b reviewed字段，未接生产SDK/共享状态/UI。

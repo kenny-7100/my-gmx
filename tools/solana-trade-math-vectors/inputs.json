@@ -8001,6 +8001,598 @@
           "next_collateral_amount": "20000000"
         }
       }
+    },
+    {
+      "id": "funding-longs-pay-no-elapsed",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "200000000000000000000017",
+          "short_size_usd20": "100000000000000000000011",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [0],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-longs-pay-tiny-rounding",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "200000000000000000000017",
+          "short_size_usd20": "100000000000000000000011",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "10000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [1],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-longs-pay-elapsed",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "200000000000000000000017",
+          "short_size_usd20": "100000000000000000000011",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-longs-pay-zero-factor",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "200000000000000000000017",
+          "short_size_usd20": "100000000000000000000011",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "0",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-longs-pay-balanced",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "100000000000000000000011",
+          "short_size_usd20": "100000000000000000000011",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-longs-pay-rate-capped",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "200000000000000000000017",
+          "short_size_usd20": "100000000000000000000011",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "1000000000000",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-longs-pay-zero-cap",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "200000000000000000000017",
+          "short_size_usd20": "100000000000000000000011",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "0",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-longs-pay-split-intervals",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "200000000000000000000017",
+          "short_size_usd20": "100000000000000000000011",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [17, 23],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-shorts-pay-no-elapsed",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "100000000000000000000011",
+          "short_size_usd20": "200000000000000000000017",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [0],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-shorts-pay-tiny-rounding",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "100000000000000000000011",
+          "short_size_usd20": "200000000000000000000017",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "10000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [1],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-shorts-pay-elapsed",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "100000000000000000000011",
+          "short_size_usd20": "200000000000000000000017",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-shorts-pay-zero-factor",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "100000000000000000000011",
+          "short_size_usd20": "200000000000000000000017",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "0",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-shorts-pay-balanced",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "100000000000000000000011",
+          "short_size_usd20": "100000000000000000000011",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-shorts-pay-rate-capped",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "100000000000000000000011",
+          "short_size_usd20": "200000000000000000000017",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "1000000000000",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-shorts-pay-zero-cap",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "100000000000000000000011",
+          "short_size_usd20": "200000000000000000000017",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "0",
+          "elapsed_seconds": [3600],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
+    },
+    {
+      "id": "funding-shorts-pay-split-intervals",
+      "input": {
+        "operation": "funding_accrual",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "long_size_usd20": "100000000000000000000011",
+          "short_size_usd20": "200000000000000000000017",
+          "long_collateral_amount": "4000000000",
+          "short_collateral_amount": "400000000",
+          "funding_factor": "100000000000017",
+          "max_factor_per_second": "100000000000000000000",
+          "elapsed_seconds": [17, 23],
+          "next_size_usd20": "10000000000000000000007",
+          "next_long_collateral_amount": "200000000",
+          "next_short_collateral_amount": "20000000"
+        }
+      }
     }
   ]
 }
