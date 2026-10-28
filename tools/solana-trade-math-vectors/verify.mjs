@@ -28,14 +28,16 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 347);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 347);
+assert.equal(reference.cases.length, 387);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 387);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const max = (...values) => values.reduce((a, b) => (a > b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
 const operations = {};
 let liquidationProbes = 0;
+let borrowingLiquidationProbes = 0;
+let borrowingLiquidationCheckpoints = 0;
 let increasePriceProbes = 0;
 let impactLiquidationProbes = 0;
 let kinkCheckpoints = 0;
@@ -703,6 +705,32 @@ function verifyLiquidation(c) {
     },
     c.id
   );
+  const borrowing = c.input.borrowing;
+  let pendingBorrowing = 0n;
+  let borrowingOutput;
+  if (borrowing) {
+    assert.equal(p.order_fee_factor, "0", c.id);
+    const reserved = p.is_long ? tokens * BigInt(p.entry_prices.index.max) : size;
+    const poolValue =
+      BigInt(p.is_long ? p.deposit_long_amount : p.deposit_short_amount) *
+      BigInt((p.is_long ? p.entry_prices.long : p.entry_prices.short).min);
+    const rate = (((reserved * unit) / poolValue) * BigInt(borrowing.factor)) / unit;
+    let cumulative = 0n;
+    const checkpoints = borrowing.elapsed_seconds.map((seconds) => {
+      const before = (size * cumulative) / unit;
+      cumulative += rate * BigInt(seconds);
+      pendingBorrowing = (size * cumulative) / unit;
+      return {
+        elapsed_seconds: seconds,
+        pending_before_update_usd20: String(before),
+        pending_after_update_usd20: String(pendingBorrowing),
+        long_cumulative_factor: String(p.is_long ? cumulative : 0n),
+        short_cumulative_factor: String(p.is_long ? 0n : cumulative),
+      };
+    });
+    borrowingOutput = { factor_per_second: String(rate), checkpoints, before_probes: [] };
+    borrowingLiquidationCheckpoints += checkpoints.length;
+  }
   const remaining = [];
   function reason(value, factor) {
     if (value < BigInt(p.min_collateral_usd20)) return "min collateral";
@@ -717,8 +745,17 @@ function verifyLiquidation(c) {
     assert(pnl < 0n, c.id);
     const collateralPrice = BigInt((p.is_long_collateral ? prices.long : prices.short).min);
     const collateralValue = collateralAmount * collateralPrice;
-    const cost = feeValue / collateralPrice;
+    const cost = feeValue / collateralPrice + pendingBorrowing / collateralPrice;
     const value = collateralValue + pnl + effectiveImpact - cost * collateralPrice;
+    if (borrowing) {
+      assert.deepEqual(prices.long, p.entry_prices.long, c.id);
+      assert.deepEqual(prices.short, p.entry_prices.short, c.id);
+      const before = collateralValue + pnl - (feeValue / collateralPrice) * collateralPrice;
+      borrowingOutput.before_probes.push({
+        reason: reason(before, p.liquidation_collateral_factor ?? p.min_collateral_factor),
+        margin_reason: reason(before, p.min_collateral_factor),
+      });
+    }
     remaining.push(value);
     const liquidation = reason(value, p.liquidation_collateral_factor ?? p.min_collateral_factor);
     const margin = reason(value, p.min_collateral_factor);
@@ -737,7 +774,13 @@ function verifyLiquidation(c) {
   });
   assert.deepEqual(
     c.output,
-    { status: "ok", opened: c.output.opened, probes, ...(impact ? { state: c.output.state } : {}) },
+    {
+      status: "ok",
+      opened: c.output.opened,
+      probes,
+      ...(impact ? { state: c.output.state } : {}),
+      ...(borrowing ? { borrowing: borrowingOutput } : {}),
+    },
     c.id
   );
   // These are three adjacent raw price units around an analytically derived boundary,
@@ -771,8 +814,24 @@ function verifyLiquidation(c) {
     );
   }
   if (c.id.endsWith("-liquidation-fee-excluded")) {
-    const peer = reference.cases.find((v) => v.id === c.id.replace("-liquidation-fee-excluded", "-closing-fee"));
+    const peer = reference.cases.find(
+      (v) => v.id === c.id.replace("-liquidation-fee-excluded", borrowing ? "-leverage" : "-closing-fee")
+    );
     assert.deepEqual(c.output, peer.output, c.id);
+  }
+  if (borrowing) {
+    borrowingLiquidationProbes += probes.length;
+    if (c.id.includes("-accrued-")) {
+      assert(pendingBorrowing > 0n, c.id);
+      assert(
+        probes.some(
+          (v, i) =>
+            v.reason !== borrowingOutput.before_probes[i].reason ||
+            v.margin_reason !== borrowingOutput.before_probes[i].margin_reason
+        ),
+        c.id
+      );
+    } else assert.equal(pendingBorrowing, 0n, c.id);
   }
   liquidationProbes += probes.length;
   if (impact) impactLiquidationProbes += probes.length;
@@ -806,7 +865,7 @@ for (let index = 0; index < reference.cases.length; index++) {
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
   }
-  if (p.operation === "liquidation_check" || p.operation === "liquidation_impact") {
+  if (["liquidation_check", "liquidation_impact", "liquidation_borrowing"].includes(p.operation)) {
     verifyLiquidation(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
@@ -1249,6 +1308,32 @@ try {
       delete s.cases[287].input.params;
     }
   );
+  invalid.push(
+    (s) => {
+      s.cases[347].input.borrowing.factor = String(unit + 1n);
+    },
+    (s) => {
+      s.cases[347].input.borrowing.factor = "01";
+    },
+    (s) => {
+      delete s.cases[347].input.borrowing.elapsed_seconds;
+    },
+    (s) => {
+      s.cases[347].input.borrowing.elapsed_seconds = [];
+    },
+    (s) => {
+      s.cases[347].input.borrowing.elapsed_seconds = [31536001];
+    },
+    (s) => {
+      s.cases[347].input.borrowing.unknown = true;
+    },
+    (s) => {
+      delete s.cases[347].input.borrowing;
+    },
+    (s) => {
+      s.cases[347].input.scenario.probe_prices.at(-1).index.min = "0";
+    }
+  );
   for (const mutate of invalid) {
     const suite = structuredClone(inputs);
     mutate(suite);
@@ -1289,6 +1374,8 @@ process.stdout.write(
       cases: reference.cases.length,
       operations,
       liquidationProbes,
+      borrowingLiquidationProbes,
+      borrowingLiquidationCheckpoints,
       increasePriceProbes,
       impactLiquidationProbes,
       kinkCheckpoints,

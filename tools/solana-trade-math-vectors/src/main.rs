@@ -49,6 +49,10 @@ struct Case {
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 enum Input {
+    LiquidationBorrowing {
+        scenario: LiquidationInput,
+        borrowing: LiquidationBorrowingInput,
+    },
     BorrowingKink {
         scenario: BorrowingInput,
         params: BorrowingKinkInput,
@@ -1068,9 +1072,17 @@ fn increase_impact(input: &IncreaseInput) -> Result<Value> {
     )
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LiquidationBorrowingInput {
+    factor: String,
+    elapsed_seconds: Vec<u64>,
+}
+
 fn liquidation_check(
     input: &LiquidationInput,
     impact: Option<&LiquidationImpactInput>,
+    borrowing: Option<&LiquidationBorrowingInput>,
 ) -> Result<Value> {
     for value in [
         input.index_decimals,
@@ -1118,7 +1130,7 @@ fn liquidation_check(
                 .unwrap_or(0),
         )
         .build();
-    // Legacy zero-impact cases remain unchanged. Neither subset advances the clock.
+    // Existing operations retain their original clock behavior.
     let no_impact = PriceImpactParams::builder()
         .exponent(UNIT)
         .positive_factor(0)
@@ -1148,6 +1160,29 @@ fn liquidation_check(
         .factor(factor(&input.liquidation_fee_factor)?)
         .receiver_factor(0)
         .build();
+    if let Some(borrowing) = borrowing {
+        if borrowing.elapsed_seconds.is_empty()
+            || borrowing.elapsed_seconds.iter().any(|v| *v > 31_536_000)
+        {
+            return Err(
+                "Expected nonempty borrowing liquidation intervals of at most one year".into(),
+            );
+        }
+        let rate = factor(&borrowing.factor)?;
+        config.borrowing_fee_params = BorrowingFeeParams::builder()
+            .receiver_factor(0)
+            .exponent_for_long(UNIT)
+            .exponent_for_short(UNIT)
+            .factor_for_long(rate)
+            .factor_for_short(rate)
+            .skip_borrowing_fee_for_smaller_side(false)
+            .build();
+        config.borrowing_fee_kink_model_params = BorrowingFeeKinkModelParamsForOneSide::builder()
+            .optimal_usage_factor(0)
+            .base_borrowing_factor(0)
+            .above_optimal_usage_borrowing_factor(0)
+            .build();
+    }
     let mut market = TestMarket::<u128, 20>::with_config(config);
     market
         .deposit(
@@ -1156,6 +1191,14 @@ fn liquidation_check(
             entry,
         )?
         .execute()?;
+    if borrowing.is_some() {
+        let report = market.update_borrowing(&entry)?.execute()?;
+        if report.duration_in_seconds() != 0 {
+            return Err(
+                "Expected borrowing liquidation clock initialization without elapsed time".into(),
+            );
+        }
+    }
     let mut position = if input.is_long {
         TestPosition::long(input.is_long_collateral)
     } else {
@@ -1204,6 +1247,37 @@ fn liquidation_check(
         "short_oi_usd20": market.open_interest()?.short_amount()?.to_string(),
         "opposite_report": opposite_report
     });
+    let mut borrowing_output = Value::Null;
+    if let Some(borrowing) = borrowing {
+        let mut before_probes = Vec::new();
+        for prices in &probes {
+            let ops = position.ops(&mut market);
+            before_probes.push(json!({
+                "reason": ops.check_liquidatable(prices, true, true)?.map(|v| v.to_string()),
+                "margin_reason": ops.check_liquidatable(prices, true, false)?.map(|v| v.to_string())
+            }));
+        }
+        let rate = market.borrowing_factor_per_second(input.is_long, &entry)?;
+        let mut checkpoints = Vec::new();
+        for seconds in &borrowing.elapsed_seconds {
+            market.move_clock_forward(Duration::from_secs(*seconds));
+            let pending_before = position.ops(&mut market).pending_borrowing_fee_value()?;
+            let report = market.update_borrowing(&entry)?.execute()?;
+            if report.duration_in_seconds() != *seconds {
+                return Err(
+                    "Borrowing liquidation clock drift: rerun without wall-clock delay".into(),
+                );
+            }
+            checkpoints.push(json!({
+                "elapsed_seconds": seconds,
+                "pending_before_update_usd20": pending_before.to_string(),
+                "pending_after_update_usd20": position.ops(&mut market).pending_borrowing_fee_value()?.to_string(),
+                "long_cumulative_factor": report.next_cumulative_borrowing_factor(true).to_string(),
+                "short_cumulative_factor": report.next_cumulative_borrowing_factor(false).to_string()
+            }));
+        }
+        borrowing_output = json!({"factor_per_second": rate.to_string(), "before_probes": before_probes, "checkpoints": checkpoints});
+    }
     let ops = position.ops(&mut market);
     let include_impact = impact.is_some();
     let mut results = Vec::new();
@@ -1261,6 +1335,9 @@ fn liquidation_check(
     let mut output = json!({"status": "ok", "opened": opened, "probes": results});
     if include_impact {
         output["state"] = state;
+    }
+    if borrowing.is_some() {
+        output["borrowing"] = borrowing_output;
     }
     Ok(output)
 }
@@ -1351,8 +1428,14 @@ fn evaluate(input: &Input) -> Result<Value> {
         Input::BorrowingAccrual { scenario } => borrowing_accrual(scenario, None),
         Input::BorrowingKink { scenario, params } => borrowing_accrual(scenario, Some(params)),
         Input::IncreaseImpact { scenario } => increase_impact(scenario),
-        Input::LiquidationCheck { scenario } => liquidation_check(scenario, None),
-        Input::LiquidationImpact { scenario, impact } => liquidation_check(scenario, Some(impact)),
+        Input::LiquidationBorrowing {
+            scenario,
+            borrowing,
+        } => liquidation_check(scenario, None, Some(borrowing)),
+        Input::LiquidationCheck { scenario } => liquidation_check(scenario, None, None),
+        Input::LiquidationImpact { scenario, impact } => {
+            liquidation_check(scenario, Some(impact), None)
+        }
         Input::Fee {
             amount,
             positive_factor,
@@ -1531,7 +1614,7 @@ fn main() -> Result<()> {
             "rustc": String::from_utf8(rustc.stdout)?.trim()
         },
         "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case or documented per-operation fixtures", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
-        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement", "Mixed-collateral dynamic reversal funding and two-token claimable settlement", "Borrowing kink usage boundaries and strict smaller-side skipping"],
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement", "Mixed-collateral dynamic reversal funding and two-token claimable settlement", "Borrowing kink usage boundaries and strict smaller-side skipping", "Liquidation predicates after real borrowing accrual"],
         "cases": cases
     });
     // Buffer all cases before writing stdout; callers must still publish output atomically.

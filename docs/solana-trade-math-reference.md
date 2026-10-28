@@ -1,14 +1,14 @@
 # Solana 交易数学差异与独立参考向量
 
-核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2d2限定数学子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和175组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
+核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2d9限定数学子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和387组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
 
 ## 固定版本与证据范围
 
-- 权威需求实时抓取于 `2026-10-27T22:08:38.596Z`，updatedAt `2026-10-25T23:43:47.128Z`，已包含正文、关系和 1 条评论，无 GMTrade 标签。评论询问计算与共享结构，没有新增已确认行为。
+- 首轮权威需求实时抓取于 `2026-10-27T22:08:38.596Z`，updatedAt `2026-10-25T23:43:47.128Z`，已包含正文、关系和 1 条评论，无 GMTrade 标签。评论询问计算与共享结构，没有新增已确认行为。
 - 需求指定协议 [v0.10.0](https://github.com/gmsol-labs/gmx-solana/tree/7ce035b41a266cb5ddb0192e5d29deb0c7e67a72)；本地 `v0.10.0^{commit}` 和在线 GitHub tag ref 均为 `7ce035b41a266cb5ddb0192e5d29deb0c7e67a72`。下文 Rust 路径/函数均按此提交读取，不能按本地 HEAD 的行号定位。
 - 本地 `gmx-solana` HEAD 为 `f102501f30635062fac156ca05831c0fb63a8590`。其 model 相对 tag 有 4 文件、223 行新增/8 行删除，涉及 fee credit 和 decrease；不能用 HEAD 生成值后标为 v0.10.0。
 - 本机 npm WASM `0.9.0-test.2` 是另一版本。现有 [基础向量入口](solana-sdk-vectors.md) 仅验证 `apply_factor`，Python 生成器和 WASM 输出都不能替代本需求的独立 Rust model 业务参考值。
-- 本轮在线 release 为 `d4b8c32147dd604d8d062d76c00a75ec4f0bbb7a`；其递归 tree 中没有 `sdk/src/utils/gmsol/`。以 FESOL-57 查询 PR 仅返回已合并的静态配置 #3111；补查 open Solana math 返回价格 #3138，无直接数学实现命中。这是限定搜索结果，不代表所有分支均无工作；实施 T19 前仍须增量核对。
+- 首轮核对的在线 release 为 `d4b8c32147dd604d8d062d76c00a75ec4f0bbb7a`；其递归 tree 中没有 `sdk/src/utils/gmsol/`。以 FESOL-57 查询 PR 仅返回已合并的静态配置 #3111；补查 open Solana math 返回价格 #3138，无直接数学实现命中。这是限定搜索结果，不代表所有分支均无工作；实施 T19 前仍须增量核对。
 - 本轮只读源码与元数据，不证明链上部署、API、WASM 与 tag 一致。未同步/合并参考仓库或上游。
 
 ## 差异、共享入口和验收矩阵
@@ -212,3 +212,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 总347组两次字节一致、独立BigInt核算、111类非法输入/setup拒绝通过；旧287组输入/业务输出不变，JSON SHA-256 `482c2c0a4d55785f38ca390104d527ce2440adf9562076dd89f6554f2f8db41e`。Rust check/fmt无warning，脚本lint/格式及本轮EVM费用/仓位55项通过，命令和原生证据见[第六十一轮记录](solana-implementation-research.md#第六十一轮实施记录t17b2d8-borrowing-kink与较小侧跳过2026-10-28)。
 
 下一轮T17.b2d9累计借款费后清算边界，核对pending与清算predicate，再补相邻价格；累计funding清算、动态OI跳过转换、完整减仓及费用退款等仍待。没有生产SDK/共享状态/UI接线或真实转账验收，T17/b2d父项及整个集成未完成，T19仍待完整矩阵/T04.b reviewed字段。
+
+## T17.b2d9 累计借款费后清算边界子集（2026-10-28）
+
+新增 `liquidation_borrowing`，复用既有清算真实开仓及 `check_liquidatable`，显式borrowing factor/非空elapsed intervals。存入流动性后先初始化clock，再开仓、按entry prices推进时钟/执行线性borrow update；不结算费用或覆写仓位快照。kink禁用，skip-smaller-side=false，开仓order fee与impact均零。原清算操作不推进时钟且输出不变。
+
+40组为两side×两抵押token×零时间/17+10000秒×leverage/minimum/nonpositive/margin/liquidation-fee-excluded五种profile，共60次update、120个相邻原始价格点。每组保持抵押token价格不变，只变index价格；固定tokens下剩余价值对index price为仿射关系，BigInt独立推导阈值及前后各一单位。该fixture不假设真实资产相关性，也不证明通用单调清算函数或一般二分求解器。
+
+核对固定model `position.rs::position_fees/check_liquidatable`：清算使用stored cumulative对应的pending borrowing，按collateral min price转为raw整数后扣价值；不使用尚未update的clock投影，也不将liquidation fee加入触发成本。独立核对累计前同价格的三组reason、每步pending before/after及两side累计、最终closing cost、liquidation与margin reason。20组非零累计各自至少一项reason相较累计前改变；另20组零时间对照保留。25% liquidation fee组与同side/collateral/interval的零liquidation fee leverage组输出完全一致，避免把执行清算成本混进触发判断。
+
+总387组两次字节一致、独立核算、119类非法输入/setup拒绝通过；旧347组输入/业务输出不变，JSON SHA-256 `177c0232b57163e9081d8c29a4143227299599b866d27106f35e51758e5f93b3`。Rust check/fmt无warning、脚本lint/格式及本轮EVM费用/仓位55项通过，详见[第六十二轮记录](solana-implementation-research.md#第六十二轮实施记录t17b2d9-累计借款费后清算边界2026-10-28)。不执行清算或真实付款，尚未覆盖借款费与funding/impact组合、非零opening fee、盈利状态及抵押价格联动。
+
+下一轮T17.b2d10累计funding应付/claimable的清算语义，先核对真实predicate如何计入应付、是否计入可领取部分，再复用参考路径补限定边界。T17/b2d父项及整个集成未完成，T19仍需完整矩阵与T04.b reviewed字段；无生产SDK/共享状态/UI接线。
