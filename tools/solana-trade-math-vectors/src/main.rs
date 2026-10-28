@@ -49,6 +49,10 @@ struct Case {
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 enum Input {
+    LiquidationFunding {
+        scenario: LiquidationInput,
+        funding: LiquidationFundingInput,
+    },
     LiquidationBorrowing {
         scenario: LiquidationInput,
         borrowing: LiquidationBorrowingInput,
@@ -1079,10 +1083,21 @@ struct LiquidationBorrowingInput {
     elapsed_seconds: Vec<u64>,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LiquidationFundingInput {
+    factor: String,
+    max_factor_per_second: String,
+    elapsed_seconds: Vec<u64>,
+    opposite_sizes_usd20: [String; 2],
+    opposite_collateral_amounts: [String; 2],
+}
+
 fn liquidation_check(
     input: &LiquidationInput,
     impact: Option<&LiquidationImpactInput>,
     borrowing: Option<&LiquidationBorrowingInput>,
+    funding: Option<&LiquidationFundingInput>,
 ) -> Result<Value> {
     for value in [
         input.index_decimals,
@@ -1183,6 +1198,25 @@ fn liquidation_check(
             .above_optimal_usage_borrowing_factor(0)
             .build();
     }
+    if let Some(funding) = funding {
+        if funding.elapsed_seconds.is_empty()
+            || funding.elapsed_seconds.iter().any(|v| *v > 31_536_000)
+        {
+            return Err(
+                "Expected nonempty funding liquidation intervals of at most one year".into(),
+            );
+        }
+        config.funding_fee_params = FundingFeeParams::builder()
+            .exponent(UNIT)
+            .funding_factor(factor(&funding.factor)?)
+            .max_factor_per_second(factor(&funding.max_factor_per_second)?)
+            .min_factor_per_second(0)
+            .increase_factor_per_second(0)
+            .decrease_factor_per_second(0)
+            .threshold_for_stable_funding(0)
+            .threshold_for_decrease_funding(0)
+            .build();
+    }
     let mut market = TestMarket::<u128, 20>::with_config(config);
     market
         .deposit(
@@ -1198,6 +1232,17 @@ fn liquidation_check(
                 "Expected borrowing liquidation clock initialization without elapsed time".into(),
             );
         }
+    }
+    if funding.is_some()
+        && market
+            .update_funding(&entry)?
+            .execute()?
+            .duration_in_seconds()
+            != 0
+    {
+        return Err(
+            "Expected funding liquidation clock initialization without elapsed time".into(),
+        );
     }
     let mut position = if input.is_long {
         TestPosition::long(input.is_long_collateral)
@@ -1241,6 +1286,63 @@ fn liquidation_check(
                 "claimable_funding_amounts": [report.claimable_funding_amounts().0.to_string(), report.claimable_funding_amounts().1.to_string()]
             });
         }
+    }
+    let mut funding_output = Value::Null;
+    if let Some(funding) = funding {
+        for (index, collateral_long) in [true, false].into_iter().enumerate() {
+            let size = uint(&funding.opposite_sizes_usd20[index])?;
+            if size == 0 {
+                return Err("Expected nonzero opposite funding sizes".into());
+            }
+            let mut opposite = if input.is_long {
+                TestPosition::short(collateral_long)
+            } else {
+                TestPosition::long(collateral_long)
+            };
+            let report = opposite
+                .ops(&mut market)
+                .increase(
+                    entry,
+                    uint(&funding.opposite_collateral_amounts[index])?,
+                    size,
+                    None,
+                )?
+                .execute()?;
+            if report.fees().total_cost_amount()? != 0
+                || report.claimable_funding_amounts() != (&0, &0)
+            {
+                return Err("Expected opposite funding opening without cost or claims".into());
+            }
+        }
+        let mut before_probes = Vec::new();
+        for prices in &probes {
+            let ops = position.ops(&mut market);
+            before_probes.push(json!({
+                "reason": ops.check_liquidatable(prices, true, true)?.map(|v| v.to_string()),
+                "margin_reason": ops.check_liquidatable(prices, true, false)?.map(|v| v.to_string())
+            }));
+        }
+        let mut checkpoints = Vec::new();
+        for seconds in &funding.elapsed_seconds {
+            market.move_clock_forward(Duration::from_secs(*seconds));
+            let before = position.ops(&mut market).pending_funding_fees()?;
+            let report = market.update_funding(&entry)?.execute()?;
+            if report.duration_in_seconds() != *seconds {
+                return Err(
+                    "Funding liquidation clock drift: rerun without wall-clock delay".into(),
+                );
+            }
+            let after = position.ops(&mut market).pending_funding_fees()?;
+            let mut deltas = Vec::new();
+            for (side, col) in [(true, true), (true, false), (false, true), (false, false)] {
+                deltas.push(json!({"funding_per_size":report.delta_funding_amount_per_size(side,col).to_string(),"claimable_per_size":report.delta_claimable_funding_amount_per_size(side,col).to_string()}));
+            }
+            checkpoints.push(json!({"elapsed_seconds":seconds,"deltas":deltas,
+                "pending_before":{"cost_amount":before.amount().to_string(),"claimable_amounts":[before.claimable_long_token_amount().to_string(),before.claimable_short_token_amount().to_string()]},
+                "pending_after":{"cost_amount":after.amount().to_string(),"claimable_amounts":[after.claimable_long_token_amount().to_string(),after.claimable_short_token_amount().to_string()]}
+            }));
+        }
+        funding_output = json!({"before_probes":before_probes,"checkpoints":checkpoints});
     }
     let state = json!({
         "long_oi_usd20": market.open_interest()?.long_amount()?.to_string(),
@@ -1339,6 +1441,9 @@ fn liquidation_check(
     if borrowing.is_some() {
         output["borrowing"] = borrowing_output;
     }
+    if funding.is_some() {
+        output["funding"] = funding_output;
+    }
     Ok(output)
 }
 
@@ -1431,10 +1536,13 @@ fn evaluate(input: &Input) -> Result<Value> {
         Input::LiquidationBorrowing {
             scenario,
             borrowing,
-        } => liquidation_check(scenario, None, Some(borrowing)),
-        Input::LiquidationCheck { scenario } => liquidation_check(scenario, None, None),
+        } => liquidation_check(scenario, None, Some(borrowing), None),
+        Input::LiquidationFunding { scenario, funding } => {
+            liquidation_check(scenario, None, None, Some(funding))
+        }
+        Input::LiquidationCheck { scenario } => liquidation_check(scenario, None, None, None),
         Input::LiquidationImpact { scenario, impact } => {
-            liquidation_check(scenario, Some(impact), None)
+            liquidation_check(scenario, Some(impact), None, None)
         }
         Input::Fee {
             amount,
@@ -1614,7 +1722,7 @@ fn main() -> Result<()> {
             "rustc": String::from_utf8(rustc.stdout)?.trim()
         },
         "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case or documented per-operation fixtures", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
-        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement", "Mixed-collateral dynamic reversal funding and two-token claimable settlement", "Borrowing kink usage boundaries and strict smaller-side skipping", "Liquidation predicates after real borrowing accrual"],
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement", "Mixed-collateral dynamic reversal funding and two-token claimable settlement", "Borrowing kink usage boundaries and strict smaller-side skipping", "Liquidation predicates after real borrowing accrual", "Funding payer costs and uncredited claimables in liquidation predicates"],
         "cases": cases
     });
     // Buffer all cases before writing stdout; callers must still publish output atomically.

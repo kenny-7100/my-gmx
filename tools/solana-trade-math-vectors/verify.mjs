@@ -28,14 +28,16 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 387);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 387);
+assert.equal(reference.cases.length, 435);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 435);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const max = (...values) => values.reduce((a, b) => (a > b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
 const operations = {};
 let liquidationProbes = 0;
+let fundingLiquidationProbes = 0;
+let fundingLiquidationCheckpoints = 0;
 let borrowingLiquidationProbes = 0;
 let borrowingLiquidationCheckpoints = 0;
 let increasePriceProbes = 0;
@@ -731,6 +733,68 @@ function verifyLiquidation(c) {
     borrowingOutput = { factor_per_second: String(rate), checkpoints, before_probes: [] };
     borrowingLiquidationCheckpoints += checkpoints.length;
   }
+  const funding = c.input.funding;
+  let fundingCost = 0n,
+    fundingOutput;
+  if (funding) {
+    assert.equal(p.order_fee_factor, "0", c.id);
+    const opp = funding.opposite_sizes_usd20.map(BigInt),
+      opposite = opp[0] + opp[1];
+    const targetPays = size > opposite,
+      payer = targetPays ? size : opposite,
+      receiver = targetPays ? opposite : size;
+    const longsPay = targetPays === p.is_long;
+    const rate = min(
+      ((((payer - receiver) * unit) / (payer + receiver)) * BigInt(funding.factor)) / unit,
+      BigInt(funding.max_factor_per_second)
+    );
+    const collateralOi = targetPays ? (p.is_long_collateral ? [size, 0n] : [0n, size]) : opp;
+    const scale = 10n ** 30n,
+      fees = [0n, 0n, 0n, 0n],
+      claims = [0n, 0n, 0n, 0n];
+    const targetIndex = p.is_long ? 0 : 2,
+      targetCol = p.is_long_collateral ? 0 : 1;
+    const pending = () => ({
+      cost_amount: String(ceil(size * fees[targetIndex + targetCol], scale)),
+      claimable_amounts: [
+        String((size * claims[targetIndex]) / scale),
+        String((size * claims[targetIndex + 1]) / scale),
+      ],
+    });
+    const checkpoints = funding.elapsed_seconds.map((seconds) => {
+      const before = pending(),
+        value = (payer * rate * BigInt(seconds)) / unit;
+      const deltas = [true, true, false, false].map((side, i) => {
+        const col = i % 2,
+          share = (value * collateralOi[col]) / payer,
+          price = BigInt((col === 0 ? p.entry_prices.long : p.entry_prices.short).max);
+        return {
+          funding_per_size: String(
+            side === longsPay && collateralOi[col] > 0n ? ceil(ceil(share * scale, collateralOi[col]), price) : 0n
+          ),
+          claimable_per_size: String(side !== longsPay ? (share * scale) / receiver / price : 0n),
+        };
+      });
+      deltas.forEach((d, i) => {
+        fees[i] += BigInt(d.funding_per_size);
+        claims[i] += BigInt(d.claimable_per_size);
+      });
+      return { elapsed_seconds: seconds, deltas, pending_before: before, pending_after: pending() };
+    });
+    fundingCost = BigInt(pending().cost_amount);
+    fundingOutput = { before_probes: [], checkpoints };
+    fundingLiquidationCheckpoints += checkpoints.length;
+    if (c.id.includes("-accrued-")) {
+      if (targetPays) assert(fundingCost > 0n, c.id);
+      else {
+        assert.equal(fundingCost, 0n, c.id);
+        assert(
+          pending().claimable_amounts.every((v) => BigInt(v) > 0n),
+          c.id
+        );
+      }
+    } else assert.deepEqual(pending(), { cost_amount: "0", claimable_amounts: ["0", "0"] }, c.id);
+  }
   const remaining = [];
   function reason(value, factor) {
     if (value < BigInt(p.min_collateral_usd20)) return "min collateral";
@@ -745,13 +809,13 @@ function verifyLiquidation(c) {
     assert(pnl < 0n, c.id);
     const collateralPrice = BigInt((p.is_long_collateral ? prices.long : prices.short).min);
     const collateralValue = collateralAmount * collateralPrice;
-    const cost = feeValue / collateralPrice + pendingBorrowing / collateralPrice;
+    const cost = feeValue / collateralPrice + pendingBorrowing / collateralPrice + fundingCost;
     const value = collateralValue + pnl + effectiveImpact - cost * collateralPrice;
-    if (borrowing) {
+    if (borrowing || funding) {
       assert.deepEqual(prices.long, p.entry_prices.long, c.id);
       assert.deepEqual(prices.short, p.entry_prices.short, c.id);
       const before = collateralValue + pnl - (feeValue / collateralPrice) * collateralPrice;
-      borrowingOutput.before_probes.push({
+      (borrowingOutput ?? fundingOutput).before_probes.push({
         reason: reason(before, p.liquidation_collateral_factor ?? p.min_collateral_factor),
         margin_reason: reason(before, p.min_collateral_factor),
       });
@@ -780,6 +844,7 @@ function verifyLiquidation(c) {
       probes,
       ...(impact ? { state: c.output.state } : {}),
       ...(borrowing ? { borrowing: borrowingOutput } : {}),
+      ...(funding ? { funding: fundingOutput } : {}),
     },
     c.id
   );
@@ -833,6 +898,13 @@ function verifyLiquidation(c) {
       );
     } else assert.equal(pendingBorrowing, 0n, c.id);
   }
+  if (funding) {
+    fundingLiquidationProbes += probes.length;
+    const before = fundingOutput.before_probes;
+    const changed = probes.some((v, i) => v.reason !== before[i].reason || v.margin_reason !== before[i].margin_reason);
+    if (c.id.includes("-payer-accrued-")) assert(changed, c.id);
+    else assert.equal(changed, false, c.id);
+  }
   liquidationProbes += probes.length;
   if (impact) impactLiquidationProbes += probes.length;
 }
@@ -865,7 +937,9 @@ for (let index = 0; index < reference.cases.length; index++) {
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
   }
-  if (["liquidation_check", "liquidation_impact", "liquidation_borrowing"].includes(p.operation)) {
+  if (
+    ["liquidation_check", "liquidation_impact", "liquidation_borrowing", "liquidation_funding"].includes(p.operation)
+  ) {
     verifyLiquidation(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
@@ -1334,6 +1408,35 @@ try {
       s.cases[347].input.scenario.probe_prices.at(-1).index.min = "0";
     }
   );
+  invalid.push(
+    (s) => {
+      s.cases[387].input.funding.factor = String(unit + 1n);
+    },
+    (s) => {
+      delete s.cases[387].input.funding.max_factor_per_second;
+    },
+    (s) => {
+      s.cases[387].input.funding.elapsed_seconds = [];
+    },
+    (s) => {
+      s.cases[387].input.funding.elapsed_seconds = [31536001];
+    },
+    (s) => {
+      s.cases[387].input.funding.opposite_sizes_usd20[0] = "0";
+    },
+    (s) => {
+      s.cases[387].input.funding.opposite_sizes_usd20.pop();
+    },
+    (s) => {
+      s.cases[387].input.funding.opposite_collateral_amounts[1] = "01";
+    },
+    (s) => {
+      s.cases[387].input.funding.unknown = true;
+    },
+    (s) => {
+      delete s.cases[387].input.funding;
+    }
+  );
   for (const mutate of invalid) {
     const suite = structuredClone(inputs);
     mutate(suite);
@@ -1374,6 +1477,8 @@ process.stdout.write(
       cases: reference.cases.length,
       operations,
       liquidationProbes,
+      fundingLiquidationProbes,
+      fundingLiquidationCheckpoints,
       borrowingLiquidationProbes,
       borrowingLiquidationCheckpoints,
       increasePriceProbes,

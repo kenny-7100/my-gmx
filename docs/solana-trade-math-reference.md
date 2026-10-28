@@ -1,6 +1,6 @@
 # Solana 交易数学差异与独立参考向量
 
-核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2d9限定数学子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和387组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
+核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2d10限定数学子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和435组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
 
 ## 固定版本与证据范围
 
@@ -224,3 +224,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 总387组两次字节一致、独立核算、119类非法输入/setup拒绝通过；旧347组输入/业务输出不变，JSON SHA-256 `177c0232b57163e9081d8c29a4143227299599b866d27106f35e51758e5f93b3`。Rust check/fmt无warning、脚本lint/格式及本轮EVM费用/仓位55项通过，详见[第六十二轮记录](solana-implementation-research.md#第六十二轮实施记录t17b2d9-累计借款费后清算边界2026-10-28)。不执行清算或真实付款，尚未覆盖借款费与funding/impact组合、非零opening fee、盈利状态及抵押价格联动。
 
 下一轮T17.b2d10累计funding应付/claimable的清算语义，先核对真实predicate如何计入应付、是否计入可领取部分，再复用参考路径补限定边界。T17/b2d父项及整个集成未完成，T19仍需完整矩阵与T04.b reviewed字段；无生产SDK/共享状态/UI接线。
+
+## T17.b2d10 累计funding应付与claimable清算子集（2026-10-28）
+
+新增 `liquidation_funding`，复用真实deposit/increase与清算predicate；显式funding factor/max、非空interval及两种抵押的opposite size/collateral。先初始化funding clock，开目标仓及两个真实对侧仓，再按entry prices推进时钟/执行fallback funding update，不覆写OI、累计或仓位快照。无borrowing update、opening order fee或impact，也不执行清算/claims结算。
+
+48组为两目标side×两抵押token×payer/receiver×零时间/17+10000秒×leverage/minimum/margin三profile，共72次update和144个相邻index价格点；固定collateral价格，独立BigInt推导仿射阈值。每step核对四维分配/packing delta及目标仓pending before/after，payer按collateral OI先floor、packing两次ceil，receiver两次floor，仓位按累计解包。对应model `PositionFees::total_cost_amount` 加入funding amount，但不扣除claims；`check_liquidatable` 只从抵押价值扣total cost，不加入claims。
+
+12组非零累计付款仓均至少改变一个liquidation/margin reason；12组非零累计接收仓均有两种非零claimable但reason与同价格累计前完全一致，24组零时间对照不变。可领取资金费并不自动改善未结算仓位的清算条件；不将模型应领报告当成实际付款。这里只验证单一付款方向，尚未覆盖同仓同时应付/应领、borrow/funding组合或非零impact。
+
+总435组两次Rust输出字节一致、独立核算、128类非法输入/setup拒绝通过；旧387组输入/业务输出不变，JSON SHA-256 `169d4e3f82b8b59bf327e164bde2969d55bbc8b12c228ac381fbc1c87ee486e4`。Rust check/fmt无warning、脚本lint/格式及本轮EVM费用/仓位55项通过，详见[第六十三轮记录](solana-implementation-research.md#第六十三轮实施记录t17b2d10-累计funding应付与claimable清算2026-10-28)。
+
+下一轮T17.b2d11借款费与funding同时累计的清算成本组合，先核对同一真实market时钟/update顺序及各费用的raw舍入，再补限定边界；非零impact/盈利清算、动态skip、完整减仓/min-position/限额与程序费用退款仍待。T17/b2d父项及整个集成未完成，T19仍需完整矩阵与T04.b reviewed字段；工具无生产SDK/共享状态/UI接线。
