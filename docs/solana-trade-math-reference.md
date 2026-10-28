@@ -1,6 +1,6 @@
 # Solana 交易数学差异与独立参考向量
 
-核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a 差异核实、b1首个子集、b2a/b2c清算及b2b即时impact增仓边界子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和131组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
+核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2c及b2d1累计借款费限定子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和159组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
 
 ## 固定版本与证据范围
 
@@ -118,3 +118,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 所有价格/金额/factor由输入显式给出，seed后的OI只通过真实动作形成；开仓可支付的抵押、流动性与其余reserve/OI/PnL/精度参数使用固定tag测试defaults。不推进clock，order/swap/liquidation fee与swap impact为0；不覆盖非线性/virtual inventory、盈利清算、累计borrowing/funding、claimable payout、真实部署配置或程序执行转账。新操作缺字段/非法factor/非规范金额/零反向size带抵押/反向动作初始化失败整次拒绝，未给缺失业务字段添加静默兜底；旧操作的零impact范围保持。
 
 两次Rust输出字节一致，131组独立BigInt核算、43类非法输入/setup拒绝、model/probe错误区分通过；接受JSON SHA-256 `a1034db35147f182d9df57e4bb9e7b7e8125913ee86e2aa26a9497359352e115`。EVM fees/positions两文件55项/0skip/0联网尝试、Rust check/fmt、脚本lint与输入/脚本格式通过。实际命令和原生证据见[第五十三轮记录](solana-implementation-research.md#第五十三轮实施记录t17b2c-非零impact清算与保证金边界2026-10-28)。无生产SDK/共享状态/UI接线，T17/FESOL-57仍实施中；下一轮T17.b2d累计borrowing/funding与下一动作claimable结算参考，先核对固定tag的clock/update及真实动作路径，再确定可独立验收子集。其后补减仓/min-position/限额和程序费用退款；T19仍待完整矩阵与T04.b reviewed字段。
+
+## T17.b2d1 累计借款费与增仓结算子集（2026-10-28）
+
+将b2d拆为b2d1 borrowing、b2d2 funding/claimable，后者未完成。本轮在同一工具增加 `borrowing_accrual`：初始化借款时钟，真实deposit/open，按显式秒数推进并调用model update_borrowing，最后两次真实增仓。新增28组（两side×两抵押×7）：零时间、raw dust、首个raw token单位、37% receiver分配、分段时间、100% receiver和零borrowing factor。累计32次update与56次后续增仓；旧131组输入/输出完全不变，总159组。
+
+指数固定1、kink参数全0禁用、skip-smaller-side=false。long reserved value为实际OI tokens×index max，short为size USD20；pool value使用对应side流动性×该资产min价格。独立整数核算依次为 `usage = reserved * UNIT / poolValue`、`rate = usage * borrowingFactor / UNIT`、`cumulative += rate * seconds`、`pendingUsd = size * (cumulative - positionFactor) / UNIT`。保留更新前position pending、market按elapsed投影的pending与更新后值；仅move clock不会更新position pending。输入含index/long/short spread与size余数，不能把usage和factor合并计算而改变舍入。
+
+费用先按抵押min价格截断为raw token，再按receiver factor截断分配，剩余进入流动性；两份model report和实际collateral/liquidity/claimable fee pool数量均独立核对。short collateral的1秒场景为非零USD但0raw token，11秒场景跨过首个单位；USD paid fee保留完整pending值，即使token扣费为零，position factor也更新，不虚构dust carry。首次后续增仓扣费后pending归零，第二次在同一累计因子下增仓不再收旧费；保留size/tokens、position factor与total_borrowing accounting。后续size必须非零，因为固定model的increase拒绝零size；本轮没有将纯top-up作为替代动作。
+
+固定TestMarket时钟为Instant加显式advanced时间。每次update报告的秒数必须与输入相等，否则整次拒绝且不发布JSON；不修改参考模型、不归一化时间。先格式化输入再生成两份，避免来源摘要变化。每段时间必填、非空且不超过一年；这是该工具的有限数学输入域，非生产协议时间限制。swap/order费用与impact为0，不调用funding update，其他reserve/minima/PnL/精度参数使用固定tag defaults；零claimable输出不证明真实资金费结算。
+
+最终159组两次字节一致、独立BigInt核算和51类非法输入/setup拒绝通过，SHA-256 `704e25b09cc11270b3aae815cf59cce6531e18682e918da07390fe6eb7225306`。EVM两文件55项/0skip/0联网尝试、Rust check/fmt、脚本lint/格式通过，完整命令及原生证据见[第五十四轮记录](solana-implementation-research.md#第五十四轮实施记录t17b2d1-累计借款费与增仓结算2026-10-28)。本轮无生产SDK/共享状态/UI接线，T17/FESOL-57仍实施中。下一轮从b2d2真实funding update及下一动作claimable report继续；kink/skip-smaller-side、累计费用清算边界、盈利状态、减仓/min-position/限额、程序折扣与rent/keeper转账及T19消费仍待，不能以本子集完成累计费用父范围。

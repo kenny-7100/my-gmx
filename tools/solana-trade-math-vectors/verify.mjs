@@ -28,8 +28,8 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 131);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 131);
+assert.equal(reference.cases.length, 159);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 159);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
@@ -37,6 +37,77 @@ const operations = {};
 let liquidationProbes = 0;
 let increasePriceProbes = 0;
 let impactLiquidationProbes = 0;
+let borrowingCheckpoints = 0;
+let borrowingSettlements = 0;
+
+function verifyBorrowing(c) {
+  const p = c.input.scenario;
+  const size = BigInt(p.size_usd20),
+    nextSize = BigInt(p.next_size_usd20);
+  const entry = BigInt(p.is_long ? p.prices.index.max : p.prices.index.min);
+  const tokens = p.is_long ? size / entry : ceil(size, entry);
+  const nextTokens = p.is_long ? nextSize / entry : ceil(nextSize, entry);
+  const reserved = p.is_long ? tokens * BigInt(p.prices.index.max) : size;
+  const pool = BigInt(p.is_long ? p.deposit_long_amount : p.deposit_short_amount);
+  const poolPrice = BigInt((p.is_long ? p.prices.long : p.prices.short).min);
+  const rate = (((reserved * unit) / (pool * poolPrice)) * BigInt(p.borrowing_factor)) / unit;
+  let cumulative = 0n;
+  const checkpoints = p.elapsed_seconds.map((seconds) => {
+    const before = (size * cumulative) / unit;
+    cumulative += rate * BigInt(seconds);
+    const after = (size * cumulative) / unit;
+    return {
+      elapsed_seconds: seconds,
+      pending_before_update_usd20: String(before),
+      projected_pending_usd20: String(after),
+      pending_after_update_usd20: String(after),
+      long_cumulative_factor: String(p.is_long ? cumulative : 0n),
+      short_cumulative_factor: String(p.is_long ? 0n : cumulative),
+    };
+  });
+  const value = (size * cumulative) / unit;
+  const collateralPrice = BigInt((p.is_long_collateral ? p.prices.long : p.prices.short).min);
+  const amount = value / collateralPrice;
+  const receiver = (amount * BigInt(p.receiver_factor)) / unit;
+  const forPool = amount - receiver;
+  const liquidity = BigInt(p.is_long_collateral ? p.deposit_long_amount : p.deposit_short_amount);
+  const settlements = [1n, 2n].map((index) => ({
+    cost_amount: String(index === 1n ? amount : 0n),
+    paid_fee_usd20: String(index === 1n ? value : 0n),
+    receiver_amount: String(index === 1n ? receiver : 0n),
+    pool_amount: String(index === 1n ? forPool : 0n),
+    claimable_funding_amounts: ["0", "0"],
+    collateral_amount: String(BigInt(p.collateral_amount) + index * BigInt(p.next_collateral_amount) - amount),
+    size_usd20: String(size + index * nextSize),
+    size_tokens: String(tokens + index * nextTokens),
+    position_borrowing_factor: String(cumulative),
+    pending_borrowing_usd20: "0",
+    total_borrowing_usd20: String(((size + index * nextSize) * cumulative) / unit),
+    liquidity_collateral_amount: String(liquidity + forPool),
+    claimable_fee_collateral_amount: String(receiver),
+  }));
+  assert.deepEqual(
+    c.output,
+    {
+      status: "ok",
+      opened: { cost_amount: "0", size_tokens: String(tokens), claimable_funding_amounts: ["0", "0"] },
+      factor_per_second: String(rate),
+      checkpoints,
+      settlements,
+    },
+    c.id
+  );
+  if (c.id.endsWith("-no-elapsed") || c.id.endsWith("-zero-factor")) assert.equal(value, 0n, c.id);
+  if (c.id.endsWith("-raw-dust")) {
+    assert(value > 0n, c.id);
+    if (!p.is_long_collateral) assert.equal(amount, 0n, c.id);
+  }
+  if (c.id.endsWith("-raw-first-unit")) assert(amount > 0n, c.id);
+  if (c.id.endsWith("-receiver-split")) assert(receiver > 0n && forPool > 0n, c.id);
+  if (c.id.endsWith("-full-receiver")) assert.equal(receiver, amount, c.id);
+  borrowingCheckpoints += checkpoints.length;
+  borrowingSettlements += settlements.length;
+}
 
 function verifyIncrease(c) {
   const p = c.input.scenario;
@@ -272,6 +343,11 @@ for (let index = 0; index < reference.cases.length; index++) {
   assert.equal(c.id, inputs.cases[index].id);
   assert.deepEqual(c.input, inputs.cases[index].input);
   const p = c.input;
+  if (p.operation === "borrowing_accrual") {
+    verifyBorrowing(c);
+    operations[p.operation] = (operations[p.operation] ?? 0) + 1;
+    continue;
+  }
   if (p.operation === "increase_impact") {
     verifyIncrease(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
@@ -482,6 +558,34 @@ try {
     ].map((mutate) => (s) => {
       mutate(s.cases[103].input.impact);
     }),
+    ...[
+      (p) => {
+        p.elapsed_seconds = [];
+      },
+      (p) => {
+        p.elapsed_seconds = [31_536_001];
+      },
+      (p) => {
+        delete p.elapsed_seconds;
+      },
+      (p) => {
+        p.borrowing_factor = String(unit + 1n);
+      },
+      (p) => {
+        p.receiver_factor = String(unit + 1n);
+      },
+      (p) => {
+        p.next_size_usd20 = "0";
+      },
+      (p) => {
+        p.collateral_amount = "1";
+      },
+      (p) => {
+        p.unknown = true;
+      },
+    ].map((mutate) => (s) => {
+      mutate(s.cases[131].input.scenario);
+    }),
   ];
 
   for (const mutate of invalid) {
@@ -526,6 +630,8 @@ process.stdout.write(
       liquidationProbes,
       increasePriceProbes,
       impactLiquidationProbes,
+      borrowingCheckpoints,
+      borrowingSettlements,
       malformedRejected: rejected,
       modelErrorDistinctFromZero: true,
       liquidationProbeErrorDistinctFromResult: true,

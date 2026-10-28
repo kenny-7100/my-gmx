@@ -12524,14 +12524,2794 @@
         },
         "status": "ok"
       }
+    },
+    {
+      "id": "borrowing-long-long-collateral-no-elapsed",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            0
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 0,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "0",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "0",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2200000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "0"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2400000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "0"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-long-collateral-raw-dust",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            1
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 1,
+            "long_cumulative_factor": "9999999999",
+            "pending_after_update_usd20": "9999999999000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "9999999999000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2200000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "9999999999000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "9999999999",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "10999999998900"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2400000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "9999999999",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "11999999998800"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-long-collateral-raw-first-unit",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            11
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 11,
+            "long_cumulative_factor": "109999999989",
+            "pending_after_update_usd20": "109999999989000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "109999999989000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2199999990",
+            "cost_amount": "10",
+            "liquidity_collateral_amount": "100000000000010",
+            "paid_fee_usd20": "109999999989000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "10",
+            "position_borrowing_factor": "109999999989",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "120999999987900"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2399999990",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000010",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "109999999989",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "131999999986800"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-long-collateral-receiver-split",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "37000000000000000000",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "35999999996400",
+            "pending_after_update_usd20": "35999999996400000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "35999999996400000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "1331",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2199996401",
+            "cost_amount": "3599",
+            "liquidity_collateral_amount": "100000000002268",
+            "paid_fee_usd20": "35999999996400000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "2268",
+            "position_borrowing_factor": "35999999996400",
+            "receiver_amount": "1331",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "39599999996040000"
+          },
+          {
+            "claimable_fee_collateral_amount": "1331",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2399996401",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000002268",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "35999999996400",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "43199999995680000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-long-collateral-split-intervals",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            17,
+            23
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 17,
+            "long_cumulative_factor": "169999999983",
+            "pending_after_update_usd20": "169999999983000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "169999999983000",
+            "short_cumulative_factor": "0"
+          },
+          {
+            "elapsed_seconds": 23,
+            "long_cumulative_factor": "399999999960",
+            "pending_after_update_usd20": "399999999960000",
+            "pending_before_update_usd20": "169999999983000",
+            "projected_pending_usd20": "399999999960000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2199999961",
+            "cost_amount": "39",
+            "liquidity_collateral_amount": "100000000000039",
+            "paid_fee_usd20": "399999999960000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "39",
+            "position_borrowing_factor": "399999999960",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "439999999956000"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2399999961",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000039",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "399999999960",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "479999999952000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-long-collateral-full-receiver",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "100000000000000000000",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "35999999996400",
+            "pending_after_update_usd20": "35999999996400000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "35999999996400000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "3599",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2199996401",
+            "cost_amount": "3599",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "35999999996400000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "35999999996400",
+            "receiver_amount": "3599",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "39599999996040000"
+          },
+          {
+            "claimable_fee_collateral_amount": "3599",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2399996401",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "35999999996400",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "43199999995680000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-long-collateral-zero-factor",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "0",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "0",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "0",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "0",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2200000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "0"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2400000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "0"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-short-collateral-no-elapsed",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            0
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 0,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "0",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "0",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "220000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "0"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "240000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "0"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-short-collateral-raw-dust",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            1
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 1,
+            "long_cumulative_factor": "9999999999",
+            "pending_after_update_usd20": "9999999999000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "9999999999000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "220000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "9999999999000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "9999999999",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "10999999998900"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "240000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "9999999999",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "11999999998800"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-short-collateral-raw-first-unit",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            11
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 11,
+            "long_cumulative_factor": "109999999989",
+            "pending_after_update_usd20": "109999999989000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "109999999989000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "219999999",
+            "cost_amount": "1",
+            "liquidity_collateral_amount": "10000000000001",
+            "paid_fee_usd20": "109999999989000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "1",
+            "position_borrowing_factor": "109999999989",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "120999999987900"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "239999999",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000001",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "109999999989",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "131999999986800"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-short-collateral-receiver-split",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "37000000000000000000",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "35999999996400",
+            "pending_after_update_usd20": "35999999996400000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "35999999996400000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "132",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "219999641",
+            "cost_amount": "359",
+            "liquidity_collateral_amount": "10000000000227",
+            "paid_fee_usd20": "35999999996400000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "227",
+            "position_borrowing_factor": "35999999996400",
+            "receiver_amount": "132",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "39599999996040000"
+          },
+          {
+            "claimable_fee_collateral_amount": "132",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "239999641",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000227",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "35999999996400",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "43199999995680000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-short-collateral-split-intervals",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            17,
+            23
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 17,
+            "long_cumulative_factor": "169999999983",
+            "pending_after_update_usd20": "169999999983000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "169999999983000",
+            "short_cumulative_factor": "0"
+          },
+          {
+            "elapsed_seconds": 23,
+            "long_cumulative_factor": "399999999960",
+            "pending_after_update_usd20": "399999999960000",
+            "pending_before_update_usd20": "169999999983000",
+            "projected_pending_usd20": "399999999960000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "219999997",
+            "cost_amount": "3",
+            "liquidity_collateral_amount": "10000000000003",
+            "paid_fee_usd20": "399999999960000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "3",
+            "position_borrowing_factor": "399999999960",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "439999999956000"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "239999997",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000003",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "399999999960",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "479999999952000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-short-collateral-full-receiver",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "100000000000000000000",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "35999999996400",
+            "pending_after_update_usd20": "35999999996400000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "35999999996400000",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "9999999999",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "359",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "219999641",
+            "cost_amount": "359",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "35999999996400000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "35999999996400",
+            "receiver_amount": "359",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "39599999996040000"
+          },
+          {
+            "claimable_fee_collateral_amount": "359",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "239999641",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "35999999996400",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "43199999995680000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-long-short-collateral-zero-factor",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "0",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "0",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "0",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "0",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "9999999999"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "220000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "10999999998",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "0"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "240000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "11999999997",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "0"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-long-collateral-no-elapsed",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            0
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 0,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "0",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "0",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2200000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "0"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2400000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "0"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-long-collateral-raw-dust",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            1
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 1,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "10000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "10000000000000",
+            "short_cumulative_factor": "10000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2200000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "10000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "10000000000",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "11000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2400000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "10000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "12000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-long-collateral-raw-first-unit",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            11
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 11,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "110000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "110000000000000",
+            "short_cumulative_factor": "110000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2199999990",
+            "cost_amount": "10",
+            "liquidity_collateral_amount": "100000000000010",
+            "paid_fee_usd20": "110000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "10",
+            "position_borrowing_factor": "110000000000",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "121000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2399999990",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000010",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "110000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "132000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-long-collateral-receiver-split",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "37000000000000000000",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "36000000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "36000000000000000",
+            "short_cumulative_factor": "36000000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "1331",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2199996401",
+            "cost_amount": "3599",
+            "liquidity_collateral_amount": "100000000002268",
+            "paid_fee_usd20": "36000000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "2268",
+            "position_borrowing_factor": "36000000000000",
+            "receiver_amount": "1331",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "39600000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "1331",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2399996401",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000002268",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "36000000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "43200000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-long-collateral-split-intervals",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            17,
+            23
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 17,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "170000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "170000000000000",
+            "short_cumulative_factor": "170000000000"
+          },
+          {
+            "elapsed_seconds": 23,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "400000000000000",
+            "pending_before_update_usd20": "170000000000000",
+            "projected_pending_usd20": "400000000000000",
+            "short_cumulative_factor": "400000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2199999961",
+            "cost_amount": "39",
+            "liquidity_collateral_amount": "100000000000039",
+            "paid_fee_usd20": "400000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "39",
+            "position_borrowing_factor": "400000000000",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "440000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2399999961",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000039",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "400000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "480000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-long-collateral-full-receiver",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "100000000000000000000",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "36000000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "36000000000000000",
+            "short_cumulative_factor": "36000000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "3599",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2199996401",
+            "cost_amount": "3599",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "36000000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "36000000000000",
+            "receiver_amount": "3599",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "39600000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "3599",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2399996401",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "36000000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "43200000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-long-collateral-zero-factor",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "0",
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "long_decimals": 9,
+          "next_collateral_amount": "200000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "0",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "0",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "0",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2200000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "0"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "2400000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "100000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "0"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-short-collateral-no-elapsed",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            0
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 0,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "0",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "0",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "220000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "0"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "240000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "0"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-short-collateral-raw-dust",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            1
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 1,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "10000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "10000000000000",
+            "short_cumulative_factor": "10000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "220000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "10000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "10000000000",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "11000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "240000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "10000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "12000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-short-collateral-raw-first-unit",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            11
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 11,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "110000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "110000000000000",
+            "short_cumulative_factor": "110000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "219999999",
+            "cost_amount": "1",
+            "liquidity_collateral_amount": "10000000000001",
+            "paid_fee_usd20": "110000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "1",
+            "position_borrowing_factor": "110000000000",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "121000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "239999999",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000001",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "110000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "132000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-short-collateral-receiver-split",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "37000000000000000000",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "36000000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "36000000000000000",
+            "short_cumulative_factor": "36000000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "132",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "219999641",
+            "cost_amount": "359",
+            "liquidity_collateral_amount": "10000000000227",
+            "paid_fee_usd20": "36000000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "227",
+            "position_borrowing_factor": "36000000000000",
+            "receiver_amount": "132",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "39600000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "132",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "239999641",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000227",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "36000000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "43200000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-short-collateral-split-intervals",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            17,
+            23
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 17,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "170000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "170000000000000",
+            "short_cumulative_factor": "170000000000"
+          },
+          {
+            "elapsed_seconds": 23,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "400000000000000",
+            "pending_before_update_usd20": "170000000000000",
+            "projected_pending_usd20": "400000000000000",
+            "short_cumulative_factor": "400000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "219999997",
+            "cost_amount": "3",
+            "liquidity_collateral_amount": "10000000000003",
+            "paid_fee_usd20": "400000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "3",
+            "position_borrowing_factor": "400000000000",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "440000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "239999997",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000003",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "400000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "480000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-short-collateral-full-receiver",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "100000000000017",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "100000000000000000000",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "36000000000000000",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "36000000000000000",
+            "short_cumulative_factor": "36000000000000"
+          }
+        ],
+        "factor_per_second": "10000000000",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "359",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "219999641",
+            "cost_amount": "359",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "36000000000000000",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "36000000000000",
+            "receiver_amount": "359",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "39600000000000000"
+          },
+          {
+            "claimable_fee_collateral_amount": "359",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "239999641",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "36000000000000",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "43200000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "borrowing-short-short-collateral-zero-factor",
+      "input": {
+        "operation": "borrowing_accrual",
+        "scenario": {
+          "borrowing_factor": "0",
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "elapsed_seconds": [
+            3600
+          ],
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "long_decimals": 9,
+          "next_collateral_amount": "20000000",
+          "next_size_usd20": "10000000000000000000007",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "receiver_factor": "0",
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000017"
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "elapsed_seconds": 3600,
+            "long_cumulative_factor": "0",
+            "pending_after_update_usd20": "0",
+            "pending_before_update_usd20": "0",
+            "projected_pending_usd20": "0",
+            "short_cumulative_factor": "0"
+          }
+        ],
+        "factor_per_second": "0",
+        "opened": {
+          "claimable_funding_amounts": [
+            "0",
+            "0"
+          ],
+          "cost_amount": "0",
+          "size_tokens": "10000000000"
+        },
+        "settlements": [
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "220000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "11000000000",
+            "size_usd20": "110000000000000000000024",
+            "total_borrowing_usd20": "0"
+          },
+          {
+            "claimable_fee_collateral_amount": "0",
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "collateral_amount": "240000000",
+            "cost_amount": "0",
+            "liquidity_collateral_amount": "10000000000000",
+            "paid_fee_usd20": "0",
+            "pending_borrowing_usd20": "0",
+            "pool_amount": "0",
+            "position_borrowing_factor": "0",
+            "receiver_amount": "0",
+            "size_tokens": "12000000000",
+            "size_usd20": "120000000000000000000031",
+            "total_borrowing_usd20": "0"
+          }
+        ],
+        "status": "ok"
+      }
     }
   ],
   "generator": {
-    "input_sha256": "dc7e707adfa508dbf5a0fcbd21bc6f3fd15afcdb2dfdfe2d079cbc093113b0e8",
+    "input_sha256": "fad51dc1bb1913da2556bf702e44854eb7eb7111e24d959c2ebbc4aec4ff6f46",
     "lock_sha256": "6b6160a8b9e1d1c1eaeb4a472852edb34fda1c8f5c4ff7188313f66f8924e346",
     "manifest_sha256": "1b952a339d1d8f65e83a897dc5b530421dd7f176335a3fa93cb131f98c95e93d",
     "rustc": "rustc 1.90.0 (1159e78c4 2025-09-14)",
-    "source_sha256": "a3e119c8458aad581fc1071a94ea49bb04daebaf042f7ffaa1dd39719b5bddac"
+    "source_sha256": "095560203135765d57ce2ea8db8f8997941268d7dcf9a8f0fb4fdf5c79d3afc2"
   },
   "reference": {
     "commit": "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72",
@@ -12545,7 +15325,8 @@
     "PositionExt::pnl_value",
     "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)",
     "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)",
-    "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)"
+    "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)",
+    "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)"
   ],
   "units": {
     "factor_decimals": "20",
