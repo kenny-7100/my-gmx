@@ -1,6 +1,6 @@
 # Solana 交易数学差异与独立参考向量
 
-核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a 差异核实、b1首个子集、b2a清算及b2b即时impact增仓边界子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和103组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
+核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a 差异核实、b1首个子集、b2a/b2c清算及b2b即时impact增仓边界子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和131组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
 
 ## 固定版本与证据范围
 
@@ -106,3 +106,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 参考集累计103组；之前71组case输入/输出完全不变。固定输入格式后两次Rust输出字节一致，SHA-256 `4a3fb1d49ade1bb048a2f18feb70f9114b6bb4e072747a1d95cd1bbe538980d0`。独立BigInt核对全部结果及96个限价点，36种非法输入/无效setup整次拒绝且stdout为空，原有model/probe错误区分通过。Rust fmt/check、脚本lint/格式及EVM fees/positions两文件55项/0skip/0联网通过。完整命令与原生证据见[第五十二轮记录](solana-implementation-research.md#第五十二轮实施记录t17b2b-即时impact增仓与限价边界2026-10-28)。
 
 下一轮T17.b2c：复用动作初始化，补非零impact下的清算/保证金predicate，验证关闭时正impact忽略、负impact按liquidation cap及minima处理；之后补累计borrowing/funding、decrease/限额等余下矩阵。T17/FESOL-57仍实施中，T19仍需完整参考矩阵及T04.b reviewed字段；本轮没有生产数学或页面接线，不代表前端交易可用。
+
+## T17.b2c 非零impact清算与保证金边界子集（2026-10-28）
+
+接续b2b，同一生成器增加 `liquidation_impact` 显式操作，复用原清算动作与predicate路径。新增28组：long/short × 两种抵押 × 正impact忽略、负impact封顶、负impact未封顶、负impact零上限、市场最低抵押、非正抵押及普通margin边界。每组保留三个相邻raw index价格，新增84点；累计清算/margin各168点及增仓限价96点，总131组参考case，旧103组输入/输出逐项不变。
+
+配置指数为1、positive factor2%、negative factor3%、普通negative cap0.1%；开仓1000 USD在空OI下真实产生-30 USD冲击，long基础10 token减至9.7，short增至10.3，后续PnL直接使用实际token size。正关闭冲击场景没有反向仓位，raw为+20 USD，但predicate贡献为0。负场景在目标开仓后真实增加独立3000 USD反向仓位，关闭目标使OI进一步失衡，raw为-30 USD；清算上限1%时贡献-10 USD、5%时-30 USD、0时0。反向action的impact/tokens/execution/funding report和实际双边OI也保留并独立核算，没有直接覆写OI或移植旧业务状态。
+
+固定tag的 `PositionExt::check_liquidatable` 调用 `cap_negative_position_price_impact(..., true, ...)`；这个true同时用于清算和普通保证金predicate，两者的区别在抵押因子：清算5%，普通10%。不能把普通保证金检查误改成使用0.1%的普通negative cap。剩余抵押为 `collateral * collateralMin + actualTokensPnL + min(rawCloseImpact, 0)AfterLiquidationCap - closingCost * collateralMin`；判断顺序仍为市场minimum、非正值、size×对应factor。20 USD minimum配合5%因子验证杠杆边界，80 USD minimum验证minimum优先，0 minimum/0清算因子验证非正边界；普通margin专属三点在10%门槛两侧且均不清算。阈值由该固定无spread/无费用场景的仿射式独立推导，保留相邻价格，不代表通用单调曲线或通用清算价求解器。
+
+所有价格/金额/factor由输入显式给出，seed后的OI只通过真实动作形成；开仓可支付的抵押、流动性与其余reserve/OI/PnL/精度参数使用固定tag测试defaults。不推进clock，order/swap/liquidation fee与swap impact为0；不覆盖非线性/virtual inventory、盈利清算、累计borrowing/funding、claimable payout、真实部署配置或程序执行转账。新操作缺字段/非法factor/非规范金额/零反向size带抵押/反向动作初始化失败整次拒绝，未给缺失业务字段添加静默兜底；旧操作的零impact范围保持。
+
+两次Rust输出字节一致，131组独立BigInt核算、43类非法输入/setup拒绝、model/probe错误区分通过；接受JSON SHA-256 `a1034db35147f182d9df57e4bb9e7b7e8125913ee86e2aa26a9497359352e115`。EVM fees/positions两文件55项/0skip/0联网尝试、Rust check/fmt、脚本lint与输入/脚本格式通过。实际命令和原生证据见[第五十三轮记录](solana-implementation-research.md#第五十三轮实施记录t17b2c-非零impact清算与保证金边界2026-10-28)。无生产SDK/共享状态/UI接线，T17/FESOL-57仍实施中；下一轮T17.b2d累计borrowing/funding与下一动作claimable结算参考，先核对固定tag的clock/update及真实动作路径，再确定可独立验收子集。其后补减仓/min-position/限额和程序费用退款；T19仍待完整矩阵与T04.b reviewed字段。

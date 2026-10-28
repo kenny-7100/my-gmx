@@ -30,7 +30,7 @@
 | [固定 WASM unsigned builder ABI](solana-builder-abi.md) | T20.a/b1/b2/b3：31-case真实unsigned bytes、v2参数、native/路径/错误/组合非原子、setup/callback/referrer与nonce限制；已覆盖离线样本通过，完整ABI、安全规则和主网仍待验；T23.a1/a2单订单unsigned update/cancel已适配并完成离线限定验收，create/组合、完整签名前校验及真实业务待续 |
 | [Solana 签名前指令契约](solana-instruction-contract.md) | T21.a：21case/27笔/10种指令的可复现库存、精确IDL账户/参数与权限并集、LUT/资金/原子性拒绝规则；T24.a1容器/LUT、a2 update与a3 cancel账户/PDA/ATA/权限及恶意变体、b1 create/prepare严格参数解码已离线通过，完整create/组合待续；CPI事件另见下项 |
 | [Solana 订单事件与生命周期契约](solana-order-events.md) | T21.b1/b2与T28.a/b：四事件契约、四真实Mainnet回执、纯TS严格decoder与离线生命周期归约（合计11项）；部署源码身份、其他真实变体/业务及生产接线待验 |
-| [Solana 交易数学差异与独立参考向量](solana-trade-math-reference.md) | T17：固定v0.10.0；103组model参考值，含28组清算/84价格点及32组即时impact增仓/96限价点，独立核算通过；非零impact清算、累计费用及SDK/API消费待续 |
+| [Solana 交易数学差异与独立参考向量](solana-trade-math-reference.md) | T17：固定v0.10.0；131组model参考值，含零/非零impact清算共56组/168价格点及32组增仓/96限价点，独立核算通过；累计费用、减仓及SDK/API消费待续 |
 | [SDK 构建产物准备与过期检查](sdk-artifacts.md) | 根类型检查前只读 verify；显式隔离 prebuild/编译，成功后替换忽略的产物，保留来源收据与日志 |
 | [前端源码离线测试](frontend-offline-tests.md) | 精确运行当前或独立 checkout 的 src/landing 原有单测，支持按真实依赖图从前端/SDK 源码或显式 Git 基线的变更范围选择前端关联测试，可只发现清单后决定执行范围；复用 Vite/happy-dom 初始化，隔离本机环境并阻止意外联网，运行器独立核对网络事件及执行前后工具指纹；单 suite 可进行源码断点调试，不启动应用服务或浏览器 |
 | [全栈测试范围规划与执行](agent-test-plan.md) | 前端/SDK/API 各自 Git 基线或显式源码发现，API profile 明确选择离线/隔离数据库；保留混合变更与未分配项，按计划执行并汇总原生失败；兼容原两侧模式，汇总不作为单侧交付证据 |

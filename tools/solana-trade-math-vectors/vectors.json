@@ -8328,14 +8328,4210 @@
         "status": "ok",
         "uncapped_impact_usd20": "-1000000000000000000000"
       }
+    },
+    {
+      "id": "liquidation-impact-long-long-collateral-positive-ignored",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "0",
+          "opposite_size_usd20": "0",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "8974358974358",
+                "min": "8974358974358"
+              },
+              "long": {
+                "max": "8974358974358",
+                "min": "8974358974358"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8974358974359",
+                "min": "8974358974359"
+              },
+              "long": {
+                "max": "8974358974359",
+                "min": "8974358974359"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8974358974360",
+                "min": "8974358974360"
+              },
+              "long": {
+                "max": "8974358974360",
+                "min": "8974358974360"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "17948717948716000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12948717948727400000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "17948717948718000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12948717948717700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "17948717948720000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12948717948708000000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": null,
+          "short_oi_usd20": "0"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-long-collateral-negative-capped",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "9059829059829",
+                "min": "9059829059829"
+              },
+              "long": {
+                "max": "9059829059829",
+                "min": "9059829059829"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9059829059830",
+                "min": "9059829059830"
+              },
+              "long": {
+                "max": "9059829059830",
+                "min": "9059829059830"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9059829059831",
+                "min": "9059829059831"
+              },
+              "long": {
+                "max": "9059829059831",
+                "min": "9059829059831"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18119658119658000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12119658119658700000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18119658119660000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12119658119649000000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18119658119662000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12119658119639300000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-long-collateral-negative-uncapped",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "9230769230769",
+                "min": "9230769230769"
+              },
+              "long": {
+                "max": "9230769230769",
+                "min": "9230769230769"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9230769230770",
+                "min": "9230769230770"
+              },
+              "long": {
+                "max": "9230769230770",
+                "min": "9230769230770"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9230769230771",
+                "min": "9230769230771"
+              },
+              "long": {
+                "max": "9230769230771",
+                "min": "9230769230771"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18461538461538000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-10461538461540700000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18461538461540000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-10461538461531000000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18461538461542000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-10461538461521300000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-long-collateral-negative-zero-cap",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "0",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "8974358974358",
+                "min": "8974358974358"
+              },
+              "long": {
+                "max": "8974358974358",
+                "min": "8974358974358"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8974358974359",
+                "min": "8974358974359"
+              },
+              "long": {
+                "max": "8974358974359",
+                "min": "8974358974359"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8974358974360",
+                "min": "8974358974360"
+              },
+              "long": {
+                "max": "8974358974360",
+                "min": "8974358974360"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "17948717948716000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12948717948727400000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "17948717948718000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12948717948717700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "17948717948720000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12948717948708000000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-long-collateral-minimum",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "8000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "9316239316239",
+                "min": "9316239316239"
+              },
+              "long": {
+                "max": "9316239316239",
+                "min": "9316239316239"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9316239316240",
+                "min": "9316239316240"
+              },
+              "long": {
+                "max": "9316239316240",
+                "min": "9316239316240"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9316239316241",
+                "min": "9316239316241"
+              },
+              "long": {
+                "max": "9316239316241",
+                "min": "9316239316241"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18632478632478000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-9632478632481700000000",
+            "reason": "min collateral",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18632478632480000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-9632478632472000000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18632478632482000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-9632478632462300000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-long-collateral-nonpositive",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "0",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "0",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "8632478632478",
+                "min": "8632478632478"
+              },
+              "long": {
+                "max": "8632478632478",
+                "min": "8632478632478"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8632478632479",
+                "min": "8632478632479"
+              },
+              "long": {
+                "max": "8632478632479",
+                "min": "8632478632479"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8632478632480",
+                "min": "8632478632480"
+              },
+              "long": {
+                "max": "8632478632480",
+                "min": "8632478632480"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "17264957264956000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-16264957264963400000000",
+            "reason": "min collateral",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "17264957264958000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-16264957264953700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "17264957264960000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-16264957264944000000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-long-collateral-margin",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "9487179487179",
+                "min": "9487179487179"
+              },
+              "long": {
+                "max": "9487179487179",
+                "min": "9487179487179"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9487179487180",
+                "min": "9487179487180"
+              },
+              "long": {
+                "max": "9487179487180",
+                "min": "9487179487180"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9487179487181",
+                "min": "9487179487181"
+              },
+              "long": {
+                "max": "9487179487181",
+                "min": "9487179487181"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18974358974358000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-7974358974363700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18974358974360000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": false,
+            "margin_reason": null,
+            "pnl_usd20": "-7974358974354000000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "18974358974362000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": false,
+            "margin_reason": null,
+            "pnl_usd20": "-7974358974344300000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-short-collateral-positive-ignored",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "0",
+          "opposite_size_usd20": "0",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "8762886597938",
+                "min": "8762886597938"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8762886597939",
+                "min": "8762886597939"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8762886597940",
+                "min": "8762886597940"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-15000000000001400000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14999999999991700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14999999999982000000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": null,
+          "short_oi_usd20": "0"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-short-collateral-negative-capped",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "8865979381443",
+                "min": "8865979381443"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8865979381444",
+                "min": "8865979381444"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8865979381445",
+                "min": "8865979381445"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14000000000002900000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-13999999999993200000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-13999999999983500000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-short-collateral-negative-uncapped",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "9072164948453",
+                "min": "9072164948453"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9072164948454",
+                "min": "9072164948454"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9072164948455",
+                "min": "9072164948455"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12000000000005900000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-11999999999996200000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-11999999999986500000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-short-collateral-negative-zero-cap",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "0",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "8762886597938",
+                "min": "8762886597938"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8762886597939",
+                "min": "8762886597939"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8762886597940",
+                "min": "8762886597940"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-15000000000001400000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14999999999991700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14999999999982000000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-short-collateral-minimum",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "8000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "9175257731958",
+                "min": "9175257731958"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9175257731959",
+                "min": "9175257731959"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9175257731960",
+                "min": "9175257731960"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-11000000000007400000000",
+            "reason": "min collateral",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-10999999999997700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-10999999999988000000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-short-collateral-nonpositive",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "0",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "0",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "8350515463917",
+                "min": "8350515463917"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8350515463918",
+                "min": "8350515463918"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "8350515463919",
+                "min": "8350515463919"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-19000000000005100000000",
+            "reason": "min collateral",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-18999999999995400000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-18999999999985700000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-long-short-collateral-margin",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": true,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "9381443298969",
+                "min": "9381443298969"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9381443298970",
+                "min": "9381443298970"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "9381443298971",
+                "min": "9381443298971"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "10309278350515",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "9700000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-9000000000000700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": false,
+            "margin_reason": null,
+            "pnl_usd20": "-8999999999991000000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": false,
+            "margin_reason": null,
+            "pnl_usd20": "-8999999999981300000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "100000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "9868421052631",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "30400000000"
+          },
+          "short_oi_usd20": "300000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-long-collateral-positive-ignored",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "0",
+          "opposite_size_usd20": "0",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "11445783132530",
+                "min": "11445783132530"
+              },
+              "long": {
+                "max": "11445783132530",
+                "min": "11445783132530"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11445783132531",
+                "min": "11445783132531"
+              },
+              "long": {
+                "max": "11445783132531",
+                "min": "11445783132531"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11445783132532",
+                "min": "11445783132532"
+              },
+              "long": {
+                "max": "11445783132532",
+                "min": "11445783132532"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22891566265060000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-17891566265059000000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22891566265062000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-17891566265069300000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22891566265064000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-17891566265079600000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "0",
+          "opposite_report": null,
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-long-collateral-negative-capped",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "11325301204819",
+                "min": "11325301204819"
+              },
+              "long": {
+                "max": "11325301204819",
+                "min": "11325301204819"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11325301204820",
+                "min": "11325301204820"
+              },
+              "long": {
+                "max": "11325301204820",
+                "min": "11325301204820"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11325301204821",
+                "min": "11325301204821"
+              },
+              "long": {
+                "max": "11325301204821",
+                "min": "11325301204821"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22650602409638000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-16650602409635700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22650602409640000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-16650602409646000000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22650602409642000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-16650602409656300000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-long-collateral-negative-uncapped",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "11084337349397",
+                "min": "11084337349397"
+              },
+              "long": {
+                "max": "11084337349397",
+                "min": "11084337349397"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11084337349398",
+                "min": "11084337349398"
+              },
+              "long": {
+                "max": "11084337349398",
+                "min": "11084337349398"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11084337349399",
+                "min": "11084337349399"
+              },
+              "long": {
+                "max": "11084337349399",
+                "min": "11084337349399"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22168674698794000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14168674698789100000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22168674698796000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14168674698799400000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22168674698798000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14168674698809700000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-long-collateral-negative-zero-cap",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "0",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "11445783132530",
+                "min": "11445783132530"
+              },
+              "long": {
+                "max": "11445783132530",
+                "min": "11445783132530"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11445783132531",
+                "min": "11445783132531"
+              },
+              "long": {
+                "max": "11445783132531",
+                "min": "11445783132531"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11445783132532",
+                "min": "11445783132532"
+              },
+              "long": {
+                "max": "11445783132532",
+                "min": "11445783132532"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22891566265060000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-17891566265059000000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22891566265062000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-17891566265069300000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "22891566265064000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-17891566265079600000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-long-collateral-minimum",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "8000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "10963855421686",
+                "min": "10963855421686"
+              },
+              "long": {
+                "max": "10963855421686",
+                "min": "10963855421686"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10963855421687",
+                "min": "10963855421687"
+              },
+              "long": {
+                "max": "10963855421687",
+                "min": "10963855421687"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10963855421688",
+                "min": "10963855421688"
+              },
+              "long": {
+                "max": "10963855421688",
+                "min": "10963855421688"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "21927710843372000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12927710843365800000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "21927710843374000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-12927710843376100000000",
+            "reason": "min collateral",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "21927710843376000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-12927710843386400000000",
+            "reason": "min collateral",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-long-collateral-nonpositive",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "0",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "0",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "11927710843373",
+                "min": "11927710843373"
+              },
+              "long": {
+                "max": "11927710843373",
+                "min": "11927710843373"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11927710843374",
+                "min": "11927710843374"
+              },
+              "long": {
+                "max": "11927710843374",
+                "min": "11927710843374"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11927710843375",
+                "min": "11927710843375"
+              },
+              "long": {
+                "max": "11927710843375",
+                "min": "11927710843375"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "23855421686746000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-22855421686741900000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "23855421686748000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-22855421686752200000000",
+            "reason": "min collateral",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "23855421686750000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-22855421686762500000000",
+            "reason": "min collateral",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-long-collateral-margin",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "2000000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": true,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "10722891566265",
+                "min": "10722891566265"
+              },
+              "long": {
+                "max": "10722891566265",
+                "min": "10722891566265"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10722891566266",
+                "min": "10722891566266"
+              },
+              "long": {
+                "max": "10722891566266",
+                "min": "10722891566266"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10722891566267",
+                "min": "10722891566267"
+              },
+              "long": {
+                "max": "10722891566267",
+                "min": "10722891566267"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "2000000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "21445783132530000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": false,
+            "margin_reason": null,
+            "pnl_usd20": "-10445783132529500000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "21445783132532000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-10445783132539800000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "21445783132534000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-10445783132550100000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-short-collateral-positive-ignored",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "0",
+          "opposite_size_usd20": "0",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "11165048543689",
+                "min": "11165048543689"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11165048543690",
+                "min": "11165048543690"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11165048543691",
+                "min": "11165048543691"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14999999999996700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-15000000000007000000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "2000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-15000000000017300000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "0",
+          "opposite_report": null,
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-short-collateral-negative-capped",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "11067961165048",
+                "min": "11067961165048"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11067961165049",
+                "min": "11067961165049"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11067961165050",
+                "min": "11067961165050"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-13999999999994400000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14000000000004700000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14000000000015000000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-short-collateral-negative-uncapped",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "5000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "10873786407766",
+                "min": "10873786407766"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10873786407767",
+                "min": "10873786407767"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10873786407768",
+                "min": "10873786407768"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-11999999999989800000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12000000000000100000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-3000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-12000000000010400000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-short-collateral-negative-zero-cap",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "0",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "11165048543689",
+                "min": "11165048543689"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11165048543690",
+                "min": "11165048543690"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11165048543691",
+                "min": "11165048543691"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-14999999999996700000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-15000000000007000000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "0",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-15000000000017300000000",
+            "reason": "min collateral for leverage",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-short-collateral-minimum",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "8000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "10776699029126",
+                "min": "10776699029126"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10776699029127",
+                "min": "10776699029127"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10776699029128",
+                "min": "10776699029128"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-10999999999997800000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-11000000000008100000000",
+            "reason": "min collateral",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-11000000000018400000000",
+            "reason": "min collateral",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-short-collateral-nonpositive",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "0",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "0",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "11553398058252",
+                "min": "11553398058252"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11553398058253",
+                "min": "11553398058253"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "11553398058254",
+                "min": "11553398058254"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-18999999999995600000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-19000000000005900000000",
+            "reason": "min collateral",
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": true,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral",
+            "pnl_usd20": "-19000000000016200000000",
+            "reason": "min collateral",
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
+    },
+    {
+      "id": "liquidation-impact-short-short-collateral-margin",
+      "input": {
+        "impact": {
+          "liquidation_cap_factor": "1000000000000000000",
+          "max_negative_factor": "100000000000000000",
+          "negative_factor": "3000000000000000000",
+          "opposite_collateral_amount": "1000000000",
+          "opposite_size_usd20": "300000000000000000000000",
+          "positive_factor": "2000000000000000000"
+        },
+        "operation": "liquidation_impact",
+        "scenario": {
+          "collateral_amount": "200000000",
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "entry_prices": {
+            "index": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "long": {
+              "max": "10000000000000",
+              "min": "10000000000000"
+            },
+            "short": {
+              "max": "100000000000000",
+              "min": "100000000000000"
+            }
+          },
+          "index_decimals": 9,
+          "is_long": false,
+          "is_long_collateral": false,
+          "liquidation_collateral_factor": "5000000000000000000",
+          "liquidation_fee_factor": "0",
+          "long_decimals": 9,
+          "min_collateral_factor": "10000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "order_fee_factor": "0",
+          "probe_prices": [
+            {
+              "index": {
+                "max": "10582524271844",
+                "min": "10582524271844"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10582524271845",
+                "min": "10582524271845"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "max": "10582524271846",
+                "min": "10582524271846"
+              },
+              "long": {
+                "max": "10000000000000",
+                "min": "10000000000000"
+              },
+              "short": {
+                "max": "100000000000000",
+                "min": "100000000000000"
+              }
+            }
+          ],
+          "short_decimals": 6,
+          "size_usd20": "100000000000000000000000"
+        }
+      },
+      "output": {
+        "opened": {
+          "collateral_amount": "200000000",
+          "execution_price": "9708737864077",
+          "impact_usd20": "-3000000000000000000000",
+          "opening_cost_amount": "0",
+          "size_tokens": "10300000000",
+          "size_usd20": "100000000000000000000000"
+        },
+        "probes": [
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": false,
+            "margin_reason": null,
+            "pnl_usd20": "-8999999999993200000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-9000000000003500000000",
+            "reason": null,
+            "status": "ok"
+          },
+          {
+            "closing_cost_amount": "0",
+            "collateral_usd20": "20000000000000000000000",
+            "effective_impact_usd20": "-1000000000000000000000",
+            "impact_usd20": "-3000000000000000000000",
+            "liquidatable": false,
+            "margin_insufficient": true,
+            "margin_reason": "min collateral for leverage",
+            "pnl_usd20": "-9000000000013800000000",
+            "reason": null,
+            "status": "ok"
+          }
+        ],
+        "state": {
+          "long_oi_usd20": "300000000000000000000000",
+          "opposite_report": {
+            "claimable_funding_amounts": [
+              "0",
+              "0"
+            ],
+            "execution_price": "10135135135135",
+            "impact_usd20": "-4000000000000000000000",
+            "size_tokens": "29600000000"
+          },
+          "short_oi_usd20": "100000000000000000000000"
+        },
+        "status": "ok"
+      }
     }
   ],
   "generator": {
-    "input_sha256": "62e29fac4c6f19cd3aba9b088a3c6a7ae3c4966465a90bffbe3076cd081172ef",
+    "input_sha256": "dc7e707adfa508dbf5a0fcbd21bc6f3fd15afcdb2dfdfe2d079cbc093113b0e8",
     "lock_sha256": "6b6160a8b9e1d1c1eaeb4a472852edb34fda1c8f5c4ff7188313f66f8924e346",
     "manifest_sha256": "1b952a339d1d8f65e83a897dc5b530421dd7f176335a3fa93cb131f98c95e93d",
     "rustc": "rustc 1.90.0 (1159e78c4 2025-09-14)",
-    "source_sha256": "5fc9ec9bf44b0f79e9cdbd63c43386306fc966e656d6bfb9d39882634bf6f88a"
+    "source_sha256": "a3e119c8458aad581fc1071a94ea49bb04daebaf042f7ffaa1dd39719b5bddac"
   },
   "reference": {
     "commit": "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72",
@@ -8348,7 +12544,8 @@
     "PerpMarketExt::cap_positive_position_price_impact",
     "PositionExt::pnl_value",
     "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)",
-    "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)"
+    "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)",
+    "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)"
   ],
   "units": {
     "factor_decimals": "20",

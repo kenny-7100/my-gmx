@@ -28,14 +28,15 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 103);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 103);
+assert.equal(reference.cases.length, 131);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 131);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
 const operations = {};
 let liquidationProbes = 0;
 let increasePriceProbes = 0;
+let impactLiquidationProbes = 0;
 
 function verifyIncrease(c) {
   const p = c.input.scenario;
@@ -133,13 +134,59 @@ function verifyLiquidation(c) {
   const feeValue = (size * BigInt(p.order_fee_factor)) / unit;
   const openingCost = feeValue / entryCollateral;
   const collateralAmount = BigInt(p.collateral_amount) - openingCost;
-  const tokens = p.is_long ? size / entryIndex : ceil(size, entryIndex);
+  const impact = c.input.impact;
+  const openingImpact = impact ? -(size * BigInt(impact.negative_factor)) / unit : 0n;
+  const openingAmount = -ceil(-openingImpact, BigInt(p.entry_prices.index.min));
+  const baseTokens = p.is_long ? size / entryIndex : ceil(size, entryIndex);
+  const tokens = p.is_long ? baseTokens + openingAmount : baseTokens - openingAmount;
+  const oppositeSize = impact ? BigInt(impact.opposite_size_usd20) : 0n;
+  const rawImpact = !impact
+    ? 0n
+    : oppositeSize === 0n
+      ? (size * min(BigInt(impact.positive_factor), BigInt(impact.negative_factor))) / unit
+      : -(size * BigInt(impact.negative_factor)) / unit;
+  const effectiveImpact =
+    rawImpact >= 0n ? 0n : -min(-rawImpact, (size * BigInt(impact.liquidation_cap_factor)) / unit);
+  if (impact) {
+    assert.equal(p.order_fee_factor, "0", c.id);
+    assert(oppositeSize === 0n || oppositeSize === 3n * size, c.id);
+    let oppositeReport = null;
+    if (oppositeSize) {
+      const seedImpact =
+        (size * min(BigInt(impact.positive_factor), BigInt(impact.negative_factor))) / unit -
+        ((oppositeSize - size) * BigInt(impact.negative_factor)) / unit;
+      assert(seedImpact < 0n, c.id);
+      const seedAmount = -ceil(-seedImpact, BigInt(p.entry_prices.index.min));
+      const seedTokens = p.is_long
+        ? ceil(oppositeSize, BigInt(p.entry_prices.index.min)) - seedAmount
+        : oppositeSize / BigInt(p.entry_prices.index.max) + seedAmount;
+      oppositeReport = {
+        impact_usd20: String(seedImpact),
+        size_tokens: String(seedTokens),
+        execution_price: String(oppositeSize / seedTokens),
+        claimable_funding_amounts: ["0", "0"],
+      };
+    }
+    assert.deepEqual(
+      c.output.state,
+      {
+        long_oi_usd20: String(p.is_long ? size : oppositeSize),
+        short_oi_usd20: String(p.is_long ? oppositeSize : size),
+        opposite_report: oppositeReport,
+      },
+      c.id
+    );
+    if (c.id.endsWith("-positive-ignored")) assert(rawImpact > 0n && effectiveImpact === 0n, c.id);
+    if (c.id.endsWith("-negative-capped")) assert(effectiveImpact < 0n && effectiveImpact > rawImpact, c.id);
+    if (c.id.endsWith("-negative-uncapped")) assert.equal(effectiveImpact, rawImpact, c.id);
+    if (c.id.endsWith("-negative-zero-cap")) assert(rawImpact < 0n && effectiveImpact === 0n, c.id);
+  }
   assert.deepEqual(
     c.output.opened,
     {
       collateral_amount: String(collateralAmount),
       execution_price: String(size / tokens),
-      impact_usd20: "0",
+      impact_usd20: String(openingImpact),
       opening_cost_amount: String(openingCost),
       size_tokens: String(tokens),
       size_usd20: String(size),
@@ -161,7 +208,7 @@ function verifyLiquidation(c) {
     const collateralPrice = BigInt((p.is_long_collateral ? prices.long : prices.short).min);
     const collateralValue = collateralAmount * collateralPrice;
     const cost = feeValue / collateralPrice;
-    const value = collateralValue + pnl - cost * collateralPrice;
+    const value = collateralValue + pnl + effectiveImpact - cost * collateralPrice;
     remaining.push(value);
     const liquidation = reason(value, p.liquidation_collateral_factor ?? p.min_collateral_factor);
     const margin = reason(value, p.min_collateral_factor);
@@ -170,21 +217,34 @@ function verifyLiquidation(c) {
       pnl_usd20: String(pnl),
       collateral_usd20: String(collateralValue),
       closing_cost_amount: String(cost),
-      impact_usd20: "0",
+      impact_usd20: String(rawImpact),
+      ...(impact ? { effective_impact_usd20: String(effectiveImpact) } : {}),
       liquidatable: liquidation !== null,
       reason: liquidation,
       margin_insufficient: margin !== null,
       margin_reason: margin,
     };
   });
-  assert.deepEqual(c.output, { status: "ok", opened: c.output.opened, probes }, c.id);
+  assert.deepEqual(
+    c.output,
+    { status: "ok", opened: c.output.opened, probes, ...(impact ? { state: c.output.state } : {}) },
+    c.id
+  );
   // These are three adjacent raw price units around an analytically derived boundary,
   // not a coarse sample or a binary search that assumes a general liquidation curve.
   assert.equal(p.probe_prices.length, 3);
   for (let index = 1; index < 3; index++) {
     assert.equal(BigInt(p.probe_prices[index].index.min) - BigInt(p.probe_prices[index - 1].index.min), 1n);
   }
-  assert(probes.some((v) => v.liquidatable) && probes.some((v) => !v.liquidatable), c.id);
+  if (c.id.endsWith("-margin")) {
+    assert(probes.some((v) => v.margin_insufficient) && probes.some((v) => !v.margin_insufficient), c.id);
+    assert(
+      probes.every((v) => !v.liquidatable),
+      c.id
+    );
+  } else {
+    assert(probes.some((v) => v.liquidatable) && probes.some((v) => !v.liquidatable), c.id);
+  }
   if (c.id.endsWith("-nonpositive")) {
     assert(remaining.some((v) => v <= 0n) && remaining.some((v) => v > 0n), c.id);
   }
@@ -205,6 +265,7 @@ function verifyLiquidation(c) {
     assert.deepEqual(c.output, peer.output, c.id);
   }
   liquidationProbes += probes.length;
+  if (impact) impactLiquidationProbes += probes.length;
 }
 for (let index = 0; index < reference.cases.length; index++) {
   const c = reference.cases[index];
@@ -216,7 +277,7 @@ for (let index = 0; index < reference.cases.length; index++) {
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
   }
-  if (p.operation === "liquidation_check") {
+  if (p.operation === "liquidation_check" || p.operation === "liquidation_impact") {
     verifyLiquidation(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
@@ -395,6 +456,32 @@ try {
     ].map((mutate) => (s) => {
       mutate(s.cases[71].input.scenario);
     }),
+    ...[
+      (p) => {
+        delete p.liquidation_cap_factor;
+      },
+      (p) => {
+        p.liquidation_cap_factor = String(unit + 1n);
+      },
+      (p) => {
+        p.max_negative_factor = String(unit + 1n);
+      },
+      (p) => {
+        p.opposite_size_usd20 = "01";
+      },
+      (p) => {
+        p.opposite_collateral_amount = "1";
+      },
+      (p) => {
+        p.opposite_size_usd20 = String(3000n * unit);
+        p.opposite_collateral_amount = "1";
+      },
+      (p) => {
+        p.unknown = true;
+      },
+    ].map((mutate) => (s) => {
+      mutate(s.cases[103].input.impact);
+    }),
   ];
 
   for (const mutate of invalid) {
@@ -438,6 +525,7 @@ process.stdout.write(
       operations,
       liquidationProbes,
       increasePriceProbes,
+      impactLiquidationProbes,
       malformedRejected: rejected,
       modelErrorDistinctFromZero: true,
       liquidationProbeErrorDistinctFromResult: true,
