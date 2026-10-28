@@ -13265,6 +13265,2826 @@
         },
         "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
       }
+    },
+    {
+      "id": "borrowing-kink-long-long-below",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999012000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-equal",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-above-adjacent",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011998",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-above",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999505999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-optimal-one",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "100000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-disabled",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "0",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-slope-equal",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999505999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "200000000000029",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-slope-lower",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999505999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "1",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-skip-smaller",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "100100000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-skip-tie",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-skip-larger",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "99900000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-charge-smaller",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100100000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-oi-usage",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "200000000000000000000034",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-below",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999012000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-equal",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-above-adjacent",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011998",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-above",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999505999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-optimal-one",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "100000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-disabled",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "0",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-slope-equal",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999505999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "200000000000029",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-slope-lower",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999505999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "1",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-skip-smaller",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "100100000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-skip-tie",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-skip-larger",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "99900000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-charge-smaller",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999011999",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100100000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-oi-usage",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "200000000000000000000034",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-below",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999701",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-equal",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-above-adjacent",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999699",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-above",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999999850",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-optimal-one",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "100000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-disabled",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "0",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-slope-equal",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999999850",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "200000000000029",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-slope-lower",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999999850",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "1",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-skip-smaller",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "100100000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-skip-tie",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-skip-larger",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "99900000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-charge-smaller",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100100000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-oi-usage",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "200000000000000000000034",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-below",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999701",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-equal",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-above-adjacent",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999699",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-above",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999999850",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-optimal-one",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "100000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-disabled",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "0",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-slope-equal",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999999850",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "200000000000029",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-slope-lower",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "4999999999999850",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "1",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-skip-smaller",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "100100000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-skip-tie",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-skip-larger",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": true,
+          "opposite_size_usd20": "99900000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-charge-smaller",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "9999999999999700",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100100000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-oi-usage",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "200000000000000000000034",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-ignore-oi",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "200000000000000000000034",
+          "ignore_open_interest_for_usage_factor": true
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-long-reserve-half",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "50000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-ignore-oi",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "200000000000000000000034",
+          "ignore_open_interest_for_usage_factor": true
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-long-short-reserve-half",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "50000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-ignore-oi",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "200000000000000000000034",
+          "ignore_open_interest_for_usage_factor": true
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-long-reserve-half",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "2000000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "200000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "2000000000",
+          "open_interest_reserve_factor": "50000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-ignore-oi",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "100000000000000000000",
+          "max_open_interest_usd20": "200000000000000000000034",
+          "ignore_open_interest_for_usage_factor": true
+        }
+      }
+    },
+    {
+      "id": "borrowing-kink-short-short-reserve-half",
+      "input": {
+        "operation": "borrowing_kink",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "size_usd20": "100000000000000000000017",
+          "collateral_amount": "200000000",
+          "borrowing_factor": "100000000000017",
+          "receiver_factor": "37000000000000000000",
+          "elapsed_seconds": [0, 17, 10000],
+          "next_size_usd20": "10000000000000000000007",
+          "next_collateral_amount": "20000000"
+        },
+        "params": {
+          "optimal_usage_factor": "25000000000000000000",
+          "base_borrowing_factor": "200000000000029",
+          "above_optimal_usage_borrowing_factor": "500000000000041",
+          "skip_smaller_side": false,
+          "opposite_size_usd20": "100000000000000000000017",
+          "opposite_collateral_amount": "200000000",
+          "open_interest_reserve_factor": "50000000000000000000",
+          "max_open_interest_usd20": "100000000000000000000000000000",
+          "ignore_open_interest_for_usage_factor": false
+        }
+      }
     }
   ]
 }

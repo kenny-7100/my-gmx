@@ -200,3 +200,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 287组两次Rust输出字节一致、独立核算及101类非法输入/setup拒绝通过；SHA-256 `593dbe18ed5e5c83a067acf1658e0cb9e69b56a8bddf957562563a240025a2ec`。Rust check/fmt、脚本lint/格式及本轮EVM费用/仓位两文件55项通过，完整命令与证据见[第六十轮记录](solana-implementation-research.md#第六十轮实施记录t17b2d7-混合抵押动态反转与结算2026-10-28)。新增拒绝包括share零/UNIT/越界/非规范、数组长度、缺share、未知字段和末步非法金额，仍整次拒绝而不发布部分JSON。
 
 下一轮T17.b2d8 borrowing kink与skip-smaller-side，复用已有borrowing路径补分段及跳过边界。累计费用清算、全部OI清空/重新进入、完整减仓/min-position/限额、程序费用退款及真实转账仍待；T17/b2d父项及整个集成未完成。工具不进入生产SDK/共享状态/UI，T19仍待完整参考矩阵与T04.b reviewed字段，页面仍占位。
+
+## T17.b2d8 Borrowing kink与较小侧跳过子集（2026-10-28）
+
+新增 `borrowing_kink`，复用原borrowing真实时钟/update、pending与两次后续增仓。显式params包含optimal/base/above factor、skip bool、opposite size/collateral、OI reserve factor、max OI及ignore OI bool；两侧用真实增仓形成OI，不直接覆写累计或仓位快照。旧操作默认线性/不跳过与输出不变。TestMarketConfig给两侧相同kink参数；本子集不覆盖两侧非对称配置或累计过程中的OI变化。
+
+固定v0.10.0 `market/borrowing.rs` 先按USD OI严格比较较小侧，相等不跳过。optimal为0选择原线性公式；非零时usage为 `max(reserved / floor(pool_value * oi_reserve_factor / UNIT), side_oi / max_oi)` 的UNIT比例，除法各自floor，ignore OI显式为true时只用reserve usage。long reserved由tokens乘index max，short直接size，pool用对应token min。基础rate为 `floor(usage * base / UNIT)`；usage大于optimal且optimal小于UNIT时加 `floor(max(above - base, 0) * (usage - optimal) / (UNIT - optimal))`。optimal=UNIT无除零；above不高于base时附加斜率为零，不做负扣减。
+
+新增60组：两side×两抵押token×15种profile，涵盖阈值相邻一单位/相等、正附加斜率、optimal0/1、above等于/低于base、较小/相等/较大side开启skip及关闭skip对照、OI主导、ignore OI和reserve factor一半。线性factor与kink base刻意不同，避免零optimal分支不可区分；相邻高一单位可能因floor仍无rate增量，不夸大为可观察跳变。每组0/17/10000秒，共180次update和120次后续增仓；独立核对两侧累计、被验仓位pending/首次结算、receiver/pool分配、快照重置及第二次零收费。对侧仓位用于真实OI/两侧累计，保持开仓，未执行其结算或付款。
+
+总347组两次字节一致、独立BigInt核算、111类非法输入/setup拒绝通过；旧287组输入/业务输出不变，JSON SHA-256 `482c2c0a4d55785f38ca390104d527ce2440adf9562076dd89f6554f2f8db41e`。Rust check/fmt无warning，脚本lint/格式及本轮EVM费用/仓位55项通过，命令和原生证据见[第六十一轮记录](solana-implementation-research.md#第六十一轮实施记录t17b2d8-borrowing-kink与较小侧跳过2026-10-28)。
+
+下一轮T17.b2d9累计借款费后清算边界，核对pending与清算predicate，再补相邻价格；累计funding清算、动态OI跳过转换、完整减仓及费用退款等仍待。没有生产SDK/共享状态/UI接线或真实转账验收，T17/b2d父项及整个集成未完成，T19仍待完整矩阵/T04.b reviewed字段。

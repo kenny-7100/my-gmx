@@ -28,15 +28,18 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 287);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 287);
+assert.equal(reference.cases.length, 347);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 347);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
+const max = (...values) => values.reduce((a, b) => (a > b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
 const operations = {};
 let liquidationProbes = 0;
 let increasePriceProbes = 0;
 let impactLiquidationProbes = 0;
+let kinkCheckpoints = 0;
+let kinkSettlements = 0;
 let borrowingCheckpoints = 0;
 let borrowingSettlements = 0;
 let fundingCheckpoints = 0;
@@ -450,22 +453,46 @@ function verifyBorrowing(c) {
   const entry = BigInt(p.is_long ? p.prices.index.max : p.prices.index.min);
   const tokens = p.is_long ? size / entry : ceil(size, entry);
   const nextTokens = p.is_long ? nextSize / entry : ceil(nextSize, entry);
-  const reserved = p.is_long ? tokens * BigInt(p.prices.index.max) : size;
-  const pool = BigInt(p.is_long ? p.deposit_long_amount : p.deposit_short_amount);
-  const poolPrice = BigInt((p.is_long ? p.prices.long : p.prices.short).min);
-  const rate = (((reserved * unit) / (pool * poolPrice)) * BigInt(p.borrowing_factor)) / unit;
-  let cumulative = 0n;
+  const kink = c.input.operation === "borrowing_kink" ? c.input.params : undefined;
+  const rateFor = (isLong) => {
+    const sideSize = isLong === p.is_long ? size : kink ? BigInt(kink.opposite_size_usd20) : 0n;
+    if (sideSize === 0n) return 0n;
+    if (kink?.skip_smaller_side && sideSize < (isLong === p.is_long ? BigInt(kink.opposite_size_usd20) : size))
+      return 0n;
+    const sideReserved = isLong ? (sideSize / BigInt(p.prices.index.max)) * BigInt(p.prices.index.max) : sideSize;
+    const poolValue =
+      BigInt(isLong ? p.deposit_long_amount : p.deposit_short_amount) *
+      BigInt((isLong ? p.prices.long : p.prices.short).min);
+    if (!kink || BigInt(kink.optimal_usage_factor) === 0n)
+      return (((sideReserved * unit) / poolValue) * BigInt(p.borrowing_factor)) / unit;
+    const reserveUsage = (sideReserved * unit) / ((poolValue * BigInt(kink.open_interest_reserve_factor)) / unit);
+    const usage = kink.ignore_open_interest_for_usage_factor
+      ? reserveUsage
+      : max(reserveUsage, (sideSize * unit) / BigInt(kink.max_open_interest_usd20));
+    const optimal = BigInt(kink.optimal_usage_factor),
+      base = BigInt(kink.base_borrowing_factor),
+      above = BigInt(kink.above_optimal_usage_borrowing_factor);
+    return (
+      (usage * base) / unit +
+      (usage > optimal && optimal < unit ? (max(above - base, 0n) * (usage - optimal)) / (unit - optimal) : 0n)
+    );
+  };
+  const rate = rateFor(p.is_long);
+  const oppositeRate = rateFor(!p.is_long);
+  let cumulative = 0n,
+    oppositeCumulative = 0n;
   const checkpoints = p.elapsed_seconds.map((seconds) => {
     const before = (size * cumulative) / unit;
     cumulative += rate * BigInt(seconds);
+    oppositeCumulative += oppositeRate * BigInt(seconds);
     const after = (size * cumulative) / unit;
     return {
       elapsed_seconds: seconds,
       pending_before_update_usd20: String(before),
       projected_pending_usd20: String(after),
       pending_after_update_usd20: String(after),
-      long_cumulative_factor: String(p.is_long ? cumulative : 0n),
-      short_cumulative_factor: String(p.is_long ? 0n : cumulative),
+      long_cumulative_factor: String(p.is_long ? cumulative : oppositeCumulative),
+      short_cumulative_factor: String(p.is_long ? oppositeCumulative : cumulative),
     };
   });
   const value = (size * cumulative) / unit;
@@ -508,8 +535,17 @@ function verifyBorrowing(c) {
   if (c.id.endsWith("-raw-first-unit")) assert(amount > 0n, c.id);
   if (c.id.endsWith("-receiver-split")) assert(receiver > 0n && forPool > 0n, c.id);
   if (c.id.endsWith("-full-receiver")) assert.equal(receiver, amount, c.id);
-  borrowingCheckpoints += checkpoints.length;
-  borrowingSettlements += settlements.length;
+  if (kink) {
+    if (c.id.endsWith("-skip-smaller")) assert.equal(rate, 0n, c.id);
+    else assert(rate > 0n, c.id);
+    if (c.id.endsWith("-skip-larger")) assert.equal(oppositeRate, 0n, c.id);
+    if (c.id.endsWith("-skip-tie")) assert(oppositeRate > 0n, c.id);
+    kinkCheckpoints += checkpoints.length;
+    kinkSettlements += settlements.length;
+  } else {
+    borrowingCheckpoints += checkpoints.length;
+    borrowingSettlements += settlements.length;
+  }
 }
 
 function verifyIncrease(c) {
@@ -760,7 +796,7 @@ for (let index = 0; index < reference.cases.length; index++) {
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
   }
-  if (p.operation === "borrowing_accrual") {
+  if (["borrowing_accrual", "borrowing_kink"].includes(p.operation)) {
     verifyBorrowing(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
@@ -1181,6 +1217,38 @@ try {
       s.cases[263].input.scenario.steps.at(-1).add_long_usd20 = "1.0";
     }
   );
+  invalid.push(
+    (s) => {
+      s.cases[287].input.params.optimal_usage_factor = String(unit + 1n);
+    },
+    (s) => {
+      s.cases[287].input.params.base_borrowing_factor = "-1";
+    },
+    (s) => {
+      s.cases[287].input.params.above_optimal_usage_borrowing_factor = "01";
+    },
+    (s) => {
+      s.cases[287].input.params.open_interest_reserve_factor = "0";
+    },
+    (s) => {
+      s.cases[287].input.params.max_open_interest_usd20 = "0";
+    },
+    (s) => {
+      s.cases[287].input.params.opposite_size_usd20 = "0";
+    },
+    (s) => {
+      delete s.cases[287].input.params.skip_smaller_side;
+    },
+    (s) => {
+      s.cases[287].input.params.unknown = true;
+    },
+    (s) => {
+      s.cases[287].input.scenario.elapsed_seconds[2] = 31536001;
+    },
+    (s) => {
+      delete s.cases[287].input.params;
+    }
+  );
   for (const mutate of invalid) {
     const suite = structuredClone(inputs);
     mutate(suite);
@@ -1223,6 +1291,8 @@ process.stdout.write(
       liquidationProbes,
       increasePriceProbes,
       impactLiquidationProbes,
+      kinkCheckpoints,
+      kinkSettlements,
       borrowingCheckpoints,
       borrowingSettlements,
       fundingCheckpoints,

@@ -49,6 +49,10 @@ struct Case {
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 enum Input {
+    BorrowingKink {
+        scenario: BorrowingInput,
+        params: BorrowingKinkInput,
+    },
     DynamicFundingMixed {
         scenario: DynamicFundingInput,
         long_collateral_factors: [String; 2],
@@ -702,7 +706,21 @@ struct BorrowingInput {
     next_collateral_amount: String,
 }
 
-fn borrowing_accrual(input: &BorrowingInput) -> Result<Value> {
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct BorrowingKinkInput {
+    optimal_usage_factor: String,
+    base_borrowing_factor: String,
+    above_optimal_usage_borrowing_factor: String,
+    skip_smaller_side: bool,
+    opposite_size_usd20: String,
+    opposite_collateral_amount: String,
+    open_interest_reserve_factor: String,
+    max_open_interest_usd20: String,
+    ignore_open_interest_for_usage_factor: bool,
+}
+
+fn borrowing_accrual(input: &BorrowingInput, kink: Option<&BorrowingKinkInput>) -> Result<Value> {
     for value in [
         input.index_decimals,
         input.long_decimals,
@@ -740,13 +758,26 @@ fn borrowing_accrual(input: &BorrowingInput) -> Result<Value> {
         .exponent_for_short(UNIT)
         .factor_for_long(factor(&input.borrowing_factor)?)
         .factor_for_short(factor(&input.borrowing_factor)?)
-        .skip_borrowing_fee_for_smaller_side(false)
+        .skip_borrowing_fee_for_smaller_side(kink.is_some_and(|p| p.skip_smaller_side))
         .build();
     config.borrowing_fee_kink_model_params = BorrowingFeeKinkModelParamsForOneSide::builder()
         .optimal_usage_factor(0)
         .base_borrowing_factor(0)
         .above_optimal_usage_borrowing_factor(0)
         .build();
+    if let Some(p) = kink {
+        config.borrowing_fee_kink_model_params = BorrowingFeeKinkModelParamsForOneSide::builder()
+            .optimal_usage_factor(factor(&p.optimal_usage_factor)?)
+            .base_borrowing_factor(factor(&p.base_borrowing_factor)?)
+            .above_optimal_usage_borrowing_factor(factor(&p.above_optimal_usage_borrowing_factor)?)
+            .build();
+        config.open_interest_reserve_factor = factor(&p.open_interest_reserve_factor)?;
+        config.max_open_interest = uint(&p.max_open_interest_usd20)?;
+        config.ignore_open_interest_for_usage_factor = p.ignore_open_interest_for_usage_factor;
+        if config.open_interest_reserve_factor == 0 || config.max_open_interest == 0 {
+            return Err("Expected nonzero borrowing usage denominators".into());
+        }
+    }
     let mut market = TestMarket::<u128, 20>::with_config(config);
     market
         .deposit(
@@ -769,6 +800,31 @@ fn borrowing_accrual(input: &BorrowingInput) -> Result<Value> {
         .increase(prices, uint(&input.collateral_amount)?, size, None)?
         .execute()?;
     let opened = json!({"cost_amount": opening.fees().total_cost_amount()?.to_string(), "size_tokens": opening.execution().size_delta_in_tokens().to_string(), "claimable_funding_amounts": [opening.claimable_funding_amounts().0.to_string(), opening.claimable_funding_amounts().1.to_string()]});
+    let mut opposite = if input.is_long {
+        TestPosition::short(input.is_long_collateral)
+    } else {
+        TestPosition::long(input.is_long_collateral)
+    };
+    if let Some(p) = kink {
+        let opposite_size = uint(&p.opposite_size_usd20)?;
+        if opposite_size == 0 {
+            return Err("Expected nonzero opposite position size".into());
+        }
+        let opening = opposite
+            .ops(&mut market)
+            .increase(
+                prices,
+                uint(&p.opposite_collateral_amount)?,
+                opposite_size,
+                None,
+            )?
+            .execute()?;
+        if opening.fees().total_cost_amount()? != 0
+            || opening.claimable_funding_amounts() != (&0, &0)
+        {
+            return Err("Expected opposite opening without accrued fees or funding claims".into());
+        }
+    }
     let rate = market.borrowing_factor_per_second(input.is_long, &prices)?;
     let mut checkpoints = Vec::new();
     for seconds in &input.elapsed_seconds {
@@ -1292,7 +1348,8 @@ fn evaluate(input: &Input) -> Result<Value> {
             dynamic_funding(scenario, true, false, None, Some(factors))
         }
         Input::FundingAccrual { scenario } => funding_accrual(scenario),
-        Input::BorrowingAccrual { scenario } => borrowing_accrual(scenario),
+        Input::BorrowingAccrual { scenario } => borrowing_accrual(scenario, None),
+        Input::BorrowingKink { scenario, params } => borrowing_accrual(scenario, Some(params)),
         Input::IncreaseImpact { scenario } => increase_impact(scenario),
         Input::LiquidationCheck { scenario } => liquidation_check(scenario, None),
         Input::LiquidationImpact { scenario, impact } => liquidation_check(scenario, Some(impact)),
@@ -1474,7 +1531,7 @@ fn main() -> Result<()> {
             "rustc": String::from_utf8(rustc.stdout)?.trim()
         },
         "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case or documented per-operation fixtures", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
-        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement", "Mixed-collateral dynamic reversal funding and two-token claimable settlement"],
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement", "Mixed-collateral dynamic reversal funding and two-token claimable settlement", "Borrowing kink usage boundaries and strict smaller-side skipping"],
         "cases": cases
     });
     // Buffer all cases before writing stdout; callers must still publish output atomically.
