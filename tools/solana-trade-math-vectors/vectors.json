@@ -20226,14 +20226,2744 @@
         ],
         "status": "ok"
       }
+    },
+    {
+      "id": "dynamic-funding-long-growth",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "10000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "29999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "10000000000000",
+            "previous_factor": "5000000000000",
+            "rate_magnitude": "10000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-stable",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "50000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "5000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "9999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "5000000000000",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "150000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-decrease-equality",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "7499999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "5000000000000",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "200000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-stable-equality",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "50000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "5000000000000",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-decay",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "150000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "15000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "4000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "4799999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "4000000000000",
+            "previous_factor": "5000000000000",
+            "rate_magnitude": "4000000000000",
+            "short_oi_usd20": "250000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-signum",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "1000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "150000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "15000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "1"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "1",
+            "previous_factor": "5000000000000",
+            "rate_magnitude": "1",
+            "short_oi_usd20": "250000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-reverse",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "60000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "1000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "428571428",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "1000000000000",
+            "previous_factor": "5000000000000",
+            "rate_magnitude": "1000000000000",
+            "short_oi_usd20": "700000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "6999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "3000000000"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-3000000000000",
+            "previous_factor": "1000000000000",
+            "rate_magnitude": "3000000000000",
+            "short_oi_usd20": "700000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-max",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "2000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "2000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "5999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "2000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "2000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-min",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "10000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "10000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "29999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "10000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-zero",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 0
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "0",
+            "previous_factor": "0",
+            "rate_magnitude": "0",
+            "short_oi_usd20": "100000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-zero-min",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "10000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 0
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "0",
+            "previous_factor": "0",
+            "rate_magnitude": "10000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-long-balanced",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "200000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "29999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "10000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "100000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "20000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "4999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "5000000000000",
+            "previous_factor": "5000000000000",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-growth",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "29999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "10000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-10000000000000",
+            "previous_factor": "-5000000000000",
+            "rate_magnitude": "10000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-stable",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "50000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          },
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "4999999999"
+              },
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "9999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "150000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "-5000000000000",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-decrease-equality",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          },
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "7499999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "200000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "-5000000000000",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-stable-equality",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "50000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "-5000000000000",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-decay",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "150000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          },
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "14999999999"
+              },
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "4799999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "4000000000"
+              }
+            ],
+            "long_oi_usd20": "250000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-4000000000000",
+            "previous_factor": "-5000000000000",
+            "rate_magnitude": "4000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-signum",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "1000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "150000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          },
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "14999999999"
+              },
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "1"
+              }
+            ],
+            "long_oi_usd20": "250000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-1",
+            "previous_factor": "-5000000000000",
+            "rate_magnitude": "1",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-reverse",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          },
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "59999999999"
+              },
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "428571428",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "1000000000"
+              }
+            ],
+            "long_oi_usd20": "700000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-1000000000000",
+            "previous_factor": "-5000000000000",
+            "rate_magnitude": "1000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          },
+          {
+            "actions": [
+              null,
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "3000000000"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "6999999999",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "700000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "3000000000000",
+            "previous_factor": "-1000000000000",
+            "rate_magnitude": "3000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-max",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "2000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "5999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "2000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-2000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "2000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-min",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "10000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "29999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "10000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "10000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-zero",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 0
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "0",
+            "previous_factor": "0",
+            "rate_magnitude": "0",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-zero-min",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "10000000000000",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 0
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": true,
+            "next_factor": "0",
+            "previous_factor": "0",
+            "rate_magnitude": "10000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
+    },
+    {
+      "id": "dynamic-funding-short-balanced",
+      "input": {
+        "operation": "dynamic_funding",
+        "scenario": {
+          "decrease_factor_per_second": "100000000000",
+          "decrease_threshold": "20000000000000000000",
+          "increase_factor_per_second": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "min_factor_per_second": "0",
+          "prices": {
+            "index": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "long": {
+              "max": "10000000000019",
+              "min": "10000000000007"
+            },
+            "short": {
+              "max": "100000000000006",
+              "min": "100000000000003"
+            }
+          },
+          "stable_threshold": "40000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "200000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        }
+      },
+      "output": {
+        "checkpoints": [
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "9999999999"
+              },
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "30000000000"
+              }
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "14999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "100000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "0",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          },
+          {
+            "actions": [
+              {
+                "claimable_funding_amounts": [
+                  "0",
+                  "0"
+                ],
+                "cost_amount": "0",
+                "size_tokens": "19999999999"
+              },
+              null
+            ],
+            "deltas": [
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "4999999999",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "0"
+              },
+              {
+                "claimable_per_size": "0",
+                "funding_per_size": "5000000000"
+              }
+            ],
+            "long_oi_usd20": "300000000000000000000000",
+            "longs_pay": false,
+            "next_factor": "-5000000000000",
+            "previous_factor": "-5000000000000",
+            "rate_magnitude": "5000000000000",
+            "short_oi_usd20": "300000000000000000000000"
+          }
+        ],
+        "status": "ok"
+      }
     }
   ],
   "generator": {
-    "input_sha256": "bbd61a40cd88fb6dd7b4b961fa05fc29ee97db7fe70db4c0f0da175ced06ac83",
+    "input_sha256": "5c49893f1695d0de999adfb92bf9466475652126c0dd0136df1ed37d4bcbcd1f",
     "lock_sha256": "6b6160a8b9e1d1c1eaeb4a472852edb34fda1c8f5c4ff7188313f66f8924e346",
     "manifest_sha256": "1b952a339d1d8f65e83a897dc5b530421dd7f176335a3fa93cb131f98c95e93d",
     "rustc": "rustc 1.90.0 (1159e78c4 2025-09-14)",
-    "source_sha256": "68a1d4da5937df226ab91c3cf8eca972ac5b5eabd514547ccc7f637cb1d74cbe"
+    "source_sha256": "8502e6a893a1e314e095d317d1883cafe1e5d91ede725e2e9fdf02325cd8515e"
   },
   "reference": {
     "commit": "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72",
@@ -20249,14 +22979,15 @@
     "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)",
     "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)",
     "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)",
-    "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)"
+    "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)",
+    "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)"
   ],
   "units": {
     "factor_decimals": "20",
     "fee_amount": "same unit as input amount; not implicitly USD",
     "prices": "USD20 per raw token unit",
     "shared_usd_decimals": "30",
-    "token_amounts": "raw units; decimals specified per case",
+    "token_amounts": "raw units; decimals specified per case or fixed tagged test defaults for dynamic_funding",
     "tolerance": "0",
     "usd_decimals": "20"
   }

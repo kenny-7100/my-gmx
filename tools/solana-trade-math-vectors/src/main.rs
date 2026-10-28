@@ -49,6 +49,9 @@ struct Case {
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 enum Input {
+    DynamicFunding {
+        scenario: DynamicFundingInput,
+    },
     FundingAccrual {
         scenario: FundingInput,
     },
@@ -134,6 +137,139 @@ impl PricesInput {
             short_token_price: price(&self.short)?,
         })
     }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct DynamicFundingInput {
+    prices: PricesInput,
+    increase_factor_per_second: String,
+    decrease_factor_per_second: String,
+    min_factor_per_second: String,
+    max_factor_per_second: String,
+    stable_threshold: String,
+    decrease_threshold: String,
+    steps: Vec<DynamicFundingStep>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct DynamicFundingStep {
+    add_long_usd20: String,
+    add_short_usd20: String,
+    elapsed_seconds: u64,
+}
+
+fn dynamic_funding(input: &DynamicFundingInput) -> Result<Value> {
+    let increase = factor(&input.increase_factor_per_second)?;
+    let decrease = factor(&input.decrease_factor_per_second)?;
+    let minimum = factor(&input.min_factor_per_second)?;
+    let maximum = factor(&input.max_factor_per_second)?;
+    let stable = factor(&input.stable_threshold)?;
+    let decrease_threshold = factor(&input.decrease_threshold)?;
+    if increase == 0 || minimum > maximum || decrease_threshold > stable || input.steps.is_empty() {
+        return Err(
+            "Expected dynamic increase, ordered rate bounds/thresholds and nonempty steps".into(),
+        );
+    }
+    let prices = input.prices.parse()?;
+    let mut config = TestMarketConfig::<u128, 20>::default();
+    let no_impact = PriceImpactParams::builder()
+        .exponent(UNIT)
+        .positive_factor(0)
+        .negative_factor(0)
+        .build();
+    let no_fee = FeeParams::builder()
+        .fee_receiver_factor(0)
+        .positive_impact_fee_factor(0)
+        .negative_impact_fee_factor(0)
+        .build();
+    config.position_impact_params = no_impact;
+    config.swap_impact_params = no_impact;
+    config.order_fee_params = no_fee;
+    config.swap_fee_params = no_fee;
+    config.funding_fee_params = FundingFeeParams::builder()
+        .exponent(UNIT)
+        .funding_factor(0)
+        .increase_factor_per_second(increase)
+        .decrease_factor_per_second(decrease)
+        .min_factor_per_second(minimum)
+        .max_factor_per_second(maximum)
+        .threshold_for_stable_funding(stable)
+        .threshold_for_decrease_funding(decrease_threshold)
+        .build();
+    let mut market = TestMarket::<u128, 20>::with_config(config);
+    market
+        .deposit(100_000_000_000_000, 10_000_000_000_000, prices)?
+        .execute()?;
+    let _ = market.update_funding(&prices)?.execute()?;
+    let mut positions = Vec::new();
+    let mut checkpoints = Vec::new();
+    for step in &input.steps {
+        if step.elapsed_seconds > 31_536_000 {
+            return Err("Funding interval exceeds one year".into());
+        }
+        let mut actions = Vec::new();
+        for (is_long, text) in [(true, &step.add_long_usd20), (false, &step.add_short_usd20)] {
+            let size = uint(text)?;
+            if size == 0 {
+                actions.push(Value::Null);
+                continue;
+            }
+            let mut position = if is_long {
+                TestPosition::long(false)
+            } else {
+                TestPosition::short(false)
+            };
+            let report = position
+                .ops(&mut market)
+                .increase(prices, 1_000_000_000, size, None)?
+                .execute()?;
+            actions.push(json!({
+                "cost_amount": report.fees().total_cost_amount()?.to_string(),
+                "size_tokens": report.execution().size_delta_in_tokens().to_string(),
+                "claimable_funding_amounts": [
+                    report.claimable_funding_amounts().0.to_string(),
+                    report.claimable_funding_amounts().1.to_string()
+                ]
+            }));
+            positions.push(position);
+        }
+        let long = market.open_interest()?.long_amount()?;
+        let short = market.open_interest()?.short_amount()?;
+        if long == 0 || short == 0 {
+            return Err("Dynamic funding subset requires both OI sides".into());
+        }
+        let previous = *market.funding_factor_per_second();
+        let (rate, longs_pay, _) = market
+            .update_funding(&prices)?
+            .next_funding_factor_per_second(step.elapsed_seconds, &long, &short)?;
+        market.move_clock_forward(Duration::from_secs(step.elapsed_seconds));
+        let report = market.update_funding(&prices)?.execute()?;
+        if report.duration_in_seconds() != step.elapsed_seconds {
+            return Err("Dynamic funding clock drift: rerun without wall-clock delay".into());
+        }
+        let deltas: Vec<_> = [(true, true), (true, false), (false, true), (false, false)]
+            .into_iter()
+            .map(|(side, col)| {
+                json!({
+                    "funding_per_size": report.delta_funding_amount_per_size(side, col).to_string(),
+                    "claimable_per_size": report.delta_claimable_funding_amount_per_size(side, col).to_string()
+                })
+            })
+            .collect();
+        checkpoints.push(json!({
+            "long_oi_usd20": long.to_string(),
+            "short_oi_usd20": short.to_string(),
+            "previous_factor": previous.to_string(),
+            "rate_magnitude": rate.to_string(),
+            "longs_pay": longs_pay,
+            "next_factor": report.next_funding_factor_per_second().to_string(),
+            "deltas": deltas,
+            "actions": actions
+        }));
+    }
+    Ok(json!({"status":"ok","checkpoints":checkpoints}))
 }
 
 #[derive(Deserialize)]
@@ -873,6 +1009,7 @@ fn model_error(error: gmsol_model::Error) -> Value {
 
 fn evaluate(input: &Input) -> Result<Value> {
     match input {
+        Input::DynamicFunding { scenario } => dynamic_funding(scenario),
         Input::FundingAccrual { scenario } => funding_accrual(scenario),
         Input::BorrowingAccrual { scenario } => borrowing_accrual(scenario),
         Input::IncreaseImpact { scenario } => increase_impact(scenario),
@@ -1055,8 +1192,8 @@ fn main() -> Result<()> {
             "input_sha256": sha256(&bytes),
             "rustc": String::from_utf8(rustc.stdout)?.trim()
         },
-        "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
-        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)"],
+        "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case or fixed tagged test defaults for dynamic_funding", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)"],
         "cases": cases
     });
     // Buffer all cases before writing stdout; callers must still publish output atomically.

@@ -28,8 +28,8 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 175);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 175);
+assert.equal(reference.cases.length, 199);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 199);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
@@ -41,6 +41,79 @@ let borrowingCheckpoints = 0;
 let borrowingSettlements = 0;
 let fundingCheckpoints = 0;
 let fundingSettlements = 0;
+let dynamicFundingCheckpoints = 0;
+
+function verifyDynamicFunding(c) {
+  const p = c.input.scenario;
+  const abs = (v) => (v < 0n ? -v : v);
+  const sign = (v) => (v < 0n ? -1n : 1n);
+  let long = 0n,
+    short = 0n,
+    stored = 0n;
+  const checkpoints = p.steps.map((step) => {
+    const additions = [BigInt(step.add_long_usd20), BigInt(step.add_short_usd20)];
+    long += additions[0];
+    short += additions[1];
+    const actions = additions.map((size, i) =>
+      size === 0n
+        ? null
+        : {
+            cost_amount: "0",
+            size_tokens: String(i === 0 ? size / BigInt(p.prices.index.max) : ceil(size, BigInt(p.prices.index.min))),
+            claimable_funding_amounts: ["0", "0"],
+          }
+    );
+    const previous = stored;
+    const ratio = (abs(long - short) * unit) / (long + short);
+    const same = (stored > 0n && long > short) || (stored < 0n && long < short);
+    const seconds = BigInt(step.elapsed_seconds);
+    if (!same || ratio > BigInt(p.stable_threshold)) {
+      stored += sign(long - short) * ((ratio * BigInt(p.increase_factor_per_second)) / unit) * seconds;
+    } else if (ratio < BigInt(p.decrease_threshold)) {
+      const delta = BigInt(p.decrease_factor_per_second) * seconds;
+      stored = sign(stored) * (abs(stored) <= delta ? 1n : abs(stored) - delta);
+    }
+    stored = sign(stored) * min(abs(stored), BigInt(p.max_factor_per_second));
+    const magnitude = abs(stored) < BigInt(p.min_factor_per_second) ? BigInt(p.min_factor_per_second) : abs(stored);
+    const longsPay = stored >= 0n && magnitude > 0n;
+    const payer = longsPay ? long : short,
+      receiver = longsPay ? short : long;
+    const value = (payer * magnitude * seconds) / unit;
+    const scale = 10n ** 30n,
+      price = BigInt(p.prices.short.max);
+    const deltas = [true, true, false, false].map((side, i) => ({
+      funding_per_size: String(i % 2 === 1 && side === longsPay ? ceil(ceil(value * scale, payer), price) : 0n),
+      claimable_per_size: String(i % 2 === 1 && side !== longsPay ? (value * scale) / receiver / price : 0n),
+    }));
+    return {
+      long_oi_usd20: String(long),
+      short_oi_usd20: String(short),
+      previous_factor: String(previous),
+      rate_magnitude: String(magnitude),
+      longs_pay: longsPay,
+      next_factor: String(stored),
+      deltas,
+      actions,
+    };
+  });
+  assert.deepEqual(c.output, { status: "ok", checkpoints }, c.id);
+  const first = checkpoints[0],
+    last = checkpoints.at(-1);
+  if (c.id.endsWith("-reverse")) {
+    assert.equal(checkpoints[1].longs_pay, first.longs_pay, c.id);
+    assert.notEqual(last.longs_pay, first.longs_pay, c.id);
+  }
+  if (["-stable", "-decrease-equality", "-stable-equality", "-balanced"].some((s) => c.id.endsWith(s)))
+    assert.equal(last.next_factor, first.next_factor, c.id);
+  if (c.id.endsWith("-growth")) assert(abs(BigInt(last.next_factor)) > abs(BigInt(first.next_factor)), c.id);
+  if (c.id.endsWith("-decay")) assert(abs(BigInt(last.next_factor)) < abs(BigInt(first.next_factor)), c.id);
+  if (c.id.endsWith("-signum")) assert.equal(abs(BigInt(last.next_factor)), 1n, c.id);
+  if (c.id.endsWith("-max")) assert.equal(abs(BigInt(first.next_factor)), BigInt(p.max_factor_per_second), c.id);
+  if (c.id.endsWith("-min") || c.id.endsWith("-zero-min"))
+    assert(BigInt(first.rate_magnitude) > abs(BigInt(first.next_factor)), c.id);
+  if (c.id.endsWith("-zero")) assert.equal(first.rate_magnitude, "0", c.id);
+  dynamicFundingCheckpoints += checkpoints.length;
+}
 
 function verifyFunding(c) {
   const p = c.input.scenario;
@@ -464,6 +537,11 @@ for (let index = 0; index < reference.cases.length; index++) {
   assert.equal(c.id, inputs.cases[index].id);
   assert.deepEqual(c.input, inputs.cases[index].input);
   const p = c.input;
+  if (p.operation === "dynamic_funding") {
+    verifyDynamicFunding(c);
+    operations[p.operation] = (operations[p.operation] ?? 0) + 1;
+    continue;
+  }
   if (p.operation === "funding_accrual") {
     verifyFunding(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
@@ -745,6 +823,42 @@ try {
     }),
   ];
 
+  invalid.push(
+    ...[
+      (p) => {
+        p.increase_factor_per_second = "0";
+      },
+      (p) => {
+        p.min_factor_per_second = String(unit);
+      },
+      (p) => {
+        p.decrease_threshold = String(unit);
+      },
+      (p) => {
+        p.steps = [];
+      },
+      (p) => {
+        delete p.stable_threshold;
+      },
+      (p) => {
+        p.steps[0].elapsed_seconds = 31_536_001;
+      },
+      (p) => {
+        p.steps[0].add_long_usd20 = "01";
+      },
+      (p) => {
+        p.steps[0].add_short_usd20 = "0";
+      },
+      (p) => {
+        p.max_factor_per_second = String(unit + 1n);
+      },
+      (p) => {
+        p.steps[0].unknown = true;
+      },
+    ].map((mutate) => (s) => {
+      mutate(s.cases[175].input.scenario);
+    })
+  );
   for (const mutate of invalid) {
     const suite = structuredClone(inputs);
     mutate(suite);
@@ -791,6 +905,7 @@ process.stdout.write(
       borrowingSettlements,
       fundingCheckpoints,
       fundingSettlements,
+      dynamicFundingCheckpoints,
       malformedRejected: rejected,
       modelErrorDistinctFromZero: true,
       liquidationProbeErrorDistinctFromResult: true,

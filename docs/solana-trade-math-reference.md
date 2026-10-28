@@ -142,3 +142,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 本轮只验证report应付数量与快照重置，**不是vault转账或真实钱包到账验收**。固定模型调用者必须使用report的claimable数量完成外部转账；本工具不广播/签名。borrow update未调用，order/swap费用和impact为0，其余固定tag test defaults保留。时间间隔显式、非空且各不超过一年；沿用秒级clock drift整次拒绝。动态funding rate、方向反转、不对称抵押OI、单边OI、累计费用清算、真实部署参数及付款仍未覆盖。
 
 两次输出字节一致，175组独立核算、60类非法输入/setup拒绝通过；JSON SHA-256 `cc9cc56273f6d4add742f24cecf6d54236c2c2408313c0954f5bc0421204c4f5`。EVM两文件55项、Rust check/fmt及脚本lint/格式通过，详见[第五十五轮记录](solana-implementation-research.md#第五十五轮实施记录t17b2d2-线性funding与claimable报告2026-10-28)。T17与b2d父范围仍实施中，下一轮优先T17.b2d3动态funding rate及方向反转，复用同一生成器补真实update路径；之后累计费用清算/减仓等余下矩阵。T19仍待完整矩阵/T04.b reviewed字段，未接生产SDK/共享状态/UI。
+
+## T17.b2d3 动态funding与方向反转子集（2026-10-28）
+
+同一生成器新增 `dynamic_funding`，24组、42次真实update：两种初始方向分别覆盖增长、稳定、decrease/stable阈值相等、衰减、衰减保留符号最小值、偏斜反转、max封顶、active min、零时间、零stored配min和平衡OI。通过真实increase改变OI并保留所有仓位，未直接注入OI或stored rate。每步记录新仓report、双边OI、previous/next signed factor、active magnitude/payer及四维funding/claimable delta；旧175组输入/业务输出完全不变，总199组。
+
+固定tag的 `FundingFeeParams::change`、`next_funding_factor_per_second` 和 `Unsigned::bound_magnitude` 是语义依据。指数1，先将abs(OI差)/总OI定点截断，再乘increase factor截断、乘秒数；只有stored方向与偏斜相同才按阈值选择增长/稳定/衰减，等于任一阈值时稳定。衰减量达到stored幅度时保留±1，不能归零。next只受max约束，active magnitude另外应用min，零stored在非零min下为正方向。平衡OI在动态模式可保留原rate，不能沿用fallback模式的平衡归零结论。
+
+初始3000/1000 USD、10秒得到±5×10^12 stored；原轻侧真实增仓6000 USD后偏斜反向，下一10秒stored仍为原符号±10^12，仍由原方向支付，再10秒跨零至反向3×10^12后才换payer。独立BigInt核算每步并断言轨迹确实命中增长/稳定/衰减/反转及上下限，不能直接由当前OI较大方决定payer。
+
+该有限子集所有新仓使用short collateral，每仓固定1000000000 raw抵押；真实deposit固定long 100000000000000 raw、short 10000000000000 raw。funding USD按实际payer OI×active rate×seconds截断，short collateral max价packing：payer两次ceil、receiver两次floor，adjustment10^10；long collateral delta为0。prices和动态参数/每步增仓及秒数显式，其余test defaults保留，order/swap费用与impact为0，不执行borrow update。双边OI必须非零；时间沿用一年工具域和clock drift整次拒绝。本轮不结算既有仓位，不证明反转后的pending/settlement或外部token付款。
+
+两次Rust输出字节一致，199组独立核算、70类非法输入/setup拒绝、model/probe错误与零区分通过；JSON SHA-256 `87b613d1174bdddd35cbcf24821b0a9e2c7edb5fef485933f786ee210d64cb45`。本轮Rust check/fmt、脚本lint/格式和EVM费用/仓位55项通过，命令及证据见[第五十六轮记录](solana-implementation-research.md#第五十六轮实施记录t17b2d3-动态funding与方向反转2026-10-28)。无生产接线，T17及b2d仍实施中。下一轮T17.b2d4补不对称混合抵押OI及单边OI funding，随后补反转结算、累计费用清算及剩余矩阵；T19仍待完整矩阵与T04.b reviewed字段。
