@@ -1,14 +1,17 @@
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
 
-import { ContractsChainId } from "config/chains";
+import { getIsSolanaNetworkEnabled } from "config/ab";
+import { ARBITRUM, ContractsChainId, isSolanaNetwork, type SolanaNetworkId } from "config/chains";
 import { GLV_MARKETS } from "config/markets";
 import { parseContractPrice, TokenPricesData } from "domain/synthetics/tokens";
+import { useChainId } from "lib/chains";
 import { FreshnessMetricId, metrics, TickersErrorsCounter } from "lib/metrics";
 import { freshnessMetrics } from "lib/metrics/reportFreshnessMetric";
 import { useOracleKeeperFetcher } from "lib/oracleKeeperFetcher/useOracleKeeperFetcher";
 import { LEADERBOARD_PRICES_UPDATE_INTERVAL, PRICES_CACHE_TTL, PRICES_UPDATE_INTERVAL } from "lib/timeConstants";
 import { getToken, getTokenBySymbol, getWrappedToken, NATIVE_TOKEN_ADDRESS } from "sdk/configs/tokens";
+import { isSameAddress } from "sdk/utils/address";
 import type { Token } from "sdk/utils/tokens/types";
 
 import { useSequentialTimedSWR } from "./useSequentialTimedSWR";
@@ -24,11 +27,15 @@ const PRICES_CACHE: { [chainId: number]: TokenPricesData } = {};
 const PRICES_CACHE_UPDATED: { [chainId: number]: { [address: string]: number } } = {};
 
 export function useTokenRecentPricesRequest(
-  chainId: ContractsChainId,
+  chainId: ContractsChainId | SolanaNetworkId,
   params?: { enabled?: boolean }
 ): TokenPricesDataResult {
   const { enabled = true } = params ?? {};
-  const oracleKeeperFetcher = useOracleKeeperFetcher(chainId);
+  const { networkId } = useChainId();
+  const isSolana = isSolanaNetwork(networkId);
+  const isSolanaSource = isSolanaNetwork(chainId);
+  const pricesEnabled = enabled && (isSolanaSource ? isSolana && getIsSolanaNetworkEnabled() : !isSolana);
+  const oracleKeeperFetcher = useOracleKeeperFetcher(isSolanaSource ? ARBITRUM : chainId);
   const pathname = useLocation().pathname;
 
   // TODO temp workaround
@@ -41,13 +48,20 @@ export function useTokenRecentPricesRequest(
   PRICES_CACHE[chainId] = PRICES_CACHE[chainId] || {};
   PRICES_CACHE_UPDATED[chainId] = PRICES_CACHE_UPDATED[chainId] || {};
 
-  const key = enabled ? [chainId, oracleKeeperFetcher.url, "useTokenRecentPrices"] : null;
+  const key = pricesEnabled
+    ? [chainId, isSolanaSource ? "gmsol" : oracleKeeperFetcher.url, "useTokenRecentPrices"]
+    : null;
 
   const { data, error, isLoading } = useSequentialTimedSWR(key, {
     refreshInterval: refreshPricesInterval,
     refreshWhenHidden: true,
 
     fetcher: async ([chainId]) => {
+      if (isSolanaNetwork(chainId)) {
+        const { fetchGmsolTokenPrices } = await import("domain/gmsol/gmsolOracleFetcher");
+        return { pricesData: await fetchGmsolTokenPrices(), updatedAt: Date.now(), networkId: chainId };
+      }
+
       const priceItems = await oracleKeeperFetcher.fetchTickers().catch(() => {
         metrics.pushCounter<TickersErrorsCounter>("tickersErrors");
         return [];
@@ -93,15 +107,19 @@ export function useTokenRecentPricesRequest(
       return {
         pricesData: result,
         updatedAt: Date.now(),
+        networkId: chainId,
       };
     },
   });
 
+  const visible = isSolanaSource ? pricesEnabled : !isSolana;
+  const currentData = visible && data?.networkId === chainId ? data : undefined;
+
   return {
-    pricesData: data?.pricesData,
-    updatedAt: data?.updatedAt,
-    error,
-    isPriceDataLoading: isLoading,
+    pricesData: currentData?.pricesData,
+    updatedAt: currentData?.updatedAt,
+    error: visible ? error : undefined,
+    isPriceDataLoading: visible && isLoading,
   };
 }
 
@@ -109,8 +127,8 @@ export function getPriceTokenConfig(chainId: ContractsChainId, tokenAddress: str
   try {
     return getToken(chainId, tokenAddress);
   } catch (e) {
-    const glvConfig = Object.values(GLV_MARKETS[chainId] ?? {}).find(
-      (glv) => glv.glvTokenAddress.toLowerCase() === tokenAddress.toLowerCase()
+    const glvConfig = Object.values(GLV_MARKETS[chainId] ?? {}).find((glv) =>
+      isSameAddress(glv.glvTokenAddress, tokenAddress)
     );
 
     if (!glvConfig) {

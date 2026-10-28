@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { TradeAction as SubsquidTradeAction } from "codegen/subsquid";
+import { mockMarketsInfoData } from "utils/markets/__tests__/mockMarkets";
 import { OrderType } from "utils/orders/types";
 import type { TokenData, TokensData } from "utils/tokens/types";
 import { createRawTradeActionTransformer } from "utils/tradeHistory/utils";
@@ -73,4 +74,44 @@ describe("createRawTradeActionTransformer", () => {
     expect(withoutEconomics).toHaveProperty("swapFeeUsd", undefined);
     expect(withoutEconomics).toHaveProperty("swapImpactUsd", undefined);
   });
+});
+
+it("resolves position and swap history through exact base58 keys and checksummed EVM keys", () => {
+  const mint = "So11111111111111111111111111111111111111112";
+  const stableMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+  for (const [index, collateral, rawIndex, rawCollateral] of [
+    [WETH_ADDRESS, USDC_ADDRESS, WETH_ADDRESS.toLowerCase(), USDC_ADDRESS.toLowerCase()],
+    [mint, stableMint, mint, stableMint],
+  ]) {
+    const indexToken = { ...weth, address: index };
+    const collateralToken = { ...usdc, address: collateral };
+    const tokenMap = { [index]: indexToken, [collateral]: collateralToken };
+    const key = `${index}-${index}-${collateral}`;
+    const market = { ...mockMarketsInfoData(tokenMap, [key])[key], marketTokenAddress: index };
+    const convert = createRawTradeActionTransformer({ [index]: market }, indexToken, tokenMap);
+    for (const orderType of [OrderType.MarketIncrease, OrderType.MarketSwap]) {
+      const raw = {
+        ...rawSwapAction,
+        orderType,
+        marketAddress: rawIndex,
+        initialCollateralTokenAddress: rawCollateral,
+        swapPath: [rawIndex],
+        acceptablePrice: "0",
+        sizeDeltaUsd: "0",
+        isLong: true,
+      };
+      const action = convert(raw, 0, []);
+      expect(action).toMatchObject({
+        swapPath: [index],
+        initialCollateralToken: collateralToken,
+        targetCollateralToken: indexToken,
+      });
+      if (action?.type === "position") expect(action.marketAddress).toBe(index);
+      if (index === mint) {
+        expect(
+          convert({ ...raw, marketAddress: mint.toLowerCase(), swapPath: [mint.toLowerCase()] }, 0, [])
+        ).toBeUndefined();
+      }
+    }
+  }
 });

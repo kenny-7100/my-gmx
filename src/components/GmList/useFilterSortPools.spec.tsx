@@ -81,6 +81,22 @@ function search(searchText: string, overrides: Partial<Options> = {}, markets = 
 }
 
 describe("useFilterSortPools search", () => {
+  it("preserves address identity when filtering recently listed pools", () => {
+    const evmAddress = getTokenBySymbol(ARBITRUM, "ETH").address;
+    const mint = "So11111111111111111111111111111111111111112";
+    for (const [address, listedAddress, matches] of [
+      [evmAddress, evmAddress.toLowerCase(), true],
+      [evmAddress, evmAddress, true],
+      [mint, mint, true],
+      [mint, mint.toLowerCase(), false],
+    ] as const) {
+      const market = pool("ETH", "WETH", "USDC", { indexTokenAddress: address });
+      expect(
+        search("", { topLevelTab: "recently-listed", recentlyListedAddresses: new Set([listedAddress]) }, [market])
+      ).toEqual(matches ? [market.marketTokenAddress] : []);
+    }
+  });
+
   it.each([
     ["btc", ["BTC-BTC-USDC", "BTC-BTC-BTC", "BTC-TBTC-TBTC", "BTC-USDG-USDG"]],
     [

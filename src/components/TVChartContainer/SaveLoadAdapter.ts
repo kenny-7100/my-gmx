@@ -6,6 +6,7 @@ import type {
   LineToolsAndGroupsState,
   StudyTemplateMetaInfo,
 } from "charting_library";
+import { isSolanaNetwork } from "config/chains";
 import { TV_SAVE_LOAD_CHARTS_KEY } from "config/localStorage";
 
 type ChartDataInfo = ChartData & {
@@ -57,15 +58,19 @@ function getLatestValidChart(charts: ChartDataInfo[] | undefined) {
 
 export class SaveLoadAdapter implements IExternalSaveLoadAdapter {
   private charts: ChartDataInfo[];
+  private storageKey: string;
 
-  constructor() {
-    const validChart = getLatestValidChart(readStoredCharts(TV_SAVE_LOAD_CHARTS_KEY));
+  constructor(networkId?: number) {
+    this.storageKey = isSolanaNetwork(networkId ?? 0)
+      ? `${TV_SAVE_LOAD_CHARTS_KEY}:${networkId}`
+      : TV_SAVE_LOAD_CHARTS_KEY;
+    const validChart = getLatestValidChart(readStoredCharts(this.storageKey));
     this.charts = validChart ? [validChart] : [];
     this.persistCharts();
   }
 
   private persistCharts() {
-    writeJson(TV_SAVE_LOAD_CHARTS_KEY, this.charts);
+    writeJson(this.storageKey, this.charts);
   }
 
   getAllCharts(): Promise<ChartMetaInfo[]> {

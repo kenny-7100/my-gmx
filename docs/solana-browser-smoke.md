@@ -138,7 +138,31 @@ yarn test:solana-readonly
 
 配置文件为 [playwright-solana-readonly.config.ts](../playwright-solana-readonly.config.ts)，默认 `http://127.0.0.1:3010`。可通过 `REGRESSION_BASE_URL` 显式指定其他 loopback HTTP 根地址；非本地、HTTPS、带路径/查询/片段/凭据的地址拒绝。配置没有 `webServer`，不会自动启动服务、构建或部署；前端仍会使用当前配置访问真实外部读取服务，并非离线测试。
 
+## 共享上报验收的版本配置
+
+2026-10-28真实核对：本地Vite缺少`VITE_APP_VERSION`时，`getAppVersion()`返回undefined，event/counter/timing上报缺version，EVM与Solana均收到带required/version关键词的400。显式配置目标真实源码版本后，同源Chrome四阶段12次上报全200，Solana冷启动event保留networkId=-501。见[第二十六轮证据](solana-implementation-research.md#第二十六轮实施记录t02f2b3-共享上报400与本地版本前置2026-10-28)。
+
+开展遥测请求验收前，确认目标Vite有非空`VITE_APP_VERSION`；缺失时仅为本次命令配置真实发布版本或本地HEAD+工作区源码身份。不要复制历史版本号或写生产兜底；无需修改.env.local。此项只适用于遥测验收，普通UI冒烟仍可执行原命令。不能据缺版本的400归因于Solana networkId或关闭上报。
+
+可选请求审计现含`reportDiagnostics`：白名单item types/networkIds、local host/dev布尔值、指标version状态、响应格式及固定错误关键词。不保存原始body、错误文本、账户或凭据。当命令显式提供VITE_APP_VERSION时，原两用例还验证四阶段存在200报告、无>=400报告及冷Solana -501批次；未配置时仍可复现400，不将原网络断言通过写成上报通过。HTTP200及摘要只验证本次请求校验，不证明遥测入库/分析归因；未提供networkId的项目标other，不推断归因。
+
 ## 开关与状态隔离
+
+### 可选的实际请求审计
+
+T02.f1新增审计模式，仍使用原两项测试、fixture、独立Vite和真实Chrome，不注入钱包或替换响应：
+
+```sh
+SOLANA_REQUEST_AUDIT=1 yarn solana:browser-check --port 3015
+```
+
+只在flag-on用例延长观察：EVM初始10秒、暖切换Solana后65秒、Solana刷新后15秒、切回EVM后10秒。既有导航和Settings断言保留；默认不启用，不增加普通冒烟等待时间。该用例限时150秒，管理入口全局180秒限制不变，超时仍按失败处理。
+
+原生结果内的`request-audit-*` JSON附件逐阶段累计外部fetch/XHR记录：相对起始/结束时间、发起阶段、脱敏目标、HTTP方法、JSON-RPC方法、HTTP状态和完成/失败结果。只允许固定公开路径，其余路径标为`/<redacted>`；不保存query、header、RPC参数、完整body或凭据。CDP另记录页面主线程EVM RPC的优先级和调用栈函数/本地源码路径，用于识别tracker；worker调用未必有CDP栈，不能将没有栈的请求全部归为tracker。监听不拦截、不取消实际请求，静态资源、WebSocket帧及真实扩展钱包不在该采集范围内。
+
+自动断言要求Solana刷新阶段无捕获到的EVM RPC，暖切换观察窗口第60秒后无新增EVM RPC；T02.f2a进一步要求暖切换窗口RPC数量与Low优先级且栈含RpcTracker的CDP记录数量一致，并确认初始EVM/切回EVM确有RPC，防止采集失效造成假通过。仍须读取附件，核对具体来源、时间与主线程/worker覆盖差异；不将数量匹配视为任意环境下的完整网络证明。允许保留metrics/chat/wallet HTTP。T02.f2b1/b2历史阶段要求Solana无flags及warm无ticker GET；T11.c接入原生Solana flags后，当前断言要求冷启动确有`/ui-flags/v2`，冷启动及warm观察窗的flags均来自`https://arbitrum-api.gmxinfra.io/ui-flags/v2`且CDP函数栈包含`fetchSolanaUiFlags`，同时保留warm无EVM ticker及RPC归因限制。`flagInitiators`附件仅记录阶段、相对时间、公开目标和函数名，不保存query或响应body。它区分共享Solana flags业务读取与旧EVM预取，不能用历史零flags数量判定当前功能退化；真实公告开关正向验收仍需远端key及owner配置。
+
+2026-10-28的[f1首轮证据](solana-implementation-research.md#第二十二轮实施记录t02f1-实际请求审计2026-10-28)发现viem高优先级eth_call和HTML两链/ui-flags/v2预取；[f2a修复后](solana-implementation-research.md#第二十三轮实施记录t02f2a-multicall-切网取消边界2026-10-28)两次暖切换均只捕获15项Low tracker，0项High或无归因RPC，冷启动0 RPC、切回83项RPC。[f2b1修复后](solana-implementation-research.md#第二十四轮实施记录t02f2b1-启动-uiflags-预取隔离2026-10-28)冷启动/导航0 RPC、0 flags，HTTP从50降至38；暖切换仍15项Low tracker、切回83项RPC。点击期间观察窗前有1项ticker GET，通用oracle迟到fallback/取消属f2b2；共享batch_report本次返回400仅证明仍发送。[f2b2修复后](solana-implementation-research.md#第二十五轮实施记录t02f2b2-evm-oracle-请求取消与迟到-fallback2026-10-28)warm全phase无ticker/flags GET，仍15项Low tracker；cold0 RPC/flags、38项共享HTTP，切回104项RPC且ticker/flags恢复。EVM oracle传输取消和旧代结果拒绝已离线验证；共享report400需f2b3核对。无真实钱包，不能据此完成FESOL-48父需求。
 
 当前 [isDevelopment](../src/config/env.ts) 根据 host 和 `production-preview` localStorage 判断，不只是 Vite build mode。现有 regression fixture 默认写入 `production-preview=true`；[AB 加载逻辑](../src/config/ab.ts) 在非 development 环境会清除投放比例为 0 的手动开关，包括当前 `solanaNetwork`。因此直接复用原 fixture 并写 `ab-flags` 会使开启用例失效，不能靠重试解决。
 
@@ -161,6 +185,12 @@ yarn test:solana-readonly
 
 
 ## 真实页面验收与导航经验（2026-10-25）
+
+### 本地静态文件与 SPA 路由冲突
+
+新增直达路径验收前，先检查同名本地HTML产物。2026-10-28实测：仓库中已有的`stats.html`使Vite将精确`/stats`解析为构建visualizer，React路由没有挂载。先核对失败快照和导航trace，不将其误诊为网络选择丢失或业务路由错误，也不删除用户产物。本轮以`/stats/`验证同一React前缀路由；精确`/stats`在无该产物环境的直达仍单列待验，不能用尾斜杠用例声称原URL完整通过。生产路由行为不由本地该文件推断。
+
+### 导航等待与历史验收
 
 首轮两项均在 `page.goto` 等待默认 `load` 时超过 60 秒；页面快照中主界面已显示，诊断无未处理 JS 错误，但有外部资源失败/中断。仅将本组 `goto` 和 `reload` 改为 `waitUntil: "domcontentloaded"`，继续由网络菜单可见和状态断言确认应用就绪；复验两项均 passed，16.7 秒。不开自动重试，不加长超时、不屏蔽外部请求，也不修改业务代码。后续遇到导航超时先核实等待的事件、页面快照和 trace，再判断资源/应用问题，不能直接断言前端不可用。
 

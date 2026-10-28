@@ -1,0 +1,958 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "fee-zero-amount-improved",
+      "input": {
+        "operation": "fee",
+        "amount": "0",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "0",
+        "balance_change": "improved"
+      }
+    },
+    {
+      "id": "fee-zero-amount-unchanged",
+      "input": {
+        "operation": "fee",
+        "amount": "0",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "0",
+        "balance_change": "unchanged"
+      }
+    },
+    {
+      "id": "fee-zero-amount-worsened",
+      "input": {
+        "operation": "fee",
+        "amount": "0",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "0",
+        "balance_change": "worsened"
+      }
+    },
+    {
+      "id": "fee-no-discount-improved",
+      "input": {
+        "operation": "fee",
+        "amount": "1000000000000000000000017",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "0",
+        "balance_change": "improved"
+      }
+    },
+    {
+      "id": "fee-no-discount-unchanged",
+      "input": {
+        "operation": "fee",
+        "amount": "1000000000000000000000017",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "0",
+        "balance_change": "unchanged"
+      }
+    },
+    {
+      "id": "fee-no-discount-worsened",
+      "input": {
+        "operation": "fee",
+        "amount": "1000000000000000000000017",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "0",
+        "balance_change": "worsened"
+      }
+    },
+    {
+      "id": "fee-half-discount-improved",
+      "input": {
+        "operation": "fee",
+        "amount": "1000000000000000000000017",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "50000000000000000000",
+        "balance_change": "improved"
+      }
+    },
+    {
+      "id": "fee-half-discount-unchanged",
+      "input": {
+        "operation": "fee",
+        "amount": "1000000000000000000000017",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "50000000000000000000",
+        "balance_change": "unchanged"
+      }
+    },
+    {
+      "id": "fee-half-discount-worsened",
+      "input": {
+        "operation": "fee",
+        "amount": "1000000000000000000000017",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "50000000000000000000",
+        "balance_change": "worsened"
+      }
+    },
+    {
+      "id": "fee-full-discount-improved",
+      "input": {
+        "operation": "fee",
+        "amount": "1000000000000000000000017",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "100000000000000000000",
+        "balance_change": "improved"
+      }
+    },
+    {
+      "id": "fee-full-discount-unchanged",
+      "input": {
+        "operation": "fee",
+        "amount": "1000000000000000000000017",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "100000000000000000000",
+        "balance_change": "unchanged"
+      }
+    },
+    {
+      "id": "fee-full-discount-worsened",
+      "input": {
+        "operation": "fee",
+        "amount": "1000000000000000000000017",
+        "positive_factor": "50000000000000000",
+        "negative_factor": "100000000000000000",
+        "combined_discount_factor": "100000000000000000000",
+        "balance_change": "worsened"
+      }
+    },
+    {
+      "id": "fee-floor-remainder-improved",
+      "input": {
+        "operation": "fee",
+        "amount": "1001",
+        "positive_factor": "33333333333333333333",
+        "negative_factor": "14285714285714285714",
+        "combined_discount_factor": "33333333333333333333",
+        "balance_change": "improved"
+      }
+    },
+    {
+      "id": "fee-floor-remainder-unchanged",
+      "input": {
+        "operation": "fee",
+        "amount": "1001",
+        "positive_factor": "33333333333333333333",
+        "negative_factor": "14285714285714285714",
+        "combined_discount_factor": "33333333333333333333",
+        "balance_change": "unchanged"
+      }
+    },
+    {
+      "id": "fee-floor-remainder-worsened",
+      "input": {
+        "operation": "fee",
+        "amount": "1001",
+        "positive_factor": "33333333333333333333",
+        "negative_factor": "14285714285714285714",
+        "combined_discount_factor": "33333333333333333333",
+        "balance_change": "worsened"
+      }
+    },
+    {
+      "id": "impact-positive-config-above-negative",
+      "input": {
+        "operation": "positive_impact_cap",
+        "impact_usd20": "10000000000000000000000",
+        "size_delta_usd20": "100000000000000000000017",
+        "pool_amount": "1000000000",
+        "index_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "max_positive_factor": "10000000000000000000",
+        "max_negative_factor": "1000000000000000000",
+        "index_decimals": 9
+      }
+    },
+    {
+      "id": "impact-positive-config-below-negative",
+      "input": {
+        "operation": "positive_impact_cap",
+        "impact_usd20": "10000000000000000000000",
+        "size_delta_usd20": "100000000000000000000017",
+        "pool_amount": "1000000000",
+        "index_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "max_positive_factor": "1000000000000000000",
+        "max_negative_factor": "10000000000000000000",
+        "index_decimals": 9
+      }
+    },
+    {
+      "id": "impact-pool-limits-impact",
+      "input": {
+        "operation": "positive_impact_cap",
+        "impact_usd20": "10000000000000000000000",
+        "size_delta_usd20": "100000000000000000000017",
+        "pool_amount": "1000000",
+        "index_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "max_positive_factor": "10000000000000000000",
+        "max_negative_factor": "1000000000000000000",
+        "index_decimals": 9
+      }
+    },
+    {
+      "id": "impact-empty-pool",
+      "input": {
+        "operation": "positive_impact_cap",
+        "impact_usd20": "10000000000000000000000",
+        "size_delta_usd20": "100000000000000000000017",
+        "pool_amount": "0",
+        "index_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "max_positive_factor": "10000000000000000000",
+        "max_negative_factor": "1000000000000000000",
+        "index_decimals": 9
+      }
+    },
+    {
+      "id": "impact-zero-impact",
+      "input": {
+        "operation": "positive_impact_cap",
+        "impact_usd20": "0",
+        "size_delta_usd20": "100000000000000000000017",
+        "pool_amount": "1000000000",
+        "index_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "max_positive_factor": "10000000000000000000",
+        "max_negative_factor": "1000000000000000000",
+        "index_decimals": 9
+      }
+    },
+    {
+      "id": "impact-negative-unchanged",
+      "input": {
+        "operation": "positive_impact_cap",
+        "impact_usd20": "-10000000000000000000000",
+        "size_delta_usd20": "100000000000000000000017",
+        "pool_amount": "0",
+        "index_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "max_positive_factor": "10000000000000000000",
+        "max_negative_factor": "1000000000000000000",
+        "index_decimals": 9
+      }
+    },
+    {
+      "id": "impact-exact-pool-limit",
+      "input": {
+        "operation": "positive_impact_cap",
+        "impact_usd20": "100000000000000000000",
+        "size_delta_usd20": "100000000000000000000017",
+        "pool_amount": "1000000",
+        "index_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "max_positive_factor": "10000000000000000000",
+        "max_negative_factor": "1000000000000000000",
+        "index_decimals": 9
+      }
+    },
+    {
+      "id": "impact-factor-floor-remainder",
+      "input": {
+        "operation": "positive_impact_cap",
+        "impact_usd20": "10000000000000000000000",
+        "size_delta_usd20": "100000000000000000000017",
+        "pool_amount": "1000000000",
+        "index_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "max_positive_factor": "333333333333333333",
+        "max_negative_factor": "1000000000000000000",
+        "index_decimals": 9
+      }
+    },
+    {
+      "id": "pnl-long-zero-cap-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "0",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-long-zero-cap-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "0",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-long-finite-cap-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "10000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-long-finite-cap-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "10000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-long-uncapped-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "2000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "100000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-long-uncapped-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "2000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "100000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-long-loss-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "0",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-long-loss-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "0",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-long-partial-rounding-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "10000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "33300000000000000000017"
+      }
+    },
+    {
+      "id": "pnl-long-partial-rounding-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": true,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "10000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "33300000000000000000017"
+      }
+    },
+    {
+      "id": "pnl-short-zero-cap-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "0",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-short-zero-cap-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "0",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-short-finite-cap-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "10000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-short-finite-cap-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "10000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-short-uncapped-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "100000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-short-uncapped-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "100000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-short-loss-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "0",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-short-loss-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "150000000000000",
+          "max": "150100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "0",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "100000000000000000000000"
+      }
+    },
+    {
+      "id": "pnl-short-partial-rounding-long-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": true,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "10000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "33300000000000000000017"
+      }
+    },
+    {
+      "id": "pnl-short-partial-rounding-short-collateral",
+      "input": {
+        "operation": "position_pnl",
+        "is_long": false,
+        "is_long_collateral": false,
+        "index_decimals": 9,
+        "long_decimals": 9,
+        "short_decimals": 6,
+        "index_price": {
+          "min": "50000000000000",
+          "max": "50100000000000"
+        },
+        "long_price": {
+          "min": "100000000000000",
+          "max": "100100000000000"
+        },
+        "short_price": {
+          "min": "100000000000000",
+          "max": "100000000000000"
+        },
+        "long_pool_amount": "1000000000",
+        "short_pool_amount": "1000000000",
+        "side_oi_long_collateral_usd20": "100000000000000000000000",
+        "side_oi_short_collateral_usd20": "100000000000000000000000",
+        "side_oi_long_collateral_tokens": "1000000000",
+        "side_oi_short_collateral_tokens": "1000000000",
+        "max_trader_pnl_factor": "10000000000000000000",
+        "position_size_usd20": "100000000000000000000000",
+        "position_size_tokens": "1000000000",
+        "size_delta_usd20": "33300000000000000000017"
+      }
+    }
+  ]
+}

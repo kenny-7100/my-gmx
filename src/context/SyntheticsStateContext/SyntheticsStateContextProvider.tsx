@@ -70,7 +70,7 @@ import {
 import { ProgressiveTokensData } from "domain/tokens";
 import { useChainId } from "lib/chains";
 import { getTimePeriodsInSeconds } from "lib/dates";
-import { useLocalStorageSerializeKey } from "lib/localStorage";
+import { useLocalStorageSerializeKeySafe } from "lib/localStorage";
 import { BlockTimestampData, useBlockTimestampRequest } from "lib/useBlockTimestampRequest";
 import { WalletSigner } from "lib/wallets";
 import useWallet from "lib/wallets/useWallet";
@@ -181,7 +181,7 @@ export function SyntheticsStateContextProvider({
   pageType: SyntheticsPageType;
   overrideChainId?: ContractsChainId;
 }) {
-  const { chainId: selectedChainId, srcChainId } = useChainId();
+  const { chainId: selectedChainId, srcChainId, networkId: selectedNetworkId } = useChainId();
 
   const { account: walletAccount, signer } = useWallet();
 
@@ -200,6 +200,8 @@ export function SyntheticsStateContextProvider({
   const account = isAccountPage ? checkSummedAccount : walletAccount;
   const leaderboard = useLeaderboardState(account, isLeaderboardPage);
   const chainId = isLeaderboardPage ? leaderboard.chainId : overrideChainId ?? selectedChainId;
+
+  const tradeNetworkId = isTradePage && overrideChainId === undefined ? selectedNetworkId : chainId;
 
   const markets = useMarkets(chainId);
   const tokensDataResult = useTokensDataRequest(chainId, srcChainId);
@@ -294,6 +296,7 @@ export function SyntheticsStateContextProvider({
   });
 
   const tradeboxState = useTradeboxState(chainId, isTradePage, {
+    networkId: tradeNetworkId,
     marketsInfoData: marketsInfo.marketsInfoData,
     marketsData: markets.marketsData,
     tokensData: tokensDataResult.tokensData,
@@ -331,7 +334,7 @@ export function SyntheticsStateContextProvider({
   const { blockTimestampData } = useBlockTimestampRequest(chainId, { skip: !["trade", "pools"].includes(pageType) });
 
   const positionSellerState = usePositionSellerState(
-    chainId,
+    tradeNetworkId,
     positionsInfoData?.[closingPositionKey ?? ""],
     closingPositionOrderOption
   );
@@ -351,7 +354,13 @@ export function SyntheticsStateContextProvider({
   const gasPrice = useGasPrice(chainId);
   const l1ExpressOrderGasReference = useL1ExpressOrderGasReference();
 
-  const [keepLeverage, setKeepLeverage] = useLocalStorageSerializeKey(getKeepLeverageKey(chainId), true);
+  const [keepLeverage, setKeepLeverage] = useLocalStorageSerializeKeySafe<boolean>(
+    getKeepLeverageKey(tradeNetworkId),
+    true,
+    {
+      readFromStorage: true,
+    }
+  );
 
   useCollectSyntheticsMetrics({
     tokensDataResult,

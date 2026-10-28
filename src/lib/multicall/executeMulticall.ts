@@ -15,6 +15,7 @@ import type { AbiId } from "sdk/abis";
 import { debugLog, getIsMulticallBatchingDisabled } from "./debug";
 import { executeMulticallMainThread } from "./executeMulticallMainThread";
 import { executeMulticallWorker } from "./executeMulticallWorker";
+import { getMulticallSignal } from "./lifecycle";
 import type { ContractCallResult, MulticallError, MulticallRequestConfig, MulticallResult } from "./types";
 import { getCallId, getCallsCountBucket, getContractAbiKey } from "./utils";
 
@@ -189,8 +190,10 @@ export async function executeMulticall<TConfig extends MulticallRequestConfig<an
    * For debugging purposes, you can provide a name to the multicall request.
    */
   name?: string,
-  disableBatching?: boolean
+  disableBatching?: boolean,
+  signal = getMulticallSignal()
 ): Promise<MulticallResult<TConfig>> {
+  signal.throwIfAborted();
   if (disableBatching) {
     const callsCount = Object.keys(request).reduce(
       (sum, contractAbiKey) => sum + Object.keys(request[contractAbiKey].calls).length,
@@ -216,9 +219,23 @@ export async function executeMulticall<TConfig extends MulticallRequestConfig<an
   let requestCallsCount = 0;
   let resolvedCallsCount = 0;
 
-  const { promise, resolve } = Promise.withResolvers<MulticallResult<any>>();
+  const { promise, resolve, reject } = Promise.withResolvers<MulticallResult<any>>();
+  const abort = () => {
+    for (const [callId, call] of entries(store.current[chainId])) {
+      delete call.handlers[requestId];
+      if (!Object.keys(call.handlers).length) delete store.current[chainId][callId];
+    }
+    if (!Object.keys(store.current[chainId] ?? {}).length) {
+      delete store.current[chainId];
+      delete store.priorities[chainId];
+    }
+    reject(signal.reason);
+  };
+  signal.addEventListener("abort", abort, { once: true });
+  const resultPromise = promise.finally(() => signal.removeEventListener("abort", abort));
 
   const callResultHandler: CallResultHandler = (destination, callResult, callError) => {
+    if (signal.aborted) return;
     resolvedCallsCount++;
 
     const { callGroupName, callName } = destination;
@@ -290,7 +307,7 @@ export async function executeMulticall<TConfig extends MulticallRequestConfig<an
   if (disableBatching || (isDevelopment() && getIsMulticallBatchingDisabled())) {
     debugLog(() => `Multicall batching disabled, executing immediately. Multicall name: ${name ?? "?"}`);
     executeChainsMulticalls() as any;
-    return promise as any;
+    return resultPromise as any;
   }
 
   debugLog(() => `Multicall with name: ${name ?? "?"} added to queue. Priority: ${priority}`);
@@ -301,7 +318,7 @@ export async function executeMulticall<TConfig extends MulticallRequestConfig<an
     throttledExecuteBackgroundChainsMulticalls();
   }
 
-  return promise as any;
+  return resultPromise as any;
 }
 
 function executeWorkerOrMainThread(chainId: AnyChainId, requestConfig: MulticallRequestConfig<any>, callCount: number) {

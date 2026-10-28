@@ -74,3 +74,9 @@ yarn solana:sdk-vectors > .local/acceptance/sdk-vectors/report.json
 本轮证据包 manifestSha256 为 `0b03efa659071318b77809181d3d84ea382aaaf36166f45e5b42cf6dc20b96fa`；报告的检查器、生成器、向量摘要与最终文件一致。参考的四个 Rust 文件也已逐字节对照记录的 Git 提交，未以未提交源码替代参考。该对照仍不证明 npm 二进制的构建来源。
 
 本轮源码基线 `23e756cea0`，实施中 dirty=true。7 项向量/版本针对性测试、3 项证据包测试通过；完整前端单元测试 299 文件通过、1 原有跳过，3014 tests 通过、1 原有跳过，退出 0。日志仍有既有 happy-dom teardown AbortError，未修改无关依赖。本轮无服务/UI/浏览器/构建/部署或交易操作。
+
+## Node 离线初始化的复用约束
+
+2026-10-28 T20.a 复用本工具执行真实 unsigned builder，初始化已提取为 `loadPinnedSdk()`；仍先核对即将加载的 WASM/wrapper 摘要。相同 wrapper 缓存 memory view，同进程重复绑定新 instance 实测触发 `ERR_ENCODING_INVALID_ENCODED_DATA`。因此缓存初始化 Promise，整个进程只绑定一个 instance；失败不自动清空重试。此改动只服务离线工具，不修改 app lazy loader。
+
+固定 WASM 的随机 nonce 使用 getrandom，其 Node 路径期望 CommonJS `module.require`；Node ESM 下首次 builder 调用实测 `ReferenceError: module is not defined`。仅[离线 builder probe](solana-builder-abi.md)调用期间提供 `createRequire(import.meta.url)`，保留真实 Node crypto，并在 finally 恢复原 global descriptor。基础 apply_factor 不需该桥，不向生产或浏览器注入 Node 环境；不要 mock RNG 绕过。真实连续两次 probe（无/有历史LUT）及原基础向量共4项测试已通过；不证明并行运行多个 probe 的全局环境安全，工具按顺序执行。

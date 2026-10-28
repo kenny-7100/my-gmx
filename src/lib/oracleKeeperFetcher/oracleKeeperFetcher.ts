@@ -49,21 +49,55 @@ export class OracleKeeperFetcher implements OracleFetcher {
   mainUrl: string;
   oracleTracker: OracleKeeperFallbackTracker;
   expectedTickerAddresses = new Set<string>();
+  getRequestSignal: (() => AbortSignal) | undefined;
+  private isTracking = false;
+  private didSubscribe = false;
 
-  constructor(p: { chainId: ContractsChainId }) {
+  constructor(p: {
+    chainId: ContractsChainId;
+    track?: boolean;
+    getRequestSignal?: () => AbortSignal;
+    trackerKey?: string;
+  }) {
+    this.getRequestSignal = p.getRequestSignal;
     this.chainId = p.chainId;
     this.mainUrl = getOracleKeeperUrl(this.chainId);
 
     this.oracleTracker = new OracleKeeperFallbackTracker({
       ...ORACLE_FALLBACK_TRACKER_CONFIG,
       chainId: this.chainId,
+      trackerKey: p.trackerKey,
       mainUrl: this.mainUrl,
       fallbacks: getOracleKeeperFallbackUrls(this.chainId),
       networkStatusObserver: NetworkStatusObserver.getInstance(),
     });
 
+    if (p.track !== false) {
+      this.ensureTracking();
+    }
+  }
+
+  ensureTracking() {
+    if (this.isTracking) {
+      return;
+    }
+
+    this.isTracking = true;
     this.oracleTracker.startTracking();
-    subscribeForOracleTrackerMetrics(this.oracleTracker);
+
+    if (!this.didSubscribe) {
+      subscribeForOracleTrackerMetrics(this.oracleTracker);
+      this.didSubscribe = true;
+    }
+  }
+
+  pauseTracking() {
+    if (!this.isTracking) {
+      return;
+    }
+
+    this.isTracking = false;
+    this.oracleTracker.stopTracking();
   }
 
   get url() {
@@ -93,9 +127,10 @@ export class OracleKeeperFetcher implements OracleFetcher {
     this.handleFailure("tickers", endpoint);
   }
 
-  request = (
+  request = async (
     path: `/${string}`,
     opts: {
+      signal?: AbortSignal;
       query?: Record<string, string | number | undefined | boolean>;
       validate?: (res: any) => Error | undefined;
       isComplete?: (res: any) => boolean;
@@ -104,13 +139,17 @@ export class OracleKeeperFetcher implements OracleFetcher {
       debugId?: "tickers";
     }
   ) => {
+    const signal = opts.signal ?? this.getRequestSignal?.();
+    signal?.throwIfAborted();
     const endpoints = this.oracleTracker.getCurrentEndpoints();
     let lastIncompleteResult: any;
 
     return withFallback<any, string>({
       endpoints: [endpoints.primary, ...endpoints.fallbacks],
-      shouldFallback: (error, result) => Boolean(error) || (opts.isComplete !== undefined && !opts.isComplete(result)),
+      shouldFallback: (error, result) =>
+        !signal?.aborted && (Boolean(error) || (opts.isComplete !== undefined && !opts.isComplete(result))),
       fn: (endpoint) => {
+        signal?.throwIfAborted();
         if (opts.debugId) {
           _debugOracleKeeper?.dispatchEvent({
             type: `${opts.debugId}-start`,
@@ -119,9 +158,10 @@ export class OracleKeeperFetcher implements OracleFetcher {
           });
         }
 
-        return fetch(buildUrl(endpoint, path, opts.query))
+        return fetch(buildUrl(endpoint, path, opts.query), { signal })
           .then((res) => res.json())
           .then((res) => {
+            signal?.throwIfAborted();
             const error = opts.validate?.(res);
 
             if (error) {
@@ -159,6 +199,7 @@ export class OracleKeeperFetcher implements OracleFetcher {
             return res;
           })
           .catch((e) => {
+            signal?.throwIfAborted();
             if (opts.debugId) {
               _debugOracleKeeper?.dispatchEvent({
                 type: `${opts.debugId}-failed`,
@@ -174,6 +215,7 @@ export class OracleKeeperFetcher implements OracleFetcher {
           });
       },
     }).catch((error) => {
+      signal?.throwIfAborted();
       if (lastIncompleteResult !== undefined) {
         return lastIncompleteResult;
       }
@@ -274,16 +316,20 @@ export class OracleKeeperFetcher implements OracleFetcher {
     return this.request("/performance/snapshots", { query: { period, address } });
   }
 
-  fetchUiFlags(): Promise<Record<string, UiFlag>> {
+  async fetchUiFlags(): Promise<Record<string, UiFlag>> {
+    const signal = this.getRequestSignal?.();
+    signal?.throwIfAborted();
     const prefetched = consumeUiFlagsPrefetch(
       buildUrl(this.oracleTracker.getCurrentEndpoints().primary, "/ui-flags/v2")
     );
 
     if (prefetched) {
-      return prefetched.then((flags) => (flags ? (flags as Record<string, UiFlag>) : this.request("/ui-flags/v2", {})));
+      const flags = await prefetched;
+      signal?.throwIfAborted();
+      if (flags) return flags as Record<string, UiFlag>;
     }
 
-    return this.request("/ui-flags/v2", {});
+    return this.request("/ui-flags/v2", { signal });
   }
 
   fetchMarkets(): Promise<ApiMarket[]> {

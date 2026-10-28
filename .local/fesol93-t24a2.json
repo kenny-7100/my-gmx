@@ -1,0 +1,45 @@
+{
+  "fetchedAt": "2026-10-27T23:59:31.251Z",
+  "coverage": {
+    "relations": true,
+    "comments": true,
+    "attachments": false
+  },
+  "issue": {
+    "id": "97978ae4-7b0e-43e8-8bb0-b38bde745126",
+    "identifier": "FESOL-93",
+    "title": "Validate Solana transaction instructions and wallet accounts",
+    "description": "## Queue Disposition — 2026-10-26\n\nRemoved from [FESOL-87](<https://linear.app/gmx-io/issue/FESOL-87>) and tracked under source [FESOL-56](<https://linear.app/gmx-io/issue/FESOL-56>) in Backlog. This is scope/readiness triage, not completion or cancellation.\n\nThe current description does not yet fix a complete versioned instruction allowlist, account constraints and positive/negative fixtures. It is not an admitted ready slice.\n\n## Required Next Step / Readmission Gate\n\nBefore requesting readmission: pin the actual supported program/IDL and currently fixed WASM ABI; write the exact instruction/account rule table, including versioned messages, LUT resolution, payer/owner/receiver/rent receiver and rejection of unknown or truncated inputs. Narrow acceptance to a deterministic offline validator. Use [FESOL-95](<https://linear.app/gmx-io/issue/FESOL-95>) for builder-produced positive fixtures and mutate each required account/instruction for rejection tests; do not make 95 depend back on 93. Simulation, SOL sufficiency, trading flags, wallet signing and broadcast stay in [FESOL-56](<https://linear.app/gmx-io/issue/FESOL-56>). Confirm no newly overlapping PR exists.\n\n## Retained Scope and Acceptance\n\nThe original scope below is retained for traceability. The readiness decision above supersedes any older claim that this is ready to start independently.\n\n## Context\n\nSplit from [FESOL-56](<https://linear.app/gmx-io/issue/FESOL-56>) originally grouped under [FESOL-87](https://linear.app/gmx-io/issue/FESOL-87/issues-split-summary) (removed from that queue on 2026-10-26). Extract deterministic transaction validation from wallet signing and RPC simulation, so rejection rules can be implemented before end-to-end sending.\n\nThis follows the release-based integration: gmx-api provides normalized data to the existing GMX shared state and components. GMTrade-labelled work and the old nightly implementation are out of scope. Follow the existing `gmx-solana` guidance.\n\n## Scope\n\n* Decode every instruction, including versioned messages with supplied lookup-table accounts.\n* Allow only the order and setup instructions specified by [FESOL-56](https://linear.app/gmx-io/issue/FESOL-56/build-check-and-send-solana-order-transactions-with-the-gmsol-sdk), SOL wrapping and Compute Budget; reject unexpected instructions, including unexpected gmsol instructions.\n* Validate the expected wallet as fee payer, owner and receiver wherever required by the instruction contract. Fail clearly when required lookup data cannot be resolved.\n\n## Acceptance Criteria\n\n- [ ] Tests accept supported instruction fixtures and reject unexpected programs, unexpected gmsol instructions and mismatched wallet accounts.\n- [ ] Resolved lookup-table addresses are checked rather than skipped.\n- [ ] The validator takes explicit transaction, wallet and lookup inputs and does not require a connected wallet.\n\n## Dependencies and Related Work\n\nThis historical readiness claim is superseded by the disposition above. Use confirmed instruction layouts and explicit fixtures.\n\nRelated work: [FESOL-56](<https://linear.app/gmx-io/issue/FESOL-56>), [FESOL-49](<https://linear.app/gmx-io/issue/FESOL-49>), [FESOL-55](<https://linear.app/gmx-io/issue/FESOL-55>), [FESOL-57](<https://linear.app/gmx-io/issue/FESOL-57>).\n\n## Recommended Implementation Path\n\nDefine supported instruction/account rules, add decoder fixtures, then implement the validator. Wire it before every signature during [FESOL-56](https://linear.app/gmx-io/issue/FESOL-56/build-check-and-send-solana-order-transactions-with-the-gmsol-sdk) integration.\n\n## Remaining in the Original Issue\n\nRPC simulation, SOL sufficiency checks, fresh trading-flag enforcement and actual wallet/send flows stay in [FESOL-56](https://linear.app/gmx-io/issue/FESOL-56/build-check-and-send-solana-order-transactions-with-the-gmsol-sdk). Completing this subissue does not close [FESOL-56](<https://linear.app/gmx-io/issue/FESOL-56>).",
+    "url": "https://linear.app/gmx-io/issue/FESOL-93/validate-solana-transaction-instructions-and-wallet-accounts",
+    "createdAt": "2026-10-23T06:16:16.568Z",
+    "updatedAt": "2026-10-25T16:10:38.542Z",
+    "archivedAt": "2026-10-25T23:46:15.548Z",
+    "completedAt": null,
+    "priority": 0,
+    "dueDate": null,
+    "state": {
+      "id": "2522fa47-751f-48b5-92d5-0b50f0b2f3c7",
+      "name": "Backlog",
+      "type": "backlog"
+    },
+    "assignee": null,
+    "project": {
+      "id": "7de89d39-ee4e-46d4-9d70-48ef42c87886",
+      "name": "GMX and GMTrade Frontend Unification"
+    },
+    "parent": {
+      "id": "7e1da1f6-b8f8-4a08-a70f-4f729a8277b3",
+      "identifier": "FESOL-56"
+    },
+    "labels": {
+      "nodes": []
+    },
+    "team": {
+      "id": "64f06d97-6f54-4d0a-a064-fe7e5f342719",
+      "key": "FESOL"
+    },
+    "relations": [],
+    "inverseRelations": [],
+    "comments": []
+  }
+}

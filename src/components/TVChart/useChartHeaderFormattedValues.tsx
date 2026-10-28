@@ -2,6 +2,7 @@ import cx from "classnames";
 import { useMemo } from "react";
 import type { Address } from "viem";
 
+import { isSolanaNetwork } from "config/chains";
 import { USD_DECIMALS } from "config/factors";
 import { selectChartToken } from "context/SyntheticsStateContext/selectors/chartSelectors";
 import { selectChartHeaderInfo } from "context/SyntheticsStateContext/selectors/chartSelectors";
@@ -14,6 +15,7 @@ import {
 import { useSelector } from "context/SyntheticsStateContext/utils";
 import { use24hPriceDeltaMap } from "domain/synthetics/tokens";
 import { use24hVolumes } from "domain/synthetics/tokens/use24Volumes";
+import { useChainId } from "lib/chains";
 import { formatPercentageDisplay, formatRatePercentage, numberWithCommasParts } from "lib/numbers";
 import { getToken } from "sdk/configs/tokens";
 import { bigMath } from "sdk/utils/bigmath";
@@ -27,6 +29,7 @@ import ShortIcon from "img/short.svg?react";
 
 export function useChartHeaderFormattedValues() {
   const chainId = useSelector(selectChainId);
+  const { networkId } = useChainId();
   const info = useSelector(selectChartHeaderInfo);
   const { isSwap } = useSelector(selectTradeboxTradeFlags);
   const { chartToken } = useSelector(selectChartToken);
@@ -34,7 +37,11 @@ export function useChartHeaderFormattedValues() {
   const oraclePriceDecimals = useSelector(selectSelectedMarketPriceDecimals);
   const marketInfo = useSelector(selectTradeboxMarketInfo);
 
-  const selectedTokenOption = chartTokenAddress ? getToken(chainId, chartTokenAddress) : undefined;
+  const selectedTokenOption = isSolanaNetwork(networkId)
+    ? chartToken
+    : chartTokenAddress
+      ? getToken(chainId, chartTokenAddress)
+      : undefined;
   const visualMultiplier = isSwap ? 1 : selectedTokenOption?.visualMultiplier ?? 1;
 
   const priceTokenAddress = useMemo(() => {
@@ -49,7 +56,7 @@ export function useChartHeaderFormattedValues() {
   const dailyVolumesValue = marketInfo?.marketTokenAddress
     ? dailyVolumes?.byMarketToken?.[marketInfo?.marketTokenAddress]
     : undefined;
-  const dayPriceDeltaMap = use24hPriceDeltaMap(chainId, [priceTokenAddress as Address]);
+  const dayPriceDeltaMap = use24hPriceDeltaMap(isSolanaNetwork(networkId) ? networkId : chainId, [priceTokenAddress]);
   const dayPriceDeltaData = chartTokenAddress ? dayPriceDeltaMap?.[chartTokenAddress] : undefined;
 
   const avgPriceValue = bigMath.avg(chartToken?.prices?.maxPrice, chartToken?.prices?.minPrice);

@@ -2,6 +2,7 @@ import useSWRSubscription, { SWRSubscription } from "swr/subscription";
 import { useAccount } from "wagmi";
 
 import { AVALANCHE, type SettlementChainId } from "config/chains";
+import { getNetworkFeatures } from "config/features";
 import { useChainId } from "lib/chains";
 import { executeMulticall } from "lib/multicall";
 import { CONFIG_UPDATE_INTERVAL } from "lib/timeConstants";
@@ -22,12 +23,14 @@ const subscribeEmptyGmxAccounts: SWRSubscription<
 
   const emptyGmxAccounts: Partial<Record<SettlementChainId, boolean>> = {};
   let isLoaded = false;
+  let cancelled = false;
   const didLoadMap: Partial<Record<SettlementChainId, boolean>> = {};
 
   function fetchEmptyGmxAccounts() {
     const requests = chainIds.map(async (chainId) => {
       const req = buildGmxAccountTokenBalancesRequest(chainId, account);
       const res = await executeMulticall(chainId, req, didLoadMap[chainId] ? "background" : "urgent");
+      if (cancelled) return;
       const parsedRes = parseGmxAccountTokenBalancesData(res);
       let isEmpty = true;
       for (const balance of Object.values(parsedRes)) {
@@ -43,7 +46,13 @@ const subscribeEmptyGmxAccounts: SWRSubscription<
       options.next(null, { emptyGmxAccounts, isLoading: !isLoaded });
     });
 
-    Promise.all(requests).then(() => {
+    Promise.allSettled(requests).then((results) => {
+      if (cancelled) return;
+      const failed = results.find((result) => result.status === "rejected");
+      if (failed?.status === "rejected") {
+        options.next(failed.reason);
+        return;
+      }
       if (!isLoaded) {
         isLoaded = true;
         options.next(null, { emptyGmxAccounts, isLoading: !isLoaded });
@@ -61,6 +70,7 @@ const subscribeEmptyGmxAccounts: SWRSubscription<
   fetchAndScheduleNext();
 
   return () => {
+    cancelled = true;
     if (timeoutId !== undefined) {
       window.clearTimeout(timeoutId);
     }
@@ -70,19 +80,23 @@ const subscribeEmptyGmxAccounts: SWRSubscription<
 export function useEmptyGmxAccounts(chainIds: SettlementChainId[] | undefined): {
   emptyGmxAccounts: Partial<Record<SettlementChainId, boolean>> | undefined;
   isLoading: boolean;
+  error: Error | undefined;
 } {
   const { address: account } = useAccount();
+  const { networkId } = useChainId();
+  const enabled = getNetworkFeatures(networkId).gmxAccount;
 
-  const { data } = useSWRSubscription(
-    account && chainIds && chainIds.length > 0 ? ["emptyGmxAccounts", chainIds, account] : null,
+  const { data, error } = useSWRSubscription(
+    enabled && account && chainIds && chainIds.length > 0 ? ["emptyGmxAccounts", chainIds, account] : null,
     subscribeEmptyGmxAccounts
   );
   const emptyGmxAccounts = data?.emptyGmxAccounts;
   const isLoading = data?.isLoading;
 
   return {
-    emptyGmxAccounts,
-    isLoading: isLoading ?? true,
+    emptyGmxAccounts: enabled ? emptyGmxAccounts : undefined,
+    isLoading: enabled && !error ? isLoading ?? true : false,
+    error: enabled ? error : undefined,
   };
 }
 

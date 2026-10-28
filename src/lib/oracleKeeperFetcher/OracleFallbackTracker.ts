@@ -11,6 +11,7 @@ type OracleCheckResult = {
 };
 
 type OracleFallbackTrackerParams = FallbackTrackerConfig & {
+  trackerKey?: string;
   chainId: ContractsChainId;
   mainUrl: string;
   fallbacks: string[];
@@ -29,7 +30,7 @@ export class OracleKeeperFallbackTracker {
   constructor(public readonly params: OracleFallbackTrackerParams) {
     this.fallbackTracker = new FallbackTracker<OracleCheckResult>({
       ...ORACLE_FALLBACK_TRACKER_CONFIG,
-      trackerKey: `OracleFallbackTracker:${getChainName(this.params.chainId)}`,
+      trackerKey: this.params.trackerKey ?? `OracleFallbackTracker:${getChainName(this.params.chainId)}`,
       primary: this.params.mainUrl,
       endpoints: [this.params.mainUrl, ...this.params.fallbacks],
       checkEndpoint: this.checkEndpoint,
@@ -49,6 +50,10 @@ export class OracleKeeperFallbackTracker {
 
   public startTracking() {
     this.fallbackTracker.startTracking();
+  }
+
+  public stopTracking() {
+    this.fallbackTracker.stopTracking();
   }
 
   checkEndpoint = async (endpoint: string, signal: AbortSignal): Promise<OracleCheckResult> => {

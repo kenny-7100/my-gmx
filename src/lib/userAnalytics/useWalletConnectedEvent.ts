@@ -2,6 +2,7 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
+import { isSolanaNetwork } from "config/chains";
 import { useConnectModal } from "context/ConnectModalContext/ConnectModalContext";
 import { useAccountStats } from "domain/synthetics/accountStats/useAccountStats";
 import { useChainId } from "lib/chains";
@@ -14,30 +15,31 @@ import { getWalletAnalyticsProvenance } from "./walletProvenance";
 export function useWalletConnectedUserAnalyticsEvent() {
   const [wasConnected, setWasConnected] = useState(false);
   const [wasSent, setWasSent] = useState(false);
-  const { chainId } = useChainId();
+  const { chainId, networkId } = useChainId();
   const { connectModalOpen } = useConnectModal();
+  const isSolanaSelected = isSolanaNetwork(networkId);
   const { account } = useWallet();
   const { connector } = useAccount();
   const { user } = usePrivy();
   const { wallets } = useWallets();
 
   const { data: accountStats } = useAccountStats(chainId, {
-    account,
-    enabled: true,
+    account: isSolanaSelected ? undefined : account,
+    enabled: !isSolanaSelected,
   });
 
   const ordersCount = accountStats?.closedCount;
 
   useEffect(() => {
-    if (!wasSent && !wasConnected && account && connectModalOpen) {
+    if (!wasSent && !wasConnected && account && connectModalOpen && !isSolanaSelected) {
       setWasConnected(true);
     }
-  }, [account, connector, connectModalOpen, wasConnected, wasSent]);
+  }, [account, connector, connectModalOpen, isSolanaSelected, wasConnected, wasSent]);
 
   useEffect(() => {
     let timeoutId: number;
 
-    if (wasConnected && !wasSent && connector) {
+    if (wasConnected && !wasSent && connector && !isSolanaSelected) {
       const sendEvent = () => {
         setWasSent(true);
         userAnalytics.pushEvent<ConnectWalletResultEvent>({
@@ -61,5 +63,5 @@ export function useWalletConnectedUserAnalyticsEvent() {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [account, connector, connectModalOpen, ordersCount, user, wallets, wasConnected, wasSent]);
+  }, [account, connector, connectModalOpen, isSolanaSelected, ordersCount, user, wallets, wasConnected, wasSent]);
 }

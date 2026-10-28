@@ -1,15 +1,17 @@
 import { MessageDescriptor } from "@lingui/core";
 import { Trans, msg } from "@lingui/macro";
-import { useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
-import { GMX_ACCOUNT_PSEUDO_CHAIN_ID } from "config/chains";
+import { GMX_ACCOUNT_PSEUDO_CHAIN_ID, isSolanaNetwork } from "config/chains";
 import { isSettlementChain } from "config/multichain";
 import type { GmxAccountAvailableAssetsFilter } from "context/GmxAccountContext/GmxAccountContext";
 import { useGmxAccountAvailableAssetsFilter, useGmxAccountModalOpen } from "context/GmxAccountContext/hooks";
 import { useTokensDataRequest } from "domain/synthetics/tokens";
+import { useSolanaWalletAssets } from "domain/tokens/useSolanaWalletAssets";
 import { useChainId } from "lib/chains";
 import { useLocalizedMap } from "lib/i18n";
+import { useSolanaWalletSession } from "lib/wallets/solanaWalletSession";
 import { convertToUsd, getMidPrice } from "sdk/utils/tokens";
 
 import { Amount } from "components/Amount/Amount";
@@ -64,10 +66,14 @@ const AssetsList = ({
   tokens,
   noChainFilter,
   initialFilter = "gmxAccount",
+  walletOnly = false,
+  status,
 }: {
   tokens: DisplayToken[];
   noChainFilter?: boolean;
   initialFilter?: FilterType;
+  walletOnly?: boolean;
+  status?: ReactNode;
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterType>(initialFilter);
@@ -111,6 +117,7 @@ const AssetsList = ({
         </div>
       )}
       <VerticalScrollFadeContainer className="flex grow flex-col overflow-y-auto pt-12">
+        {status}
         {sortedFilteredTokens.map((displayToken) => (
           <div
             key={displayToken.symbol + "_" + displayToken.chainId}
@@ -131,15 +138,23 @@ const AssetsList = ({
                 isStable={displayToken.isStable}
               />
               <div className="text-body-small text-typography-secondary numbers">
-                <UsdValue usd={displayToken.balanceUsd} />
+                <UsdValue
+                  usd={displayToken.balanceUsd}
+                  fallback={walletOnly ? <Trans>Unavailable</Trans> : undefined}
+                />
               </div>
             </div>
           </div>
         ))}
         {sortedFilteredTokens.length === 0 &&
+          !status &&
           (searchQuery !== "" ? (
             <div className="flex h-full flex-col items-center justify-center p-adaptive text-typography-secondary">
               <Trans>No assets found</Trans>
+            </div>
+          ) : walletOnly ? (
+            <div className="flex h-full items-center justify-center p-adaptive text-typography-secondary">
+              <Trans>Unavailable</Trans>
             </div>
           ) : !noChainFilter && activeFilter === "wallet" ? (
             <div className="flex h-full flex-col items-center justify-center gap-12 p-adaptive">
@@ -226,6 +241,40 @@ const AssetListSettlementChain = () => {
 
 export const AvailableToTradeAssetsView = () => {
   const { chainId } = useAccount();
+  const { networkId } = useChainId();
 
-  return isSettlementChain(chainId!) ? <AssetListSettlementChain /> : <AssetListMultichain />;
+  return isSolanaNetwork(networkId) ? (
+    <AssetListSolana />
+  ) : isSettlementChain(chainId!) ? (
+    <AssetListSettlementChain />
+  ) : (
+    <AssetListMultichain />
+  );
 };
+
+function AssetListSolana() {
+  const { networkId } = useChainId();
+  const { address } = useSolanaWalletSession();
+  const { assets, isLoading, error } = useSolanaWalletAssets(address);
+  const tokens = useMemo(
+    () =>
+      assets
+        .map(
+          (token): DisplayToken => ({
+            ...token,
+            chainId: networkId,
+            isGmxAccount: false,
+            isStable: token.isStable,
+          })
+        )
+        .sort(tokenSorter),
+    [assets, networkId]
+  );
+  const status =
+    isLoading || error ? (
+      <div className="px-adaptive py-8 text-typography-secondary" role="status">
+        {error ? <Trans>Unavailable</Trans> : <Trans>Loading...</Trans>}
+      </div>
+    ) : undefined;
+  return <AssetsList noChainFilter walletOnly tokens={tokens} status={status} />;
+}

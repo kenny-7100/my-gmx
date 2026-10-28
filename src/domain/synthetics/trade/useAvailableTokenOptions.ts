@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { zeroAddress } from "viem";
 
-import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, MEGAETH } from "config/chains";
+import { ARBITRUM, ARBITRUM_SEPOLIA, AVALANCHE, AVALANCHE_FUJI, MEGAETH, type NetworkId } from "config/chains";
 import { getSortedMarketsAddressesKey } from "config/localStorage";
 import { SORTED_MARKETS } from "config/static/sortedMarkets";
 import {
@@ -32,20 +32,20 @@ export type AvailableTokenOptions = {
   sortedMarketConfigs: Market[];
 };
 
-function getCachedSortedMarketAddresses(chainId: number): string[] {
-  const cached = localStorage.getItem(getSortedMarketsAddressesKey(chainId));
+function getCachedSortedMarketAddresses(networkId: number): string[] {
+  const cached = localStorage.getItem(getSortedMarketsAddressesKey(networkId));
 
   if (cached) {
     return JSON.parse(cached);
   }
 
-  return SORTED_MARKETS[chainId as ContractsChainId] ?? [];
+  return SORTED_MARKETS[networkId as ContractsChainId] ?? [];
 }
 
-function saveCachedSortedMarketAddresses(chainId: number, sortedMarketsInfo: MarketInfo[]) {
+function saveCachedSortedMarketAddresses(networkId: number, sortedMarketsInfo: MarketInfo[]) {
   const addresses = sortedMarketsInfo.map((marketInfo) => marketInfo.marketTokenAddress);
 
-  localStorage.setItem(getSortedMarketsAddressesKey(chainId), JSON.stringify(addresses));
+  localStorage.setItem(getSortedMarketsAddressesKey(networkId), JSON.stringify(addresses));
 
   return addresses;
 }
@@ -84,6 +84,7 @@ const FORCE_ALLOWED_COLLATERAL_TOKENS: Record<ContractsChainId, string[]> = {
 export function useAvailableTokenOptions(
   chainId: number,
   p: {
+    networkId?: NetworkId;
     marketsInfoData?: GlvAndGmMarketsInfoData;
     marketsData?: MarketsData;
     tokensData?: TokensData;
@@ -93,14 +94,8 @@ export function useAvailableTokenOptions(
 ): AvailableTokenOptions {
   const { marketsInfoData, marketsData, tokensData, marketTokens, srcChainId } = p;
 
-  const sortedMarketAddressesRef = useRef<string[]>();
-
-  useEffect(
-    function updateSortedMarketAddresses() {
-      sortedMarketAddressesRef.current = getCachedSortedMarketAddresses(chainId);
-    },
-    [chainId]
-  );
+  const networkId = p.networkId ?? chainId;
+  const sortedMarketAddressesRef = useRef<{ networkId: number; addresses: string[] }>();
 
   return useMemo(() => {
     const marketsInfo = Object.values(marketsInfoData || {})
@@ -199,11 +194,16 @@ export function useAvailableTokenOptions(
       );
     });
 
+    let sortedAddresses =
+      sortedMarketAddressesRef.current?.networkId === networkId
+        ? sortedMarketAddressesRef.current.addresses
+        : getCachedSortedMarketAddresses(networkId);
     if (sortedAllMarkets.length) {
-      sortedMarketAddressesRef.current = saveCachedSortedMarketAddresses(chainId, sortedAllMarkets);
+      sortedAddresses = saveCachedSortedMarketAddresses(networkId, sortedAllMarkets);
     }
+    sortedMarketAddressesRef.current = { networkId, addresses: sortedAddresses };
 
-    const sortedMarketConfigs = getSortedMarketsConfigs(marketsData, sortedMarketAddressesRef.current);
+    const sortedMarketConfigs = getSortedMarketsConfigs(marketsData, sortedAddresses);
 
     const sortedLongAndShortTokens = getTokenAddressesSortedByPoolValue(swapTokenPoolValues);
 
@@ -243,5 +243,5 @@ export function useAvailableTokenOptions(
       sortedAllMarkets,
       sortedMarketConfigs,
     };
-  }, [marketsInfoData, chainId, tokensData, marketsData, marketTokens, srcChainId]);
+  }, [marketsInfoData, networkId, chainId, tokensData, marketsData, marketTokens, srcChainId]);
 }

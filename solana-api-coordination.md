@@ -1,3 +1,5 @@
+> 历史协调草稿，未发送。2026-10-28 已核实 API #295/#305 合并，公共市场路径200、67组数据可由共享SDK解析；以下“main全部样例/markets 404”已过期，不用于当前协调。账户路径仍404、#307/#308未合并，FESOL-61评审和真实账户向量仍待owner交付。最新字段表、部署证据和待确认问题见[第二十七轮记录](docs/solana-implementation-research.md#第二十七轮实施记录t04a-市场契约与公共服务只读核验2026-10-28)。保留原文仅供追溯。
+
 Divhead，想和你对齐一下 Solana gmx-api 的当前进度及联调时间，方便我们安排后续前端开发。
 
 目前看到 FESOL-62 的服务骨架和 stub endpoints 已完成，FESOL-63 有 [PR #295](https://github.com/gmx-io/gmx-api/pull/295)，但公开 main 中 markets、positions、orders 和 fee-discount 仍返回样例。`solana.gmxapi.io` 的 `/v1/pairs` 可用，markets 接口仍是 404。如果已有其他分支或部署提供真实数据，请帮忙更新一下。

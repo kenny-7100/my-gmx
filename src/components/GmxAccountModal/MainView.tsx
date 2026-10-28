@@ -6,11 +6,10 @@ import { useHistory } from "react-router-dom";
 import { useCopyToClipboard } from "react-use";
 import { isAddressEqual } from "viem";
 
-import { getChainName, getExplorerUrl } from "config/chains";
+import { getChainName, isSolanaNetwork } from "config/chains";
 import type { ContractsChainId, SourceChainId } from "config/chains";
 import { getChainIcon } from "config/icons";
 import { GMX_ACCOUNT_CONNECTED_BANNER_DISMISSED_KEY } from "config/localStorage";
-import { getAccountModalMode } from "config/multichain";
 import {
   useGmxAccountAvailableAssetsFilter,
   useGmxAccountDepositViewChain,
@@ -24,13 +23,18 @@ import { isMultichainFundingItemLoading } from "domain/multichain/isMultichainFu
 import type { MultichainFundingHistoryItem } from "domain/multichain/types";
 import { useDisconnectAndClose } from "domain/multichain/useDisconnectAndClose";
 import { useGmxAccountFundingHistory } from "domain/multichain/useGmxAccountFundingHistory";
+import { useSolanaWalletAssets } from "domain/tokens/useSolanaWalletAssets";
 import { useChainId } from "lib/chains";
 import { formatRelativeDateWithComma } from "lib/dates";
 import { useLocalizedMap } from "lib/i18n";
-import { useENS } from "lib/legacy";
+import { getAccountUrl, useENS } from "lib/legacy";
 import { useLocalStorageByChainId } from "lib/localStorage";
+import { metrics } from "lib/metrics";
 import { useNotifyModalState } from "lib/useNotifyModalState";
+import { userAnalytics } from "lib/userAnalytics";
+import { DisconnectWalletEvent } from "lib/userAnalytics/types";
 import { shortenAddressOrEns, switchNetwork } from "lib/wallets";
+import { useSolanaWalletSession } from "lib/wallets/solanaWalletSession";
 import useWallet from "lib/wallets/useWallet";
 import { buildAccountDashboardUrl } from "pages/AccountDashboard/buildAccountDashboardUrl";
 import { getToken } from "sdk/configs/tokens";
@@ -65,17 +69,30 @@ import WalletIcon from "img/ic_wallet.svg?react";
 import WithdrawIcon from "img/ic_withdraw.svg?react";
 
 import {
+  useAccountModalMode,
   useAvailableToTradeAssetSettlementChain,
   useGmxAccountDepositEligibility,
   useOpenWalletReceive,
 } from "./hooks";
 import { FUNDING_OPERATIONS_LABELS } from "./keys";
 
-function BalanceAmount({ usd, onClick }: { usd: bigint | undefined; onClick: () => void }) {
+function BalanceAmount({
+  usd,
+  onClick,
+  isLoading = true,
+}: {
+  usd: bigint | undefined;
+  onClick: () => void;
+  isLoading?: boolean;
+}) {
   return (
     <button className="flex min-h-32 items-center gap-4" onClick={onClick}>
       {usd !== undefined ? (
         <UsdValue usd={usd} className="text-h2 normal-nums leading-[30px]" />
+      ) : !isLoading ? (
+        <span className="text-typography-secondary">
+          <Trans>Unavailable</Trans>
+        </span>
       ) : (
         <Skeleton
           baseColor="#B4BBFF1A"
@@ -97,17 +114,17 @@ const WALLET_ICON_BUTTON_GRAY =
   "flex size-28 -m-4 items-center justify-center rounded-8 text-typography-secondary gmx-hover:bg-fill-surfaceHover gmx-hover:text-typography-primary";
 
 function WalletBlock({ account }: { account: string }) {
-  const { chainId: settlementChainId, srcChainId } = useChainId();
+  const { chainId: settlementChainId, srcChainId, networkId } = useChainId();
   const chainId = srcChainId ?? settlementChainId;
+  const isSolanaSelected = isSolanaNetwork(networkId);
 
   const [, setIsVisibleOrView] = useGmxAccountModalOpen();
-  const [, setAvailableAssetsFilter] = useGmxAccountAvailableAssetsFilter();
-  const { ensName } = useENS(account);
+  const { ensName } = useENS(isSolanaSelected ? undefined : account);
   const [, copyToClipboard] = useCopyToClipboard();
   const [isCopied, setIsCopied] = useState(false);
   const copyTimeoutRef = useRef<number | undefined>(undefined);
-  const handleDisconnect = useDisconnectAndClose();
-  const { walletUsd } = useAvailableToTradeAssetSettlementChain();
+  const disconnectEvm = useDisconnectAndClose();
+  const solanaWallet = useSolanaWalletSession();
   const { wallets } = useWallets();
   const { exportWallet } = useExportWallet();
   const openWalletReceive = useOpenWalletReceive();
@@ -117,9 +134,10 @@ function WalletBlock({ account }: { account: string }) {
   };
 
   const embeddedWallet = getEmbeddedConnectedWallet(wallets);
-  const canExport = Boolean(embeddedWallet && account && isAddressEqual(embeddedWallet.address, account));
+  const canExport =
+    !isSolanaSelected && Boolean(embeddedWallet && account && isAddressEqual(embeddedWallet.address, account));
 
-  const accountUrl = !account || !chainId ? "" : `${getExplorerUrl(chainId)}address/${account}`;
+  const accountUrl = getAccountUrl(isSolanaSelected ? networkId : chainId, account);
 
   useEffect(() => () => clearTimeout(copyTimeoutRef.current), []);
 
@@ -130,6 +148,28 @@ function WalletBlock({ account }: { account: string }) {
       setIsCopied(true);
       copyTimeoutRef.current = window.setTimeout(() => setIsCopied(false), 1000);
     }
+  };
+
+  const handleDisconnect = () => {
+    if (!isSolanaSelected) {
+      void disconnectEvm();
+      return;
+    }
+
+    userAnalytics.pushEvent<DisconnectWalletEvent>({
+      event: "ConnectWalletAction",
+      data: {
+        action: "Disconnect",
+        network: getChainName(networkId),
+      },
+    });
+    void Promise.resolve(solanaWallet.disconnect?.())
+      .catch((error) => {
+        metrics.pushError(error, "gmxAccountModal.disconnect");
+      })
+      .finally(() => {
+        setIsVisibleOrView(false);
+      });
   };
 
   return (
@@ -144,27 +184,31 @@ function WalletBlock({ account }: { account: string }) {
           {isCopied ? <CheckIcon className="size-16 text-green-500" /> : <CopyIcon className="size-16" />}
         </button>
         <div className="flex items-center gap-8">
-          <TooltipWithPortal
-            content={t`Receive to wallet`}
-            position="bottom"
-            tooltipClassName="!min-w-max"
-            variant="none"
-          >
-            <button className={WALLET_ICON_BUTTON_BLUE} onClick={handleOpenWalletReceive}>
-              <ReceiveIcon className="size-16" />
-            </button>
-          </TooltipWithPortal>
-          <TooltipWithPortal
-            content={t`Send from wallet`}
-            position="bottom"
-            tooltipClassName="!min-w-max"
-            variant="none"
-          >
-            <button className={WALLET_ICON_BUTTON_BLUE} onClick={() => setIsVisibleOrView("walletSend")}>
-              <SendIcon className="size-16" />
-            </button>
-          </TooltipWithPortal>
-          <div className="h-16 border-l-1/2 border-slate-600" />
+          {!isSolanaSelected && (
+            <>
+              <TooltipWithPortal
+                content={t`Receive to wallet`}
+                position="bottom"
+                tooltipClassName="!min-w-max"
+                variant="none"
+              >
+                <button className={WALLET_ICON_BUTTON_BLUE} onClick={handleOpenWalletReceive}>
+                  <ReceiveIcon className="size-16" />
+                </button>
+              </TooltipWithPortal>
+              <TooltipWithPortal
+                content={t`Send from wallet`}
+                position="bottom"
+                tooltipClassName="!min-w-max"
+                variant="none"
+              >
+                <button className={WALLET_ICON_BUTTON_BLUE} onClick={() => setIsVisibleOrView("walletSend")}>
+                  <SendIcon className="size-16" />
+                </button>
+              </TooltipWithPortal>
+              <div className="h-16 border-l-1/2 border-slate-600" />
+            </>
+          )}
           {canExport && (
             <TooltipWithPortal
               content={t`Export wallet`}
@@ -202,14 +246,35 @@ function WalletBlock({ account }: { account: string }) {
           </TooltipWithPortal>
         </div>
       </div>
-      <BalanceAmount
-        usd={walletUsd}
-        onClick={() => {
-          setAvailableAssetsFilter("wallet");
-          setIsVisibleOrView("availableToTradeAssets");
-        }}
-      />
+      {isSolanaSelected ? <SolanaWalletBalance account={account} /> : <WalletBalance />}
     </div>
+  );
+}
+
+function SolanaWalletBalance({ account }: { account: string }) {
+  const { walletUsd, isLoading, error } = useSolanaWalletAssets(account);
+  const [, setIsVisibleOrView] = useGmxAccountModalOpen();
+  return (
+    <BalanceAmount
+      usd={walletUsd}
+      isLoading={!error && isLoading}
+      onClick={() => setIsVisibleOrView("availableToTradeAssets")}
+    />
+  );
+}
+
+function WalletBalance() {
+  const { walletUsd } = useAvailableToTradeAssetSettlementChain();
+  const [, setAvailableAssetsFilter] = useGmxAccountAvailableAssetsFilter();
+  const [, setIsVisibleOrView] = useGmxAccountModalOpen();
+  return (
+    <BalanceAmount
+      usd={walletUsd}
+      onClick={() => {
+        setAvailableAssetsFilter("wallet");
+        setIsVisibleOrView("availableToTradeAssets");
+      }}
+    />
   );
 }
 
@@ -384,8 +449,9 @@ function MenuRow({ icon, label, onClick }: { icon: ReactNode; label: ReactNode; 
 
 function MenuList({ account }: { account: string }) {
   const [, setIsVisible] = useGmxAccountModalOpen();
-  const { chainId: settlementChainId, srcChainId } = useChainId();
+  const { chainId: settlementChainId, srcChainId, networkId } = useChainId();
   const chainId = srcChainId ?? settlementChainId;
+  const isSolanaSelected = isSolanaNetwork(networkId);
   const history = useHistory();
   const { openNotifyModal } = useNotifyModalState();
   const { setIsSettingsVisible } = useSettings();
@@ -412,16 +478,20 @@ function MenuList({ account }: { account: string }) {
 
   return (
     <div className="flex flex-col">
-      <MenuRow
-        icon={<PnlAnalysisIcon className="size-16" />}
-        label={<Trans>PnL analysis</Trans>}
-        onClick={handlePnlAnalysisClick}
-      />
-      <MenuRow
-        icon={<BellIcon className="size-16" />}
-        label={<Trans>Notifications</Trans>}
-        onClick={handleNotificationsClick}
-      />
+      {!isSolanaSelected && (
+        <>
+          <MenuRow
+            icon={<PnlAnalysisIcon className="size-16" />}
+            label={<Trans>PnL analysis</Trans>}
+            onClick={handlePnlAnalysisClick}
+          />
+          <MenuRow
+            icon={<BellIcon className="size-16" />}
+            label={<Trans>Notifications</Trans>}
+            onClick={handleNotificationsClick}
+          />
+        </>
+      )}
       <MenuRow
         icon={<SettingsIcon className="size-16" />}
         label={<Trans>Settings</Trans>}
@@ -432,8 +502,7 @@ function MenuList({ account }: { account: string }) {
 }
 
 export const MainView = ({ account }: { account: string }) => {
-  const { chainId, srcChainId } = useChainId();
-  const mode = getAccountModalMode(chainId, srcChainId);
+  const mode = useAccountModalMode();
 
   return (
     <div className="text-body-medium flex grow flex-col gap-[--padding-adaptive] overflow-y-hidden">

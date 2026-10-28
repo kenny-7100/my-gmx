@@ -2,19 +2,28 @@ import { useEffect, useRef } from "react";
 import { useSessionStorage } from "react-use";
 import { useAccount } from "wagmi";
 
+import { isSolanaNetwork } from "config/chains";
 import { SUPPORT_CHAT_LAST_CONNECTED_STATE_KEY } from "config/localStorage";
-import { useLocalStorageSerializeKey } from "lib/localStorage";
+import { useChainId } from "lib/chains";
+import { useLocalStorageSerializeKeySafe } from "lib/localStorage";
 import useSearchParams from "lib/useSearchParams";
+import { useSolanaWalletSession } from "lib/wallets/solanaWalletSession";
 import { useIsWalletInitializing } from "lib/wallets/useIsWalletInitializing";
 
 import { SUPPORT_CHAT_OPENED_WITHOUT_WALLET_SESSION_KEY } from "./constants";
 
 export function useShowSupportChat() {
-  const { isConnected } = useAccount();
-  const isWalletInitializing = useIsWalletInitializing();
-  const [lastConnectedState, setLastConnectedState] = useLocalStorageSerializeKey<boolean>(
-    SUPPORT_CHAT_LAST_CONNECTED_STATE_KEY,
-    false
+  const { networkId } = useChainId();
+  const isSolana = isSolanaNetwork(networkId);
+  const { isConnected: isEvmConnected } = useAccount();
+  const isEvmInitializing = useIsWalletInitializing();
+  const solanaWallet = useSolanaWalletSession();
+  const isConnected = isSolana ? Boolean(solanaWallet.address) : isEvmConnected;
+  const isWalletInitializing = isSolana ? solanaWallet.isRestoring : isEvmInitializing;
+  const [lastConnectedState, setLastConnectedState] = useLocalStorageSerializeKeySafe<boolean>(
+    isSolana ? undefined : SUPPORT_CHAT_LAST_CONNECTED_STATE_KEY,
+    false,
+    { readFromStorage: true }
   );
 
   const { openChat } = useSearchParams<{ openChat?: string }>();
@@ -24,7 +33,7 @@ export function useShowSupportChat() {
     shouldOpenChatOnBoot
   );
 
-  const showWhileConnecting = isWalletInitializing && lastConnectedState;
+  const showWhileConnecting = isWalletInitializing && (isSolana || lastConnectedState);
 
   const shouldShowSupportChat = isConnected || showWhileConnecting || wasOpenedWithoutWallet;
 
@@ -41,10 +50,10 @@ export function useShowSupportChat() {
   }, [isConnected, setWasOpenedWithoutWallet]);
 
   useEffect(() => {
-    if (!isWalletInitializing) {
+    if (!isSolana && !isWalletInitializing) {
       setLastConnectedState(isConnected);
     }
-  }, [isWalletInitializing, isConnected, setLastConnectedState]);
+  }, [isSolana, isWalletInitializing, isConnected, setLastConnectedState]);
 
   return {
     shouldShowSupportChat,

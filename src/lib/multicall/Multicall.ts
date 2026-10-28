@@ -61,7 +61,7 @@ export class Multicall {
     return instance;
   }
 
-  static getViemClient(chainId: number, rpcUrl: string) {
+  static getViemClient(chainId: number, rpcUrl: string, signal?: AbortSignal) {
     return createPublicClient({
       transport: http(rpcUrl, {
         // retries works strangely in viem, so we disable them
@@ -69,6 +69,7 @@ export class Multicall {
         retryDelay: 10000000,
         batch: BATCH_CONFIGS[chainId as ContractsChainId].http,
         timeout: MAX_PRIMARY_TIMEOUT,
+        fetchOptions: signal ? { signal } : undefined,
       }),
       pollingInterval: undefined,
       batch: BATCH_CONFIGS[chainId as ContractsChainId].client,
@@ -87,8 +88,10 @@ export class Multicall {
     providerUrls: CurrentRpcEndpoints,
     request: MulticallRequestConfig<any>,
     isLargeAccount: boolean,
-    debugState?: MulticallDebugState
+    debugState?: MulticallDebugState,
+    signal?: AbortSignal
   ) {
+    signal?.throwIfAborted();
     const originalKeys: {
       contractKey: string;
       callKey: string;
@@ -240,7 +243,9 @@ export class Multicall {
 
     return withFallback({
       endpoints: [providerUrl, ...providerUrls.fallbacks],
+      shouldFallback: (error) => Boolean(error) && !signal?.aborted,
       fn: async (providerUrl: string, { isLastAttempt }) => {
+        signal?.throwIfAborted();
         const isFallback = providerUrl !== providerUrls.primary;
 
         const rpcProviderName = getProviderNameFromUrl(providerUrl);
@@ -252,13 +257,15 @@ export class Multicall {
           rpcProvider: rpcProviderName,
         });
 
-        const client = Multicall.getViemClient(this.chainId, providerUrl);
-
         const durationStart = performance.now();
 
         const debugShouldTimeout = !isFallback && isWebWorker && debugState?.triggerPrimaryTimeoutInWorker;
 
         const timeoutController = new AbortController();
+        const abort = () => timeoutController.abort(signal?.reason);
+        signal?.addEventListener("abort", abort, { once: true });
+        const attemptSignal = timeoutController.signal;
+        const client = Multicall.getViemClient(this.chainId, providerUrl, signal ? attemptSignal : undefined);
 
         const batchSize =
           typeof BATCH_CONFIGS[this.chainId]?.client?.multicall === "object"
@@ -297,7 +304,8 @@ export class Multicall {
         };
 
         return await Promise.race([
-          sleepWithSignal(debugShouldTimeout ? 100 : MAX_PRIMARY_TIMEOUT, timeoutController.signal).then(() => {
+          sleepWithSignal(debugShouldTimeout ? 100 : MAX_PRIMARY_TIMEOUT, attemptSignal).then(() => {
+            signal?.throwIfAborted();
             sendDebugEvent("primary-timeout", { providerUrl });
 
             emitReportEndpointFailure({
@@ -329,6 +337,7 @@ export class Multicall {
           executeCalls(),
         ])
           .then((response) => {
+            signal?.throwIfAborted();
             timeoutController.abort();
 
             sendTiming({
@@ -362,6 +371,8 @@ export class Multicall {
             }
           })
           .catch((_viemError) => {
+            timeoutController.abort();
+            signal?.throwIfAborted();
             const e = new Error(_viemError.message.slice(0, 150));
             // eslint-disable-next-line no-console
             console.groupCollapsed("multicall error:");
@@ -400,6 +411,10 @@ export class Multicall {
             });
 
             throw e;
+          })
+          .finally(() => {
+            signal?.removeEventListener("abort", abort);
+            timeoutController.abort();
           });
       },
     });

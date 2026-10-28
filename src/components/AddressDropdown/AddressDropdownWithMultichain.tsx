@@ -3,6 +3,7 @@ import cx from "classnames";
 import { useCallback, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
+import { getNetworkFeatures } from "config/features";
 import { useGmxAccountModalOpen } from "context/GmxAccountContext/hooks";
 import { useGmxAccountShowDepositButton } from "domain/multichain/useGmxAccountShowDepositButton";
 import { useChainId } from "lib/chains";
@@ -22,12 +23,48 @@ type Props = {
 };
 
 export function AddressDropdownWithMultichain({ account }: Props) {
+  const { networkId } = useChainId();
+  return getNetworkFeatures(networkId).gmxAccount ? (
+    <EvmAddressDropdownWithMultichain account={account} />
+  ) : (
+    <WalletAddressDropdown account={account} />
+  );
+}
+
+function EvmAddressDropdownWithMultichain({ account }: Props) {
   const { srcChainId } = useChainId();
   const { ensName } = useENS(account);
-  const [, setGmxAccountModalOpen] = useGmxAccountModalOpen();
   const { totalUsd, gmxAccountUsd, isGmxAccountLoading } = useAvailableToTradeAssetSettlementChain();
   const { shouldShowDepositButton } = useGmxAccountShowDepositButton();
+  const showSideButton = srcChainId !== undefined || (gmxAccountUsd !== undefined && gmxAccountUsd > 0n);
 
+  return (
+    <WalletAddressDropdown
+      account={account}
+      ensName={ensName}
+      shouldShowDepositButton={shouldShowDepositButton}
+      showSideButton={showSideButton}
+      isGmxAccountLoading={isGmxAccountLoading}
+      usd={srcChainId ? gmxAccountUsd : totalUsd}
+    />
+  );
+}
+
+function WalletAddressDropdown({
+  account,
+  ensName,
+  shouldShowDepositButton = false,
+  showSideButton = false,
+  isGmxAccountLoading = false,
+  usd,
+}: Props & {
+  ensName?: string;
+  shouldShowDepositButton?: boolean;
+  showSideButton?: boolean;
+  isGmxAccountLoading?: boolean;
+  usd?: bigint;
+}) {
+  const [, setGmxAccountModalOpen] = useGmxAccountModalOpen();
   const { isMobile, isSmallMobile } = useBreakpoints();
   const displayAddressLength = isMobile ? 9 : 13;
 
@@ -56,8 +93,6 @@ export function AddressDropdownWithMultichain({ account }: Props) {
     },
     [setGmxAccountModalOpen]
   );
-
-  const showSideButton = srcChainId !== undefined || (gmxAccountUsd !== undefined && gmxAccountUsd > 0n);
 
   return (
     <div
@@ -95,7 +130,7 @@ export function AddressDropdownWithMultichain({ account }: Props) {
               {isGmxAccountLoading ? (
                 <Skeleton baseColor="#B4BBFF1A" highlightColor="#B4BBFF1A" width={55} height={18} />
               ) : (
-                <UsdValue usd={srcChainId ? gmxAccountUsd : totalUsd} displayDecimals={0} />
+                <UsdValue usd={usd} displayDecimals={0} />
               )}
             </>
           )}

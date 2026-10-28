@@ -369,6 +369,12 @@ export class FallbackTracker<TCheckStats> {
   }
 
   public stopTracking() {
+    if (this.state.setEndpointsThrottleTimeout) {
+      clearTimeout(this.state.setEndpointsThrottleTimeout);
+      this.state.setEndpointsThrottleTimeout = undefined;
+    }
+    this.state.pendingEndpoints = undefined;
+
     if (this.state.trackerTimeoutId) {
       clearTimeout(this.state.trackerTimeoutId);
       this.state.trackerTimeoutId = undefined;
@@ -412,6 +418,7 @@ export class FallbackTracker<TCheckStats> {
 
     this.checkEndpoints(abortController)
       .then(() => {
+        if (abortController.signal.aborted || this.state.abortController !== abortController) return;
         emitTrackingFinished({ trackerKey: this.trackerKey, endpointsStats: this.getEndpointsStats() });
         this.selectBestEndpoints();
       })
@@ -578,6 +585,8 @@ export class FallbackTracker<TCheckStats> {
     );
 
     const fulfilledResults = checkResults.filter((result) => result.status === "fulfilled");
+
+    if (abortController.signal.aborted || this.state.abortController !== abortController) return;
 
     if (fulfilledResults.length === 0) {
       this.networkStatusObserver.setTrackingFailed(this.trackerKey, true);

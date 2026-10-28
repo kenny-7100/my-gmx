@@ -120,6 +120,12 @@
       "utils/numbers": [
         "./build/types/src/utils/numbers/index.d.ts"
       ],
+      "utils/address": [
+        "./build/types/src/utils/address/index.d.ts"
+      ],
+      "utils/gmsol": [
+        "./build/types/src/utils/gmsol/index.d.ts"
+      ],
       "utils/objects": [
         "./build/types/src/utils/objects/index.d.ts"
       ],
@@ -383,6 +389,18 @@
       "import": "./build/esm/src/utils/numbers/index.js",
       "require": "./build/cjs/src/utils/numbers/index.js",
       "default": "./build/cjs/src/utils/numbers/index.js"
+    },
+    "./utils/address": {
+      "types": "./build/types/src/utils/address/index.d.ts",
+      "import": "./build/esm/src/utils/address/index.js",
+      "require": "./build/cjs/src/utils/address/index.js",
+      "default": "./build/cjs/src/utils/address/index.js"
+    },
+    "./utils/gmsol": {
+      "types": "./build/types/src/utils/gmsol/index.d.ts",
+      "import": "./build/esm/src/utils/gmsol/index.js",
+      "require": "./build/cjs/src/utils/gmsol/index.js",
+      "default": "./build/cjs/src/utils/gmsol/index.js"
     },
     "./utils/objects": {
       "types": "./build/types/src/utils/objects/index.d.ts",

@@ -101,3 +101,9 @@ env PATH="$(dirname "$MATRIX_NODE"):$PATH" "$MATRIX_NODE" scripts/sdk-artifacts.
 后续需要统一配置时，先明确验证范围：根原生前端开发/类型/测试/构建、SDK 发布消费与源码测试、API 测试/路由生成，以及页面和进程清理；再在候选 Node 与目标锁定依赖上验证受影响入口。不得仅因本机 Node 22.17.0 曾通过测试，就改写所有仓库的支持范围。安装、构建和其他服务启动仍按原授权执行；本矩阵不新增权限，也不要求当前任务为补矩阵执行这些动作。
 
 文档维护时同步核对根/SDK/API package、各 `.nvmrc`/`.yarnrc.yml`、工具的 Node/依赖检查及实际报告。版本升级后保留历史核验日期，更新当前观察，避免把旧机器状态改写成新的验证事实。本轮验收证据见[版本矩阵历史验收](solana-agent-friendliness-history.md#运行版本矩阵实施与验收记录2026-10-27)。
+
+## Rust数学生成器运行时（2026-10-28）
+
+用户已授权安装Rust 1.90.0（Cargo/rustfmt）、下载固定依赖，并仅编译运行 `tools/solana-trade-math-vectors/` 生成器。官方rustup minimal安装已成功，host为aarch64-apple-darwin，rustc为 `1.90.0 (1159e78c4 2025-09-14)`；未修改shell启动文件，因此新命令不应仅凭 `command -v cargo` 失败判定尚未安装。先检查本机Cargo bin（当前为 `/Users/kenny/.cargo/bin`），在该进程PATH前置后显式使用 `cargo +1.90.0`；不要改HOME或重装工具链。
+
+该生成器的Cargo.lock和依赖缓存已就绪，复跑用 `--locked --offline`；生成两份临时JSON，经已有 `verify.mjs` 核对来源/输入/锁摘要、两次一致性及独立数值后再发布。执行步骤和授权边界见[工具说明](../tools/solana-trade-math-vectors/README.md)。这项已获授权的生成器构建不需重复确认，不扩展到SDK/程序构建、部署、其他依赖安装或钱包交易；完整Solana数学仍未验收。

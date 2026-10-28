@@ -10,6 +10,7 @@ import { stripBlacklistedWords } from "domain/tokens/utils";
 import { getByKey } from "lib/objects";
 import { searchBy } from "lib/searchBy";
 import { getTokenVisualMultiplier } from "sdk/configs/tokens";
+import { getAddressKey } from "sdk/utils/address";
 import { ProgressiveTokensData, TokenCategory } from "sdk/utils/tokens/types";
 
 import type { SortField } from "./GmList";
@@ -178,7 +179,7 @@ export function useFilterSortPools({
           else if (!recentlyListedAddresses || recentlyListedAddresses.size === 0) topLevelOk = false;
           else
             topLevelOk =
-              recentlyListedAddresses.has(market.indexTokenAddress.toLowerCase()) ||
+              recentlyListedAddresses.has(getAddressKey(market.indexTokenAddress)) ||
               recentlyListedAddresses.has(market.indexTokenAddress);
           break;
       }

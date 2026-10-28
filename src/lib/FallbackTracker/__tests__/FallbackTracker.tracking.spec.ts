@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { getFallbackTrackerKey } from "config/localStorage";
 import { suppressConsole } from "lib/__testUtils__/_utils";
 
 import { FallbackTracker } from "../FallbackTracker";
@@ -26,6 +27,21 @@ describe("FallbackTracker - endpoint tracking and monitoring", () => {
     trackers.length = 0;
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  it("discards a queued endpoint change when tracking is paused", async () => {
+    const config = createMockConfig();
+    const tracker = new FallbackTracker(config);
+    trackers.push(tracker);
+    tracker.setCurrentEndpoints(testEndpoints.secondary, [testEndpoints.primary]);
+    tracker.setCurrentEndpoints(testEndpoints.fallback, [testEndpoints.secondary]);
+    const stored = localStorage.getItem(getFallbackTrackerKey(tracker.trackerKey));
+    expect(stored).not.toBeNull();
+    tracker.stopTracking();
+    await vi.advanceTimersByTimeAsync(config.setEndpointsThrottle + 1);
+    expect(tracker.state.primary).toBe(testEndpoints.secondary);
+    expect(tracker.state.pendingEndpoints).toBeUndefined();
+    expect(localStorage.getItem(getFallbackTrackerKey(tracker.trackerKey))).toBe(stored);
   });
 
   describe("checkEndpoints", () => {
@@ -446,12 +462,9 @@ describe("FallbackTracker - endpoint tracking and monitoring", () => {
 
       await checkPromise;
 
-      // Should handle abort gracefully - all endpoints should be marked as failed
-      const lastResults = tracker.getLastCheckResults();
-      expect(lastResults).toBeDefined();
-      config.endpoints.forEach((endpoint) => {
-        expect(lastResults?.[endpoint]?.success).toBe(false);
-      });
+      // Cancelling a probe is not evidence of an endpoint failure.
+      expect(tracker.getLastCheckResults()).toBeUndefined();
+      expect(config.networkStatusObserver.getTrackingFailed(tracker.trackerKey)).toBe(false);
     });
   });
 

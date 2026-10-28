@@ -12,10 +12,11 @@ import { MetricEventParams, MulticallTimeoutEvent, WorkerMulticallErrorCounter }
 import { emitMetricCounter, emitMetricEvent, emitMetricTiming } from "lib/metrics/emitMetricEvent";
 import { CurrentRpcEndpoints } from "lib/rpc/RpcTracker";
 import { getCurrentRpcUrls } from "lib/rpc/useRpcUrls";
-import { sleep } from "lib/sleep";
+import { sleepWithSignal } from "lib/sleep";
 
 import { _debugMulticall, MULTICALL_DEBUG_EVENT_NAME, type MulticallDebugEvent } from "./_debug";
 import { executeMulticallMainThread } from "./executeMulticallMainThread";
+import { getMulticallSignal } from "./lifecycle";
 import { MAX_PRIMARY_TIMEOUT } from "./Multicall";
 import type { MulticallRequestConfig, MulticallResult } from "./types";
 
@@ -117,11 +118,13 @@ if (executorWorker) {
  */
 export async function executeMulticallWorker(
   chainId: AnyChainId,
-  request: MulticallRequestConfig<any>
+  request: MulticallRequestConfig<any>,
+  signal = getMulticallSignal()
 ): Promise<MulticallResult<any> | undefined> {
+  signal.throwIfAborted();
   // If worker is not available, fallback to main thread
   if (!executorWorker) {
-    return await executeMulticallMainThread(chainId, request);
+    return await executeMulticallMainThread(chainId, request, signal);
   }
 
   const id = uniqueId("multicall-");
@@ -131,6 +134,11 @@ export async function executeMulticallWorker(
 
   const { promise, resolve, reject } = Promise.withResolvers<MulticallResult<any> | undefined>();
   promises[id] = { resolve, reject };
+  const abort = () => {
+    executorWorker?.postMessage({ cancelId: id });
+    reject(signal.reason);
+  };
+  signal.addEventListener("abort", abort, { once: true });
 
   try {
     executorWorker.postMessage({
@@ -149,56 +157,64 @@ export async function executeMulticallWorker(
 
   const timeoutBuffer = 500;
 
-  const escapePromise = sleep(MAX_PRIMARY_TIMEOUT + timeoutBuffer).then(() => {
+  const timeoutController = new AbortController();
+  const escapePromise = sleepWithSignal(MAX_PRIMARY_TIMEOUT + timeoutBuffer, timeoutController.signal).then(() => {
     throw new Error("timeout");
   });
   const race = Promise.race([promise, escapePromise]);
 
-  return race.catch(async (error) => {
-    delete promises[id];
+  return race
+    .catch(async (error) => {
+      delete promises[id];
+      signal.throwIfAborted();
 
-    const providerUrls = getCurrentRpcUrls(chainId);
+      const providerUrls = getCurrentRpcUrls(chainId);
 
-    if (error.message === "timeout") {
-      emitMetricEvent<MulticallTimeoutEvent>({
-        event: "multicall.timeout",
-        isError: true,
-        data: {
-          metricType: "workerTimeout",
-          isInMainThread: true,
-          errorMessage: `Worker did not respond in time. Falling back to main thread.`,
-        },
+      if (error.message === "timeout") {
+        emitMetricEvent<MulticallTimeoutEvent>({
+          event: "multicall.timeout",
+          isError: true,
+          data: {
+            metricType: "workerTimeout",
+            isInMainThread: true,
+            errorMessage: `Worker did not respond in time. Falling back to main thread.`,
+          },
+        });
+        // eslint-disable-next-line no-console
+        console.error(
+          `[executeMulticallWorker] Worker did not respond in time. Falling back to main thread. Job ID: ${id}`,
+          request
+        );
+      } else {
+        emitMetricCounter<WorkerMulticallErrorCounter>({
+          event: "worker.multicall.error",
+          data: {
+            errorName: error.name,
+            errorMessage: (error.message ?? "").slice(0, 150),
+          },
+        });
+
+        // eslint-disable-next-line no-console
+        console.error(
+          `[executeMulticallWorker] Worker execution failed. Falling back to main thread. Job ID: ${id}`,
+          error.message,
+          error.stack
+        );
+      }
+
+      // Send debug event for worker fallback
+      _debugMulticall?.dispatchEvent({
+        type: "worker-fallback",
+        isInWorker: false,
+        chainId,
+        providerUrl: providerUrls.primary,
       });
-      // eslint-disable-next-line no-console
-      console.error(
-        `[executeMulticallWorker] Worker did not respond in time. Falling back to main thread. Job ID: ${id}`,
-        request
-      );
-    } else {
-      emitMetricCounter<WorkerMulticallErrorCounter>({
-        event: "worker.multicall.error",
-        data: {
-          errorName: error.name,
-          errorMessage: (error.message ?? "").slice(0, 150),
-        },
-      });
 
-      // eslint-disable-next-line no-console
-      console.error(
-        `[executeMulticallWorker] Worker execution failed. Falling back to main thread. Job ID: ${id}`,
-        error.message,
-        error.stack
-      );
-    }
-
-    // Send debug event for worker fallback
-    _debugMulticall?.dispatchEvent({
-      type: "worker-fallback",
-      isInWorker: false,
-      chainId,
-      providerUrl: providerUrls.primary,
+      return await executeMulticallMainThread(chainId, request, signal);
+    })
+    .finally(() => {
+      timeoutController.abort();
+      signal.removeEventListener("abort", abort);
+      delete promises[id];
     });
-
-    return await executeMulticallMainThread(chainId, request);
-  });
 }

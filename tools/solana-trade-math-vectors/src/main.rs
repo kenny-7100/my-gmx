@@ -1,0 +1,336 @@
+use std::{
+    collections::HashSet,
+    error::Error,
+    fs,
+    io::{self, Write},
+    process::Command,
+};
+
+use gmsol_model::{
+    params::{FeeParams, PositionParams},
+    pool::delta::BalanceChange,
+    price::{Price, Prices},
+    test::{TestMarket, TestMarketConfig, TestPosition},
+    BaseMarketExt, BaseMarketMut, PerpMarketExt, PerpMarketMut, Pool, PositionExt,
+    PositionImpactMarketMutExt, PositionStateMut,
+};
+use serde::Deserialize;
+use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
+
+type Result<T> = std::result::Result<T, Box<dyn Error>>;
+const COMMIT: &str = "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72";
+const UNIT: u128 = 100_000_000_000_000_000_000;
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Suite {
+    schema_version: u32,
+    cases: Vec<Case>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Case {
+    id: String,
+    input: Input,
+}
+
+#[derive(Deserialize)]
+#[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
+enum Input {
+    Fee {
+        amount: String,
+        positive_factor: String,
+        negative_factor: String,
+        combined_discount_factor: String,
+        balance_change: Change,
+    },
+    PositiveImpactCap {
+        impact_usd20: String,
+        size_delta_usd20: String,
+        pool_amount: String,
+        index_price: PriceInput,
+        max_positive_factor: String,
+        max_negative_factor: String,
+        index_decimals: u8,
+    },
+    PositionPnl {
+        is_long: bool,
+        is_long_collateral: bool,
+        index_decimals: u8,
+        long_decimals: u8,
+        short_decimals: u8,
+        index_price: PriceInput,
+        long_price: PriceInput,
+        short_price: PriceInput,
+        long_pool_amount: String,
+        short_pool_amount: String,
+        side_oi_long_collateral_usd20: String,
+        side_oi_short_collateral_usd20: String,
+        side_oi_long_collateral_tokens: String,
+        side_oi_short_collateral_tokens: String,
+        max_trader_pnl_factor: String,
+        position_size_usd20: String,
+        position_size_tokens: String,
+        size_delta_usd20: String,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum Change {
+    Improved,
+    Unchanged,
+    Worsened,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PriceInput {
+    min: String,
+    max: String,
+}
+
+fn uint(text: &str) -> Result<u128> {
+    let value: u128 = text.parse()?;
+    if value.to_string() != text {
+        return Err("Expected canonical u128 decimal string".into());
+    }
+    Ok(value)
+}
+
+fn signed(text: &str) -> Result<i128> {
+    let value: i128 = text.parse()?;
+    if value.to_string() != text {
+        return Err("Expected canonical i128 decimal string".into());
+    }
+    Ok(value)
+}
+
+fn factor(text: &str) -> Result<u128> {
+    let value = uint(text)?;
+    if value > UNIT {
+        return Err("Factor must be between zero and 10^20".into());
+    }
+    Ok(value)
+}
+
+fn decimals(value: u8) -> Result<()> {
+    if value > 20 {
+        return Err("Token decimals must not exceed 20".into());
+    }
+    Ok(())
+}
+
+fn price(input: &PriceInput) -> Result<Price<u128>> {
+    let min = uint(&input.min)?;
+    let max = uint(&input.max)?;
+    if min == 0 || min > max {
+        return Err("Expected nonzero ordered price bounds".into());
+    }
+    Ok(Price { min, max })
+}
+
+fn usd30(value: impl ToString) -> String {
+    let text = value.to_string();
+    if text == "0" {
+        text
+    } else {
+        format!("{text}0000000000")
+    }
+}
+
+fn model_error(error: gmsol_model::Error) -> Value {
+    json!({"status": "error", "message": error.to_string()})
+}
+
+fn evaluate(input: &Input) -> Result<Value> {
+    match input {
+        Input::Fee {
+            amount,
+            positive_factor,
+            negative_factor,
+            combined_discount_factor,
+            balance_change,
+        } => {
+            let params = FeeParams::<u128>::builder()
+                .positive_impact_fee_factor(factor(positive_factor)?)
+                .negative_impact_fee_factor(factor(negative_factor)?)
+                .fee_receiver_factor(0)
+                .build()
+                .with_discount_factor(factor(combined_discount_factor)?);
+            let change = match balance_change {
+                Change::Improved => BalanceChange::Improved,
+                Change::Unchanged => BalanceChange::Unchanged,
+                Change::Worsened => BalanceChange::Worsened,
+            };
+            Ok(match params.fee::<20>(change, &uint(amount)?) {
+                Some(fee) => json!({"status": "ok", "fee_amount": fee.to_string()}),
+                None => json!({"status": "unavailable", "reason": "FeeParams::fee returned None"}),
+            })
+        }
+        Input::PositiveImpactCap {
+            impact_usd20,
+            size_delta_usd20,
+            pool_amount,
+            index_price,
+            max_positive_factor,
+            max_negative_factor,
+            index_decimals,
+        } => {
+            decimals(*index_decimals)?;
+            // Only position_params and position_impact_pool are read by this model entry.
+            let mut config = TestMarketConfig::<u128, 20>::default();
+            config.position_params = PositionParams::new(
+                0,
+                0,
+                0,
+                factor(max_positive_factor)?,
+                factor(max_negative_factor)?,
+                0,
+            );
+            let mut market = TestMarket::<u128, 20>::with_config(config);
+            market.apply_delta_to_position_impact_pool(&i128::try_from(uint(pool_amount)?)?)?;
+            let mut impact = signed(impact_usd20)?;
+            let result = market.cap_positive_position_price_impact(
+                &price(index_price)?,
+                &signed(size_delta_usd20)?,
+                &mut impact,
+            );
+            Ok(match result {
+                Ok(()) => {
+                    json!({"status": "ok", "impact_usd20": impact.to_string(), "impact_usd30": usd30(impact)})
+                }
+                Err(error) => model_error(error),
+            })
+        }
+        Input::PositionPnl {
+            is_long,
+            is_long_collateral,
+            index_decimals,
+            long_decimals,
+            short_decimals,
+            index_price,
+            long_price,
+            short_price,
+            long_pool_amount,
+            short_pool_amount,
+            side_oi_long_collateral_usd20,
+            side_oi_short_collateral_usd20,
+            side_oi_long_collateral_tokens,
+            side_oi_short_collateral_tokens,
+            max_trader_pnl_factor,
+            position_size_usd20,
+            position_size_tokens,
+            size_delta_usd20,
+        } => {
+            for value in [index_decimals, long_decimals, short_decimals] {
+                decimals(*value)?;
+            }
+            let prices = Prices {
+                index_token_price: price(index_price)?,
+                long_token_price: price(long_price)?,
+                short_token_price: price(short_price)?,
+            };
+            // pnl_value reads only these pools, the position sizes, prices and trader factor.
+            // Other TestMarket defaults do not enter this read-only calculation; no clock runs.
+            let mut config = TestMarketConfig::<u128, 20>::default();
+            config.max_pnl_factors.trader = factor(max_trader_pnl_factor)?;
+            let mut market = TestMarket::<u128, 20>::with_config(config);
+            let pool = market.liquidity_pool_mut()?;
+            pool.apply_delta_to_long_amount(&i128::try_from(uint(long_pool_amount)?)?)?;
+            pool.apply_delta_to_short_amount(&i128::try_from(uint(short_pool_amount)?)?)?;
+            let oi = market.open_interest_pool_mut(*is_long)?;
+            oi.apply_delta_to_long_amount(&i128::try_from(uint(side_oi_long_collateral_usd20)?)?)?;
+            oi.apply_delta_to_short_amount(&i128::try_from(uint(
+                side_oi_short_collateral_usd20,
+            )?)?)?;
+            let tokens = market.open_interest_in_tokens_pool_mut(*is_long)?;
+            tokens.apply_delta_to_long_amount(&i128::try_from(uint(
+                side_oi_long_collateral_tokens,
+            )?)?)?;
+            tokens.apply_delta_to_short_amount(&i128::try_from(uint(
+                side_oi_short_collateral_tokens,
+            )?)?)?;
+            let size = uint(position_size_usd20)?;
+            let size_tokens = uint(position_size_tokens)?;
+            let delta = uint(size_delta_usd20)?;
+            if size == 0 || size_tokens == 0 || delta > size {
+                return Err("Expected nonempty position and delta at most size".into());
+            }
+            let pool_pnl = market.pnl(&prices.index_token_price, *is_long, true)?;
+            let pool_value =
+                market.pool_value_without_pnl_for_one_side(&prices, *is_long, false)?;
+            let mut position = if *is_long {
+                TestPosition::long(*is_long_collateral)
+            } else {
+                TestPosition::short(*is_long_collateral)
+            };
+            let mut ops = position.ops(&mut market);
+            *ops.size_in_usd_mut() = size;
+            *ops.size_in_tokens_mut() = size_tokens;
+            Ok(match ops.pnl_value(&prices, &delta) {
+                Ok((pnl, uncapped, delta_tokens)) => json!({
+                    "status": "ok", "pnl_usd20": pnl.to_string(), "pnl_usd30": usd30(pnl),
+                    "uncapped_pnl_usd20": uncapped.to_string(), "uncapped_pnl_usd30": usd30(uncapped),
+                    "size_delta_tokens": delta_tokens.to_string(),
+                    "side_pool_pnl_usd20": pool_pnl.to_string(), "side_pool_value_usd20": pool_value.to_string()
+                }),
+                Err(error) => model_error(error),
+            })
+        }
+    }
+}
+
+fn sha256(bytes: &[u8]) -> String {
+    format!("{:x}", Sha256::digest(bytes))
+}
+
+fn main() -> Result<()> {
+    let mut args = std::env::args().skip(1);
+    let input_path = args
+        .next()
+        .ok_or("Usage: solana-trade-math-vectors INPUT.json")?;
+    if args.next().is_some() {
+        return Err("Expected exactly one input path".into());
+    }
+    let bytes = fs::read(input_path)?;
+    let suite: Suite = serde_json::from_slice(&bytes)?;
+    if suite.schema_version != 1 || suite.cases.is_empty() {
+        return Err("Expected schema version 1 and nonempty cases".into());
+    }
+    let raw: Value = serde_json::from_slice(&bytes)?;
+    let mut ids = HashSet::new();
+    let mut cases = Vec::new();
+    for (index, case) in suite.cases.iter().enumerate() {
+        if case.id.is_empty() || !ids.insert(&case.id) {
+            return Err("Expected unique nonempty case IDs".into());
+        }
+        let output = evaluate(&case.input).map_err(|error| format!("Case {}: {error}", case.id))?;
+        cases.push(json!({"id": case.id, "input": raw["cases"][index]["input"], "output": output}));
+    }
+    let rustc = Command::new("rustc").arg("--version").output()?;
+    if !rustc.status.success() {
+        return Err("Cannot identify rustc version".into());
+    }
+    let result = json!({
+        "schema_version": 1,
+        "reference": {"repository": "https://github.com/gmsol-labs/gmx-solana", "tag": "v0.10.0", "commit": COMMIT},
+        "generator": {
+            "source_sha256": sha256(include_bytes!("main.rs")),
+            "manifest_sha256": sha256(include_bytes!("../Cargo.toml")),
+            "lock_sha256": sha256(include_bytes!("../Cargo.lock")),
+            "input_sha256": sha256(&bytes),
+            "rustc": String::from_utf8(rustc.stdout)?.trim()
+        },
+        "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value"],
+        "cases": cases
+    });
+    // Buffer all cases before writing stdout; callers must still publish output atomically.
+    let mut output = serde_json::to_vec_pretty(&result)?;
+    output.push(b'\n');
+    io::stdout().lock().write_all(&output)?;
+    Ok(())
+}

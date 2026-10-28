@@ -1,10 +1,10 @@
 import noop from "lodash/noop";
 import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
 
-import { ARBITRUM, getExecutionFeeConfig } from "config/chains";
+import { ARBITRUM, getExecutionFeeConfig, isSolanaNetwork } from "config/chains";
 import { isDevelopment } from "config/env";
 import { DEFAULT_ACCEPTABLE_PRICE_IMPACT_BUFFER, DEFAULT_SLIPPAGE_AMOUNT } from "config/factors";
-import { getIsExpressSupported } from "config/features";
+import { getNetworkFeatures } from "config/features";
 import {
   BREAKDOWN_NET_PRICE_IMPACT_ENABLED_KEY,
   BUY_SELL_ICONS_MODE_KEY,
@@ -35,7 +35,12 @@ import {
   getSyntheticsAcceptablePriceImpactBufferKey,
 } from "config/localStorage";
 import { useChainId } from "lib/chains";
-import { hasStoredLocalStorageValue, useLocalStorageByChainId, useLocalStorageSerializeKey } from "lib/localStorage";
+import {
+  hasStoredLocalStorageValue,
+  useLocalStorageByChainId,
+  useLocalStorageSerializeKey,
+  useLocalStorageSerializeKeySafe,
+} from "lib/localStorage";
 import { tenderlyLsKeys } from "lib/tenderly";
 import useWallet from "lib/wallets/useWallet";
 import { useWalletCanSignTypedData } from "lib/wallets/useWalletSessionChains";
@@ -144,7 +149,9 @@ export function useSettings() {
 }
 
 export function SettingsContextProvider({ children }: { children: ReactNode }) {
-  const { chainId, srcChainId } = useChainId();
+  const { chainId, srcChainId, networkId } = useChainId();
+  const isSolana = isSolanaNetwork(networkId);
+  const expressSupported = getNetworkFeatures(networkId).express;
   const { account } = useWallet();
 
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
@@ -153,15 +160,18 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
     DEBUG_ERROR_BOUNDARY_KEY,
     false
   );
-  const [savedAllowedSlippage, setSavedAllowedSlippage] = useLocalStorageSerializeKey(
-    getAllowedSlippageKey(chainId),
-    DEFAULT_SLIPPAGE_AMOUNT
+  const [savedAllowedSlippage, setSavedAllowedSlippage] = useLocalStorageSerializeKeySafe<number>(
+    getAllowedSlippageKey(networkId),
+    DEFAULT_SLIPPAGE_AMOUNT,
+    { readFromStorage: true }
   );
 
-  const [savedAcceptablePriceImpactBuffer, setSavedAcceptablePriceImpactBuffer] = useLocalStorageSerializeKey(
-    getSyntheticsAcceptablePriceImpactBufferKey(chainId),
-    DEFAULT_ACCEPTABLE_PRICE_IMPACT_BUFFER
-  );
+  const [savedAcceptablePriceImpactBuffer, setSavedAcceptablePriceImpactBuffer] =
+    useLocalStorageSerializeKeySafe<number>(
+      getSyntheticsAcceptablePriceImpactBufferKey(networkId),
+      DEFAULT_ACCEPTABLE_PRICE_IMPACT_BUFFER,
+      { readFromStorage: true }
+    );
 
   const [hasOverriddenDefaultArb30ExecutionFeeBufferBpsKey, setHasOverriddenDefaultArb30ExecutionFeeBufferBpsKey] =
     useLocalStorageSerializeKey(getHasOverriddenDefaultArb30ExecutionFeeBufferBpsKey(chainId), false);
@@ -180,24 +190,28 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
     undefined
   );
 
-  const [savedShowPnlAfterFees, setSavedShowPnlAfterFees] = useLocalStorageSerializeKey(
-    [chainId, SHOW_PNL_AFTER_FEES_KEY],
-    false
+  const [savedShowPnlAfterFees, setSavedShowPnlAfterFees] = useLocalStorageSerializeKeySafe<boolean>(
+    [networkId, SHOW_PNL_AFTER_FEES_KEY],
+    false,
+    { readFromStorage: true }
   );
 
-  const [savedIsPnlInLeverage, setSavedIsPnlInLeverage] = useLocalStorageSerializeKey(
-    [chainId, IS_PNL_IN_LEVERAGE_KEY],
-    false
+  const [savedIsPnlInLeverage, setSavedIsPnlInLeverage] = useLocalStorageSerializeKeySafe<boolean>(
+    [networkId, IS_PNL_IN_LEVERAGE_KEY],
+    false,
+    { readFromStorage: true }
   );
 
-  const [savedIsAutoCancelTPSL, setIsAutoCancelTPSL] = useLocalStorageSerializeKey(
-    [chainId, IS_AUTO_CANCEL_TPSL_KEY],
-    true
+  const [savedIsAutoCancelTPSL, setIsAutoCancelTPSL] = useLocalStorageSerializeKeySafe<boolean>(
+    [networkId, IS_AUTO_CANCEL_TPSL_KEY],
+    true,
+    { readFromStorage: true }
   );
 
-  const [isLeverageSliderEnabled, setIsLeverageSliderEnabled] = useLocalStorageSerializeKey(
-    getLeverageSliderEnabledKey(chainId),
-    true
+  const [isLeverageSliderEnabled, setIsLeverageSliderEnabled] = useLocalStorageSerializeKeySafe<boolean>(
+    getLeverageSliderEnabledKey(networkId),
+    true,
+    { readFromStorage: true }
   );
 
   const [tenderlyAccountSlug, setTenderlyAccountSlug] = useLocalStorageSerializeKey(tenderlyLsKeys.accountSlug, "");
@@ -226,15 +240,15 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
     null
   );
 
-  const [savedBreakdownNetPriceImpactEnabled, setSavedBreakdownNetPriceImpactEnabled] = useLocalStorageSerializeKey(
-    [chainId, BREAKDOWN_NET_PRICE_IMPACT_ENABLED_KEY],
-    false
-  );
+  const [savedBreakdownNetPriceImpactEnabled, setSavedBreakdownNetPriceImpactEnabled] =
+    useLocalStorageSerializeKeySafe<boolean>([networkId, BREAKDOWN_NET_PRICE_IMPACT_ENABLED_KEY], false, {
+      readFromStorage: true,
+    });
 
-  const [savedSetAcceptablePriceImpactEnabled, setSavedSetAcceptablePriceImpactEnabled] = useLocalStorageSerializeKey(
-    [chainId, SET_ACCEPTABLE_PRICE_IMPACT_ENABLED_KEY],
-    false
-  );
+  const [savedSetAcceptablePriceImpactEnabled, setSavedSetAcceptablePriceImpactEnabled] =
+    useLocalStorageSerializeKeySafe<boolean>([networkId, SET_ACCEPTABLE_PRICE_IMPACT_ENABLED_KEY], false, {
+      readFromStorage: true,
+    });
 
   let [gasPaymentTokenAddress, setGasPaymentTokenAddress] = useLocalStorageSerializeKey(
     getGasPaymentTokenAddressKey(chainId, account),
@@ -281,23 +295,25 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
     setSavedIsTokenPermitsQaOverrideEnabled = noop;
   }
 
-  const [savedShouldShowPositionLines, setSavedShouldShowPositionLines] = useLocalStorageSerializeKey(
-    [chainId, SHOULD_SHOW_POSITION_LINES_KEY],
-    true
+  const [savedShouldShowPositionLines, setSavedShouldShowPositionLines] = useLocalStorageSerializeKeySafe<boolean>(
+    [networkId, SHOULD_SHOW_POSITION_LINES_KEY],
+    true,
+    { readFromStorage: true }
   );
 
-  const [savedBuySellIconsModeRaw, setSavedBuySellIconsModeRaw] = useLocalStorageSerializeKey<
+  const [savedBuySellIconsModeRaw, setSavedBuySellIconsModeRaw] = useLocalStorageSerializeKeySafe<
     BuySellIconsMode | boolean
-  >([chainId, BUY_SELL_ICONS_MODE_KEY], DEFAULT_BUY_SELL_ICONS_MODE);
+  >([networkId, BUY_SELL_ICONS_MODE_KEY], DEFAULT_BUY_SELL_ICONS_MODE, { readFromStorage: true });
 
   const savedBuySellIconsMode = useMemo(
     () => getBuySellIconsMode(savedBuySellIconsModeRaw),
     [savedBuySellIconsModeRaw]
   );
 
-  const [savedTwapNumberOfParts, setSavedTWAPNumberOfParts] = useLocalStorageSerializeKey(
-    [chainId, TWAP_NUMBER_OF_PARTS_KEY],
-    DEFAULT_TWAP_NUMBER_OF_PARTS
+  const [savedTwapNumberOfParts, setSavedTWAPNumberOfParts] = useLocalStorageSerializeKeySafe<number>(
+    [networkId, TWAP_NUMBER_OF_PARTS_KEY],
+    DEFAULT_TWAP_NUMBER_OF_PARTS,
+    { readFromStorage: true }
   );
 
   const [showCloseSizeInTokens, setShowCloseSizeInTokens] = useLocalStorageSerializeKey(
@@ -311,19 +327,20 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    if (shouldUseExecutionFeeBuffer && executionFeeBufferBps === undefined) {
+    if (!isSolana && shouldUseExecutionFeeBuffer && executionFeeBufferBps === undefined) {
       setExecutionFeeBufferBps(defaultExecutionFeeBufferBps ?? 0);
     }
   }, [
     chainId,
     defaultExecutionFeeBufferBps,
+    isSolana,
     executionFeeBufferBps,
     setExecutionFeeBufferBps,
     shouldUseExecutionFeeBuffer,
   ]);
 
   useEffect(() => {
-    if (!hasOverriddenDefaultArb30ExecutionFeeBufferBpsKey && chainId === ARBITRUM) {
+    if (!isSolana && !hasOverriddenDefaultArb30ExecutionFeeBufferBpsKey && chainId === ARBITRUM) {
       setExecutionFeeBufferBps(defaultExecutionFeeBufferBps ?? 0);
       setHasOverriddenDefaultArb30ExecutionFeeBufferBpsKey(true);
     }
@@ -331,6 +348,7 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
     chainId,
     defaultExecutionFeeBufferBps,
     hasOverriddenDefaultArb30ExecutionFeeBufferBpsKey,
+    isSolana,
     setExecutionFeeBufferBps,
     setHasOverriddenDefaultArb30ExecutionFeeBufferBpsKey,
   ]);
@@ -340,7 +358,7 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
       if (
         !account ||
         expressOrdersEnabled ||
-        !getIsExpressSupported(chainId) ||
+        !expressSupported ||
         hasStoredLocalStorageValue(expressOrdersEnabledKey)
       ) {
         return;
@@ -348,16 +366,16 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
 
       setExpressOrdersEnabled(true);
     },
-    [account, chainId, expressOrdersEnabled, expressOrdersEnabledKey, setExpressOrdersEnabled]
+    [account, expressSupported, expressOrdersEnabled, expressOrdersEnabledKey, setExpressOrdersEnabled]
   );
 
   useEffect(
     function fallbackMultichain() {
-      if (srcChainId && !expressOrdersEnabled) {
+      if (srcChainId && !expressOrdersEnabled && !isSolana) {
         setExpressOrdersEnabled(true);
       }
     },
-    [expressOrdersEnabled, setExpressOrdersEnabled, srcChainId]
+    [expressOrdersEnabled, setExpressOrdersEnabled, srcChainId, isSolana]
   );
 
   const contextState: SettingsContextType = useMemo(() => {
@@ -410,7 +428,7 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
       isSettingsVisible,
       setIsSettingsVisible,
 
-      expressOrdersEnabled: expressOrdersEnabled! && canSignTypedData,
+      expressOrdersEnabled: expressOrdersEnabled! && canSignTypedData && !isSolana,
       setExpressOrdersEnabled,
       gasPaymentTokenAddress: gasPaymentTokenAddress!,
       setGasPaymentTokenAddress,
@@ -481,6 +499,7 @@ export function SettingsContextProvider({ children }: { children: ReactNode }) {
     tenderlyProjectSlug,
     tenderlySimulationEnabled,
     isSettingsVisible,
+    isSolana,
     expressOrdersEnabled,
     canSignTypedData,
     setExpressOrdersEnabled,

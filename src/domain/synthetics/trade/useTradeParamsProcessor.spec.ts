@@ -1,6 +1,7 @@
 import { zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
+import { SOLANA_NETWORK_ID } from "config/chains";
 import { ARBITRUM, AVALANCHE } from "sdk/configs/chains";
 import { MARKETS } from "sdk/configs/markets";
 import { getTokenBySymbol, getTokensMap } from "sdk/configs/tokens";
@@ -38,6 +39,14 @@ describe("getCleanedTradeSearch", () => {
 });
 
 describe("getTradeLinkTradeType", () => {
+  it("restricts explicit and restored Swap links only on Solana", () => {
+    for (const path of ["swap", "SWAP", undefined, "unknown"]) {
+      expect(getTradeLinkTradeType(path, TradeType.Swap, SOLANA_NETWORK_ID)).toBe(TradeType.Long);
+      expect(getTradeLinkTradeType(path, TradeType.Swap, ARBITRUM)).toBe(TradeType.Swap);
+    }
+    expect(getTradeLinkTradeType("short", TradeType.Long, SOLANA_NETWORK_ID)).toBe(TradeType.Short);
+  });
+
   it("takes the trade type from the path", () => {
     expect(getTradeLinkTradeType("short", TradeType.Long)).toBe(TradeType.Short);
   });

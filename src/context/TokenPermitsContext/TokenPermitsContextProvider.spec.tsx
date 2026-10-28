@@ -3,6 +3,7 @@ import { SWRConfig } from "swr";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import "lib/monkeyPatching";
+import { SOLANA_NETWORK_ID } from "config/chains";
 import { IS_TOKEN_PERMITS_EOA_ENABLED_UI_FLAG, type UiFlags } from "domain/synthetics/uiFlags/uiFlags";
 import { PERMIT_WALLET_CHANGED_ERROR } from "lib/errors/customErrors";
 import type { SignedTokenPermit } from "sdk/utils/tokens/types";
@@ -17,6 +18,8 @@ const WETH = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 const LINK = "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4";
 
 const mocks = vi.hoisted(() => ({
+  networkId: 42161,
+  accountTypeRead: vi.fn(),
   uiFlags: undefined as UiFlags | undefined,
   accountType: "eoa" as string,
   account: "0x0000000000000000000000000000000000000001",
@@ -25,7 +28,7 @@ const mocks = vi.hoisted(() => ({
   isPermitSignatureValid: true,
 }));
 
-vi.mock("lib/chains", () => ({ useChainId: () => ({ chainId: CHAIN_ID }) }));
+vi.mock("lib/chains", () => ({ useChainId: () => ({ chainId: CHAIN_ID, networkId: mocks.networkId }) }));
 vi.mock("lib/wallets/useWallet", () => ({
   default: () => ({ signer: { address: mocks.account, provider: mocks.hasProvider ? {} : undefined } }),
 }));
@@ -38,7 +41,10 @@ vi.mock("context/SettingsContext/SettingsContextProvider", () => ({
 }));
 vi.mock("domain/tokens/tokenPermitsEligibility", async (importOriginal) => ({
   ...(await importOriginal<object>()),
-  getTokenPermitAccountType: async () => mocks.accountType,
+  getTokenPermitAccountType: async () => {
+    mocks.accountTypeRead();
+    return mocks.accountType;
+  },
 }));
 vi.mock("domain/tokens/permitUtils", async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -109,6 +115,7 @@ describe("TokenPermitsContextProvider", () => {
     localStorage.clear();
     mocks.uiFlags = flag(IS_TOKEN_PERMITS_EOA_ENABLED_UI_FLAG, true);
     mocks.accountType = "eoa";
+    mocks.networkId = CHAIN_ID;
     mocks.account = ACCOUNT;
     mocks.isPermitSignatureValid = true;
     mocks.hasProvider = true;
@@ -269,5 +276,40 @@ describe("TokenPermitsContextProvider", () => {
 
     await expect(state.addTokenPermit(USDC, ROUTER, 100n)).rejects.toThrow();
     expect(mocks.createAndSignTokenPermit).not.toHaveBeenCalled();
+  });
+  it("does not classify or expose EVM permits on Solana and rejects a signature completed after switching", async () => {
+    storePermits([permit(USDC)]);
+    const stored = localStorage.getItem(PERMITS_KEY);
+    mocks.networkId = SOLANA_NETWORK_ID;
+    const view = render(<Tree />);
+    await act(async () => undefined);
+    expect(state.accountType).toBeUndefined();
+    expect(state.tokenPermits).toEqual([]);
+    expect(state.getIsPermitAvailable(USDC)).toBe(false);
+    expect(mocks.accountTypeRead).not.toHaveBeenCalled();
+    await expect(state.addTokenPermit(USDC, ROUTER, 1n)).rejects.toThrow(PERMIT_WALLET_CHANGED_ERROR);
+    expect(mocks.createAndSignTokenPermit).not.toHaveBeenCalled();
+    mocks.networkId = CHAIN_ID;
+    view.rerender(<Tree />);
+    await waitFor(() => expect(state.tokenPermits).toHaveLength(1));
+    expect(state.accountType).toBe("eoa");
+    let complete!: (value: { permit: SignedTokenPermit }) => void;
+    mocks.createAndSignTokenPermit.mockReturnValueOnce(
+      new Promise((resolve) => {
+        complete = resolve;
+      })
+    );
+    const signing = state.addTokenPermit(WETH, ROUTER, 1n);
+    const rejection = expect(signing).rejects.toThrow(PERMIT_WALLET_CHANGED_ERROR);
+    mocks.networkId = SOLANA_NETWORK_ID;
+    view.rerender(<Tree />);
+    complete({ permit: permit(WETH) });
+    await rejection;
+    expect(state.accountType).toBeUndefined();
+    expect(state.tokenPermits).toEqual([]);
+    expect(localStorage.getItem(PERMITS_KEY)).toBe(stored);
+    mocks.networkId = CHAIN_ID;
+    view.rerender(<Tree />);
+    await waitFor(() => expect(state.tokenPermits).toHaveLength(1));
   });
 });

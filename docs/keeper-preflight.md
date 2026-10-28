@@ -41,7 +41,7 @@ VITE_APP_SOLANA_TRADING_OVERRIDE=true
 针对性验证覆盖开发/非开发环境、开启/关闭/未设置/非法值与远端开启/关闭的组合，并保留真实接口失败传播和 Hook fail-closed 验证：
 
 ```sh
-yarn test:ci src/domain/gmsol/fetchSolanaTradingEnabled.spec.ts src/domain/gmsol/useSolanaTradingEnabled.spec.ts
+yarn test:ci src/domain/gmsol/fetchSolanaTradingEnabled.spec.ts src/domain/gmsol/useSolanaTradingEnabled.spec.tsx
 ```
 
 2026-10-24：上述 2 个文件、10 项测试通过；完整前端回归 299 个文件通过、1 个原有跳过，3014 项测试通过、1 项原有跳过；类型检查及本次前端改动的 ESLint 通过。非开发环境忽略覆盖通过单元验证，未运行构建、预览部署或浏览器验收。

@@ -14,6 +14,8 @@
 
 需要同时运行前端/API/RPC 时，按[全栈工作区说明](solana-dev-workspace.md)使用 `yarn solana:dev up/status/logs/stop`，核对所选服务及 borrowed/owned 归属。新启动持续工作区前，先按[组合预检](solana-dev-workspace.md#启动前的组合预检)用相同目录/服务/端口运行 `yarn solana:dev doctor`，一次处理依赖、Chrome 和占用缺项；已运行工作区的健康用 status，不为 doctor 自动停服。一次性 `solana:dev:check` 已内置同一预检，无需重复。持续调试独立前端 checkout 时，按同一说明显式传 `--project-dir PATH`，为目标选择空闲 Vite 端口；同时联调 API 功能分支时，up 显式加 `--api-dir PATH --api-port PORT`，先按同一说明确认 API 自身前置和服务启动授权，核对路径及 PID。status/logs/stop 和浏览器诊断也传同一前端目录，核对报告的目标身份，不误用基础设施目录的既有工作区。浏览器请求问题使用 `solana:dev:browser` 和 `solana:dev trace --id`；contracts 的 partial 不当作完整通过。当前前端未消费开发代理路径，不为环境验收补业务接入。仅需 API 时仍使用下文的独立 API 入口。
 
+涉及T17独立Rust参考值时，先按[交易数学的Rust前置](solana-trade-math-reference.md#rust前置及后续验收)核对 `rustc/cargo/rustfmt`、固定协议commit及Cargo.lock；当前常见位置未找到工具链，未提供前不编译、不自行安装。源码/输入静态核验不代替Rust生成或数值一致性，工具链和构建授权明确后再执行限定generator命令。
+
 本节用于安排当前任务已获授权的检查，不要求每次任务运行所有命令。用户已长期授权本地 Vite、Chrome 及已授权任务所需的本地页面验收；构建（含 SDK 构建）、其他服务及部署仍须遵循根 `AGENTS.md` 的授权边界；用户仅要求 `push` 时直接执行推送流程，不插入本节检查。纯文档修改只检查文档路径、链接及差异。
 
 仅需一次组合验收、不保留调试服务时，按[一次性组合验收](solana-dev-workspace.md#一条命令运行组合验收并停服)使用 `yarn solana:dev:check --project-dir PATH --api-dir PATH`，显式选择空闲端口；需要真实源码断点时再加 `--api-inspect-port PORT`。它复用既有工具并自动停止所属工作区，不先手动 up，不以已有工作区替代本轮实例。结束后核对 status、阶段退出和 cleanup；取消后等待正常退出和最终报告，本入口已为 Chrome 清理保留 15 秒，不立即追加强杀。失败看该次日志，不将 sample 探测当业务验收。
@@ -107,6 +109,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 **SDK Git 回归范围：** SDK 纯源码功能分支按[范围说明](sdk-offline-tests.md#按-git-变更范围运行回归)使用 `sdk:test-offline --sdk-dir PATH/sdk --changed-since REF`。先核对目标 `changes.checkoutDir`、`sdkPrefix`、基线 SHA 和完整路径，再确认 `changesUnchanged=true`、原生清单、网络及清理结果；SDK 配置、前端或根配置混入、删除、空范围均需人工评估后显式选 `--suite`。不能把断言通过当成执行期间范围保持一致，调试仍使用单 suite。
 
 **离线工具变化：** 前端和 SDK 离线验收成功前，按[工具指纹说明](frontend-offline-tests.md#结束时核对工具指纹)确认 `toolingUnchanged=true` 及前后工具指纹相同。`tooling-evidence` 失败时，先结束并发工具编辑，再用稳定工具重跑；原生断言通过不能覆盖此失败。交付检查要求这项证据，旧报告缺字段需重跑，不手补状态或指纹。
+
+**共享遥测验收的版本前置：** 核对`/report/ui/batch_report`前，确认目标Vite环境显式配置非空`VITE_APP_VERSION`。`getAppVersion()`直接读取它，缺失会使指标payload省略必需version，EVM/Solana均可返回400。使用目标实际发布版本或本地真实HEAD/工作区源码身份，可仅为本次命令设置；不伪造上线版本、不在生产代码添加静默兜底。只打印配置是否存在，不输出其他环境值。按[浏览器说明](solana-browser-smoke.md#共享上报验收的版本配置)区分版本校验与网络/服务拒绝，普通UI冒烟无需此项；HTTP200不能替代入库/下游分析验收。
 
 ## 查阅入口
 

@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
@@ -39,7 +40,15 @@ export function evaluateVectors(fixture, applyFactor) {
   });
 }
 
-export async function runVectors() {
+let sdkLoadPromise;
+
+export function loadPinnedSdk() {
+  // wasm-bindgen's wrapper caches memory views; bind it to one instance per process.
+  if (!sdkLoadPromise) sdkLoadPromise = initializePinnedSdk();
+  return sdkLoadPromise;
+}
+
+async function initializePinnedSdk() {
   const local = await readLocalRuntime();
   const bytes = await readFile(require.resolve("@gmsol-labs/gmsol-sdk/index_bg.wasm"));
   // Hash the exact bytes about to be instantiated, including after the shared preflight.
@@ -51,6 +60,11 @@ export async function runVectors() {
   const { instance } = await WebAssembly.instantiate(bytes, { "./index_bg.js": sdk });
   sdk.__wbg_set_wasm(instance.exports);
   instance.exports.__wbindgen_start();
+  return { sdk, local };
+}
+
+export async function runVectors() {
+  const { sdk, local } = await loadPinnedSdk();
   const vectorBytes = await readFile(new URL(`../${VECTOR_FILE}`, import.meta.url));
   const vectors = evaluateVectors(JSON.parse(vectorBytes.toString("utf8")), sdk.apply_factor);
   const status = vectors.every((row) => row.status === "passed") ? "passed" : "failed";

@@ -9,7 +9,7 @@
 | 文档 | 适用场景 |
 | --- | --- |
 | [Solana 独立集成实施任务表](../solana-implementation-tasks.md) | 后续 Agent 的实施入口：60 个任务、5 项已有或待复核基础，含优先级、本地状态、依赖、验收与全量 Linear 覆盖；不反写线上状态 |
-| [Solana 独立集成调研依据与架构边界](solana-implementation-research.md) | 2026-10-27 全量需求、PR/版本与源码核验；统一数据流、EVM 保护、API 最新进展及待确认的契约与资源 |
+| [Solana 独立集成调研依据与架构边界](solana-implementation-research.md) | 2026-10-27 全量需求、PR/版本与源码核验；统一数据流、EVM 保护、API 最新进展及待确认的契约与资源；T00/T03接缝记录、T08单位转换、T05余额reader、T09共享SWR及T06.a/b/c存储隔离与Settings/SWR审计、T07网络感知token lookup、T01.a/b钱包接线与T02.a钱包余额/TokenPermits、T02.b1共享支持聊天/EVM属性与T02.b2全局provider/effect/Settings隔离、T02.c1共享地址helper/最近上架筛选、T02.c2订单/历史与T02.c3图表/导出/市场/返佣地址消费及datafeed清理、T02.c4剩余地址消费与保证金入口、T02.d1交易能力/共享状态门槛、T02.d2路由/导航/公告隔离、T02.e1 GMX Account状态/查询隔离、T02.e2a EVM uiFlags查询/fallback隔离、T02.e2b价格/oracle tracker生命周期隔离及T02.f1真实请求审计/残余调用定位、T02.f2a multicall切网取消边界、T02.f2b1启动uiFlags预取隔离及T02.f2b3上报400/版本前置、T02.f2b2 EVM oracle请求取消/迟到fallback的实现及验收边界、T04.a市场字段表/公共API67组真实只读核验与T10版本绑定边界、T11.a复用keeper adapter/共享实时价格hook与限定验收、T11.c共享flags/原公告接线及真实请求归因（正向banner待远端key）、T11.b1共享24h请求/原消费者接线及T11.b2原DataFeed数据源/生命周期/布局隔离与限定消费验证、T12原钱包摘要/资产列表与USD接线及Mainnet捕获消费验证（真实钱包面板待验；真实图表待T13，个人markers待T34；后续数学与builder见下列专题）（其余地址消费/capability、零EVM RPC、真实钱包/最终产物待验） |
 | [Agent 本地运行版本矩阵](agent-runtime-matrix.md) | 区分仓库版本声明、Agent 工具前置和本机观察；解释 Node 20/22 及 API patch 差异，记录本机 22.17.0/22.22.0 离线测试、真实 Chrome 页面冒烟实测与产物收据边界，指导独立 checkout 的版本核对 |
 | [Agent 本地环境与依赖清单](agent-environment.md) | 支持实际前端/API 目标目录、关键依赖逐项问题、SDK 消费来源、SDK 产物/API 路由和本地数据库前置检查；兼容原本机清单，不将所选前置 ready 当业务就绪 |
 | [Agent 基础设施当前阶段与接手结论](agent-acceptance-infrastructure.md#当前阶段与接手结论2026-10-27) | 2026-10-27 能力与验证摘要、真实环境及业务验收边界；开发与局部验收已可用，建议下一阶段用真实需求检验，避免继续无目标扩展工具 |
@@ -27,6 +27,10 @@
 | [Solana 集成 Agent 友好度历史实施记录](solana-agent-friendliness-history.md) | 按需追溯路线表的历史验收、命令、结果与本机证据位置；不是日常启动入口或实时环境就绪证明 |
 | [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，涉及现有行为/真实数据时先核对线上基线，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；Markdown 工作表一致性检查及可选逐条件 JSON 映射，拒绝错误汇总与无效证据引用 |
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
+| [固定 WASM unsigned builder ABI](solana-builder-abi.md) | T20.a/b1/b2/b3：31-case真实unsigned bytes、v2参数、native/路径/错误/组合非原子、setup/callback/referrer与nonce限制；已覆盖离线样本通过，完整ABI、安全规则和主网仍待验；T23.a1/a2单订单unsigned update/cancel已适配并完成离线限定验收，create/组合、完整签名前校验及真实业务待续 |
+| [Solana 签名前指令契约](solana-instruction-contract.md) | T21.a：21case/27笔/10种指令的可复现库存、精确IDL账户/参数与权限并集、LUT/资金/原子性拒绝规则；T24.a1容器/LUT、a2 update与a3 cancel账户/PDA/ATA/权限及恶意变体、b1 create/prepare严格参数解码已离线通过，完整create/组合待续；CPI事件另见下项 |
+| [Solana 订单事件与生命周期契约](solana-order-events.md) | T21.b1/b2与T28.a/b：四事件契约、四真实Mainnet回执、纯TS严格decoder与离线生命周期归约（合计11项）；部署源码身份、其他真实变体/业务及生产接线待验 |
+| [Solana 交易数学差异与独立参考向量](solana-trade-math-reference.md) | T17：固定v0.10.0的九项差异、共享SDK映射；b1已安装Rust1.90、编译并验收43组model参考值/锁文件及独立核算；动作/清算等子集和SDK/API消费待续，不以WASM或基础向量代替 |
 | [SDK 构建产物准备与过期检查](sdk-artifacts.md) | 根类型检查前只读 verify；显式隔离 prebuild/编译，成功后替换忽略的产物，保留来源收据与日志 |
 | [前端源码离线测试](frontend-offline-tests.md) | 精确运行当前或独立 checkout 的 src/landing 原有单测，支持按真实依赖图从前端/SDK 源码或显式 Git 基线的变更范围选择前端关联测试，可只发现清单后决定执行范围；复用 Vite/happy-dom 初始化，隔离本机环境并阻止意外联网，运行器独立核对网络事件及执行前后工具指纹；单 suite 可进行源码断点调试，不启动应用服务或浏览器 |
 | [全栈测试范围规划与执行](agent-test-plan.md) | 前端/SDK/API 各自 Git 基线或显式源码发现，API profile 明确选择离线/隔离数据库；保留混合变更与未分配项，按计划执行并汇总原生失败；兼容原两侧模式，汇总不作为单侧交付证据 |

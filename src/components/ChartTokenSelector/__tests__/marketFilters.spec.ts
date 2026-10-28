@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import { DAY_MS, SECONDS_IN_DAY } from "lib/dates";
+import type { Token } from "sdk/utils/tokens/types";
 
 import {
   applySubCategoryFilter,
@@ -200,5 +201,31 @@ describe("getRecentlyListedTokenAddresses", () => {
       "0xolder": now - RECENTLY_LISTED_WINDOW_MS - 1,
     };
     expect(getRecentlyListedTokenAddresses(map, now)).toEqual([]);
+  });
+});
+
+describe("recent listing address identity", () => {
+  it("preserves mint case across listing keys and filtering while retaining EVM key compatibility", () => {
+    const evm = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
+    const mint = "So11111111111111111111111111111111111111112";
+    const changedMint = mint.toLowerCase();
+    const now = Date.UTC(2026, 9, 28);
+    const candidates: Token[] = [evm, mint, changedMint].map((address) => ({
+      address,
+      name: address,
+      symbol: address,
+      decimals: 9,
+    }));
+    const filter = (keys: string[]) =>
+      applyTopLevelFilter(candidates, {
+        topLevelTab: "recently-listed",
+        favoriteAddresses: [],
+        recentlyListedAddresses: new Set(keys),
+      }).map((token) => token.address);
+    const keys = getRecentlyListedTokenAddresses({ [evm]: now - 1, [mint]: now - 1 }, now);
+    expect(keys).toEqual([evm.toLowerCase(), mint]);
+    expect(filter(keys)).toEqual([evm, mint]);
+    expect(filter([evm])).toEqual([evm]);
+    expect(filter([changedMint])).toEqual([changedMint]);
   });
 });

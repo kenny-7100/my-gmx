@@ -4,6 +4,7 @@ import partition from "lodash/partition";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
 
+import { isSolanaNetwork } from "config/chains";
 import { USD_DECIMALS } from "config/factors";
 import { PROMOTED_TOKENS_ORDER } from "config/promotedTokens";
 import type { SortDirection } from "context/SorterContext/types";
@@ -41,11 +42,13 @@ import { MissedCoinsPlace } from "domain/synthetics/userFeedback";
 import { useMissedCoinsSearch } from "domain/synthetics/userFeedback/useMissedCoinsSearch";
 import { stripBlacklistedWords, type Token } from "domain/tokens";
 import { getMidPrice } from "domain/tokens/utils";
+import { useChainId } from "lib/chains";
 import { useLocalizedMap } from "lib/i18n";
 import { EMPTY_ARRAY } from "lib/objects";
 import { searchBy } from "lib/searchBy";
 import { useBreakpoints } from "lib/useBreakpoints";
 import { convertTokenAddress, getTokenVisualMultiplier, isChartAvailableForToken } from "sdk/configs/tokens";
+import { getAddressKey } from "sdk/utils/address";
 
 import Button from "components/Button/Button";
 import { EmptyTableContent } from "components/EmptyTableContent/EmptyTableContent";
@@ -198,6 +201,7 @@ type SortField =
 
 function MarketsList() {
   const chainId = useSelector(selectChainId);
+  const { networkId } = useChainId();
   const perpTokens = useSelector(selectAvailablePerpChartTokens);
   const swapTokens = useSelector(selectAvailableSwapChartTokens);
   const tradeType = useSelector(selectTradeboxTradeType);
@@ -255,7 +259,7 @@ function MarketsList() {
 
   const recentlyListedCount = useMemo(() => {
     if (!options || recentlyListedAddressesSet.size === 0) return 0;
-    return options.filter((t) => recentlyListedAddressesSet.has(t.address.toLowerCase())).length;
+    return options.filter((t) => recentlyListedAddressesSet.has(getAddressKey(t.address))).length;
   }, [options, recentlyListedAddressesSet]);
 
   const hasAvailableFavorites = useMemo(() => {
@@ -310,7 +314,10 @@ function MarketsList() {
     [populatedTradfiSubCats, localizedSubCategoryLabels]
   );
 
-  const dayPriceDeltaMap = use24hPriceDeltaMap(chainId, availableChartTokenAddresses);
+  const dayPriceDeltaMap = use24hPriceDeltaMap(
+    isSolanaNetwork(networkId) ? networkId : chainId,
+    availableChartTokenAddresses
+  );
   const dayVolumesData = use24hVolumes();
   const dayVolumes = dayVolumesData?.byIndexToken;
   const indexTokenStatsMap = useSelector(selectIndexTokenStatsMap).indexMap;

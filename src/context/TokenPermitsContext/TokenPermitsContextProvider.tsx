@@ -4,6 +4,7 @@ import { useLatest } from "react-use";
 import useSWR from "swr";
 import { isAddressEqual, type Address } from "viem";
 
+import { isSolanaNetwork } from "config/chains";
 import { getTokenPermitsFallbackKey, getTokenPermitsKey, LEGACY_PERMITS_DISABLED_KEY } from "config/localStorage";
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
 import { useUiFlagsRequest } from "domain/synthetics/uiFlags/useUiFlagsRequest";
@@ -95,12 +96,14 @@ function useTokenPermitAccountType(chainId: number, account: string | undefined)
 }
 
 export function TokenPermitsContextProvider({ children }: { children: React.ReactNode }) {
-  const { chainId } = useChainId();
+  const { chainId, networkId } = useChainId();
+  const isEvmNetwork = !isSolanaNetwork(networkId);
   const { signer } = useWallet();
-  const account = signer?.address;
+  const account = isEvmNetwork ? signer?.address : undefined;
   const { uiFlags } = useUiFlagsRequest();
   const { isTokenPermitsQaOverrideEnabled } = useSettings();
-  const accountType = useTokenPermitAccountType(chainId, account);
+  const requestedAccountType = useTokenPermitAccountType(chainId, account);
+  const accountType = isEvmNetwork ? requestedAccountType : undefined;
 
   const isEnabled = getIsTokenPermitsEnabled({
     uiFlags,
@@ -291,7 +294,7 @@ export function TokenPermitsContextProvider({ children }: { children: React.Reac
 
   useEffect(
     function revalidatePermits() {
-      if (!storedTokenPermits?.length) return;
+      if (!account || !storedTokenPermits?.length) return;
 
       const valid = storedTokenPermits.filter((permit) => !getIsPermitExpired(permit));
 
@@ -323,7 +326,7 @@ export function TokenPermitsContextProvider({ children }: { children: React.Reac
         document.removeEventListener("visibilitychange", onVisibilityChange);
       };
     },
-    [storedTokenPermits, setTokenPermits]
+    [account, storedTokenPermits, setTokenPermits]
   );
 
   const state = useMemo(

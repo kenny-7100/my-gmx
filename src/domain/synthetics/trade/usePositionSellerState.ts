@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { getKeepLeverageKey, getSyntheticsReceiveMoneyTokenKey } from "config/localStorage";
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
-import { useLocalStorageSerializeKey } from "lib/localStorage";
+import { useLocalStorageSerializeKeySafe } from "lib/localStorage";
 import { DEFAULT_TWAP_DURATION, DEFAULT_TWAP_NUMBER_OF_PARTS } from "sdk/configs/twap";
 import { TradeMode } from "sdk/utils/trade/types";
 import { TwapDuration } from "sdk/utils/twap/types";
@@ -22,14 +22,20 @@ export const ORDER_OPTION_TO_TRADE_MODE: Record<OrderOption, TradeMode> = {
 export type PositionSellerState = ReturnType<typeof usePositionSellerState>;
 
 export function usePositionSellerState(
-  chainId: number,
+  networkId: number,
   closingPosition: PositionInfo | undefined,
   initialOrderOption: OrderOption | undefined
 ) {
   const { savedAllowedSlippage } = useSettings();
   const [orderOption, setOrderOption] = useState<OrderOption>(initialOrderOption ?? OrderOption.Market);
   const [triggerPriceInputValue, setTriggerPriceInputValue] = useState("");
-  const [keepLeverage, setKeepLeverage] = useLocalStorageSerializeKey(getKeepLeverageKey(chainId), true);
+  const [keepLeverage, setKeepLeverage] = useLocalStorageSerializeKeySafe<boolean>(
+    getKeepLeverageKey(networkId),
+    true,
+    {
+      readFromStorage: true,
+    }
+  );
   const [defaultTriggerAcceptablePriceImpactBps, setDefaultTriggerAcceptablePriceImpactBps] = useState<bigint>();
   const [selectedTriggerAcceptablePriceImpactBps, setSelectedTriggerAcceptablePriceImpactBps] = useState<bigint>();
   const [closeUsdInputValue, setCloseUsdInputValue] = useState("");
@@ -62,16 +68,17 @@ export function usePositionSellerState(
 
   const closingPositionKey = useMemo(() => {
     return getSyntheticsReceiveMoneyTokenKey(
-      chainId,
+      networkId,
       closingPosition?.market.name,
       closingPosition?.isLong ? "long" : "short",
       closingPosition?.collateralTokenAddress
     );
-  }, [chainId, closingPosition]);
+  }, [networkId, closingPosition]);
 
-  const [defaultReceiveToken, setDefaultReceiveToken] = useLocalStorageSerializeKey<string | undefined>(
+  const [defaultReceiveToken, setDefaultReceiveToken] = useLocalStorageSerializeKeySafe<string | undefined>(
     closingPositionKey,
-    undefined
+    undefined,
+    { readFromStorage: true }
   );
 
   const handleSetOrderOption = useCallback((option: OrderOption) => {

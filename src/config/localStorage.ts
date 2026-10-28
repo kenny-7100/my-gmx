@@ -1,6 +1,8 @@
 export const SELECTED_NETWORK_LOCAL_STORAGE_KEY = "SELECTED_NETWORK";
 export const SELECTED_NETWORK_WAS_APP_SELECTED_LOCAL_STORAGE_KEY = "SELECTED_NETWORK_WAS_APP_SELECTED";
 export const SELECTED_SOLANA_NETWORK_LOCAL_STORAGE_KEY = "SELECTED_SOLANA_NETWORK";
+export const SOLANA_WALLET_LOCAL_STORAGE_KEY = "SOLANA_WALLET";
+export const SOLANA_LINKED_EVM_CONNECTORS_LOCAL_STORAGE_KEY = "SOLANA_LINKED_EVM_CONNECTORS";
 export const SELECTED_SETTLEMENT_CHAIN_ID_KEY = "SELECTED_SETTLEMENT_CHAIN_ID";
 export const SHOULD_EAGER_CONNECT_LOCALSTORAGE_KEY = "eagerconnect";
 export const CURRENT_PROVIDER_LOCALSTORAGE_KEY = "currentprovider";
@@ -156,12 +158,12 @@ export function getAccountDashboardTabKey(chainId: number) {
   return [chainId, ACCOUNT_DASHBOARD_TAB_KEY];
 }
 
-export function getSyntheticsAcceptablePriceImpactBufferKey(chainId: number) {
-  return [chainId, SYNTHETICS_ACCEPTABLE_PRICE_IMPACT_BUFFER_KEY];
+export function getSyntheticsAcceptablePriceImpactBufferKey(networkId: number) {
+  return [networkId, SYNTHETICS_ACCEPTABLE_PRICE_IMPACT_BUFFER_KEY];
 }
 
-export function getSyntheticsTradeOptionsKey(chainId: number) {
-  return [chainId, SYNTHETICS_TRADE_OPTIONS];
+export function getSyntheticsTradeOptionsKey(networkId: number) {
+  return [networkId, SYNTHETICS_TRADE_OPTIONS];
 }
 
 export function getSyntheticsCollateralEditAddressMapKey(chainId: number) {
@@ -172,20 +174,20 @@ export function getSyntheticsCollateralEditTokenIsFromGmxAccountMapKey(chainId: 
   return [chainId, SYNTHETICS_COLLATERAL_EDIT_TOKEN_IS_FROM_GMX_ACCOUNT_KEY];
 }
 
-export function getLeverageKey(chainId: number) {
-  return [chainId, LEVERAGE_OPTION_KEY];
+export function getLeverageKey(networkId: number) {
+  return [networkId, LEVERAGE_OPTION_KEY];
 }
 
-export function getKeepLeverageKey(chainId: number) {
-  return [chainId, KEEP_LEVERAGE_FOR_DECREASE_KEY];
+export function getKeepLeverageKey(networkId: number) {
+  return [networkId, KEEP_LEVERAGE_FOR_DECREASE_KEY];
 }
 
-export function getLeverageEnabledKey(chainId: number) {
-  return [chainId, LEVERAGE_ENABLED_KEY];
+export function getLeverageEnabledKey(networkId: number) {
+  return [networkId, LEVERAGE_ENABLED_KEY];
 }
 
-export function getAllowedSlippageKey(chainId: number) {
-  return [chainId, SLIPPAGE_BPS_KEY];
+export function getAllowedSlippageKey(networkId: number) {
+  return [networkId, SLIPPAGE_BPS_KEY];
 }
 
 export function getExecutionFeeBufferBpsKey(chainId: number) {
@@ -223,8 +225,8 @@ export function getMulticallBatchingLoggingEnabledKey() {
   return [DEBUG_MULTICALL_BATCHING_KEY, "logging"];
 }
 
-export function getSortedMarketsAddressesKey(chainId: number) {
-  return [SORTED_MARKETS_KEY, chainId].join(":");
+export function getSortedMarketsAddressesKey(networkId: number) {
+  return [SORTED_MARKETS_KEY, networkId].join(":");
 }
 
 export function getCollateralCloseDestinationKey(chainId: number, account: string | undefined) {

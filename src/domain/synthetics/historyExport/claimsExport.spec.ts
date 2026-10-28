@@ -82,3 +82,44 @@ describe("buildClaimsCsvRows", () => {
     });
   });
 });
+
+it("resolves EVM metadata case-insensitively without merging distinct base58 assets", () => {
+  const evm = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+  const mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+  for (const [address, key, matches] of [
+    [evm.toLowerCase(), evm, true],
+    [mint, mint, true],
+    [mint.toLowerCase(), mint, false],
+  ] as const) {
+    const [row] = buildClaimsCsvRows({
+      chainId: 42161,
+      rawActions: [
+        {
+          id: "claim:1",
+          eventName: ClaimType.ClaimFunding,
+          account: "account",
+          marketAddresses: [],
+          tokenAddresses: [address],
+          amounts: ["1000000"],
+          tokenPrices: ["1000000000000000000000000"],
+          transactionHash: "tx",
+          timestamp: 1783425600,
+        },
+      ],
+      marketsInfoData: {},
+      tokensData: {
+        [key]: {
+          address: key,
+          name: "USD Coin",
+          symbol: "USDC",
+          decimals: 6,
+          prices: { minPrice: 10n ** 30n, maxPrice: 10n ** 30n },
+        },
+      },
+    });
+    expect(row.token_address).toBe(address);
+    expect(row.token_symbol).toBe(matches ? "USDC" : "");
+    expect(row.amount).toBe(matches ? "1" : "");
+    if (!matches) expect(row.manual_review_reason).toContain("token metadata unavailable");
+  }
+});

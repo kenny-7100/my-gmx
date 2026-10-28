@@ -1,74 +1,66 @@
 import { useMemo } from "react";
 import useSWR from "swr";
-import { Address } from "viem";
 
+import { getIsSolanaNetworkEnabled } from "config/ab";
+import { ARBITRUM, isSolanaNetwork } from "config/chains";
+import { useChainId } from "lib/chains";
 import { FreshnessMetricId } from "lib/metrics";
 import { freshnessMetrics } from "lib/metrics/reportFreshnessMetric";
+import type { DayPriceCandle } from "lib/oracleKeeperFetcher/types";
 import { useOracleKeeperFetcher } from "lib/oracleKeeperFetcher/useOracleKeeperFetcher";
 import { ContractsChainId } from "sdk/configs/chains";
-import { getNormalizedTokenSymbol, getToken } from "sdk/configs/tokens";
+import { getToken } from "sdk/configs/tokens";
 
-export type PriceDelta = {
-  close: number;
-  deltaPercentage: number;
-  deltaPercentageStr: string;
-  deltaPrice: number;
-  high: number;
-  low: number;
-  open: number;
-  tokenSymbol: string;
+import { type PriceDelta, getPriceDelta } from "./priceDelta";
+
+export type { PriceDelta } from "./priceDelta";
+
+export type PriceDeltaMap = Partial<Record<string, PriceDelta>>;
+type PriceDeltaResponse = {
+  networkId: number;
+  candles?: DayPriceCandle[];
+  priceDeltas?: PriceDeltaMap;
 };
 
-export type PriceDeltaMap = Partial<Record<Address, PriceDelta>>;
+export function use24hPriceDeltaRequest(chainId: number, tokenAddresses: (string | undefined)[]) {
+  const { networkId } = useChainId();
+  const solanaSource = isSolanaNetwork(chainId);
+  const active = solanaSource ? isSolanaNetwork(networkId) && getIsSolanaNetworkEnabled() : !isSolanaNetwork(networkId);
+  const oracleKeeperFetcher = useOracleKeeperFetcher((solanaSource ? ARBITRUM : chainId) as ContractsChainId);
+  const { data, error, isLoading } = useSWR<PriceDeltaResponse, Error>(
+    active ? [chainId, solanaSource ? "gmsol" : oracleKeeperFetcher.url, "use24PriceDelta"] : null,
+    {
+      fetcher: async () => {
+        if (solanaSource) {
+          const { fetchGmsol24hPriceDeltas } = await import("domain/gmsol/gmsolOracleFetcher");
+          return { networkId: chainId, priceDeltas: await fetchGmsol24hPriceDeltas() };
+        }
+        const candles = await oracleKeeperFetcher.fetch24hPrices();
+        freshnessMetrics.reportThrottled(chainId, FreshnessMetricId.Prices24h);
+        return { networkId: chainId, candles };
+      },
+      keepPreviousData: false,
+    }
+  );
+
+  const priceDeltaMap = useMemo(() => {
+    if (!active || (solanaSource && (!data || error)) || (data && data.networkId !== chainId)) return undefined;
+    return Object.fromEntries(
+      tokenAddresses
+        .filter((address): address is string => Boolean(address))
+        .map((address) => [
+          address,
+          solanaSource ? data?.priceDeltas?.[address] : getPriceDelta(data?.candles, getToken(chainId, address).symbol),
+        ])
+    );
+  }, [active, chainId, data, error, solanaSource, tokenAddresses]);
+
+  return { priceDeltaMap, error: active ? error : undefined, isLoading: active && isLoading };
+}
 
 export function use24hPriceDeltaMap(
   chainId: number,
-  tokenAddresses: (Address | undefined)[]
+  tokenAddresses: (string | undefined)[]
 ): PriceDeltaMap | undefined {
-  const oracleKeeperFetcher = useOracleKeeperFetcher(chainId as ContractsChainId);
-
-  const { data } = useSWR<
-    {
-      close: number;
-      high: number;
-      low: number;
-      open: number;
-      tokenSymbol: string;
-    }[]
-  >([chainId, oracleKeeperFetcher.url, "use24PriceDelta"], {
-    fetcher: () => {
-      return oracleKeeperFetcher.fetch24hPrices().then((res) => {
-        freshnessMetrics.reportThrottled(chainId, FreshnessMetricId.Prices24h);
-        return res;
-      });
-    },
-  });
-
-  const priceDeltas = useMemo(() => {
-    return Object.fromEntries(
-      tokenAddresses
-        .filter((tokenAddress): tokenAddress is Address => Boolean(tokenAddress))
-        .map((tokenAddress) => {
-          const token = getToken(chainId, tokenAddress);
-
-          const tokenDelta = data?.find(
-            (candle) =>
-              candle.tokenSymbol === token.symbol || candle.tokenSymbol === getNormalizedTokenSymbol(token.symbol)
-          );
-
-          if (!tokenDelta) {
-            return [tokenAddress, undefined];
-          }
-
-          const deltaPrice = tokenDelta.close - tokenDelta.open;
-          const deltaPercentage = (deltaPrice * 100) / tokenDelta.open;
-          const deltaPercentageStr =
-            deltaPercentage > 0 ? `+${deltaPercentage.toFixed(2)}%` : `${deltaPercentage.toFixed(2)}%`;
-
-          return [tokenAddress, { ...tokenDelta, deltaPrice, deltaPercentage, deltaPercentageStr }];
-        })
-    );
-  }, [chainId, data, tokenAddresses]);
-
-  return priceDeltas;
+  return use24hPriceDeltaRequest(chainId, tokenAddresses).priceDeltaMap;
 }

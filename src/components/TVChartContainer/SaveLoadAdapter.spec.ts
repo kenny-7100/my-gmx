@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { ChartData } from "charting_library";
+import { ARBITRUM, SOLANA_NETWORK_ID } from "config/chains";
 import { TV_SAVE_LOAD_CHARTS_KEY } from "config/localStorage";
 
 import { SaveLoadAdapter } from "./SaveLoadAdapter";
@@ -36,6 +37,19 @@ describe("SaveLoadAdapter", () => {
 
     const nextAdapter = new SaveLoadAdapter();
     expect(await nextAdapter.getAllCharts()).toHaveLength(1);
+  });
+
+  it("isolates Solana layouts from the original EVM key and late writes", async () => {
+    const evm = new SaveLoadAdapter();
+    await evm.saveChart(makeChart({ content: "evm" }));
+    const solana = new SaveLoadAdapter(SOLANA_NETWORK_ID);
+    expect(await solana.getAllCharts()).toEqual([]);
+    await solana.saveChart(makeChart({ content: "solana" }));
+    await evm.saveChart(makeChart({ content: "late-evm" }));
+    expect(await new SaveLoadAdapter(SOLANA_NETWORK_ID).getChartContent("gmx-chart-v2")).toBe("solana");
+    expect(await new SaveLoadAdapter(ARBITRUM).getChartContent("gmx-chart-v2")).toBe("late-evm");
+    await solana.removeChart("gmx-chart-v2");
+    expect(readCharts(TV_SAVE_LOAD_CHARTS_KEY)[0].content).toBe("late-evm");
   });
 
   it("keeps only the latest gmx-chart-v2 record", async () => {

@@ -13,7 +13,7 @@ import {
   SubscribeBarsCallback,
 } from "charting_library";
 import { type TradingViewResolution, RESOLUTION_TO_SECONDS, SUPPORTED_RESOLUTIONS_V2 } from "config/tradingview";
-import { Bar, FromOldToNewArray } from "domain/tradingview/types";
+import { Bar, FromOldToNewArray, FromNewToOldArray } from "domain/tradingview/types";
 import {
   formatTimeInBarToMs,
   getCurrentCandleTime,
@@ -41,6 +41,12 @@ import {
   getTokenVisualMultiplier,
   isChartAvailableForToken,
 } from "sdk/configs/tokens";
+import type { Token } from "sdk/utils/tokens/types";
+
+export type ChartDataSource = {
+  getTokenBySymbol: (symbol: string) => Token | undefined;
+  fetchCandles: (symbol: string, period: string, limit: number) => Promise<FromNewToOldArray<Bar>>;
+};
 
 let metricsRequestId: string | undefined = undefined;
 let metricsIsFirstLoadTime = true;
@@ -51,6 +57,8 @@ const V2_UPDATE_INTERVAL = 1000;
 const PREFETCH_CANDLES_COUNT = 300;
 
 export class DataFeed extends EventTarget implements IBasicDataFeed {
+  private destroyed = false;
+  private resolveGeneration = 0;
   private subscriptions: Record<string, PauseableInterval<Bar | undefined>> = {};
   private prefetchedBarsPromises: Record<string, Promise<FromOldToNewArray<Bar>>> = {};
   private visibilityHandler: () => void;
@@ -74,7 +82,8 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
 
   constructor(
     private chainId: number,
-    private oracleFetcher: OracleFetcher
+    private oracleFetcher: OracleFetcher,
+    private source?: ChartDataSource
   ) {
     super();
 
@@ -118,18 +127,26 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     }
   }
 
-  resolveSymbol(symbolNameWithMultiplier: string, onResolve: ResolveCallback): void {
+  resolveSymbol(symbolNameWithMultiplier: string, onResolve: ResolveCallback, onError?: DatafeedErrorCallback): void {
+    if (this.destroyed) return;
+    const generation = ++this.resolveGeneration;
+    this.pendingResolve = undefined;
     let { symbolName, visualMultiplier } = parseSymbolName(symbolNameWithMultiplier);
 
-    if (!isChartAvailableForToken(this.chainId, symbolName)) {
+    if (!this.source && !isChartAvailableForToken(this.chainId, symbolName)) {
       symbolName = getNativeToken(this.chainId).symbol;
       visualMultiplier = 1;
     }
 
-    const token = getTokenBySymbol(this.chainId, symbolName);
+    const token = this.getChartToken(symbolName);
+    if (!token) {
+      onError?.(`Unsupported chart symbol: ${symbolName}`);
+      return;
+    }
     const prefix = visualMultiplier !== 1 ? getTokenVisualMultiplier(token) : "";
 
     const doResolve = () => {
+      if (this.destroyed || generation !== this.resolveGeneration) return;
       const currentPrice = this.tokenPriceGetter?.(symbolName);
       const priceDecimals = calculateDisplayDecimals(currentPrice, undefined, visualMultiplier);
 
@@ -173,6 +190,8 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     onResult: HistoryCallback,
     onError: DatafeedErrorCallback
   ): Promise<void> {
+    if (this.destroyed) return;
+    const generation = this.resolveGeneration;
     const to = periodParams.to;
     const res = resolution as TradingViewResolution;
 
@@ -186,11 +205,11 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
       : // But for subsequent requests we aggressively fetch more candles so that user can scroll back in time faster
         Math.max(periodParams.countBack * 2, 500);
 
-    const token = getTokenBySymbol(this.chainId, symbolInfo.name);
-    const isStable = token.isStable;
-
     let bars: FromOldToNewArray<Bar> = [];
     try {
+      const token = this.getChartToken(symbolInfo.name);
+      if (!token) throw new Error(`Unsupported chart symbol: ${symbolInfo.name}`);
+      const isStable = token.isStable;
       if (!isStable) {
         bars = await this.fetchCandles(symbolInfo.name, resolution, countBack + offset);
       } else {
@@ -198,10 +217,12 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
         bars = this.getStableCandles(currentCandleTime, resolution, countBack + offset);
       }
     } catch (e) {
+      if (this.destroyed || generation !== this.resolveGeneration) return;
       onError(String(e));
       onCandlesDisplayFailed(isFirstDraw);
       return;
     }
+    if (this.destroyed || generation !== this.resolveGeneration) return;
 
     const barsToReturn: FromOldToNewArray<Bar> = [];
     const visualMultiplier = parseInt(symbolInfo.unit_id ?? "1");
@@ -215,6 +236,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     }
 
     onResult(barsToReturn, { noData: offset + countBack >= 10_000 || barsToReturn.length < countBack });
+    if (this.destroyed || generation !== this.resolveGeneration) return;
 
     if (isFirstDraw && barsToReturn.length === 0) {
       onCandlesDisplayFailed(true);
@@ -249,7 +271,9 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     onTick: SubscribeBarsCallback,
     listenerGuid: string
   ): void {
-    const token = getTokenBySymbol(this.chainId, symbolInfo.name);
+    if (this.destroyed) return;
+    const token = this.getChartToken(symbolInfo.name);
+    if (!token) throw new Error(`Unsupported chart symbol: ${symbolInfo.name}`);
     const isStable = token.isStable;
 
     const visualMultiplier = parseInt(symbolInfo.unit_id ?? "1");
@@ -281,12 +305,14 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
         console.error(e);
         return lastReturnedValue;
       }
+      if (this.destroyed || this.subscriptions[listenerGuid] !== interval) return lastReturnedValue;
 
       let newLastReturnedValue: Bar | undefined = lastReturnedValue;
 
       let didPatchPreviousCandle = false;
 
       for (const price of prices) {
+        if (this.destroyed || this.subscriptions[listenerGuid] !== interval) return lastReturnedValue;
         if (lastReturnedValue?.time && price.time < lastReturnedValue.time) {
           continue;
         }
@@ -303,12 +329,13 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
           onTick(multiplyBarValues(formatTimeInBarToMs(previousBarWithNewClose), visualMultiplier));
         }
 
+        if (this.destroyed || this.subscriptions[listenerGuid] !== interval) return lastReturnedValue;
         onTick(multiplyBarValues(formatTimeInBarToMs(price), visualMultiplier));
 
         newLastReturnedValue = price;
       }
 
-      if (newLastReturnedValue) {
+      if (newLastReturnedValue && !this.destroyed && this.subscriptions[listenerGuid] === interval) {
         this.dispatchEvent(
           new CustomEvent("currentCandle.update", {
             detail: {
@@ -323,15 +350,17 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
       return newLastReturnedValue;
     }, V2_UPDATE_INTERVAL);
 
+    this.subscriptions[listenerGuid]?.destroy();
     this.subscriptions[listenerGuid] = interval;
   }
 
   unsubscribeBars(listenerGuid: string): void {
-    this.subscriptions[listenerGuid].destroy();
+    this.subscriptions[listenerGuid]?.destroy();
     delete this.subscriptions[listenerGuid];
   }
 
   onReady(callback: OnReadyCallback): void {
+    if (this.destroyed) return;
     if (metricsIsFirstLoadTime) {
       metricsRequestId = getRequestId();
 
@@ -346,6 +375,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     }
 
     setTimeout(() => {
+      if (this.destroyed) return;
       callback({
         supported_resolutions: Object.keys(SUPPORTED_RESOLUTIONS_V2) as ResolutionString[],
         supports_marks: true,
@@ -362,21 +392,31 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     onDataCallback: (marks: Mark[]) => void,
     resolution: ResolutionString
   ): void {
+    if (this.destroyed) return;
     const result = this.marksGetter?.(symbolInfo, from, to, resolution) ?? [];
     if (result instanceof Promise) {
-      result.then(onDataCallback, () => onDataCallback([]));
+      result.then(
+        (marks) => {
+          if (!this.destroyed) onDataCallback(marks);
+        },
+        () => {
+          if (!this.destroyed) onDataCallback([]);
+        }
+      );
     } else {
       onDataCallback(result);
     }
   }
 
   prefetchBars(symbol: string, resolution: ResolutionString): void {
+    if (this.destroyed) return;
     const prefetchKey = `${symbol}-${resolution}`;
     if (prefetchKey in this.prefetchedBarsPromises) {
       return;
     }
 
     this.prefetchedBarsPromises[prefetchKey] = this.fetchCandles(symbol, resolution, PREFETCH_CANDLES_COUNT, true);
+    void this.prefetchedBarsPromises[prefetchKey].catch(() => undefined);
   }
 
   private pauseAll() {
@@ -393,6 +433,7 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     count: number,
     isPrefetch = false
   ): Promise<FromOldToNewArray<Bar>> {
+    if (this.destroyed) return [];
     const prefetchKey = `${symbol}-${resolution}`;
     if (prefetchKey in this.prefetchedBarsPromises && !isPrefetch && metricsIsFirstLoadTime) {
       metricsIsFirstLoadTime = false;
@@ -425,17 +466,21 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     const res = resolution as TradingViewResolution;
 
     result = await Promise.race([
-      this.oracleFetcher
-        .fetchOracleCandles(symbol, SUPPORTED_RESOLUTIONS_V2[res], count)
-        .then((bars) => bars.slice().reverse()),
+      (this.source
+        ? this.source.fetchCandles(symbol, SUPPORTED_RESOLUTIONS_V2[res], count)
+        : this.oracleFetcher.fetchOracleCandles(symbol, SUPPORTED_RESOLUTIONS_V2[res], count)
+      ).then((bars) => bars.slice().reverse()),
       sleep(5000).then(() => Promise.reject("Oracle candles timeout")),
     ]).catch((ex) => {
+      if (this.destroyed) return [];
       success = false;
       onCandlesLoadFailed(ex, isPrefetch);
       // eslint-disable-next-line no-console
       console.warn("Load history candles failed", ex);
+      if (this.source) throw ex;
       return [];
     });
+    if (this.destroyed) return [];
 
     if (success) {
       freshnessMetrics.reportThrottled(this.chainId, FreshnessMetricId.Candles);
@@ -467,8 +512,16 @@ export class DataFeed extends EventTarget implements IBasicDataFeed {
     }));
   }
 
+  private getChartToken(symbol: string): Token | undefined {
+    return this.source ? this.source.getTokenBySymbol(symbol) : getTokenBySymbol(this.chainId, symbol);
+  }
+
   destroy() {
+    this.destroyed = true;
+    this.pendingResolve = undefined;
+    this.prefetchedBarsPromises = {};
     Object.values(this.subscriptions).forEach((subscription) => subscription.destroy());
+    this.subscriptions = {};
     document.removeEventListener("visibilitychange", this.visibilityHandler);
   }
 }

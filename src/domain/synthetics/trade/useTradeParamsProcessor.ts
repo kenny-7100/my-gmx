@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { useLatest } from "react-use";
 
+import { getNetworkFeatures } from "config/features";
 import {
   selectTradeboxAvailableTokensOptions,
   selectTradeboxCollateralTokenAddress,
@@ -53,17 +54,21 @@ export function getCleanedTradeSearch(search: string): string | undefined {
 // A link without a trade type in the path is resolved against the one the tradebox is already on.
 export function getTradeLinkTradeType(
   tradeTypeFromPath: string | undefined,
-  currentTradeType: TradeType | undefined
+  currentTradeType: TradeType | undefined,
+  networkId?: number
 ): TradeType | undefined {
+  let tradeType = currentTradeType;
   if (tradeTypeFromPath) {
     const validTradeType = getMatchingValueFromObject(TradeType, tradeTypeFromPath);
 
     if (validTradeType) {
-      return validTradeType as TradeType;
+      tradeType = validTradeType as TradeType;
     }
   }
 
-  return currentTradeType;
+  return tradeType === TradeType.Swap && networkId !== undefined && !getNetworkFeatures(networkId).swap
+    ? TradeType.Long
+    : tradeType;
 }
 
 export function getTradeLinkMarket({
@@ -85,7 +90,7 @@ export function useTradeParamsProcessor() {
   const setTradeConfig = useSelector(selectTradeboxSetTradeConfig);
   const availableTokensOptions = useSelector(selectTradeboxAvailableTokensOptions);
   const markets = availableTokensOptions.sortedAllMarkets;
-  const { chainId } = useChainId();
+  const { chainId, networkId } = useChainId();
   const history = useHistory();
   const params = useParams<{ tradeType?: string }>();
   const searchParams = useSearchParams<TradeSearchParams>();
@@ -135,7 +140,8 @@ export function useTradeParamsProcessor() {
 
     const toToken = to ?? market;
 
-    const linkTradeType = getTradeLinkTradeType(tradeType, latestTradeOptions.current.tradeType);
+    const features = getNetworkFeatures(networkId);
+    const linkTradeType = getTradeLinkTradeType(tradeType, latestTradeOptions.current.tradeType, networkId);
 
     const tradeOptions: TradeOptions = {};
 
@@ -148,8 +154,13 @@ export function useTradeParamsProcessor() {
         tradeOptions.tradeMode = TradeMode.Trigger;
       } else {
         const validTradeMode = getMatchingValueFromObject(TradeMode, tradeMode);
-        if (validTradeMode) {
-          tradeOptions.tradeMode = validTradeMode as TradeMode;
+        const mode = validTradeMode as TradeMode | undefined;
+        const modeAllowed =
+          mode !== undefined &&
+          (mode !== TradeMode.Twap || features.twap) &&
+          (mode !== TradeMode.StopMarket || features.stopMarket);
+        if (modeAllowed) {
+          tradeOptions.tradeMode = mode;
         }
       }
     }
@@ -210,6 +221,7 @@ export function useTradeParamsProcessor() {
     searchParams,
     markets,
     chainId,
+    networkId,
     history,
     setTradeConfig,
     swapTokens,

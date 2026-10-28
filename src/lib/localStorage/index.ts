@@ -135,15 +135,18 @@ function getShouldSkipKey(key: LocalStorageKey | LocalStorageKey[]): boolean {
 }
 
 /**
- * Respects reactive prev value in consecutive calls to setValue
+ * Respects reactive prev value in consecutive calls to setValue.
+ * With readFromStorage, each render and update reads the persisted value for its own key.
  */
 export function useLocalStorageSerializeKeySafe<
   T extends string | number | boolean | null | undefined | Record<string, any>,
 >(
   key: LocalStorageKey | LocalStorageKey[],
-  initialValue: T
+  initialValue: T,
+  opts?: { readFromStorage: boolean }
 ): [T | undefined, (value: React.SetStateAction<T | undefined>) => void] {
   const serializedKey = JSON.stringify(key);
+  const keyInitialValue = opts?.readFromStorage ? initialValue : undefined;
   const shouldSkipKey = getShouldSkipKey(key);
   const [valueMap, setValueMap] = useState<Record<string, T>>(() => {
     if (shouldSkipKey) {
@@ -171,6 +174,13 @@ export function useLocalStorageSerializeKeySafe<
       if (shouldSkipKey) {
         return;
       }
+      if (opts?.readFromStorage) {
+        const oldValue = tryGetLocalStorageItem<T>(serializedKey) ?? keyInitialValue;
+        const newValue = typeof value === "function" ? value(oldValue) : value;
+        localStorage.setItem(serializedKey, JSON.stringify(newValue));
+        setValueMap((prev) => ({ ...prev, [serializedKey]: newValue }));
+        return;
+      }
       setValueMap((prev) => {
         const oldValue = prev[serializedKey] ?? tryGetLocalStorageItem<T>(serializedKey);
         const newValue = typeof value === "function" ? value(oldValue) : value;
@@ -179,10 +189,14 @@ export function useLocalStorageSerializeKeySafe<
         return newMap;
       });
     },
-    [serializedKey, shouldSkipKey]
+    [serializedKey, shouldSkipKey, keyInitialValue, opts?.readFromStorage]
   );
 
-  const value = shouldSkipKey ? undefined : valueMap[serializedKey];
+  const value = shouldSkipKey
+    ? undefined
+    : opts?.readFromStorage
+      ? tryGetLocalStorageItem<T>(serializedKey) ?? initialValue
+      : valueMap[serializedKey];
 
   return [value, setValue] as const;
 }

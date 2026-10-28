@@ -5,11 +5,16 @@ import {
   HttpRequestError,
   InternalRpcError,
   RpcRequestError,
+  toHex,
+  encodeFunctionResult,
+  multicall3Abi,
 } from "viem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { CurrentRpcEndpoints } from "lib/rpc/RpcTracker";
 
+import { executeMulticall } from "./executeMulticall";
+import { getMulticallSignal, setMulticallEnabled } from "./lifecycle";
 import { Multicall } from "./Multicall";
 
 vi.mock("lib/metrics/emitMetricEvent", () => ({
@@ -35,9 +40,76 @@ const request = {
   },
 };
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+  setMulticallEnabled(true);
+});
 
 describe("multicall result isolation", () => {
+  it("rejects queued and delayed old work across a rapid Solana and EVM round trip", async () => {
+    vi.useFakeTimers();
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    const signal = getMulticallSignal();
+    const queued = executeMulticall(42161, request);
+    const rejected = expect(queued).rejects.toMatchObject({ name: "AbortError" });
+    setMulticallEnabled(false);
+    setMulticallEnabled(true);
+    await rejected;
+    await vi.advanceTimersByTimeAsync(100);
+    await expect(executeMulticall(42161, request, "urgent", "delayed", false, signal)).rejects.toMatchObject({
+      name: "AbortError",
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it("aborts the old transport without fallback or stale results and restores EVM reads", async () => {
+    let started!: () => void;
+    const ready = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    let transportSignal: AbortSignal | undefined;
+    const fetch = vi.fn().mockImplementationOnce((_url: string, init: RequestInit) => {
+      transportSignal = init.signal!;
+      started();
+      return new Promise((_resolve, reject) => {
+        init.signal!.addEventListener("abort", () => reject(init.signal!.reason), { once: true });
+      });
+    });
+    vi.stubGlobal("fetch", fetch);
+    const oldSignal = getMulticallSignal();
+    const pending = new Multicall(42161, {}).call(endpoints, request, false, undefined, oldSignal);
+    const rejected = expect(pending).rejects.toMatchObject({ name: "AbortError" });
+    await ready;
+    setMulticallEnabled(false);
+    await rejected;
+    expect(transportSignal?.aborted).toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    setMulticallEnabled(true);
+    expect(getMulticallSignal()).not.toBe(oldSignal);
+    await expect(new Multicall(42161, {}).call(endpoints, request, false, undefined, oldSignal)).rejects.toMatchObject({
+      name: "AbortError",
+    });
+    const result = encodeFunctionResult({
+      abi: multicall3Abi,
+      functionName: "aggregate3",
+      result: [50_000_000n, 100_000_000n].map((value) => ({
+        success: true,
+        returnData: toHex(value, { size: 32 }) as `0x${string}`,
+      })),
+    });
+    fetch.mockRejectedValueOnce(new Error("primary unavailable"));
+    fetch.mockImplementationOnce(async (_url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string);
+      const reply = (item: { id: number }) => ({ jsonrpc: "2.0", id: item.id, result });
+      return Response.json(Array.isArray(body) ? body.map(reply) : reply(body));
+    });
+    const recovered = await new Multicall(42161, {}).call(endpoints, request, false, undefined, getMulticallSignal());
+    expect(recovered.data.balance.amount.returnValues).toEqual([50_000_000n]);
+    expect(recovered.data.balance.supply.returnValues).toEqual([100_000_000n]);
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
   it("retains a valid balance when another contract read reverts", async () => {
     const call = vi.fn().mockResolvedValue([
       { status: "success", result: 50_000_000n },

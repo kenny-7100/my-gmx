@@ -9,7 +9,8 @@ import { SetStateAction, useCallback, useEffect, useMemo, useState } from "react
 import { useHistory } from "react-router-dom";
 import { useLatest } from "react-use";
 
-import { AVALANCHE, ContractsChainId, SourceChainId } from "config/chains";
+import { AVALANCHE, ContractsChainId, NetworkId, SourceChainId } from "config/chains";
+import { getNetworkFeatures } from "config/features";
 import {
   getKeepLeverageKey,
   getLeverageKey,
@@ -22,7 +23,7 @@ import { createGetMaxLongShortLiquidityPool } from "context/SyntheticsStateConte
 import { useEmptyGmxAccounts } from "domain/multichain/useEmptyGmxAccounts";
 import { JitLiquidityInfo } from "domain/synthetics/jit/utils";
 import { MarketInfo } from "domain/synthetics/markets";
-import { useLocalStorageSerializeKey } from "lib/localStorage";
+import { useLocalStorageSerializeKey, useLocalStorageSerializeKeySafe } from "lib/localStorage";
 import { EMPTY_OBJECT, getByKey } from "lib/objects";
 import { useSafeState } from "lib/useSafeState";
 import { getContract } from "sdk/configs/contracts";
@@ -95,23 +96,46 @@ export type StoredTradeOptions = {
   isFromTokenGmxAccount: boolean;
 };
 
+const INITIAL_TRADEBOX_ADVANCED_OPTIONS: TradeboxAdvancedOptions = { advancedDisplay: false, limitOrTPSL: false };
+
 const INITIAL_SYNTHETICS_TRADE_OPTIONS_STATE: StoredTradeOptions = {
   tradeType: TradeType.Long,
   tradeMode: TradeMode.Market,
   tokens: {},
   markets: {},
   collaterals: {},
-  advanced: {
-    advancedDisplay: false,
-    limitOrTPSL: false,
-  },
+  advanced: INITIAL_TRADEBOX_ADVANCED_OPTIONS,
   isFromTokenGmxAccount: false,
 };
+
+function getSupportedTradeOptions(networkId: NetworkId, options: StoredTradeOptions): StoredTradeOptions {
+  const features = getNetworkFeatures(networkId);
+  const tradeType = options.tradeType === TradeType.Swap && !features.swap ? TradeType.Long : options.tradeType;
+  const tradeMode =
+    (options.tradeMode === TradeMode.Twap && !features.twap) ||
+    (options.tradeMode === TradeMode.StopMarket && !features.stopMarket)
+      ? TradeMode.Market
+      : options.tradeMode;
+  return tradeType === options.tradeType && tradeMode === options.tradeMode
+    ? options
+    : { ...options, tradeType, tradeMode };
+}
+
+function readStoredTradeOptions(networkId: NetworkId): StoredTradeOptions {
+  const key = JSON.stringify(getSyntheticsTradeOptionsKey(networkId));
+  const raw = localStorage.getItem(key);
+  if (raw) {
+    return JSON.parse(raw) as StoredTradeOptions;
+  }
+  localStorage.setItem(key, JSON.stringify(INITIAL_SYNTHETICS_TRADE_OPTIONS_STATE));
+  return INITIAL_SYNTHETICS_TRADE_OPTIONS_STATE;
+}
 
 export function useTradeboxState(
   chainId: ContractsChainId,
   enabled: boolean,
   p: {
+    networkId?: NetworkId;
     marketsData?: MarketsData;
     marketsInfoData?: MarketsInfoData;
     positionsInfoData?: PositionsInfoData;
@@ -121,14 +145,17 @@ export function useTradeboxState(
     jitLiquidityMap?: Record<string, JitLiquidityInfo>;
   }
 ) {
+  const networkId = p.networkId ?? chainId;
   const history = useHistory();
   const latestHistory = useLatest(history);
   const latestEnabled = useLatest(enabled);
+  const latestNetworkId = useLatest(networkId);
 
   const { marketsInfoData, marketsData, tokensData, positionsInfoData, ordersInfoData, srcChainId, jitLiquidityMap } =
     p;
 
   const availableTokensOptions = useAvailableTokenOptions(chainId, {
+    networkId,
     marketsInfoData,
     tokensData,
     marketsData,
@@ -156,58 +183,81 @@ export function useTradeboxState(
     [availableTokensOptions.sortedAllMarkets]
   );
 
+  const { savedAllowedSlippage, savedTwapNumberOfParts, expressOrdersEnabled } = useSettings();
   // eslint-disable-next-line react/hook-use-state
-  const [storedOptions, setStoredOptionsWithoutFallbacks] = useState<StoredTradeOptions>(() => {
-    const raw = localStorage.getItem(JSON.stringify(getSyntheticsTradeOptionsKey(chainId)));
-
-    if (!raw) {
-      localStorage.setItem(
-        JSON.stringify(getSyntheticsTradeOptionsKey(chainId)),
-        JSON.stringify(INITIAL_SYNTHETICS_TRADE_OPTIONS_STATE)
+  const [storedScope, setStoredScope] = useState(() => ({
+    networkId,
+    options: readStoredTradeOptions(networkId),
+    allowedSlippage: savedAllowedSlippage,
+    numberOfParts: savedTwapNumberOfParts,
+  }));
+  let tradeScope = storedScope;
+  if (storedScope.networkId !== networkId) {
+    tradeScope = {
+      networkId,
+      options: readStoredTradeOptions(networkId),
+      allowedSlippage: savedAllowedSlippage,
+      numberOfParts: savedTwapNumberOfParts,
+    };
+    // Reset during render so no consumer or effect observes the previous network's options.
+    setStoredScope(tradeScope);
+  }
+  const { options: networkOptions, allowedSlippage, numberOfParts } = tradeScope;
+  const storedOptions = useMemo(() => getSupportedTradeOptions(networkId, networkOptions), [networkId, networkOptions]);
+  const setAllowedSlippage = useCallback(
+    (value: SetStateAction<number>) => {
+      setStoredScope((current) =>
+        current.networkId === networkId
+          ? { ...current, allowedSlippage: typeof value === "function" ? value(current.allowedSlippage) : value }
+          : current
       );
-      return INITIAL_SYNTHETICS_TRADE_OPTIONS_STATE;
-    }
-
-    return JSON.parse(raw) as StoredTradeOptions;
-  });
-
-  const setStoredOptionsOnChain = useCallback(
-    (args: SetStateAction<StoredTradeOptions>) => {
-      setStoredOptionsWithoutFallbacks((oldState) => {
-        const newState = typeof args === "function" ? args(oldState) : args;
-
-        if (isEqual(oldState, newState)) {
-          return oldState;
-        }
-
-        localStorage.setItem(JSON.stringify(getSyntheticsTradeOptionsKey(chainId)), JSON.stringify(newState));
-
-        if (latestEnabled.current && newState.tradeType !== oldState.tradeType) {
-          latestHistory.current.replace({
-            pathname: `/trade/${newState.tradeType.toLowerCase()}`,
-            // The search still carries deep link params here, they are applied once markets load.
-            search: latestHistory.current.location.search,
-          });
-        }
-        return newState;
-      });
     },
-    [chainId, latestEnabled, latestHistory]
+    [networkId]
+  );
+  const setNumberOfParts = useCallback(
+    (value: SetStateAction<number>) => {
+      setStoredScope((current) =>
+        current.networkId === networkId
+          ? { ...current, numberOfParts: typeof value === "function" ? value(current.numberOfParts) : value }
+          : current
+      );
+    },
+    [networkId]
   );
 
-  const { savedAllowedSlippage, savedTwapNumberOfParts, expressOrdersEnabled } = useSettings();
-  const [syncedChainId, setSyncedChainId] = useState<number | undefined>(undefined);
-  const [allowedSlippage, setAllowedSlippage] = useState<number>(savedAllowedSlippage);
+  const setStoredOptionsOnNetwork = useCallback(
+    (args: SetStateAction<StoredTradeOptions>) => {
+      const oldState = readStoredTradeOptions(networkId);
+      const newState = typeof args === "function" ? args(oldState) : args;
+      if (isEqual(oldState, newState)) {
+        return;
+      }
+
+      localStorage.setItem(JSON.stringify(getSyntheticsTradeOptionsKey(networkId)), JSON.stringify(newState));
+      setStoredScope((current) => (current.networkId === networkId ? { ...current, options: newState } : current));
+
+      if (latestNetworkId.current === networkId && latestEnabled.current && newState.tradeType !== oldState.tradeType) {
+        latestHistory.current.replace({
+          pathname: `/trade/${newState.tradeType.toLowerCase()}`,
+          // The search still carries deep link params here, they are applied once markets load.
+          search: latestHistory.current.location.search,
+        });
+      }
+    },
+    [networkId, latestEnabled, latestHistory, latestNetworkId]
+  );
+
+  const [syncedNetworkId, setSyncedNetworkId] = useState<NetworkId | undefined>(undefined);
 
   useEffect(
-    function handleChainChange() {
-      if (syncedChainId === chainId) {
+    function handleNetworkChange() {
+      if (syncedNetworkId === networkId) {
         return;
       }
 
       if (!enabled) return;
 
-      const raw = localStorage.getItem(JSON.stringify(getSyntheticsTradeOptionsKey(chainId)));
+      const raw = localStorage.getItem(JSON.stringify(getSyntheticsTradeOptionsKey(networkId)));
 
       if (raw) {
         if (availableIndexTokensAddresses.length === 0) {
@@ -217,10 +267,10 @@ export function useTradeboxState(
         const saved = JSON.parse(raw) as StoredTradeOptions;
 
         if (saved.tokens.indexTokenAddress && availableIndexTokensAddresses.includes(saved.tokens.indexTokenAddress)) {
-          if (syncedChainId !== undefined) {
-            setStoredOptionsOnChain(saved);
+          if (syncedNetworkId !== undefined) {
+            setStoredOptionsOnNetwork(saved);
           }
-          setSyncedChainId(chainId);
+          setSyncedNetworkId(networkId);
           return;
         }
       }
@@ -231,10 +281,11 @@ export function useTradeboxState(
         return;
       }
 
-      setStoredOptionsOnChain((oldState) => ({
+      setStoredOptionsOnNetwork((oldState) => ({
         ...INITIAL_SYNTHETICS_TRADE_OPTIONS_STATE,
         // A `/trade/short` link is applied before the chain defaults resolve, so keep its trade type.
         tradeType: oldState.tradeType ?? INITIAL_SYNTHETICS_TRADE_OPTIONS_STATE.tradeType,
+        advanced: oldState.advanced ?? INITIAL_TRADEBOX_ADVANCED_OPTIONS,
         markets: {
           [market.indexTokenAddress]: {
             long: market.marketTokenAddress,
@@ -246,28 +297,29 @@ export function useTradeboxState(
           fromTokenAddress: market.shortTokenAddress,
         },
       }));
-      setSyncedChainId(chainId);
+      setSyncedNetworkId(networkId);
     },
     [
       availableIndexTokensAddresses,
       availableTokensOptions.sortedAllMarkets,
-      chainId,
+      networkId,
       enabled,
-      setStoredOptionsOnChain,
-      syncedChainId,
+      setStoredOptionsOnNetwork,
+      syncedNetworkId,
     ]
   );
 
   const setStoredOptions = useCallback(
     (args: SetStateAction<StoredTradeOptions>) => {
-      setStoredOptionsOnChain((oldState) => {
-        let newState = typeof args === "function" ? args(oldState) : args;
+      setStoredOptionsOnNetwork((oldState) => {
+        const supportedOldState = getSupportedTradeOptions(networkId, oldState);
+        let newState = getSupportedTradeOptions(networkId, typeof args === "function" ? args(supportedOldState) : args);
 
         if (newState && (newState.tradeType === TradeType.Long || newState.tradeType === TradeType.Short)) {
           newState = fallbackPositionTokens({
             chainId,
             srcChainId,
-            prevState: oldState,
+            prevState: supportedOldState,
             nextState: newState,
             allowedPayTokens: availableSwapTokenAddresses,
             allowedMarkets: availableTokensOptions.sortedAllMarkets,
@@ -279,7 +331,8 @@ export function useTradeboxState(
       });
     },
     [
-      setStoredOptionsOnChain,
+      setStoredOptionsOnNetwork,
+      networkId,
       chainId,
       srcChainId,
       availableSwapTokenAddresses,
@@ -300,11 +353,17 @@ export function useTradeboxState(
   const [closeSizeInputValue, setCloseSizeInputValue] = useState("");
   const [triggerPriceInputValue, setTriggerPriceInputValue] = useState<string>("");
   const [triggerRatioInputValue, setTriggerRatioInputValue] = useState<string>("");
-  const [numberOfParts, setNumberOfParts] = useState<number>(savedTwapNumberOfParts);
   const [duration, setDuration] = useState<TwapDuration>({ hours: 10, minutes: 0 });
 
-  const [advancedOptions, setAdvancedOptions] = useSafeState<TradeboxAdvancedOptions>(
-    storedOptions.advanced ?? INITIAL_SYNTHETICS_TRADE_OPTIONS_STATE.advanced
+  const advancedOptions = storedOptions.advanced ?? INITIAL_TRADEBOX_ADVANCED_OPTIONS;
+  const setAdvancedOptions = useCallback(
+    (value: SetStateAction<TradeboxAdvancedOptions>) => {
+      setStoredOptionsOnNetwork((oldState) => ({
+        ...oldState,
+        advanced: typeof value === "function" ? value(oldState.advanced ?? INITIAL_TRADEBOX_ADVANCED_OPTIONS) : value,
+      }));
+    },
+    [setStoredOptionsOnNetwork]
   );
 
   const latestDefaultTriggerAcceptablePriceImpactBps = useLatest(defaultTriggerAcceptablePriceImpactBps);
@@ -322,8 +381,16 @@ export function useTradeboxState(
   const tradeType = storedOptions?.tradeType;
   const tradeMode = storedOptions?.tradeMode;
 
-  const [leverageOption, setLeverageOption] = useLocalStorageSerializeKey(getLeverageKey(chainId), 2);
-  const [keepLeverage, setKeepLeverage] = useLocalStorageSerializeKey(getKeepLeverageKey(chainId), true);
+  const [leverageOption, setLeverageOption] = useLocalStorageSerializeKeySafe<number>(getLeverageKey(networkId), 2, {
+    readFromStorage: true,
+  });
+  const [keepLeverage, setKeepLeverage] = useLocalStorageSerializeKeySafe<boolean>(
+    getKeepLeverageKey(networkId),
+    true,
+    {
+      readFromStorage: true,
+    }
+  );
   const [limitPriceWarningHidden, setLimitPriceWarningHidden] = useLocalStorageSerializeKey(
     "limit-price-warning-hidden",
     false
@@ -359,8 +426,8 @@ export function useTradeboxState(
       return [];
     }
 
-    return getAvailableTradeModes({ chainId, tradeType, fromTokenAddress, toTokenAddress });
-  }, [chainId, tradeType, fromTokenAddress, toTokenAddress]);
+    return getAvailableTradeModes({ chainId, networkId, tradeType, fromTokenAddress, toTokenAddress });
+  }, [chainId, networkId, tradeType, fromTokenAddress, toTokenAddress]);
 
   const getMaxLongShortLiquidityPool = useMemo(
     () => createGetMaxLongShortLiquidityPool(availableTokensOptions.sortedAllMarkets || [], jitLiquidityMap),
@@ -724,24 +791,7 @@ export function useTradeboxState(
     ]
   );
 
-  useEffect(() => {
-    /**
-     * This check required to avoid redundant calls caused by chainId override in context/SynteticsStateContextProvider.txs:104
-     * Overriding chainId causes setStoredOptionsOnChain change and this effect is triggered overriding stored options with wrong chainId
-     */
-    if (isEqual(storedOptions.advanced, advancedOptions)) {
-      return;
-    }
-
-    setStoredOptionsOnChain((oldState) => {
-      return {
-        ...oldState,
-        advanced: advancedOptions,
-      };
-    });
-  }, [advancedOptions, setStoredOptionsOnChain, storedOptions.advanced]);
-
-  const { emptyGmxAccounts } = useEmptyGmxAccounts([AVALANCHE]);
+  const { emptyGmxAccounts } = useEmptyGmxAccounts(getNetworkFeatures(networkId).gmxAccount ? [AVALANCHE] : undefined);
   const isAvalancheSettlement = chainId === AVALANCHE;
   const isAvalancheEmpty = emptyGmxAccounts?.[AVALANCHE] === true;
   const isEmptyAvalancheGmxAccount = isAvalancheSettlement && isAvalancheEmpty;

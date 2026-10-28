@@ -55,7 +55,12 @@ it("propagates failures instead of reusing an earlier permission", async () => {
   const fetchMock = vi.fn().mockResolvedValue(Response.json({ solanaTrading: { enabled: true } }));
   vi.stubGlobal("fetch", fetchMock);
   await expect(fetchSolanaTradingEnabled()).resolves.toBe(true);
-  for (const response of [new Response("", { status: 503 }), new Response("invalid JSON")]) {
+  for (const response of [
+    new Response("", { status: 503 }),
+    new Response("invalid JSON"),
+    Response.json(null),
+    Response.json([]),
+  ]) {
     fetchMock.mockResolvedValueOnce(response);
     await expect(fetchSolanaTradingEnabled()).rejects.toThrow();
   }

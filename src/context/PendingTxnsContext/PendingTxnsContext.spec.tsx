@@ -13,6 +13,8 @@ import {
 import { waitForTransactionReceipt } from "viem/actions";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AVALANCHE, SOLANA_NETWORK_ID } from "config/chains";
+
 import { PendingTransaction, PendingTxnsContextProvider, usePendingTxns } from "./PendingTxnsContext";
 
 const mocks = vi.hoisted(() => ({
@@ -22,12 +24,13 @@ const mocks = vi.hoisted(() => ({
   getPublicClient: vi.fn(),
   success: vi.fn(),
   error: vi.fn(),
+  networkId: 43114,
 }));
 
 vi.mock("lib/wallets/walletConfig", () => ({
   getPublicClientWithRpc: mocks.getPublicClient,
 }));
-vi.mock("lib/chains", () => ({ useChainId: () => ({ chainId: 43114 }) }));
+vi.mock("lib/chains", () => ({ useChainId: () => ({ chainId: AVALANCHE, networkId: mocks.networkId }) }));
 vi.mock("lib/rpc", () => ({
   getProvider: mocks.getProvider,
   useJsonRpcProvider: () => ({ provider: { getTransactionReceipt: mocks.getReceipt } }),
@@ -89,6 +92,7 @@ async function replace(reason: ReplacementReturnType["reason"]) {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
+  mocks.networkId = AVALANCHE;
   watchers.clear();
   i18n.load("en", {});
   i18n.activate("en");
@@ -107,6 +111,47 @@ afterEach(() => {
 });
 
 describe("pending wallet transaction replacements", () => {
+  it.each([0, 1])("preserves pending EVM transactions on Solana and ignores late receipt status %s", async (status) => {
+    mocks.networkId = SOLANA_NETWORK_ID;
+    const transaction = createTransaction();
+    const entry = () => (
+      <PendingTxnsContextProvider>
+        <Harness transaction={transaction} />
+      </PendingTxnsContextProvider>
+    );
+    const view = render(entry());
+    await act(() => vi.advanceTimersByTimeAsync(4000));
+    expect(context.pendingTxns).toEqual([transaction]);
+    expect(mocks.getReceipt).not.toHaveBeenCalled();
+    expect(mocks.getPublicClient).not.toHaveBeenCalled();
+
+    mocks.networkId = AVALANCHE;
+    view.rerender(entry());
+    let resolveReceipt!: (receipt: { status: number }) => void;
+    mocks.getReceipt.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveReceipt = resolve;
+        })
+    );
+    await act(() => vi.advanceTimersByTimeAsync(2000));
+    mocks.networkId = SOLANA_NETWORK_ID;
+    view.rerender(entry());
+    await act(async () => {
+      resolveReceipt({ status });
+    });
+    expect(context.pendingTxns).toEqual([transaction]);
+    expect(mocks.success).not.toHaveBeenCalled();
+    expect(transaction.onError).not.toHaveBeenCalled();
+
+    mocks.networkId = AVALANCHE;
+    mocks.getReceipt.mockResolvedValue({ status: 1 });
+    view.rerender(entry());
+    await act(() => vi.advanceTimersByTimeAsync(2000));
+    expect(context.pendingTxns).toEqual([]);
+    expect(mocks.success).toHaveBeenCalledOnce();
+  });
+
   it.each([0, 1])("settles a speed-up on its submitted chain with receipt status %s", async (status) => {
     const transaction = mount();
     await replace("repriced");

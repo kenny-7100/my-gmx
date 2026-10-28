@@ -22,20 +22,29 @@ describe("OracleKeeperFetcher Fallback Logic", () => {
 
   const chainId = ARBITRUM;
   const mainUrl = oracleKeeperConfig.getOracleKeeperUrl(chainId);
+  const fetchers: OracleKeeperFetcher[] = [];
 
   beforeEach(() => {
     vi.useFakeTimers();
     localStorage.clear();
     vi.clearAllMocks();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response('[{"tokenAddress":"test"}]'))
+    );
   });
 
   afterEach(() => {
+    fetchers.forEach((fetcher) => fetcher.oracleTracker.fallbackTracker.cleanup());
+    fetchers.length = 0;
+    vi.unstubAllGlobals();
     vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
   test("should initialize with main URL when no stored fallback state exists", () => {
     const fetcher = new OracleKeeperFetcher({ chainId });
+    fetchers.push(fetcher);
     expect(fetcher.url).toBe(mainUrl);
   });
 
@@ -52,6 +61,7 @@ describe("OracleKeeperFetcher Fallback Logic", () => {
     localStorage.setItem(getFallbackTrackerKey(trackerKey), JSON.stringify(state));
 
     const fetcher = new OracleKeeperFetcher({ chainId });
+    fetchers.push(fetcher);
     expect(fetcher.url).toBe(storedFallback);
   });
 
@@ -67,11 +77,34 @@ describe("OracleKeeperFetcher Fallback Logic", () => {
     localStorage.setItem(getFallbackTrackerKey(trackerKey), JSON.stringify(state));
 
     const fetcher = new OracleKeeperFetcher({ chainId });
+    fetchers.push(fetcher);
     expect(fetcher.url).toBe(mainUrl);
+  });
+
+  test("keeps a Solana reader's endpoint bans separate from the existing EVM storage", () => {
+    const evmKey = getFallbackTrackerKey(`OracleFallbackTracker:${getChainName(chainId)}`);
+    const state = JSON.stringify({
+      primary: oracleKeeperConfig.getOracleKeeperFallbackUrls(chainId)[0],
+      timestamp: Date.now(),
+      cachedEndpointsState: {},
+    });
+    localStorage.setItem(evmKey, state);
+    const evm = new OracleKeeperFetcher({ chainId, track: false });
+    const solana = new OracleKeeperFetcher({ chainId, track: false, trackerKey: "OracleFallbackTracker:SolanaPrices" });
+    fetchers.push(evm, solana);
+    expect(evm.url).toBe(JSON.parse(state).primary);
+    expect(solana.url).toBe(mainUrl);
+    solana.oracleTracker.fallbackTracker.banEndpoint(mainUrl, "Keeper unavailable");
+    expect(localStorage.getItem(evmKey)).toBe(state);
+    const restored = new OracleKeeperFetcher({ chainId, track: false });
+    fetchers.push(restored);
+    expect(restored.url).toBe(evm.url);
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   test("should trigger fallback after multiple failures and update store", async () => {
     const fetcher = new OracleKeeperFetcher({ chainId });
+    fetchers.push(fetcher);
     expect(fetcher.url).toBe(mainUrl);
 
     // Trigger failures to ban the main endpoint

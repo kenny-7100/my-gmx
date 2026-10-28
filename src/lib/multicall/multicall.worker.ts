@@ -18,29 +18,48 @@ async function executeMulticall(
   request: MulticallRequestConfig<any>,
   abFlags: Record<string, boolean>,
   isLargeAccount: boolean,
-  debugState?: MulticallDebugState
+  debugState?: MulticallDebugState,
+  signal?: AbortSignal
 ) {
   const multicall = await Multicall.getInstance(chainId, abFlags);
 
-  return multicall?.call(providerUrls, request, isLargeAccount, debugState);
+  signal?.throwIfAborted();
+  return multicall?.call(providerUrls, request, isLargeAccount, debugState, signal);
 }
 
 self.addEventListener("message", run);
+const controllers = new Map<string, AbortController>();
 
 async function run(event: MessageEvent) {
+  if (event.data.cancelId) {
+    controllers.get(event.data.cancelId)?.abort();
+    return;
+  }
   const { PRODUCTION_PREVIEW_KEY, chainId, providerUrls, request, id, abFlags, isLargeAccount, debugState } =
     event.data;
   // @ts-ignore
   self.PRODUCTION_PREVIEW_KEY = PRODUCTION_PREVIEW_KEY;
+  const controller = new AbortController();
+  controllers.set(id, controller);
 
   try {
-    const result = await executeMulticall(chainId, providerUrls, request, abFlags, isLargeAccount, debugState);
+    const result = await executeMulticall(
+      chainId,
+      providerUrls,
+      request,
+      abFlags,
+      isLargeAccount,
+      debugState,
+      controller.signal
+    );
+    if (controller.signal.aborted) return;
 
     postMessage({
       id,
       result,
     });
   } catch (error) {
+    if (controller.signal.aborted) return;
     postMessage({
       id,
       error: {
@@ -49,6 +68,8 @@ async function run(event: MessageEvent) {
         stack: error.stack,
       },
     });
+  } finally {
+    controllers.delete(id);
   }
 }
 

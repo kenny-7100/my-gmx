@@ -1,0 +1,971 @@
+{
+  "schemaVersion": 1,
+  "scope": "contract-for-offline-validator",
+  "status": "reviewable-supported-subset",
+  "validator": "not-implemented",
+  "rulesDocument": "docs/solana-instruction-contract.md",
+  "program": "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo",
+  "store": "CTDLvGGXnoxvqLyTpGzdGLg9pD6JexKxKXSV8tqqo8bN",
+  "idlCommit": "c6778dc9bf6444f9037c3b0d2dc219c857e1b45d",
+  "idlSha256": "9bc76f2081a1f45334208618aa1b5c1a944e6f1c885c5afb696978210ba81a94",
+  "sdk": {
+    "version": "0.9.0-test.2",
+    "approvedWasmSha256": "775a7ddb532d6d49a1800a3d8eccca523960d685db8e1800fbd5eb519ed8dd68"
+  },
+  "wrapperSha256": "0d42e12dae1bdfbbe8a95b8042828956b0f150f055fe9689a366a39e2223c80d",
+  "inventorySha256": "c412331569160a64673ee227cd4ce8ee8763f3c45ca6ea7e5f113d4a69e80343",
+  "sources": [
+    {
+      "path": "tools/solana-builder-probe/unsigned-fixtures.json",
+      "sha256": "0976fc37b18b6dcb0dc61c9ee69374d459d4921eb6a6d3420989293247b5674d",
+      "probeSha256": "4447350ed9ff2d3fbdbefe1bd0e0baa6eb1997b794927594ca9b7aae9daeae39",
+      "checkedAt": "2026-10-27T22:33:16.475Z"
+    },
+    {
+      "path": "tools/solana-builder-probe/parameter-fixtures.json",
+      "sha256": "5780bcc03326c39906901f276affc6551890c1f093214a5c7387c0e87093938b",
+      "probeSha256": "a31bb866d5e78f59571a87f4b35151c8f821705e7efd75ce4421c226b22ec96e",
+      "checkedAt": "2026-10-27T22:39:59.785Z"
+    },
+    {
+      "path": "tools/solana-builder-probe/capability-fixtures.json",
+      "sha256": "6f63d0ec466901795080bc5089bb6b3ca71b832cef93ae2cde221e86f90ae4d9",
+      "probeSha256": "17f47efb5ccb7fdc0308314308c0c85e5ed82f225cedc9ff068d0893b6e9aa87",
+      "checkedAt": "2026-10-27T22:44:41.026Z"
+    },
+    {
+      "path": "tools/solana-builder-probe/native-fixtures.json",
+      "sha256": "be4b63f9f49bdfcd16027afce3e16426bd8ab908d9edd86d1d1e943297b240ab",
+      "probeSha256": "9ed85eebd003aebea311d3095adb4f941a2874613f3a40e09abef5a26c67d660",
+      "checkedAt": "2026-10-27T22:50:27.472Z"
+    }
+  ],
+  "transactionCount": 27,
+  "instructions": [
+    {
+      "program": "ComputeBudget111111111111111111111111111111",
+      "name": "SetComputeUnitLimit",
+      "discriminatorHex": "02",
+      "args": null,
+      "accounts": [],
+      "accountCount": 0,
+      "observedCount": 27,
+      "observedDataLengths": [5],
+      "observedAccountCounts": [0],
+      "example": {
+        "source": "tools/solana-builder-probe/unsigned-fixtures.json",
+        "case": "MarketIncrease-force-position-false",
+        "transactionSha256": "701c973fbfce3bc320171f302982b4ad119cda0f5ad672836a8fa467be20626c",
+        "instructionIndex": 0
+      }
+    },
+    {
+      "program": "ComputeBudget111111111111111111111111111111",
+      "name": "SetComputeUnitPrice",
+      "discriminatorHex": "03",
+      "args": null,
+      "accounts": [],
+      "accountCount": 0,
+      "observedCount": 27,
+      "observedDataLengths": [9],
+      "observedAccountCounts": [0],
+      "example": {
+        "source": "tools/solana-builder-probe/unsigned-fixtures.json",
+        "case": "MarketIncrease-force-position-false",
+        "transactionSha256": "701c973fbfce3bc320171f302982b4ad119cda0f5ad672836a8fa467be20626c",
+        "instructionIndex": 1
+      }
+    },
+    {
+      "program": "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo",
+      "name": "prepare_user",
+      "discriminatorHex": "bead8fc18b50e785",
+      "args": [],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "store",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "user",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "system_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        }
+      ],
+      "accountCount": 4,
+      "observedCount": 16,
+      "observedDataLengths": [8],
+      "observedAccountCounts": [4],
+      "example": {
+        "source": "tools/solana-builder-probe/unsigned-fixtures.json",
+        "case": "MarketIncrease-force-position-false",
+        "transactionSha256": "701c973fbfce3bc320171f302982b4ad119cda0f5ad672836a8fa467be20626c",
+        "instructionIndex": 2
+      }
+    },
+    {
+      "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+      "name": "CreateIdempotent",
+      "discriminatorHex": "01",
+      "args": null,
+      "accounts": [
+        {
+          "name": "payer",
+          "signer": true,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "ata",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "owner",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "mint",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "system_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "token_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        }
+      ],
+      "accountCount": 6,
+      "observedCount": 92,
+      "observedDataLengths": [1],
+      "observedAccountCounts": [6],
+      "example": {
+        "source": "tools/solana-builder-probe/unsigned-fixtures.json",
+        "case": "MarketIncrease-force-position-false",
+        "transactionSha256": "701c973fbfce3bc320171f302982b4ad119cda0f5ad672836a8fa467be20626c",
+        "instructionIndex": 3
+      }
+    },
+    {
+      "program": "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo",
+      "name": "prepare_position",
+      "discriminatorHex": "b2d7375a890f6c0f",
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "CreateOrderParams"
+            }
+          }
+        }
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "store",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "market",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "position",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "system_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        }
+      ],
+      "accountCount": 5,
+      "observedCount": 11,
+      "observedDataLengths": [82],
+      "observedAccountCounts": [5],
+      "example": {
+        "source": "tools/solana-builder-probe/unsigned-fixtures.json",
+        "case": "MarketIncrease-force-position-false",
+        "transactionSha256": "701c973fbfce3bc320171f302982b4ad119cda0f5ad672836a8fa467be20626c",
+        "instructionIndex": 7
+      }
+    },
+    {
+      "program": "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo",
+      "name": "create_order_v2",
+      "discriminatorHex": "c89d03b603a4a2f0",
+      "args": [
+        {
+          "name": "nonce",
+          "type": {
+            "array": ["u8", 32]
+          }
+        },
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "CreateOrderParams"
+            }
+          }
+        },
+        {
+          "name": "callback_version",
+          "type": {
+            "option": "u8"
+          }
+        }
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "receiver",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "store",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "market",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "user",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "order",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "position",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "initial_collateral_token",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "final_output_token",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "long_token",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "short_token",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "initial_collateral_token_escrow",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "final_output_token_escrow",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "long_token_escrow",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "short_token_escrow",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "initial_collateral_token_source",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "system_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "token_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "associated_token_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "callback_authority",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "callback_program",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "callback_shared_data_account",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "callback_partitioned_data_account",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "event_authority",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        }
+      ],
+      "accountCount": "25 + params.swap_path_length",
+      "observedCount": 22,
+      "observedDataLengths": [115, 116, 124, 131, 132, 140],
+      "observedAccountCounts": [25, 26],
+      "example": {
+        "source": "tools/solana-builder-probe/unsigned-fixtures.json",
+        "case": "MarketIncrease-force-position-false",
+        "transactionSha256": "701c973fbfce3bc320171f302982b4ad119cda0f5ad672836a8fa467be20626c",
+        "instructionIndex": 8
+      }
+    },
+    {
+      "program": "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo",
+      "name": "update_order_v2",
+      "discriminatorHex": "c3afcf21abf629b0",
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "UpdateOrderParams"
+            }
+          }
+        }
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "store",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "market",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "order",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "callback_authority",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "callback_program",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "callback_shared_data_account",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "callback_partitioned_data_account",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "event_authority",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        }
+      ],
+      "accountCount": 10,
+      "observedCount": 3,
+      "observedDataLengths": [29, 45, 85],
+      "observedAccountCounts": [10],
+      "example": {
+        "source": "tools/solana-builder-probe/unsigned-fixtures.json",
+        "case": "update-order",
+        "transactionSha256": "649b8e4ac0510fe48111b46a0885ab416245605b4cfd98188b660bfb696633aa",
+        "instructionIndex": 2
+      }
+    },
+    {
+      "program": "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo",
+      "name": "close_order_v2",
+      "discriminatorHex": "d5d96264e1cd4cb8",
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ],
+      "accounts": [
+        {
+          "name": "executor",
+          "signer": true,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "store",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "store_wallet",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "owner",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "receiver",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "rent_receiver",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "user",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "referrer_user",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "order",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "initial_collateral_token",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "final_output_token",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "long_token",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "short_token",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "initial_collateral_token_escrow",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "final_output_token_escrow",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "long_token_escrow",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "short_token_escrow",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "initial_collateral_token_ata",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "final_output_token_ata",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "long_token_ata",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "short_token_ata",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "system_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "token_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "associated_token_program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "callback_authority",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "callback_program",
+          "signer": false,
+          "writable": false,
+          "optional": true
+        },
+        {
+          "name": "callback_shared_data_account",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "callback_partitioned_data_account",
+          "signer": false,
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "event_authority",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        },
+        {
+          "name": "program",
+          "signer": false,
+          "writable": false,
+          "optional": false
+        }
+      ],
+      "accountCount": 30,
+      "observedCount": 2,
+      "observedDataLengths": [18],
+      "observedAccountCounts": [30],
+      "example": {
+        "source": "tools/solana-builder-probe/unsigned-fixtures.json",
+        "case": "close-order",
+        "transactionSha256": "caa60ac43f50fd804c85a76d38e809da3cd6e3432cf5852016e3fe9ff24c5e84",
+        "instructionIndex": 3
+      }
+    },
+    {
+      "program": "11111111111111111111111111111111",
+      "name": "Transfer",
+      "discriminatorHex": "02000000",
+      "args": null,
+      "accounts": [
+        {
+          "name": "source",
+          "signer": true,
+          "writable": true,
+          "optional": false
+        },
+        {
+          "name": "destination",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        }
+      ],
+      "accountCount": 2,
+      "observedCount": 3,
+      "observedDataLengths": [12],
+      "observedAccountCounts": [2],
+      "example": {
+        "source": "tools/solana-builder-probe/native-fixtures.json",
+        "case": "native-pay-skip-wrap-false",
+        "transactionSha256": "b860ed94e963016fac118d4c685e6604896c32e434bee86ac6bf6970621f1eee",
+        "instructionIndex": 5
+      }
+    },
+    {
+      "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "name": "SyncNative",
+      "discriminatorHex": "11",
+      "args": null,
+      "accounts": [
+        {
+          "name": "native_token_account",
+          "signer": false,
+          "writable": true,
+          "optional": false
+        }
+      ],
+      "accountCount": 1,
+      "observedCount": 3,
+      "observedDataLengths": [1],
+      "observedAccountCounts": [1],
+      "example": {
+        "source": "tools/solana-builder-probe/native-fixtures.json",
+        "case": "native-pay-skip-wrap-false",
+        "transactionSha256": "b860ed94e963016fac118d4c685e6604896c32e434bee86ac6bf6970621f1eee",
+        "instructionIndex": 6
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "CreateOrderParams",
+      "docs": ["Create Order Arguments."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "kind",
+            "docs": ["Order Kind."],
+            "type": {
+              "defined": {
+                "name": "OrderKind"
+              }
+            }
+          },
+          {
+            "name": "decrease_position_swap_type",
+            "docs": ["Decrease Position Swap Type."],
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "DecreasePositionSwapType"
+                }
+              }
+            }
+          },
+          {
+            "name": "execution_lamports",
+            "docs": ["Execution fee in lamports."],
+            "type": "u64"
+          },
+          {
+            "name": "swap_path_length",
+            "docs": ["The length of the swap path."],
+            "type": "u8"
+          },
+          {
+            "name": "initial_collateral_delta_amount",
+            "docs": ["Initial collateral / swap in token amount."],
+            "type": "u64"
+          },
+          {
+            "name": "size_delta_value",
+            "docs": ["Size delta value."],
+            "type": "u128"
+          },
+          {
+            "name": "is_long",
+            "docs": ["Is long."],
+            "type": "bool"
+          },
+          {
+            "name": "is_collateral_long",
+            "docs": ["Is collateral or the swap out token the long token."],
+            "type": "bool"
+          },
+          {
+            "name": "min_output",
+            "docs": ["Min output amount or value."],
+            "type": {
+              "option": "u128"
+            }
+          },
+          {
+            "name": "trigger_price",
+            "docs": ["Trigger price."],
+            "type": {
+              "option": "u128"
+            }
+          },
+          {
+            "name": "acceptable_price",
+            "docs": ["Acceptable price."],
+            "type": {
+              "option": "u128"
+            }
+          },
+          {
+            "name": "should_unwrap_native_token",
+            "docs": ["Whether to unwrap native token when sending funds back."],
+            "type": "bool"
+          },
+          {
+            "name": "valid_from_ts",
+            "docs": ["Valid from timestamp."],
+            "type": {
+              "option": "i64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderKind",
+      "docs": ["Order Kind."],
+      "repr": {
+        "kind": "rust"
+      },
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Liquidation"
+          },
+          {
+            "name": "AutoDeleveraging"
+          },
+          {
+            "name": "MarketSwap"
+          },
+          {
+            "name": "MarketIncrease"
+          },
+          {
+            "name": "MarketDecrease"
+          },
+          {
+            "name": "LimitSwap"
+          },
+          {
+            "name": "LimitIncrease"
+          },
+          {
+            "name": "LimitDecrease"
+          },
+          {
+            "name": "StopLossDecrease"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DecreasePositionSwapType",
+      "docs": ["Swap Type for the decrease position action."],
+      "repr": {
+        "kind": "rust"
+      },
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "NoSwap"
+          },
+          {
+            "name": "PnlTokenToCollateralToken"
+          },
+          {
+            "name": "CollateralToPnlToken"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateOrderParams",
+      "docs": ["Update Order Params."],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "size_delta_value",
+            "docs": ["Size delta in USD."],
+            "type": {
+              "option": "u128"
+            }
+          },
+          {
+            "name": "acceptable_price",
+            "docs": ["Acceptable price."],
+            "type": {
+              "option": "u128"
+            }
+          },
+          {
+            "name": "trigger_price",
+            "docs": ["Trigger price."],
+            "type": {
+              "option": "u128"
+            }
+          },
+          {
+            "name": "min_output",
+            "docs": ["Min output amount."],
+            "type": {
+              "option": "u128"
+            }
+          },
+          {
+            "name": "valid_from_ts",
+            "docs": ["Valid from this timestamp."],
+            "type": {
+              "option": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "pending": [
+    "production validator",
+    "adversarial mutation fixtures",
+    "prepare_position strict decoder",
+    "CPI event contract",
+    "live program and account compatibility"
+  ]
+}

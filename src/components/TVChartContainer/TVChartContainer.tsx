@@ -2,8 +2,10 @@ import { gql } from "@apollo/client";
 import { t } from "@lingui/macro";
 import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLatest, useLocalStorage, useMedia } from "react-use";
-import { isAddressEqual, type Address } from "viem";
+import { type Address } from "viem";
 
+import { getIsSolanaNetworkEnabled } from "config/ab";
+import { isSolanaNetwork } from "config/chains";
 import { colors } from "config/colors";
 import { WAS_TV_CHART_OVERRIDDEN_KEY } from "config/localStorage";
 import { type TradingViewResolution, RESOLUTION_TO_SECONDS, SUPPORTED_RESOLUTIONS_V2 } from "config/tradingview";
@@ -24,8 +26,9 @@ import { parseContractPrice } from "domain/synthetics/tokens";
 import { processRawTradeActions } from "domain/synthetics/tradeHistory/processTradeActions";
 import { fetchRawTradeActions } from "domain/synthetics/tradeHistory/useTradeHistory";
 import { TokenPrices } from "domain/tokens";
-import { DataFeed } from "domain/tradingview/DataFeed";
+import { DataFeed, type ChartDataSource } from "domain/tradingview/DataFeed";
 import { getObjectKeyFromValue, getSymbolName } from "domain/tradingview/utils";
+import { useChainId } from "lib/chains";
 import { getSubsquidGraphClient } from "lib/indexers/clients";
 import { formatUsd, calculateDisplayDecimals } from "lib/numbers";
 import { useOracleKeeperFetcher } from "lib/oracleKeeperFetcher";
@@ -33,6 +36,7 @@ import useWallet from "lib/wallets/useWallet";
 import { ContractsChainId } from "sdk/configs/chains";
 import { isChartAvailableForToken, getTokenBySymbolSafe } from "sdk/configs/tokens";
 import { convertTokenAddress } from "sdk/configs/tokens";
+import { getAddressKey, isSameAddress } from "sdk/utils/address";
 import { TradeActionType, isPositionTradeAction, type TradeAction } from "sdk/utils/tradeHistory/types";
 
 import Loader from "components/Loader/Loader";
@@ -70,7 +74,7 @@ const MARKS_PAGE_SIZE = 100;
 const MARKS_CACHE_TTL_MS = 60_000;
 
 function getNormalizedPositionKey(account: string, market: string, collateral: string, isLong: boolean) {
-  return getPositionKey(account.toLowerCase(), market.toLowerCase(), collateral.toLowerCase(), isLong);
+  return getPositionKey(getAddressKey(account), getAddressKey(market), getAddressKey(collateral), isLong);
 }
 
 const OPENED_AT_QUERY_LIMIT = 500;
@@ -97,7 +101,7 @@ async function fetchOpenPositionsOpenedAt(chainId: number, contractKeys: string[
 
   for (const position of res.data?.positions || []) {
     if (position.positionKey && typeof position.openedAt === "number") {
-      result.set(position.positionKey.toLowerCase(), position.openedAt);
+      result.set(getAddressKey(position.positionKey), position.openedAt);
     }
   }
 
@@ -142,6 +146,29 @@ export default function TVChartContainer({
   const { theme } = useTheme();
 
   const oracleKeeperFetcher = useOracleKeeperFetcher(chainId as ContractsChainId);
+  const { networkId } = useChainId();
+  const solanaEnabled = isSolanaNetwork(networkId) && getIsSolanaNetworkEnabled();
+  const [solanaSource, setSolanaSource] = useState<ChartDataSource>();
+  const [sourceError, setSourceError] = useState<Error>();
+  useEffect(() => {
+    let cancelled = false;
+    setSolanaSource(undefined);
+    setSourceError(undefined);
+    if (solanaEnabled) {
+      import("domain/gmsol/gmsolOracleFetcher").then(
+        ({ getGmsolChartDataSource }) => {
+          if (!cancelled) setSolanaSource(getGmsolChartDataSource());
+        },
+        (error) => {
+          if (!cancelled) setSourceError(error);
+        }
+      );
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [solanaEnabled]);
+  if (solanaEnabled && sourceError) throw sourceError;
 
   const [datafeed, setDatafeed] = useState<DataFeed | null>(null);
   const { positionIncreaseEvents, positionDecreaseEvents } = useSyntheticsEvents();
@@ -169,7 +196,7 @@ export default function TVChartContainer({
     if (!positionsInfoData) return keys;
     for (const pos of Object.values(positionsInfoData)) {
       if (!pos || pos.sizeInUsd === 0n || !pos.contractKey) continue;
-      keys.push(pos.contractKey.toLowerCase());
+      keys.push(getAddressKey(pos.contractKey));
     }
     return keys;
   }, [positionsInfoData]);
@@ -178,7 +205,7 @@ export default function TVChartContainer({
   const [openedAtByContractKey, setOpenedAtByContractKey] = useState<Map<string, number>>(() => new Map());
 
   useEffect(() => {
-    if (!account || buySellIconsMode !== "current" || openContractKeys.length === 0) {
+    if (isSolanaNetwork(networkId) || !account || buySellIconsMode !== "current" || openContractKeys.length === 0) {
       setOpenedAtByContractKey((prev) => (prev.size === 0 ? prev : new Map()));
       return;
     }
@@ -195,14 +222,14 @@ export default function TVChartContainer({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId, account, buySellIconsMode, openContractKeysKey]);
+  }, [chainId, networkId, account, buySellIconsMode, openContractKeysKey]);
 
   const openedAtByKey = useMemo(() => {
     const map = new Map<string, number>();
     if (!positionsInfoData) return map;
     for (const pos of Object.values(positionsInfoData)) {
       if (!pos || pos.sizeInUsd === 0n || !pos.contractKey) continue;
-      const openedAt = openedAtByContractKey.get(pos.contractKey.toLowerCase());
+      const openedAt = openedAtByContractKey.get(getAddressKey(pos.contractKey));
       if (openedAt === undefined) continue;
       map.set(
         getNormalizedPositionKey(pos.account, pos.marketAddress, pos.collateralTokenAddress, pos.isLong),
@@ -263,7 +290,15 @@ export default function TVChartContainer({
   }, [chartReady, wasChartOverridden, setWasChartOverridden, theme]);
 
   useEffect(() => {
-    const newDatafeed = new DataFeed(chainId, oracleKeeperFetcher);
+    if (isSolanaNetwork(networkId) && (!solanaEnabled || !solanaSource)) {
+      setDatafeed(null);
+      return;
+    }
+    const newDatafeed = new DataFeed(
+      isSolanaNetwork(networkId) ? networkId : chainId,
+      oracleKeeperFetcher,
+      isSolanaNetwork(networkId) ? solanaSource : undefined
+    );
     newDatafeed.setTokenPriceGetter((symbol) => {
       const data = marksStateRef.current.tokensData;
       if (!data) return undefined;
@@ -271,6 +306,8 @@ export default function TVChartContainer({
       return token?.prices?.minPrice;
     });
     newDatafeed.setMarksGetter(async (_symbolInfo, from, to, resolution) => {
+      // Solana markers need the network-aware history source (T34), never the EVM indexer.
+      if (isSolanaNetwork(networkId)) return [];
       const {
         positionIncreaseEvents: inc,
         positionDecreaseEvents: dec,
@@ -313,7 +350,7 @@ export default function TVChartContainer({
           return null;
         }
         const marketIndexWrapped = convertTokenAddress(cid as ContractsChainId, market.indexTokenAddress, "wrapped");
-        if (!isAddressEqual(marketIndexWrapped as Address, wrappedSelected as Address)) {
+        if (!isSameAddress(marketIndexWrapped, wrappedSelected)) {
           return null;
         }
 
@@ -383,10 +420,7 @@ export default function TVChartContainer({
 
         marketAddresses = Object.values(markets)
           .filter((m) =>
-            isAddressEqual(
-              convertTokenAddress(cid as ContractsChainId, m.indexTokenAddress, "wrapped") as Address,
-              wrappedSelected as Address
-            )
+            isSameAddress(convertTokenAddress(cid as ContractsChainId, m.indexTokenAddress, "wrapped"), wrappedSelected)
           )
           .map((m) => m.marketTokenAddress);
 
@@ -456,7 +490,7 @@ export default function TVChartContainer({
       if (mode === "current") {
         (inc || []).forEach((e) => {
           if (e.sizeDeltaUsd === 0n || e.sizeInUsd !== e.sizeDeltaUsd) return;
-          if (acc && e.account && !isAddressEqual(e.account as Address, acc as Address)) return;
+          if (acc && e.account && !isSameAddress(e.account, acc)) return;
           const key = getNormalizedPositionKey(e.account, e.marketAddress, e.collateralTokenAddress, e.isLong);
           const ts = Number(e.increasedAtTime);
           const prev = liveGenesisByKey.get(key);
@@ -510,7 +544,7 @@ export default function TVChartContainer({
 
       (inc || []).forEach((e) => {
         if (e.sizeDeltaUsd === 0n) return;
-        if (acc && e.account && !isAddressEqual(e.account as Address, acc as Address)) return;
+        if (acc && e.account && !isSameAddress(e.account, acc)) return;
         const ts = Number(e.increasedAtTime);
         if (!isOpenPositionMark(e.account, e.marketAddress, e.collateralTokenAddress, e.isLong, ts)) return;
         const marketForEvent = markets?.[e.marketAddress];
@@ -534,7 +568,7 @@ export default function TVChartContainer({
 
       (dec || []).forEach((e) => {
         if (e.sizeDeltaUsd === 0n) return;
-        if (acc && e.account && !isAddressEqual(e.account as Address, acc as Address)) return;
+        if (acc && e.account && !isSameAddress(e.account, acc)) return;
         const ts = Number(e.decreasedAtTime);
         if (!isOpenPositionMark(e.account, e.marketAddress, e.collateralTokenAddress, e.isLong, ts)) return;
         const marketForEvent = markets?.[e.marketAddress];
@@ -566,13 +600,12 @@ export default function TVChartContainer({
         }
       });
     }
-    setDatafeed((prev) => {
-      if (prev) {
-        prev.destroy();
-      }
-      return newDatafeed;
-    });
-  }, [chainId, oracleKeeperFetcher, setIsCandlesLoaded, marksStateRef]);
+    setDatafeed(newDatafeed);
+
+    return () => {
+      newDatafeed.destroy();
+    };
+  }, [chainId, networkId, solanaEnabled, solanaSource, oracleKeeperFetcher, setIsCandlesLoaded, marksStateRef]);
 
   const isMobile = useMedia("(max-width: 550px)");
   const symbolRef = useRef(chartToken.symbol);
@@ -702,7 +735,9 @@ export default function TVChartContainer({
       !chartReady ||
       !tvWidgetRef.current ||
       !chartToken.symbol ||
-      !isChartAvailableForToken(chainId, chartToken.symbol)
+      !(isSolanaNetwork(networkId)
+        ? solanaSource?.getTokenBySymbol(chartToken.symbol)
+        : isChartAvailableForToken(chainId, chartToken.symbol))
     ) {
       return;
     }
@@ -727,19 +762,21 @@ export default function TVChartContainer({
         setIsChartChangingSymbol(false);
       });
     }
-  }, [chainId, chartReady, chartToken.symbol, visualMultiplier]);
+  }, [chainId, networkId, solanaSource, chartReady, chartToken.symbol, visualMultiplier]);
 
   useEffect(() => {
     if (!chartReady || !tvWidgetRef.current || !chartToken.symbol) return;
 
-    const token = getTokenBySymbolSafe(chainId, chartToken.symbol);
+    const token = isSolanaNetwork(networkId)
+      ? solanaSource?.getTokenBySymbol(chartToken.symbol)
+      : getTokenBySymbolSafe(chainId, chartToken.symbol);
     const isStable = token?.isStable ?? false;
 
     tvWidgetRef.current.applyOverrides({
       "mainSeriesProperties.highLowAvgPrice.highLowPriceLinesVisible": false,
       "mainSeriesProperties.highLowAvgPrice.highLowPriceLabelsVisible": !isStable,
     });
-  }, [chainId, chartReady, chartToken.symbol, theme]);
+  }, [chainId, networkId, solanaSource, chartReady, chartToken.symbol, theme]);
 
   const lastPeriod = useLatest(period);
   const lastSupportedResolutions = useLatest(supportedResolutions);
@@ -852,7 +889,7 @@ export default function TVChartContainer({
       custom_formatters: defaultChartProps.custom_formatters,
       load_last_chart: true,
       auto_save_delay: 1,
-      save_load_adapter: new SaveLoadAdapter(),
+      save_load_adapter: new SaveLoadAdapter(networkId),
     };
     const widget = new window.TradingView.widget(widgetOptions);
 
@@ -980,7 +1017,7 @@ export default function TVChartContainer({
     };
     // We don't want to re-initialize the chart when the symbol changes. This will make the chart flicker.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId, datafeed, theme]);
+  }, [chainId, networkId, datafeed, theme]);
 
   const style = useMemo<CSSProperties>(
     () => ({ visibility: !chartDataLoading ? "visible" : "hidden" }),

@@ -1,15 +1,17 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useLayoutEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { cssTransition, ToastContainer } from "react-toastify";
 import { zeroHash } from "viem";
 
+import { isSolanaNetwork } from "config/chains";
 import { REFERRAL_CODE_KEY } from "config/localStorage";
 import { TOAST_AUTO_CLOSE_TIME } from "config/ui";
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
 import { useSmartWalletSubaccountWarning } from "context/SubaccountContext/useSmartWalletSubaccountWarning";
 import { useTheme } from "context/ThemeContext/ThemeContext";
 import { useMultichainFundingToast } from "domain/multichain/useMultichainFundingToast";
-import { useSupportChat } from "domain/supportChat/useSupportChat";
+import { SupportChatEvmAttributes, useSupportChat } from "domain/supportChat/useSupportChat";
+import { useChainId } from "lib/chains";
 import { useRealChainIdWarning } from "lib/chains/useRealChainIdWarning";
 import { dynamicActivate, locales } from "lib/i18n";
 import { REFERRAL_CODE_QUERY_PARAM } from "lib/legacy";
@@ -17,6 +19,8 @@ import { useAccountInitedMetric, useOpenAppMetric } from "lib/metrics";
 import { useConfigureMetrics } from "lib/metrics/useConfigureMetrics";
 import { useFreshnessMetricsControl } from "lib/metrics/useFreshnessMetricsControl";
 import { useWalletCapabilitiesMetric } from "lib/metrics/useWalletCapabilitiesMetric";
+import { setMulticallEnabled } from "lib/multicall/lifecycle";
+import { setEvmOracleEnabled } from "lib/oracleKeeperFetcher/lifecycle";
 import { sendEarnPageViewEvent } from "lib/userAnalytics/earnEvents";
 import { useConfigureUserAnalyticsProfile } from "lib/userAnalytics/useConfigureUserAnalyticsProfile";
 import { useWalletConnectedUserAnalyticsEvent } from "lib/userAnalytics/useWalletConnectedEvent";
@@ -40,19 +44,31 @@ const Zoom = cssTransition({
   collapseDuration: 200,
 });
 
+function EvmGlobalEffects() {
+  useWalletCapabilitiesMetric();
+  useMultichainFundingToast();
+  useSmartWalletSubaccountWarning();
+
+  return <SupportChatEvmAttributes />;
+}
+
 export function AppRoutes() {
   const { theme } = useTheme();
   const history = useHistory();
+  const { networkId } = useChainId();
+
+  useLayoutEffect(() => {
+    setMulticallEnabled(!isSolanaNetwork(networkId));
+    setEvmOracleEnabled(!isSolanaNetwork(networkId));
+  }, [networkId]);
 
   useConfigureMetrics();
   useConfigureUserAnalyticsProfile();
   useOpenAppMetric();
   useAccountInitedMetric();
-  useWalletCapabilitiesMetric();
   useSupportChat();
 
   useWalletConnectedUserAnalyticsEvent();
-  useMultichainFundingToast();
   useFreshnessMetricsControl();
 
   const query = useRouteQuery();
@@ -117,7 +133,6 @@ export function AppRoutes() {
   }, [isEarnPage]);
 
   useRealChainIdWarning();
-  useSmartWalletSubaccountWarning();
 
   return (
     <>
@@ -139,6 +154,7 @@ export function AppRoutes() {
         closeButton={CloseToastButton}
       />
       <WhatsNewToastContainer />
+      {!isSolanaNetwork(networkId) && <EvmGlobalEffects />}
       <GmxAccountModal />
       <SettingsModal isSettingsVisible={isSettingsVisible} setIsSettingsVisible={setIsSettingsVisible} />
       <NotifyModal />

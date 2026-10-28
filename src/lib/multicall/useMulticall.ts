@@ -11,6 +11,7 @@ import { AnyChainId, ContractsChainId } from "sdk/configs/chains";
 
 import { debugLog } from "./debug";
 import { executeMulticall } from "./executeMulticall";
+import { getMulticallSignal } from "./lifecycle";
 import type { CacheKey, MulticallRequestConfig, MulticallResult, SkipKey } from "./types";
 import { serializeMulticallErrors } from "./utils";
 
@@ -65,6 +66,7 @@ export function useMulticall<
   const { data, mutate, error } = useSWR<TResult | undefined>(swrFullKey, {
     ...swrOpts,
     fetcher: async () => {
+      const signal = getMulticallSignal();
       performance.mark(`multicall-${name}-start`);
       try {
         let request: TConfig;
@@ -126,7 +128,7 @@ export function useMulticall<
 
           responseOrFailure = await Promise.race([
             sleep(EXECUTE_MULTICALL_TIMEOUT).then(() => Promise.reject(new Error("executeMulticall timeout"))),
-            executeMulticall(chainId!, request, priority, name, params.disableBatching),
+            executeMulticall(chainId!, request, priority, name, params.disableBatching, signal),
           ]);
 
           debugLog(() => {
@@ -156,6 +158,7 @@ export function useMulticall<
 
         return result as TResult;
       } catch (e) {
+        if (e.name === "AbortError") throw e;
         // eslint-disable-next-line no-console
         console.error(`Multicall request failed: ${name}`, e);
         e.message = `Multicall request failed: ${name} ${e.message}`;
