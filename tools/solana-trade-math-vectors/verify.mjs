@@ -28,8 +28,8 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 247);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 247);
+assert.equal(reference.cases.length, 263);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 263);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
@@ -46,10 +46,15 @@ let distributionCheckpoints = 0;
 let distributionSettlements = 0;
 let reversalCheckpoints = 0;
 let reversalSettlements = 0;
+let singleSideWarmupCheckpoints = 0;
+let singleSideUpdates = 0;
+let fullCloses = 0;
+let survivorSettlements = 0;
 
 function verifyDynamicFunding(c) {
   const p = c.input.scenario;
-  const settle = c.input.operation === "dynamic_funding_settlement";
+  const single = c.input.operation === "dynamic_funding_single_side";
+  const settle = single || c.input.operation === "dynamic_funding_settlement";
   const collateralIndex = c.input.is_long_collateral ? 0 : 1;
   const fees = [0n, 0n, 0n, 0n],
     claims = [0n, 0n, 0n, 0n],
@@ -136,8 +141,42 @@ function verifyDynamicFunding(c) {
     };
   });
   const expected = { status: "ok", checkpoints };
+  if (single) {
+    assert.notEqual(stored, 0n, c.id);
+    const closeLong = c.input.transition.close_long;
+    expected.single_side = {
+      closing: positions.map((position) => {
+        if (position.side !== closeLong) return null;
+        const due = pending(position);
+        return {
+          cost_amount: due.cost_amount,
+          claimable_funding_amounts: due.claimable_amounts,
+          should_remove: true,
+          remaining_size_usd20: "0",
+        };
+      }),
+      updates: c.input.transition.elapsed_seconds.map((seconds, index) => ({
+        elapsed_seconds: seconds,
+        previous_factor: index === 0 ? String(stored) : "0",
+        next_factor: "0",
+        long_oi_usd20: closeLong ? "0" : String(long),
+        short_oi_usd20: closeLong ? String(short) : "0",
+        amounts: fees.map((fee, i) => ({
+          funding_per_size: String(fee),
+          claimable_per_size: String(claims[i]),
+          delta_funding_per_size: "0",
+          delta_claimable_per_size: "0",
+        })),
+        pending: positions.map((position) => (position.side === closeLong ? null : pending(position))),
+      })),
+    };
+    singleSideWarmupCheckpoints += checkpoints.length;
+    singleSideUpdates += expected.single_side.updates.length;
+    fullCloses += expected.single_side.closing.filter(Boolean).length;
+  }
   if (settle) {
     expected.settlements = positions.map((position) => {
+      if (single && position.side === c.input.transition.close_long) return null;
       const due = pending(position),
         index = position.side ? 0 : 2;
       return [1n, 2n].map((attempt) => ({
@@ -156,23 +195,26 @@ function verifyDynamicFunding(c) {
         pending_claimable_amounts: ["0", "0"],
       }));
     });
-    assert(
-      checkpoints.some((v) => v.longs_pay !== checkpoints[0].longs_pay),
-      c.id
-    );
-    for (const attempts of expected.settlements.slice(0, 2)) {
-      assert(BigInt(attempts[0].cost_amount) > 0n, c.id);
-      assert(BigInt(attempts[0].claimable_funding_amounts[collateralIndex]) > 0n, c.id);
+    if (!single || c.id.endsWith("-reversal")) {
+      assert(
+        checkpoints.some((v) => v.longs_pay !== checkpoints[0].longs_pay),
+        c.id
+      );
+      for (const due of positions.slice(0, 2).map(pending)) {
+        assert(BigInt(due.cost_amount) > 0n, c.id);
+        assert(BigInt(due.claimable_amounts[collateralIndex]) > 0n, c.id);
+      }
     }
-    const paid = expected.settlements.reduce((sum, a) => sum + BigInt(a[0].cost_amount), 0n);
-    const claimed = expected.settlements.reduce(
-      (sum, a) => sum + BigInt(a[0].claimable_funding_amounts[collateralIndex]),
-      0n
-    );
+    const dues = positions.map(pending);
+    const paid = dues.reduce((sum, due) => sum + BigInt(due.cost_amount), 0n);
+    const claimed = dues.reduce((sum, due) => sum + BigInt(due.claimable_amounts[collateralIndex]), 0n);
     assert(paid >= claimed, c.id);
     if (c.id.endsWith("-return")) assert.equal(checkpoints.at(-1).longs_pay, checkpoints[0].longs_pay, c.id);
-    reversalCheckpoints += checkpoints.length;
-    reversalSettlements += positions.length * 2;
+    if (single) survivorSettlements += expected.settlements.filter(Boolean).length * 2;
+    else {
+      reversalCheckpoints += checkpoints.length;
+      reversalSettlements += positions.length * 2;
+    }
   }
   assert.deepEqual(c.output, expected, c.id);
   const first = checkpoints[0],
@@ -674,7 +716,7 @@ for (let index = 0; index < reference.cases.length; index++) {
   assert.equal(c.id, inputs.cases[index].id);
   assert.deepEqual(c.input, inputs.cases[index].input);
   const p = c.input;
-  if (p.operation === "dynamic_funding" || p.operation === "dynamic_funding_settlement") {
+  if (["dynamic_funding", "dynamic_funding_settlement", "dynamic_funding_single_side"].includes(p.operation)) {
     verifyDynamicFunding(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
@@ -1056,6 +1098,29 @@ try {
   invalid.push((s) => {
     delete s.cases[223].input.is_long_collateral;
   });
+  invalid.push(
+    (s) => {
+      delete s.cases[247].input.transition;
+    },
+    (s) => {
+      delete s.cases[247].input.transition.close_long;
+    },
+    (s) => {
+      s.cases[247].input.transition.elapsed_seconds = [];
+    },
+    (s) => {
+      s.cases[247].input.transition.elapsed_seconds = [31_536_001];
+    },
+    (s) => {
+      s.cases[247].input.scenario.steps[0].elapsed_seconds = 0;
+    },
+    (s) => {
+      s.cases[247].input.transition.unknown = true;
+    },
+    (s) => {
+      s.cases[247].input.scenario.steps[0].add_short_usd20 = "0";
+    }
+  );
   for (const mutate of invalid) {
     const suite = structuredClone(inputs);
     mutate(suite);
@@ -1107,6 +1172,10 @@ process.stdout.write(
       distributionSettlements,
       reversalCheckpoints,
       reversalSettlements,
+      singleSideWarmupCheckpoints,
+      singleSideUpdates,
+      fullCloses,
+      survivorSettlements,
       malformedRejected: rejected,
       modelErrorDistinctFromZero: true,
       liquidationProbeErrorDistinctFromResult: true,

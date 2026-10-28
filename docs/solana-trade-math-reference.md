@@ -176,3 +176,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 每组只使用一种抵押品：long抵押组long claim非零、short claim为零，short组相反；没有声称同一动态场景同时领取两种非零token。两种抵押token、min/max和两个初始方向都实际验，混合抵押同时参与动态反转仍属剩余矩阵。开仓long 10000000000或short 1000000000 raw；后续每次增仓1 USD并补long 1000000000或short 100000000 raw。其余流动性/价格/模型配置延续dynamic，borrow update不调用、order/swap费与impact0，严格检查时间漂移。本轮是report/快照验收，不是vault或钱包转账。
 
 最终247组两次输出字节一致、独立核算及86类非法输入/setup拒绝通过，SHA-256 `7aeb310ecdceb25ff9967060d45c70658f4685703150094017bb3dbc58bca7af`。Rust check/fmt、脚本lint/格式、本轮EVM费用/仓位55项通过，详见[第五十八轮记录](solana-implementation-research.md#第五十八轮实施记录t17b2d5-动态反转后旧仓结算2026-10-28)。下一轮T17.b2d6从真实全平动作核对非零动态费率转单边OI，验证next清零与既有累计保留，再补混合动态/borrow kink/smaller-side等剩余矩阵。T17及b2d仍实施中，T19依赖完整参考与T04.b reviewed字段，未接生产共享状态或UI。
+
+## T17.b2d6 非零动态费率转单边OI子集（2026-10-28）
+
+新增 `dynamic_funding_single_side`，复用动态暖场、pending及结算路径；显式transition含close_long和非空elapsed_seconds。暖场必须得到非零stored factor，再逐仓真实全平指定side，核对恰好一边OI为零，之后执行资金费更新及幸存仓位的两次增仓。未直接覆写OI、快照或费率。16组覆盖两初始方向×两抵押token×关闭任一side×minimum/reversal暖场：32次暖场update、20次真实全平、48次单边update、40次幸存增仓。旧247组输入/业务输出不变，总263组。
+
+固定tag `UpdateFundingState::next_funding_amount_per_size` 在任一side为零时返回empty report，`execute`将next写为0；这在elapsed=0和配置min rate非零时也成立，不走正常rate/min计算。每组实际连续更新0/10/10000秒，首个previous为暖场非零值，后续为0；四维market funding/claimable累计保持暖场值，delta全0。幸存仓位pending逐项保留，不随rate清零而消失；第一次增仓结算原累计，第二次无update返回0。
+
+关闭side可能包含多个仓位，全部通过 `DecreasePosition::execute` 全平。逐仓比对report应付/两种claimable、should_remove=true与remaining size0；平仓会结算该仓旧pending，但不改变其他仓位的累计或市场funding因子。独立核算器保留每仓出生快照，并同时核对关闭报告和幸存结算。已关闭仓位后续pending/settlement为null，不查询其零size pending或重新开仓。这里不验证完整减仓PnL/output分配、租金或vault付款；全平只是本子集建立真实OI转换的必要动作。
+
+延续dynamic单一抵押token、固定流动性/抵押、零order/swap费与impact、不调用borrow update和严格clock drift拒绝。新transition拒绝缺字段、缺close bool、空/越域时间、未知字段，暖场stored为零或初始单边也拒绝；不把无效前置当清零通过。未覆盖全部OI为零、重新进入双边OI、混合抵押动态反转和真实转账。
+
+最终263组两次字节一致、独立核算及93类非法输入/setup拒绝通过；SHA-256 `cbc8ca03ba7f0a5c141d1a7a65c53b69774ba58f81ebd64c962449ddad705b0a`。Rust check/fmt、脚本lint/格式及本轮EVM费用/仓位55项通过，命令/证据见[第五十九轮记录](solana-implementation-research.md#第五十九轮实施记录t17b2d6-非零动态费率转单边oi2026-10-28)。下一轮T17.b2d7混合抵押动态反转累计与结算，再补borrow kink/smaller-side及其他矩阵；T17/b2d及T19仍未完成，无生产共享状态/UI接线。
