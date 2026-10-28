@@ -49,6 +49,10 @@ struct Case {
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 enum Input {
+    DynamicFundingMixed {
+        scenario: DynamicFundingInput,
+        long_collateral_factors: [String; 2],
+    },
     DynamicFundingSingleSide {
         scenario: DynamicFundingInput,
         is_long_collateral: bool,
@@ -184,6 +188,7 @@ fn dynamic_funding(
     settle: bool,
     is_long_collateral: bool,
     transition: Option<&SingleSideInput>,
+    mixed_factors: Option<[u128; 2]>,
 ) -> Result<Value> {
     if let Some(transition) = transition {
         if transition.elapsed_seconds.is_empty()
@@ -238,14 +243,31 @@ fn dynamic_funding(
     let _ = market.update_funding(&prices)?.execute()?;
     let mut positions = Vec::new();
     let mut sides = Vec::new();
+    let mut collaterals = Vec::new();
     let mut checkpoints = Vec::new();
     for step in &input.steps {
         if step.elapsed_seconds > 31_536_000 {
             return Err("Funding interval exceeds one year".into());
         }
-        let mut actions = Vec::new();
-        for (is_long, text) in [(true, &step.add_long_usd20), (false, &step.add_short_usd20)] {
+        let mut additions = Vec::new();
+        for (index, (is_long, text)) in
+            [(true, &step.add_long_usd20), (false, &step.add_short_usd20)]
+                .into_iter()
+                .enumerate()
+        {
             let size = uint(text)?;
+            if let Some(factors) = mixed_factors {
+                let long_size =
+                    gmsol_model::utils::apply_factor::<u128, 20>(&size, &factors[index])
+                        .ok_or("Mixed collateral split overflow")?;
+                additions.push((is_long, true, long_size));
+                additions.push((is_long, false, size - long_size));
+            } else {
+                additions.push((is_long, is_long_collateral, size));
+            }
+        }
+        let mut actions = Vec::new();
+        for (is_long, is_long_collateral, size) in additions {
             if size == 0 {
                 actions.push(Value::Null);
                 continue;
@@ -278,6 +300,7 @@ fn dynamic_funding(
             }));
             positions.push(position);
             sides.push(is_long);
+            collaterals.push(is_long_collateral);
         }
         let long = market.open_interest()?.long_amount()?;
         let short = market.open_interest()?.short_amount()?;
@@ -392,7 +415,9 @@ fn dynamic_funding(
     }
     if settle {
         let mut settlements = Vec::new();
-        for (index, (position, is_long)) in positions.iter_mut().zip(sides).enumerate() {
+        for (index, ((position, is_long), is_long_collateral)) in
+            positions.iter_mut().zip(sides).zip(collaterals).enumerate()
+        {
             if closed[index] {
                 settlements.push(Value::Null);
                 continue;
@@ -1240,16 +1265,32 @@ fn model_error(error: gmsol_model::Error) -> Value {
 fn evaluate(input: &Input) -> Result<Value> {
     match input {
         Input::FundingDistribution { scenario } => funding_distribution(scenario),
-        Input::DynamicFunding { scenario } => dynamic_funding(scenario, false, false, None),
+        Input::DynamicFunding { scenario } => dynamic_funding(scenario, false, false, None, None),
         Input::DynamicFundingSettlement {
             scenario,
             is_long_collateral,
-        } => dynamic_funding(scenario, true, *is_long_collateral, None),
+        } => dynamic_funding(scenario, true, *is_long_collateral, None, None),
         Input::DynamicFundingSingleSide {
             scenario,
             is_long_collateral,
             transition,
-        } => dynamic_funding(scenario, true, *is_long_collateral, Some(transition)),
+        } => dynamic_funding(scenario, true, *is_long_collateral, Some(transition), None),
+        Input::DynamicFundingMixed {
+            scenario,
+            long_collateral_factors,
+        } => {
+            let factors = [
+                factor(&long_collateral_factors[0])?,
+                factor(&long_collateral_factors[1])?,
+            ];
+            if factors.iter().any(|value| *value == 0 || *value == UNIT) {
+                return Err(
+                    "Mixed funding requires both collateral shares strictly between zero and one"
+                        .into(),
+                );
+            }
+            dynamic_funding(scenario, true, false, None, Some(factors))
+        }
         Input::FundingAccrual { scenario } => funding_accrual(scenario),
         Input::BorrowingAccrual { scenario } => borrowing_accrual(scenario),
         Input::IncreaseImpact { scenario } => increase_impact(scenario),
@@ -1433,7 +1474,7 @@ fn main() -> Result<()> {
             "rustc": String::from_utf8(rustc.stdout)?.trim()
         },
         "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case or documented per-operation fixtures", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
-        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement"],
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement", "Mixed-collateral dynamic reversal funding and two-token claimable settlement"],
         "cases": cases
     });
     // Buffer all cases before writing stdout; callers must still publish output atomically.

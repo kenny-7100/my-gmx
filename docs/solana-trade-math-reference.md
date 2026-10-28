@@ -188,3 +188,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 延续dynamic单一抵押token、固定流动性/抵押、零order/swap费与impact、不调用borrow update和严格clock drift拒绝。新transition拒绝缺字段、缺close bool、空/越域时间、未知字段，暖场stored为零或初始单边也拒绝；不把无效前置当清零通过。未覆盖全部OI为零、重新进入双边OI、混合抵押动态反转和真实转账。
 
 最终263组两次字节一致、独立核算及93类非法输入/setup拒绝通过；SHA-256 `cbc8ca03ba7f0a5c141d1a7a65c53b69774ba58f81ebd64c962449ddad705b0a`。Rust check/fmt、脚本lint/格式及本轮EVM费用/仓位55项通过，命令/证据见[第五十九轮记录](solana-implementation-research.md#第五十九轮实施记录t17b2d6-非零动态费率转单边oi2026-10-28)。下一轮T17.b2d7混合抵押动态反转累计与结算，再补borrow kink/smaller-side及其他矩阵；T17/b2d及T19仍未完成，无生产共享状态/UI接线。
+
+## T17.b2d7 混合抵押动态反转与结算子集（2026-10-28）
+
+新增 `dynamic_funding_mixed`，复用既有动态轨迹/真实增仓/时钟及pending结算路径。`long_collateral_factors` 是long/short side新增OI分给long collateral的工具fixture份额，不是协议配置；两项均为规范UNIT（10^20）比例且严格介于0和1。每步用固定model `utils::apply_factor` 向下取整long-collateral size，余数分到short collateral，按四维side/collateral矩阵开真实仓位。每仓保留实际抵押类型；未直接覆写OI、累计或仓位快照，原操作默认行为不变。
+
+24组覆盖两初始付款方向、75%/30%与舍入三分之一/三分之二两组不对称份额，以及standard/split/return/zero-time/minimum/capped六种轨迹；84次funding update、304次后续增仓，总287组，旧263组输入/业务输出不变。每case内每side的份额固定，不代表轨迹内份额变化或混合单边转换已验证。
+
+独立BigInt跟踪四维OI：付款collateral funding USD按OI份额floor，payer packing使用该collateral OI并两层ceil；receiver packing使用接收side总OI并两层floor，各token分别用max price。每仓以真实开仓时的fee/两claimable累计作为出生快照，避免领取开仓前累计。四个初始旧仓反转后均保留非零应付与两种非零claims，不净额抵消；每步pending、首次结算/三快照推进、第二次无更新报告零逐项验证，每token总收费≥总领取。这里只验证model报告，不证明vault付款。
+
+287组两次Rust输出字节一致、独立核算及101类非法输入/setup拒绝通过；SHA-256 `593dbe18ed5e5c83a067acf1658e0cb9e69b56a8bddf957562563a240025a2ec`。Rust check/fmt、脚本lint/格式及本轮EVM费用/仓位两文件55项通过，完整命令与证据见[第六十轮记录](solana-implementation-research.md#第六十轮实施记录t17b2d7-混合抵押动态反转与结算2026-10-28)。新增拒绝包括share零/UNIT/越界/非规范、数组长度、缺share、未知字段和末步非法金额，仍整次拒绝而不发布部分JSON。
+
+下一轮T17.b2d8 borrowing kink与skip-smaller-side，复用已有borrowing路径补分段及跳过边界。累计费用清算、全部OI清空/重新进入、完整减仓/min-position/限额、程序费用退款及真实转账仍待；T17/b2d父项及整个集成未完成。工具不进入生产SDK/共享状态/UI，T19仍待完整参考矩阵与T04.b reviewed字段，页面仍占位。

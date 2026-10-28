@@ -28,8 +28,8 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 263);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 263);
+assert.equal(reference.cases.length, 287);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 287);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
@@ -50,20 +50,24 @@ let singleSideWarmupCheckpoints = 0;
 let singleSideUpdates = 0;
 let fullCloses = 0;
 let survivorSettlements = 0;
+let mixedCheckpoints = 0;
+let mixedSettlements = 0;
 
 function verifyDynamicFunding(c) {
   const p = c.input.scenario;
   const single = c.input.operation === "dynamic_funding_single_side";
-  const settle = single || c.input.operation === "dynamic_funding_settlement";
+  const mixed = c.input.operation === "dynamic_funding_mixed";
+  const settle = mixed || single || c.input.operation === "dynamic_funding_settlement";
   const collateralIndex = c.input.is_long_collateral ? 0 : 1;
   const fees = [0n, 0n, 0n, 0n],
     claims = [0n, 0n, 0n, 0n],
+    collateralOi = [0n, 0n, 0n, 0n],
     positions = [];
   const scale = 10n ** 30n;
   const pending = (position) => {
     const index = position.side ? 0 : 2;
     return {
-      cost_amount: String(ceil(position.size * (fees[index + collateralIndex] - position.fee), scale)),
+      cost_amount: String(ceil(position.size * (fees[index + position.col] - position.fee), scale)),
       claimable_amounts: [
         String((position.size * (claims[index] - position.claims[0])) / scale),
         String((position.size * (claims[index + 1] - position.claims[1])) / scale),
@@ -76,25 +80,37 @@ function verifyDynamicFunding(c) {
     short = 0n,
     stored = 0n;
   const checkpoints = p.steps.map((step) => {
-    const additions = [BigInt(step.add_long_usd20), BigInt(step.add_short_usd20)];
-    long += additions[0];
-    short += additions[1];
-    const actions = additions.map((size, i) =>
+    const totals = [BigInt(step.add_long_usd20), BigInt(step.add_short_usd20)];
+    long += totals[0];
+    short += totals[1];
+    const additions = totals.flatMap((size, side) => {
+      if (!mixed) return [{ size, side, col: collateralIndex }];
+      const longSize = (size * BigInt(c.input.long_collateral_factors[side])) / unit;
+      return [
+        { size: longSize, side, col: 0 },
+        { size: size - longSize, side, col: 1 },
+      ];
+    });
+    const actions = additions.map(({ size, side }) =>
       size === 0n
         ? null
         : {
             cost_amount: "0",
-            size_tokens: String(i === 0 ? size / BigInt(p.prices.index.max) : ceil(size, BigInt(p.prices.index.min))),
+            size_tokens: String(
+              side === 0 ? size / BigInt(p.prices.index.max) : ceil(size, BigInt(p.prices.index.min))
+            ),
             claimable_funding_amounts: ["0", "0"],
           }
     );
-    for (const [i, size] of additions.entries()) {
+    for (const { side, col, size } of additions) {
       if (size > 0n) {
-        const index = i * 2;
+        const index = side * 2;
+        collateralOi[index + col] += size;
         positions.push({
           size,
-          side: i === 0,
-          fee: fees[index + collateralIndex],
+          side: side === 0,
+          col,
+          fee: fees[index + col],
           claims: [claims[index], claims[index + 1]],
         });
       }
@@ -115,15 +131,18 @@ function verifyDynamicFunding(c) {
     const payer = longsPay ? long : short,
       receiver = longsPay ? short : long;
     const value = (payer * magnitude * seconds) / unit;
-    const price = BigInt((collateralIndex === 0 ? p.prices.long : p.prices.short).max);
-    const deltas = [true, true, false, false].map((side, i) => ({
-      funding_per_size: String(
-        i % 2 === collateralIndex && side === longsPay ? ceil(ceil(value * scale, payer), price) : 0n
-      ),
-      claimable_per_size: String(
-        i % 2 === collateralIndex && side !== longsPay ? (value * scale) / receiver / price : 0n
-      ),
-    }));
+    const deltas = [true, true, false, false].map((side, i) => {
+      const col = i % 2;
+      const payerCollateral = collateralOi[(longsPay ? 0 : 2) + col];
+      const collateralValue = (value * payerCollateral) / payer;
+      const price = BigInt((col === 0 ? p.prices.long : p.prices.short).max);
+      return {
+        funding_per_size: String(
+          side === longsPay && payerCollateral > 0n ? ceil(ceil(collateralValue * scale, payerCollateral), price) : 0n
+        ),
+        claimable_per_size: String(side !== longsPay ? (collateralValue * scale) / receiver / price : 0n),
+      };
+    });
     for (const [i, delta] of deltas.entries()) {
       fees[i] += BigInt(delta.funding_per_size);
       claims[i] += BigInt(delta.claimable_per_size);
@@ -178,7 +197,8 @@ function verifyDynamicFunding(c) {
     expected.settlements = positions.map((position) => {
       if (single && position.side === c.input.transition.close_long) return null;
       const due = pending(position),
-        index = position.side ? 0 : 2;
+        index = position.side ? 0 : 2,
+        collateralIndex = position.col;
       return [1n, 2n].map((attempt) => ({
         cost_amount: attempt === 1n ? due.cost_amount : "0",
         claimable_funding_amounts: attempt === 1n ? due.claimable_amounts : ["0", "0"],
@@ -200,18 +220,28 @@ function verifyDynamicFunding(c) {
         checkpoints.some((v) => v.longs_pay !== checkpoints[0].longs_pay),
         c.id
       );
-      for (const due of positions.slice(0, 2).map(pending)) {
+      for (const due of positions.slice(0, mixed ? 4 : 2).map(pending)) {
         assert(BigInt(due.cost_amount) > 0n, c.id);
-        assert(BigInt(due.claimable_amounts[collateralIndex]) > 0n, c.id);
+        if (mixed)
+          assert(
+            due.claimable_amounts.every((v) => BigInt(v) > 0n),
+            c.id
+          );
+        else assert(BigInt(due.claimable_amounts[collateralIndex]) > 0n, c.id);
       }
     }
     const dues = positions.map(pending);
-    const paid = dues.reduce((sum, due) => sum + BigInt(due.cost_amount), 0n);
-    const claimed = dues.reduce((sum, due) => sum + BigInt(due.claimable_amounts[collateralIndex]), 0n);
-    assert(paid >= claimed, c.id);
+    for (const col of [0, 1]) {
+      const paid = dues.reduce((sum, due, i) => sum + (positions[i].col === col ? BigInt(due.cost_amount) : 0n), 0n);
+      const claimed = dues.reduce((sum, due) => sum + BigInt(due.claimable_amounts[col]), 0n);
+      assert(paid >= claimed, c.id);
+    }
     if (c.id.endsWith("-return")) assert.equal(checkpoints.at(-1).longs_pay, checkpoints[0].longs_pay, c.id);
     if (single) survivorSettlements += expected.settlements.filter(Boolean).length * 2;
-    else {
+    else if (mixed) {
+      mixedCheckpoints += checkpoints.length;
+      mixedSettlements += positions.length * 2;
+    } else {
       reversalCheckpoints += checkpoints.length;
       reversalSettlements += positions.length * 2;
     }
@@ -716,7 +746,11 @@ for (let index = 0; index < reference.cases.length; index++) {
   assert.equal(c.id, inputs.cases[index].id);
   assert.deepEqual(c.input, inputs.cases[index].input);
   const p = c.input;
-  if (["dynamic_funding", "dynamic_funding_settlement", "dynamic_funding_single_side"].includes(p.operation)) {
+  if (
+    ["dynamic_funding", "dynamic_funding_settlement", "dynamic_funding_single_side", "dynamic_funding_mixed"].includes(
+      p.operation
+    )
+  ) {
     verifyDynamicFunding(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
@@ -1121,6 +1155,32 @@ try {
       s.cases[247].input.scenario.steps[0].add_short_usd20 = "0";
     }
   );
+  invalid.push(
+    (s) => {
+      s.cases[263].input.long_collateral_factors[0] = "0";
+    },
+    (s) => {
+      s.cases[263].input.long_collateral_factors[0] = String(unit);
+    },
+    (s) => {
+      s.cases[263].input.long_collateral_factors[1] = String(unit + 1n);
+    },
+    (s) => {
+      s.cases[263].input.long_collateral_factors[1] = "01";
+    },
+    (s) => {
+      s.cases[263].input.long_collateral_factors.pop();
+    },
+    (s) => {
+      delete s.cases[263].input.long_collateral_factors;
+    },
+    (s) => {
+      s.cases[263].input.unknown = true;
+    },
+    (s) => {
+      s.cases[263].input.scenario.steps.at(-1).add_long_usd20 = "1.0";
+    }
+  );
   for (const mutate of invalid) {
     const suite = structuredClone(inputs);
     mutate(suite);
@@ -1176,6 +1236,8 @@ process.stdout.write(
       singleSideUpdates,
       fullCloses,
       survivorSettlements,
+      mixedCheckpoints,
+      mixedSettlements,
       malformedRejected: rejected,
       modelErrorDistinctFromZero: true,
       liquidationProbeErrorDistinctFromResult: true,

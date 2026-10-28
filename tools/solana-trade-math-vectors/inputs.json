@@ -12101,6 +12101,1170 @@
           "elapsed_seconds": [0, 10, 10000]
         }
       }
+    },
+    {
+      "id": "dynamic-mixed-1-long-standard",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-long-split",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-long-return",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "1200000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-long-zero-time",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 0
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-long-minimum",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "10000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-long-capped",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "2000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-short-standard",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-short-split",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-short-return",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "1200000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-short-zero-time",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 0
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-short-minimum",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "10000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-1-short-capped",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "2000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["75000000000000000000", "30000000000000000000"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-long-standard",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-long-split",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-long-return",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "1200000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-long-zero-time",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 0
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-long-minimum",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "10000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-long-capped",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "2000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-short-standard",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-short-split",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-short-return",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "1200000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-short-zero-time",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 0
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-short-minimum",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "10000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
+    },
+    {
+      "id": "dynamic-mixed-2-short-capped",
+      "input": {
+        "operation": "dynamic_funding_mixed",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "2000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "long_collateral_factors": ["33333333333333333333", "66666666666666666667"]
+      }
     }
   ]
 }
