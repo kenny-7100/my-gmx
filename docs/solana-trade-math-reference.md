@@ -1,6 +1,6 @@
 # Solana 交易数学差异与独立参考向量
 
-核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a 源码差异与生成入口核实**及 **T17.b1 首个子集及编译验收**。用户已授权Rust安装与限定构建；生成器、锁文件和43组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
+核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a 差异核实、b1首个子集及b2a动作初始化清算边界子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和71组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
 
 ## 固定版本与证据范围
 
@@ -74,3 +74,21 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 首次运行揭示long的uncapped输入仍因spread被1000 USD池值轻微cap；将这两组long池量增到2000000000，使pool值2000 USD高于side PnL 1002 USD，按其原用例目标修正输入并重新生成，未改model/公式或手填期望。long部分减仓tokens向上取整、short向下取整均已独立核对。rustfmt、脚本零warning lint/Prettier通过；原EVM SDK fees/positions两文件55项/0skip通过，零联网尝试，source/tooling不变且cleanup passed。完整命令与可追溯结果见[第五十轮记录](solana-implementation-research.md#第五十轮实施记录t17b1-rust安装与首个向量子集验收2026-10-28)。
 
 下一轮从T17.b2动作/清算predicate子集继续，复用已安装工具链和同一生成器，不积累未经编译代码；此安装授权不应再作为阻碍，也不需再次询问同一生成器的必要编译。即时impact/acceptable price、清算/minima、funding、程序层费用退款及SDK/API共用消费仍未覆盖。T19继续等待完整独立向量和T04.b reviewed字段，不将首个子集完成等同T17或FESOL-57完成。T24.b2参数与prepare账户校验仍为其明确接手点，未因本轮授权切片而完成。
+
+## T17.b2a 动作初始化的清算边界子集（2026-10-28）
+
+本轮接续b2，先完成一个可独立验收的限定子步骤，不将整个动作/清算矩阵标为完成。沿用同一生成器/锁文件及Rust1.90.0授权；实时FESOL-57于 `2026-10-28T02:01:31.245Z` 抓取，正文、关系及1条评论不变；线上tag仍指向固定commit。限定搜索open主前端PR的标题/分支中的57、math、liquidat未命中，不代表所有远端分支都无相关工作。
+
+新增28组 `liquidation_check` 输入：long/short × long/short collateral，各覆盖杠杆最低抵押、市场最低抵押、二者相等、剩余抵押非正、显式null的协议factor回落、三种token价格spread；short collateral另覆盖开平仓费用及清算费排除的成对对照。每组通过真实 `market.deposit(...).execute()` 与 `position.increase(...).execute()` 初始化，并保存开仓后size/tokens/collateral/fee/execution/impact；不手填仓位或伪造动作report。随后对三个相邻raw index价格调用 `check_liquidatable(prices,true,true)`，同时保存普通 `for_liquidation=false` 的结果和原因，总84个价格点各执行两类predicate。
+
+本子集显式把swap/position impact及swap fee置零，模型clock不推进，故无累计borrowing/funding。初始价格、存入流动性、抵押数量、size、minima、普通/清算factor及费用均来自JSON；其余reserve/OI/PnL限额、borrowing/funding配置和模型精度调整沿用固定tag的 `TestMarketConfig` 默认值，不冒充真实市场参数。所有probe均为亏损，不覆盖盈利PnL cap。long collateral场景按输入显式联动long/index min，short collateral场景long价格保持输入值；没有隐含价格联动。
+
+边界由该限定场景的独立仿射关系推导，输入保留候选值减一、候选值、候选值加一；不是粗采样或假定通用单调性的二分。不可整除时保留边界两侧的相邻可表示价格，不声称存在精确相等点。例如long/long collateral，1000 USD仓位、10 token size、2 token抵押、清算factor5%、普通factor10%、市场minimum20 USD时：剩余抵押为 `12 * tokenPrice - 1000`，87.5 USD刚好满足50 USD清算门槛，但仍不满足100 USD普通margin门槛。真实predicate确认该点不清算、低一个raw价格单位清算，且三点均普通margin不足。市场minimum与leverage相等时，低于门槛优先报告 `min collateral`；minimum为0时精确0报告 `<= 0`，负值仍按程序报告 `min collateral`，不改写原因。
+
+`liquidation_collateral_factor`必须显式为规范字符串或null，遗漏拒绝。null只验证协议getter回落普通factor的既有行为，绝非允许API缺字段静默回落。订单费为0.1%的对照在开仓和关闭估算时各扣1 USD；将清算费从0变为90%的压力输入不改变predicate及关闭费用，验证程序判断是否清算时不包含清算费。这不是实际清算付款或执行成功证据。
+
+当前 [vectors.json](../tools/solana-trade-math-vectors/vectors.json) 共71组；原43组case的输入/输出逐项与前一接受文件相同，仅来源元数据/scope更新。两次Rust输出字节一致，SHA-256为 `91a2e15a8db60bb7e8399fc393f10d5989d5726ca636757d0b77e677a63c56c7`。独立BigInt验收核对开仓结果、所有84点PnL/抵押/关闭费/布尔及原因、相邻单位和跨边界、factor差异与null回落、清算费排除；27种非法输入/无效setup非零退出且stdout为空。另有model conversion及单probe溢出，确认error与零/不清算分开，其他probe保留正常结果。
+
+复现仍用工具README的两次 `cargo +1.90.0 run --locked --offline` 和 `verify.mjs FIRST SECOND`；rustfmt、脚本lint/Prettier及已有EVM fees/positions两文件55项/0skip通过，network拒绝次数0、source/tooling不变、cleanup passed。完整命令及原生证据见[第五十一轮记录](solana-implementation-research.md#第五十一轮实施记录t17b2a-动作初始化清算边界子集2026-10-28)。只修改工具及文档，无生产SDK/React/StateCtx/API、依赖锁或flag变化；根类型/最终bundle、真实页面/钱包/交易未验。
+
+下一步T17.b2b：先补非零position impact下increase report与acceptable-price相邻边界，再补非零impact清算、累计borrowing/funding、盈利状态、min-position/decrease限制及其余矩阵。当前向量不是一般清算价求解器；T17/FESOL-57仍实施中，T19及生产页面消费未实施。

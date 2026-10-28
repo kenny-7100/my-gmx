@@ -1762,4 +1762,27 @@ T24父项仍实施中，下一轮 **T24.b2 独立预期参数比对及prepare_po
 
 T17.b1首个子集现已编译并完成离线独立数值验收，**T17父项及FESOL-57仍实施中**。下一轮优先T17.b2动作/清算predicate向量，复用相同工具与用户已给的限定生成器构建授权；即时impact、acceptable price、minima/liquidation/funding/程序费用退款和SDK/API消费仍待。T19完整向量及T04.b reviewed字段前置不变；T24.b2接手点保留，T23 nonce/T25资源与交易授权/T28真实变体及部署身份仍未解锁。
 
+## 第五十一轮实施记录：T17.b2a 动作初始化清算边界子集（2026-10-28）
+
+沿用 `solana-independent-implementation`，初始实施基线仍为 `5637a48912114f86df57bb409c1121d60a086070`，当前HEAD `4b1e7cc12f371b7ac7842ebb3f4ee64a31757d23`。前五十轮已由用户push提交至个人my-gmx；本轮先执行用户要求的add/commit/push，commit因clean返回nothing to commit，再执行 `git push my-gmx HEAD` 返回Everything up-to-date。本轮新增实现与文档未提交，未创建PR或自动同步上游。修正任务表当前交接里过期的“全部未提交”，不篡改前轮当时记录。
+
+已读根AGENTS、任务表及本研究的总体边界/最近记录、数学主题、参考仓库入口、交付/只读需求skill、gmx-prompts dev/Solana/tests/review及适用细则。实时FESOL-57于 `2026-10-28T02:01:31.245Z` 抓取，Execution、updatedAt仍2026-10-25T23:43:47.128Z，无GMTrade标签，正文、关系和唯一评论未变化。GitHub tag v0.10.0仍为 `7ce035b41a266cb5ddb0192e5d29deb0c7e67a72`；限定open主前端PR标题/分支搜索57/math/liquidat未命中，未做全量调研或Git fetch。实际编译来源是Cargo锁定checkout的7ce035b；本地参考repo HEAD f102501未切换、未修改。需求原始记录在本机 `.local/acceptance/requirements/solana-implementation-t17b2/fesol-57.json`。
+
+从上一轮b2接手点拆出b2a：扩展现有 [main.rs](../tools/solana-trade-math-vectors/src/main.rs)、[输入](../tools/solana-trade-math-vectors/inputs.json) 与 [验收器](../tools/solana-trade-math-vectors/verify.mjs)，新增28组真实deposit/increase初始化场景，清算与普通margin predicate各验证84个相邻价格点；完整分组、已知defaults、仿射边界及限制统一维护在[数学主题](solana-trade-math-reference.md#t17b2a-动作初始化的清算边界子集2026-10-28)。没有新建生成器框架、平行数据流、生产组件或store，没有调用WASM status作为数学真值。清算factor必填可为显式null，模型错误不变为零或false。非零impact、累计费用及一般清算价求解仍不在本子集内。
+
+本轮实际命令与结果（仓库根目录；Cargo相关命令在进程PATH前置 `/Users/kenny/.cargo/bin`）：
+
+- `cargo +1.90.0 check --locked --offline --manifest-path tools/solana-trade-math-vectors/Cargo.toml`：通过；首轮新导入路径错误，改为实际 `params::fee::LiquidationFeeParams` 后通过，未调整依赖。
+- `cargo +1.90.0 fmt --manifest-path tools/solana-trade-math-vectors/Cargo.toml --check`：通过。
+- 两次 `cargo +1.90.0 run --locked --offline --manifest-path tools/solana-trade-math-vectors/Cargo.toml -- tools/solana-trade-math-vectors/inputs.json`：均退出0，71组字节一致。输出保存 `first.json` / `second.json`；只在核算通过后原子替换接受文件。旧43组case与上一接受文件逐项相同。
+- `node tools/solana-trade-math-vectors/verify.mjs tools/solana-trade-math-vectors/vectors.json .local/acceptance/requirements/solana-implementation-t17b2/second.json`：71组独立核算、84个清算点及普通margin对照、来源/两次一致性、27种非法输入/无效setup拒绝及model/probe错误区分全部通过，临时目录清理通过。报告 `verification.json`；接受文件SHA-256 `91a2e15a8db60bb7e8399fc393f10d5989d5726ca636757d0b77e677a63c56c7`。
+- `yarn sdk:test-offline --suite src/utils/__tests__/fees.spec.ts --suite src/utils/__tests__/positions.spec.ts`：2文件55项通过，0失败/skip，network installations=2、blockedAttempts=0，sourceUnchanged/toolingUnchanged=true、进程及临时目录cleanup passed。日志 `evm-sdk.log`；原生 `.local/acceptance/sdk-offline/run-k75TNd/vitest-results.json`。
+- `yarn exec eslint tools/solana-trade-math-vectors/verify.mjs --max-warnings 0`：零warning；相关JSON/脚本Prettier、文档链接和diff检查见收尾记录。
+
+自审依次核对全部除法/舍入、真实动作顺序、参数完整性与None/零/错误、USD20/raw token及价格边界、失败整次输出原子性和生产消费者隔离。新场景初始化使用固定tag默认reserve/OI限制等，仅显式覆盖该子集价格/impact/费用/minima；它们是离线数学状态，不代表主网配置。每组价格逐字段保留，模型clock不推进；独立验收器只核算，不生成接受输出。源数据/代码/hash、71组JSON与上述摘要可共享，不只引用本机日志。
+
+没有改动生产SDK/EVM/UI/API、缓存/存储、lazy入口、包依赖或锁文件；无共享启动引用、旧服务或RPC请求。本轮未运行根类型/完整前端回归/最终bundle或真实钱包/交易验收，不把工具限定通过写成集成完成。现有前端服务与用户Chrome保持运行，本轮未新开浏览器。下一轮从T17.b2b非零impact increase report/acceptable-price边界继续；T04.b评审、T10 revision、T23 nonce、T25钱包/开关/交易授权及其余待验范围保持，T17/T19与整个集成均未完成。
+
+收尾实际通过：三个JSON/脚本文件的Prettier、verify.mjs零warning ESLint、Rust fmt check、`git diff --check`；`yarn agent:docs-check --file docs/solana-trade-math-reference.md --file docs/README.md --file docs/solana-implementation-research.md --file solana-implementation-tasks.md --file tools/solana-trade-math-vectors/README.md` 检查194个本地链接、diagnostics为空。仅上述9个工具/文档文件变化，gmx-solana/gmx-prompts工作区无改动。
+
 收尾检查：六份相关文档 `yarn agent:docs-check` 实际检查226个本地链接、0诊断；`git diff --check`、脚本零warning lint、Prettier及Rust fmt均退出0。数学工具链的可复用检查顺序已写入运行版本矩阵；本轮没有变更Node、根Yarn依赖或SDK来源收据。

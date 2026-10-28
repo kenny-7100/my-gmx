@@ -7,12 +7,13 @@ use std::{
 };
 
 use gmsol_model::{
-    params::{FeeParams, PositionParams},
+    params::{fee::LiquidationFeeParams, FeeParams, PositionParams, PriceImpactParams},
     pool::delta::BalanceChange,
     price::{Price, Prices},
     test::{TestMarket, TestMarketConfig, TestPosition},
-    BaseMarketExt, BaseMarketMut, PerpMarketExt, PerpMarketMut, Pool, PositionExt,
-    PositionImpactMarketMutExt, PositionStateMut,
+    BaseMarketExt, BaseMarketMut, LiquidityMarketMutExt, MarketAction, PerpMarketExt,
+    PerpMarketMut, Pool, PositionExt, PositionImpactMarketMutExt, PositionMutExt, PositionState,
+    PositionStateMut,
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -39,6 +40,9 @@ struct Case {
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 enum Input {
+    LiquidationCheck {
+        scenario: LiquidationInput,
+    },
     Fee {
         amount: String,
         positive_factor: String,
@@ -90,6 +94,171 @@ enum Change {
 struct PriceInput {
     min: String,
     max: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PricesInput {
+    index: PriceInput,
+    long: PriceInput,
+    short: PriceInput,
+}
+
+impl PricesInput {
+    fn parse(&self) -> Result<Prices<u128>> {
+        Ok(Prices {
+            index_token_price: price(&self.index)?,
+            long_token_price: price(&self.long)?,
+            short_token_price: price(&self.short)?,
+        })
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LiquidationInput {
+    is_long: bool,
+    is_long_collateral: bool,
+    index_decimals: u8,
+    long_decimals: u8,
+    short_decimals: u8,
+    entry_prices: PricesInput,
+    probe_prices: Vec<PricesInput>,
+    deposit_long_amount: String,
+    deposit_short_amount: String,
+    collateral_amount: String,
+    size_usd20: String,
+    min_position_size_usd20: String,
+    min_collateral_usd20: String,
+    min_collateral_factor: String,
+    #[serde(deserialize_with = "Option::deserialize")]
+    liquidation_collateral_factor: Option<String>,
+    order_fee_factor: String,
+    liquidation_fee_factor: String,
+}
+
+fn liquidation_check(input: &LiquidationInput) -> Result<Value> {
+    for value in [
+        input.index_decimals,
+        input.long_decimals,
+        input.short_decimals,
+    ] {
+        decimals(value)?;
+    }
+    if input.probe_prices.is_empty() {
+        return Err("Expected nonempty liquidation probes".into());
+    }
+    let entry = input.entry_prices.parse()?;
+    let probes = input
+        .probe_prices
+        .iter()
+        .map(PricesInput::parse)
+        .collect::<Result<Vec<_>>>()?;
+    let size = uint(&input.size_usd20)?;
+    if size == 0 {
+        return Err("Expected nonzero position size".into());
+    }
+    let mut config = TestMarketConfig::<u128, 20>::default();
+    config.position_params = PositionParams::builder()
+        .min_position_size_usd(uint(&input.min_position_size_usd20)?)
+        .min_collateral_value(uint(&input.min_collateral_usd20)?)
+        .min_collateral_factor(factor(&input.min_collateral_factor)?)
+        .min_collateral_factor_for_liquidation(
+            input
+                .liquidation_collateral_factor
+                .as_deref()
+                .map(factor)
+                .transpose()?,
+        )
+        .max_positive_position_impact_factor(0)
+        .max_negative_position_impact_factor(0)
+        .max_position_impact_factor_for_liquidations(0)
+        .build();
+    // This subset isolates minima, collateral/PnL prices and closing fees. No clock advances.
+    let no_impact = PriceImpactParams::builder()
+        .exponent(UNIT)
+        .positive_factor(0)
+        .negative_factor(0)
+        .build();
+    config.position_impact_params = no_impact;
+    config.swap_impact_params = no_impact;
+    let fee = factor(&input.order_fee_factor)?;
+    config.order_fee_params = FeeParams::builder()
+        .fee_receiver_factor(0)
+        .positive_impact_fee_factor(fee)
+        .negative_impact_fee_factor(fee)
+        .build();
+    config.swap_fee_params = FeeParams::builder()
+        .fee_receiver_factor(0)
+        .positive_impact_fee_factor(0)
+        .negative_impact_fee_factor(0)
+        .build();
+    config.liquidation_fee_params = LiquidationFeeParams::builder()
+        .factor(factor(&input.liquidation_fee_factor)?)
+        .receiver_factor(0)
+        .build();
+    let mut market = TestMarket::<u128, 20>::with_config(config);
+    market
+        .deposit(
+            uint(&input.deposit_long_amount)?,
+            uint(&input.deposit_short_amount)?,
+            entry,
+        )?
+        .execute()?;
+    let mut position = if input.is_long {
+        TestPosition::long(input.is_long_collateral)
+    } else {
+        TestPosition::short(input.is_long_collateral)
+    };
+    let mut ops = position.ops(&mut market);
+    let report = ops
+        .increase(entry, uint(&input.collateral_amount)?, size, None)?
+        .execute()?;
+    let opened = json!({
+        "size_usd20": ops.size_in_usd().to_string(),
+        "size_tokens": ops.size_in_tokens().to_string(),
+        "collateral_amount": ops.collateral_amount().to_string(),
+        "opening_cost_amount": report.fees().total_cost_amount()?.to_string(),
+        "execution_price": report.execution().execution_price().to_string(),
+        "impact_usd20": report.execution().price_impact_value().to_string()
+    });
+    let mut results = Vec::new();
+    for prices in probes {
+        let result = (|| -> gmsol_model::Result<Value> {
+            let (pnl, _, _) = ops.pnl_value(&prices, ops.size_in_usd())?;
+            let collateral = ops.collateral_value(&prices)?;
+            let impact = ops.position_price_impact(
+                &-i128::try_from(size)
+                    .map_err(|_| gmsol_model::Error::Computation("size exceeds signed range"))?,
+                true,
+            )?;
+            let fees = ops.position_fees(
+                ops.collateral_price(&prices),
+                &size,
+                impact.balance_change,
+                false,
+            )?;
+            let cost = fees.total_cost_amount()?;
+            let reason = ops
+                .check_liquidatable(&prices, true, true)?
+                .map(|v| v.to_string());
+            let margin_reason = ops
+                .check_liquidatable(&prices, true, false)?
+                .map(|v| v.to_string());
+            Ok(json!({
+                "status": "ok", "pnl_usd20": pnl.to_string(),
+                "collateral_usd20": collateral.to_string(), "closing_cost_amount": cost.to_string(),
+                "impact_usd20": impact.value.to_string(),
+                "liquidatable": reason.is_some(), "reason": reason,
+                "margin_insufficient": margin_reason.is_some(), "margin_reason": margin_reason
+            }))
+        })();
+        results.push(match result {
+            Ok(value) => value,
+            Err(error) => model_error(error),
+        });
+    }
+    Ok(json!({"status": "ok", "opened": opened, "probes": results}))
 }
 
 fn uint(text: &str) -> Result<u128> {
@@ -147,6 +316,7 @@ fn model_error(error: gmsol_model::Error) -> Value {
 
 fn evaluate(input: &Input) -> Result<Value> {
     match input {
+        Input::LiquidationCheck { scenario } => liquidation_check(scenario),
         Input::Fee {
             amount,
             positive_factor,
@@ -325,7 +495,7 @@ fn main() -> Result<()> {
             "rustc": String::from_utf8(rustc.stdout)?.trim()
         },
         "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
-        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value"],
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)"],
         "cases": cases
     });
     // Buffer all cases before writing stdout; callers must still publish output atomically.
