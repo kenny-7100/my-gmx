@@ -28,8 +28,8 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 199);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 199);
+assert.equal(reference.cases.length, 223);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 223);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
@@ -42,6 +42,8 @@ let borrowingSettlements = 0;
 let fundingCheckpoints = 0;
 let fundingSettlements = 0;
 let dynamicFundingCheckpoints = 0;
+let distributionCheckpoints = 0;
+let distributionSettlements = 0;
 
 function verifyDynamicFunding(c) {
   const p = c.input.scenario;
@@ -116,36 +118,53 @@ function verifyDynamicFunding(c) {
 }
 
 function verifyFunding(c) {
-  const p = c.input.scenario;
+  const distribution = c.input.operation === "funding_distribution";
+  const p = distribution
+    ? {
+        ...c.input.scenario,
+        long_collateral_amount: "10000000000",
+        short_collateral_amount: "1000000000",
+        next_size_usd20: String(unit),
+        next_long_collateral_amount: "1000000000",
+        next_short_collateral_amount: "100000000",
+      }
+    : c.input.scenario;
+  const sizes = distribution
+    ? p.sizes_usd20.map(BigInt)
+    : [p.long_size_usd20, p.long_size_usd20, p.short_size_usd20, p.short_size_usd20].map(BigInt);
   const matrix = [
     [true, true],
     [true, false],
     [false, true],
     [false, false],
   ];
-  const long = 2n * BigInt(p.long_size_usd20),
-    short = 2n * BigInt(p.short_size_usd20);
+  const long = sizes[0] + sizes[1],
+    short = sizes[2] + sizes[3];
   const longsPay = long > short;
   const payer = longsPay ? long : short,
     receiver = longsPay ? short : long;
   const difference = long > short ? long - short : short - long;
   const rawRate = (((difference * unit) / (long + short)) * BigInt(p.funding_factor)) / unit;
-  const rate = min(rawRate, BigInt(p.max_factor_per_second));
+  const rate = long === 0n || short === 0n ? 0n : min(rawRate, BigInt(p.max_factor_per_second));
   const adjustment = 10n ** 10n,
     scale = adjustment * unit;
   const fees = [0n, 0n, 0n, 0n],
     claims = [0n, 0n, 0n, 0n];
-  const posSize = (side) => BigInt(side ? p.long_size_usd20 : p.short_size_usd20);
-  const pending = (side, col, index) => ({
-    cost_amount: String(ceil(posSize(side) * fees[index], scale)),
-    claimable_amounts: [
-      String((posSize(side) * claims[side ? 0 : 2]) / scale),
-      String((posSize(side) * claims[side ? 1 : 3]) / scale),
-    ],
-  });
-  const opened = matrix.map(([side]) => {
-    const size = posSize(side),
+  const posSize = (side, col) => sizes[(side ? 0 : 2) + (col ? 0 : 1)];
+  const pending = (side, col, index) =>
+    posSize(side, col) === 0n
+      ? null
+      : {
+          cost_amount: String(ceil(posSize(side, col) * fees[index], scale)),
+          claimable_amounts: [
+            String((posSize(side, col) * claims[side ? 0 : 2]) / scale),
+            String((posSize(side, col) * claims[side ? 1 : 3]) / scale),
+          ],
+        };
+  const opened = matrix.map(([side, col]) => {
+    const size = posSize(side, col),
       price = BigInt(side ? p.prices.index.max : p.prices.index.min);
+    if (size === 0n) return null;
     return {
       cost_amount: "0",
       size_tokens: String(side ? size / price : ceil(size, price)),
@@ -155,10 +174,12 @@ function verifyFunding(c) {
   const checkpoints = p.elapsed_seconds.map((seconds) => {
     const value = (payer * rate * BigInt(seconds)) / unit;
     const deltas = matrix.map(([side, col], index) => {
-      const collateralValue = (value * posSize(longsPay)) / payer;
+      const payerCollateral = posSize(longsPay, col);
+      const collateralValue = payer === 0n ? 0n : (value * payerCollateral) / payer;
       const price = BigInt((col ? p.prices.long : p.prices.short).max);
-      const fee = side === longsPay ? ceil(ceil(collateralValue * scale, posSize(side)), price) : 0n;
-      const claim = side !== longsPay ? (collateralValue * scale) / receiver / price : 0n;
+      const fee =
+        side === longsPay && payerCollateral > 0n ? ceil(ceil(collateralValue * scale, payerCollateral), price) : 0n;
+      const claim = side !== longsPay && receiver > 0n ? (collateralValue * scale) / receiver / price : 0n;
       fees[index] += fee;
       claims[index] += claim;
       return { funding_per_size: String(fee), claimable_per_size: String(claim) };
@@ -172,6 +193,7 @@ function verifyFunding(c) {
   });
   const settlements = matrix.map(([side, col], index) => {
     const due = pending(side, col, index);
+    if (due === null) return null;
     const cost = BigInt(due.cost_amount);
     return [1n, 2n].map((attempt) => ({
       cost_amount: attempt === 1n ? due.cost_amount : "0",
@@ -181,7 +203,7 @@ function verifyFunding(c) {
           attempt * BigInt(col ? p.next_long_collateral_amount : p.next_short_collateral_amount) -
           cost
       ),
-      size_usd20: String(posSize(side) + attempt * BigInt(p.next_size_usd20)),
+      size_usd20: String(posSize(side, col) + attempt * BigInt(p.next_size_usd20)),
       funding_snapshot: String(fees[index]),
       claimable_snapshots: [String(claims[side ? 0 : 2]), String(claims[side ? 1 : 3])],
       pending_cost_amount: "0",
@@ -192,11 +214,12 @@ function verifyFunding(c) {
   assert.deepEqual(c.output, { status: "ok", adjustment: String(adjustment), opened, checkpoints, settlements }, c.id);
   for (const col of [true, false]) {
     const paid = matrix.reduce(
-      (total, [, collateral], index) => total + (collateral === col ? BigInt(settlements[index][0].cost_amount) : 0n),
+      (total, [, collateral], index) =>
+        total + (collateral === col && settlements[index] ? BigInt(settlements[index][0].cost_amount) : 0n),
       0n
     );
     const claimed = settlements.reduce(
-      (total, attempts) => total + BigInt(attempts[0].claimable_funding_amounts[col ? 0 : 1]),
+      (total, attempts) => total + (attempts ? BigInt(attempts[0].claimable_funding_amounts[col ? 0 : 1]) : 0n),
       0n
     );
     assert(paid >= claimed, c.id);
@@ -230,8 +253,46 @@ function verifyFunding(c) {
       settlements.every((a) => a[0].cost_amount === "0" && a[0].claimable_funding_amounts.every((v) => v === "0")),
       c.id
     );
-  fundingCheckpoints += checkpoints.length;
-  fundingSettlements += settlements.length * 2;
+  if (distribution) {
+    distributionCheckpoints += checkpoints.length;
+    distributionSettlements += settlements.filter(Boolean).length * 2;
+    if (c.id.endsWith("-mixed-dust")) {
+      assert(rate > 0n, c.id);
+      assert(
+        settlements.filter(Boolean).some((a) => BigInt(a[0].cost_amount) > 0n),
+        c.id
+      );
+      assert(
+        settlements.filter(Boolean).every((a) => a[0].claimable_funding_amounts.every((v) => v === "0")),
+        c.id
+      );
+    }
+    if (c.id.endsWith("-mixed-cap")) assert(rate > 0n && rate < rawRate, c.id);
+    if (c.id.includes("-receiver-")) {
+      for (const [index, [side]] of matrix.entries()) {
+        if (side !== longsPay && settlements[index])
+          assert(
+            settlements[index][0].claimable_funding_amounts.every((v) => BigInt(v) > 0n),
+            c.id
+          );
+      }
+    }
+    if (long === 0n || short === 0n) {
+      assert(
+        checkpoints.every((c) => c.deltas.every((d) => d.funding_per_size === "0" && d.claimable_per_size === "0")),
+        c.id
+      );
+      assert(
+        settlements
+          .filter(Boolean)
+          .every((a) => a.every((v) => v.cost_amount === "0" && v.claimable_funding_amounts.every((x) => x === "0"))),
+        c.id
+      );
+    }
+  } else {
+    fundingCheckpoints += checkpoints.length;
+    fundingSettlements += settlements.length * 2;
+  }
 }
 
 function verifyBorrowing(c) {
@@ -542,7 +603,7 @@ for (let index = 0; index < reference.cases.length; index++) {
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
   }
-  if (p.operation === "funding_accrual") {
+  if (p.operation === "funding_accrual" || p.operation === "funding_distribution") {
     verifyFunding(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
     continue;
@@ -859,6 +920,39 @@ try {
       mutate(s.cases[175].input.scenario);
     })
   );
+  invalid.push(
+    ...[
+      (p) => {
+        p.sizes_usd20 = ["0", "0", "0", "0"];
+      },
+      (p) => {
+        p.sizes_usd20.pop();
+      },
+      (p) => {
+        p.sizes_usd20[0] = "01";
+      },
+      (p) => {
+        delete p.sizes_usd20;
+      },
+      (p) => {
+        p.elapsed_seconds = [];
+      },
+      (p) => {
+        p.elapsed_seconds = [31_536_001];
+      },
+      (p) => {
+        p.funding_factor = String(unit + 1n);
+      },
+      (p) => {
+        p.prices.short.max = "0";
+      },
+      (p) => {
+        p.unknown = true;
+      },
+    ].map((mutate) => (s) => {
+      mutate(s.cases[199].input.scenario);
+    })
+  );
   for (const mutate of invalid) {
     const suite = structuredClone(inputs);
     mutate(suite);
@@ -906,6 +1000,8 @@ process.stdout.write(
       fundingCheckpoints,
       fundingSettlements,
       dynamicFundingCheckpoints,
+      distributionCheckpoints,
+      distributionSettlements,
       malformedRejected: rejected,
       modelErrorDistinctFromZero: true,
       liquidationProbeErrorDistinctFromResult: true,

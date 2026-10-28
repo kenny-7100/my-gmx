@@ -9523,6 +9523,700 @@
           ]
         }
       }
+    },
+    {
+      "id": "funding-distribution-long-mixed-elapsed",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "300000000000000000000017",
+            "100000000000000000000013",
+            "30000000000000000000007",
+            "70000000000000000000011"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-mixed-split",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "300000000000000000000017",
+            "100000000000000000000013",
+            "30000000000000000000007",
+            "70000000000000000000011"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [3333, 6667]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-mixed-dust",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "300000000000000000000017",
+            "100000000000000000000013",
+            "30000000000000000000007",
+            "70000000000000000000011"
+          ],
+          "funding_factor": "7",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [1]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-mixed-zero-time",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "300000000000000000000017",
+            "100000000000000000000013",
+            "30000000000000000000007",
+            "70000000000000000000011"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [0]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-mixed-balanced",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "300000000000000000000017",
+            "100000000000000000000013",
+            "150000000000000000000011",
+            "250000000000000000000019"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-mixed-zero-factor",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "300000000000000000000017",
+            "100000000000000000000013",
+            "30000000000000000000007",
+            "70000000000000000000011"
+          ],
+          "funding_factor": "0",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-mixed-cap",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "300000000000000000000017",
+            "100000000000000000000013",
+            "30000000000000000000007",
+            "70000000000000000000011"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "10000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-payer-long-only",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["400000000000000000000030", "0", "30000000000000000000007", "70000000000000000000011"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-payer-short-only",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["0", "400000000000000000000030", "30000000000000000000007", "70000000000000000000011"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-receiver-long-only",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["300000000000000000000017", "100000000000000000000013", "100000000000000000000018", "0"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-receiver-short-only",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["300000000000000000000017", "100000000000000000000013", "0", "100000000000000000000018"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-long-single-sided",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["300000000000000000000017", "100000000000000000000013", "0", "0"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-mixed-elapsed",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "30000000000000000000007",
+            "70000000000000000000011",
+            "300000000000000000000017",
+            "100000000000000000000013"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-mixed-split",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "30000000000000000000007",
+            "70000000000000000000011",
+            "300000000000000000000017",
+            "100000000000000000000013"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [3333, 6667]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-mixed-dust",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "30000000000000000000007",
+            "70000000000000000000011",
+            "300000000000000000000017",
+            "100000000000000000000013"
+          ],
+          "funding_factor": "7",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [1]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-mixed-zero-time",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "30000000000000000000007",
+            "70000000000000000000011",
+            "300000000000000000000017",
+            "100000000000000000000013"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [0]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-mixed-balanced",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "150000000000000000000011",
+            "250000000000000000000019",
+            "300000000000000000000017",
+            "100000000000000000000013"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-mixed-zero-factor",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "30000000000000000000007",
+            "70000000000000000000011",
+            "300000000000000000000017",
+            "100000000000000000000013"
+          ],
+          "funding_factor": "0",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-mixed-cap",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": [
+            "30000000000000000000007",
+            "70000000000000000000011",
+            "300000000000000000000017",
+            "100000000000000000000013"
+          ],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "10000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-payer-long-only",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["30000000000000000000007", "70000000000000000000011", "400000000000000000000030", "0"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-payer-short-only",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["30000000000000000000007", "70000000000000000000011", "0", "400000000000000000000030"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-receiver-long-only",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["100000000000000000000018", "0", "300000000000000000000017", "100000000000000000000013"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-receiver-short-only",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["0", "100000000000000000000018", "300000000000000000000017", "100000000000000000000013"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
+    },
+    {
+      "id": "funding-distribution-short-single-sided",
+      "input": {
+        "operation": "funding_distribution",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "sizes_usd20": ["0", "0", "300000000000000000000017", "100000000000000000000013"],
+          "funding_factor": "1000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "elapsed_seconds": [10000]
+        }
+      }
     }
   ]
 }

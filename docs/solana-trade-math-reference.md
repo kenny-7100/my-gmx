@@ -154,3 +154,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 该有限子集所有新仓使用short collateral，每仓固定1000000000 raw抵押；真实deposit固定long 100000000000000 raw、short 10000000000000 raw。funding USD按实际payer OI×active rate×seconds截断，short collateral max价packing：payer两次ceil、receiver两次floor，adjustment10^10；long collateral delta为0。prices和动态参数/每步增仓及秒数显式，其余test defaults保留，order/swap费用与impact为0，不执行borrow update。双边OI必须非零；时间沿用一年工具域和clock drift整次拒绝。本轮不结算既有仓位，不证明反转后的pending/settlement或外部token付款。
 
 两次Rust输出字节一致，199组独立核算、70类非法输入/setup拒绝、model/probe错误与零区分通过；JSON SHA-256 `87b613d1174bdddd35cbcf24821b0a9e2c7edb5fef485933f786ee210d64cb45`。本轮Rust check/fmt、脚本lint/格式和EVM费用/仓位55项通过，命令及证据见[第五十六轮记录](solana-implementation-research.md#第五十六轮实施记录t17b2d3-动态funding与方向反转2026-10-28)。无生产接线，T17及b2d仍实施中。下一轮T17.b2d4补不对称混合抵押OI及单边OI funding，随后补反转结算、累计费用清算及剩余矩阵；T19仍待完整矩阵与T04.b reviewed字段。
+
+## T17.b2d4 混合抵押与单边OI funding子集（2026-10-28）
+
+新增 `funding_distribution`，复用原funding累计/结算函数，按四维size分别真实开仓；零size表示无该仓位，opened/pending/settlements为null，市场delta仍完整保留。旧funding入口继续要求双边非零且每side两种抵押等size，原199组输入/输出逐项不变。新增24组、26次update、168次后续increase，总223组：两付款方向×不对称抵押、分段时间、dust、零时间/因子、平衡、rate cap、付款方仅long/short抵押、接收方仅long/short抵押和单边OI。
+
+固定tag `UpdateFundingState::next_funding_amount_per_size/set_deltas` 先计算payer总funding USD，再按payer每种抵押OI占比分别floor，分配后的值之和可能小于总值；不能将一方余数补给另一方。payer packing分母是该抵押的payer OI，两次ceil；receiver packing分母是整个receiver side OI，两次floor；两者使用各自collateral max价。`pack_to_funding_amount_per_size` 在funding value或分母OI为零时返回真零，不能直接除零。receiver只有一种抵押仓位时，仍按其size领取两种token。独立核算全部delta、pending、首次结算report、快照重置及第二次不重复收费/领取，并检查逐token总收费≥总领取。dust场景特意选择非零rate，付款raw token非零而claimable为零。
+
+任一side OI为零时，模型在计算rate之前返回空report，实际update写入next factor0。本子集从stored0开始验证零delta/零pending/零结算，**尚未验证从已有动态rate进入单边OI的状态转换**，不由源码检查冒充该验收。无仓位null与已存在仓位费用真零分开；全四size为0拒绝。其他非法输入包括缺size、数组长度错误、非规范金额、时间空/越域、factor越域、无效价格和未知字段。
+
+固定数学setup：index/long/short decimals=9/9/6，流动性long 100000000000000、short 10000000000000 raw；每个有效仓位抵押long 10000000000或short 1000000000 raw；每次后续增仓1 USD并补long 1000000000或short 100000000 raw。prices、四size、funding factor/cap和时间显式给定；线性fallback、动态参数0、无borrow update、order/swap fee与impact0，其余固定tag defaults不变。沿用clock drift整次拒绝；不是部署参数或外部付款证据。
+
+两次Rust输出字节一致，223组独立核算、79类非法输入/setup拒绝通过；JSON SHA-256 `78b68e32a1018d2eaa6b352394404b66fce713b916f66bfe815d368d0ea20b75`。Rust check/fmt、脚本lint/格式及本轮EVM两文件55项通过，详见[第五十七轮记录](solana-implementation-research.md#第五十七轮实施记录t17b2d4-混合抵押与单边oi-funding2026-10-28)。工具不接入生产SDK/StateCtx/UI，T17/b2d及整个集成仍未完成。下一轮T17.b2d5补动态方向反转后的旧仓pending与结算，之后补动态单边转换、borrow kink/smaller-side及剩余矩阵；T19仍待完整参考与T04.b reviewed字段。

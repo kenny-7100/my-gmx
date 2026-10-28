@@ -1,6 +1,6 @@
 # Solana 独立集成实施任务表
 
-更新时间：2026-10-28（Asia/Shanghai）。初始调研基线：`new-gmx` / `solana-integration` 的 `e8015302585f74d632d5fea34c65533d20ab4d2b`；初始调研时线上上游 release 为 `8ef82eb8a465b2045f73805a66941bf7f836630d`。**独立实施分支：`solana-independent-implementation`，从 `new-gmx` 的 `5637a48912114f86df57bb409c1121d60a086070` 开始，后续沿用。前五十五轮累积改动已提交并推送至个人my-gmx：`f6c06b23aaca575df229b17f85ed4e5a58d9fee8`；第五十六轮新增改动尚未提交。** 实时取证范围、PR SHA、架构依据和验收记录见[调研与实施说明](docs/solana-implementation-research.md)。
+更新时间：2026-10-28（Asia/Shanghai）。初始调研基线：`new-gmx` / `solana-integration` 的 `e8015302585f74d632d5fea34c65533d20ab4d2b`；初始调研时线上上游 release 为 `8ef82eb8a465b2045f73805a66941bf7f836630d`。**独立实施分支：`solana-independent-implementation`，从 `new-gmx` 的 `5637a48912114f86df57bb409c1121d60a086070` 开始，后续沿用。前五十六轮累积改动已提交并推送至个人my-gmx：`4ceef52e33390bb91671e2f971e2147bd30e808c`；第五十七轮新增改动尚未提交。** 实时取证范围、PR SHA、架构依据和验收记录见[调研与实施说明](docs/solana-implementation-research.md)。
 
 ## 不可违反的实施约束
 
@@ -54,7 +54,7 @@
 | T14 | P1 | 待依赖 | 共享市场选择器、header 和 scaled 显示接线 | T13；FESOL-15/98 | 迁移实际 token 查询；复用 ChartTokenSelector/ChartHeader；搜索分类图标、OI/rates、listing provenance、kBONK/kPEPE/kSHIB | V1/V2；T10 后 V3：切市场、搜索、无数据；无日期不标 New；价格倍率只显示一次；OI/funding/borrowing 对应 API | 最大杠杆最终由 T22 确认计算口径；不因旧 nightly checkbox 已勾选跳过 |
 | T15 | P1 | 待依赖 | 共享 Price 图表历史、实时与切市场接线 | T13/T14/T11；FESOL-29/99 | 复用 DataFeed/TVChartContainer、mapped symbol 与现有 interval；统一 whole-token/显示单位 | V1/V2/V3：历史/实时同单位；scaled token、切市场/周期、取消旧订阅与 error；EVM 图表原行为 | 不是新 chart 或旧 Web candle adapter；overlays/actions 在 T29 |
 | T16 | P0 | 待依赖 | 补齐真实账户接口的契约/数据前置 | T04；FESOL-65，API owner 外部交付 | 核实 Positions/Orders/User/Store 解码、discount、callback/referrer、kind/filter/key，及共享参考向量；取得实现 PR/部署证据 | V3：明确 owner 的真实记录匹配链上；unlisted/执行未关闭订单语义正确；无账户与服务失败分开；费用/PnL/清算有独立向量 | 当前 main 仍 sample；本表不擅自接管 API owner 的实现。缺交付则阻塞消费者，不能浏览器 RPC 替代 |
-| T17 | P0 | 实施中（a/b1/b2a至b2d3限定子集已验收） | 建立 trade-math 差异清单与独立 v0.10.0 参考向量 | FESOL-57、Rust model/program、现有 EVM math | 逐条映射 impact/PnL cap/fee discount/minima/liquidation/funding/execution lamports；记录 generator/tag、单位与容差，供 API/前端共用 | 可重复生成向量；清算按程序规则而非已知错误 WASM status；long/short、抵押组合、极值/舍入覆盖；注明 build 所需授权 | b2d3增24组动态funding/42次update，验证阈值、衰减±1、active min和延迟反转；总199组独立核算/重复一致、70类拒绝和55项EVM回归通过，旧175组不变；见[数学参考](docs/solana-trade-math-reference.md#t17b2d3-动态funding与方向反转子集2026-10-28)。混合抵押OI/单边OI、反转结算/真实付款、减仓/其余矩阵及T19仍待 |
+| T17 | P0 | 实施中（a/b1/b2a至b2d4限定子集已验收） | 建立 trade-math 差异清单与独立 v0.10.0 参考向量 | FESOL-57、Rust model/program、现有 EVM math | 逐条映射 impact/PnL cap/fee discount/minima/liquidation/funding/execution lamports；记录 generator/tag、单位与容差，供 API/前端共用 | 可重复生成向量；清算按程序规则而非已知错误 WASM status；long/short、抵押组合、极值/舍入覆盖；注明 build 所需授权 | b2d4增24组混合抵押/单边OI、26次update及168次后续增仓report；总223组独立核算/重复一致、79类拒绝和55项本轮EVM回归通过，旧199组不变；见[数学参考](docs/solana-trade-math-reference.md#t17b2d4-混合抵押与单边oi-funding子集2026-10-28)。反转结算/动态单边转换/真实付款、减仓/其余矩阵及T19仍待 |
 | T18 | P1 | 待依赖 | 共享 PositionList/OrderList 接真实账户数据与设置 | T13/T16/T19；FESOL-25/100 | 复用现有列表；owner:market:collateral:isLong 保留 case；Margin、Size toggle、PnL/leverage 设置、limit/TP/SL 筛选 | V1/V2/V3：字段和 tooltip 可追溯；loading/empty/error 区分；两项显示设置开/关；切钱包迟到响应不污染；fill/cancel 更新 | 不只交付列表壳；隐藏未支持 swap/TWAP；动作在 T26–T28 |
 | T19 | P0 | 待依赖 | 实现并接通 opt-in gmsol 交易数学 | T17；T04 确认 per-market 字段 | 共享 SDK math 的最小分支或纯 gmsol helpers：即时 impact、pool-capped acceptable price、side PnL cap、combined discount/UI fee0、minima、清算、lamports 与可退 rent | V1：全部分支对独立向量及原 EVM suite；关键消费者实际接线；同输入 EVM 结果不变；与 API 使用同一参考口径 | 不通过永久调用 WASM math 绕过共享逻辑；不把 gmsol 原始20位值传进共享状态 |
 
@@ -127,9 +127,9 @@
 | V5 发布/压测/监控 | T57/T58 | 先负责人资源与明确外部操作授权；实际部署版本、负载/成本、告警演练及回滚依据。开发自动验收不能自动授权上线 |
 
 
-当前接手点：第五十六轮完成 **T17.b2d3 动态funding与方向反转限定子集**。沿用 `solana-independent-implementation`，初始实施基线不变；当前HEAD为已推送的 `f6c06b23aaca575df229b17f85ed4e5a58d9fee8`。本轮开头push前轮9文件，新增仍为未提交工作区改动。新增24组、42次真实update，通过真实增仓改变双边OI，覆盖增长/稳定/阈值相等/衰减保留±1、max/min、零时间、平衡OI保留费率及延迟方向反转；独立核对OI、action、signed rate/active rate及四维delta。总199组两次一致、70类拒绝通过，旧175组不变；本轮EVM55项/0skip/0联网尝试通过。仅工具和文档，无生产SDK/StateCtx/UI接线，页面仍占位。详见[数学主题](docs/solana-trade-math-reference.md#t17b2d3-动态funding与方向反转子集2026-10-28)及[第五十六轮记录](docs/solana-implementation-research.md#第五十六轮实施记录t17b2d3-动态funding与方向反转2026-10-28)。
+当前接手点：第五十七轮完成 **T17.b2d4 混合抵押与单边OI funding限定子集**。沿用 `solana-independent-implementation`，初始实施基线不变；当前HEAD为已推送的 `4ceef52e33390bb91671e2f971e2147bd30e808c`。本轮开头push前轮9文件，新增仍为未提交工作区改动。新增24组、26次真实update及168次后续increase，复用已有累计/结算路径，覆盖不对称抵押OI、缺一种付款/接收抵押仓位、单边OI、dust/零值/cap/分段时间；逐项独立核对delta、pending、report与快照不重复结算。总223组两次一致、79类拒绝通过，旧199组不变；本轮EVM55项/0skip/0联网尝试通过。仅工具和文档，无生产SDK/StateCtx/UI接线，页面仍占位。详见[数学主题](docs/solana-trade-math-reference.md#t17b2d4-混合抵押与单边oi-funding子集2026-10-28)及[第五十七轮记录](docs/solana-implementation-research.md#第五十七轮实施记录t17b2d4-混合抵押与单边oi-funding2026-10-28)。
 
-下一轮优先 **T17.b2d4 不对称混合抵押OI及单边OI funding参考**，复用固定tag真实update/action与同一生成器，先核对单边OI的零delta及rate状态语义；b2d父范围仍未完成，反转后pending/settlement、borrowing kink/skip-smaller-side与累计费用清算边界仍待。随后补减仓/min-position/限额及程序费用退款，不从WASM status生成真值。T17/FESOL-57仍实施中，T19仍待完整矩阵与T04.b reviewed字段。T24.b2接手点保留；T23 nonce、T25资源/交易授权、T04.b评审、T10 revision绑定和T28真实变体/部署身份阻碍不变。Rust及该生成器必要编译已有授权。本轮未重跑真实页面/钱包、根类型/最终bundle，现有服务/用户Chrome未操作，不打开新浏览器。
+下一轮优先 **T17.b2d5 动态方向反转后旧仓pending与结算参考**，复用固定tag真实update/action与同一生成器；b2d父范围仍未完成，动态rate转单边OI、borrowing kink/skip-smaller-side与累计费用清算边界仍待。本轮单边仅从stored0验证fallback，不能宣称非零动态状态清除已验。随后补减仓/min-position/限额及程序费用退款，不从WASM status生成真值。T17/FESOL-57仍实施中，T19仍待完整矩阵与T04.b reviewed字段。T24.b2接手点保留；T23 nonce、T25资源/交易授权、T04.b评审、T10 revision绑定和T28真实变体/部署身份阻碍不变。Rust及该生成器必要编译已有授权。本轮未重跑真实页面/钱包、根类型/最终bundle，现有服务/用户Chrome未操作，不打开新浏览器。
 
 上一轮T02.f2b3的版本前置及无钱包隔离证据见[第二十六轮记录](docs/solana-implementation-research.md#第二十六轮实施记录t02f2b3-共享上报400与本地版本前置2026-10-28)。T02/f与整个集成仍未完成，f3真实钱包前置及最终SDK产物/根类型/bundle边界不变。
 

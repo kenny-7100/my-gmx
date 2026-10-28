@@ -1913,3 +1913,28 @@ T17/FESOL-57仍实施中。下一轮 **T17.b2d 累计borrowing/funding与下一�
 下一轮 **T17.b2d4 不对称混合抵押OI及单边OI funding**，实时只读核对后复用本生成器，从实际抵押OI分配、单边update零delta/状态语义继续；再补反转后pending/settlement、借款kink/smaller-side、累计费用清算、减仓及剩余矩阵。T19完整参考及T04.b reviewed字段、T10 revision绑定、T23 nonce、T25资源/交易授权、T28真实变体/部署身份等阻碍保持，T24.b2接手点保留。整个集成未完成，不将离线参考验收写成生产交易可用。
 
 收尾：五份相关Markdown使用 `yarn agent:docs-check --file docs/solana-trade-math-reference.md --file docs/README.md --file docs/solana-implementation-research.md --file solana-implementation-tasks.md --file tools/solana-trade-math-vectors/README.md` 检查207个本地链接、0诊断；`git diff --check` 通过。自审后仅调整新增Rust报告排版及JSON单位元数据（注明dynamic使用固定tag defaults），重新运行fmt/check、两次生成、完整verify及旧175组逐项对照后更新最终指纹；未因元数据变动重跑无关EVM测试。本轮共9个工具/文档文件变化，生产与参考仓库/锁文件不变，全部新增仍未提交。
+
+## 第五十七轮实施记录：T17.b2d4 混合抵押与单边OI funding（2026-10-28）
+
+开头按push约定执行 `git add . && git commit -m 'Validate Solana dynamic funding rates and direction reversals' && git push my-gmx HEAD`，上一轮9文件成功推送，当前HEAD `4ceef52e33390bb91671e2f971e2147bd30e808c`。沿用独立实施分支与初始基线，以下新增均为未提交工作区改动；无再次push、PR或上游同步。
+
+恢复根AGENTS、任务表/交接、数学主题、参考仓库/环境资料、项目交付与只读需求skill及gmx-prompts dev/Solana/tests/review规范。FESOL-57于 `2026-10-28T03:01:18.592Z` 实时读取，完整issue与前轮一致，Execution、updatedAt2026-10-25T23:43:47.128Z，无GMTrade标签，正文/关系/评论未变。远端tag v0.10.0仍 `7ce035b41a266cb5ddb0192e5d29deb0c7e67a72`，实际编译同一Cargo锁定checkout。限定open前端PR标题/分支57/math/liquidat/borrow/funding仍仅#3114，head仍 `83971c4930867ceb996087391a4d393db65b988a`，沿用前轮文件范围核对（lifetime费用tooltip），未发现该范围内的生成器重复实现，不扩大为全远端审计。原始证据位于 `.local/acceptance/requirements/solana-implementation-t17b2d4/`，Linear只读。
+
+同一工具新增 `funding_distribution`，将原funding动作执行提取为共享内部函数，旧入口继续原有非零/对称约束。新增入口以四维size真实开仓，零size明确为无仓位，不尝试对未初始化仓位结算；opened/pending/settlements用null，与已存在仓位费用真零分开。新增24组、26次真实funding update、168次后续增仓report；覆盖两个付款方向、不对称抵押分布、缺付款或接收方的一种抵押仓位、单边OI、分段/dust/零时间/平衡/零factor/rate cap。全部reuse已有时钟、pending、report和快照重置路径，没有新状态体系。公式及固定配置集中见[数学主题](solana-trade-math-reference.md#t17b2d4-混合抵押与单边oi-funding子集2026-10-28)。
+
+源码 `UpdateFundingState::next_funding_amount_per_size/set_deltas/execute` 和pack/unpack核对：付款方每种抵押OI分别分配funding value并floor，payer packing使用该抵押OI而receiver使用总side OI；不能强行补齐分配余数。缺付款抵押的零分母由model零分支处理，不吞掉算术错误。接收方只有一种抵押仓位仍可领取两种token，独立检查每token总收费≥总领取。单边OI在rate计算前返回空report，execute将next写为0；本轮从stored0验证fallback，不声称已有动态rate的单边转换已验。没有vault转账、钱包到账、真实交易或生产接线。
+
+实际验收（根目录，Node v22.17.0；Cargo/verify进程PATH前置 `/Users/kenny/.cargo/bin`，沿用限定生成器构建授权）：
+
+- `cargo +1.90.0 fmt --manifest-path tools/solana-trade-math-vectors/Cargo.toml --check`、`cargo +1.90.0 check --locked --offline --manifest-path tools/solana-trade-math-vectors/Cargo.toml` 最终通过，无warning，Cargo.lock不变。首次编译指出null分支使settlements成为 `Vec<Value>`，已将有效attempts显式封装Value::Array后复验，未改变原JSON形状。
+- 输入格式固定后，两次 `cargo +1.90.0 run --locked --offline --manifest-path tools/solana-trade-math-vectors/Cargo.toml -- tools/solana-trade-math-vectors/inputs.json` 输出至本轮first.json/second.json，成功、字节一致、无clock drift。自审将dust factor从1改为7，确保实际rate非零、payer raw token非零而claims零，再完整生成/核算；不以rate已截断为零的样本冒充dust收费边界。
+- `node tools/solana-trade-math-vectors/verify.mjs .local/acceptance/requirements/solana-implementation-t17b2d4/first.json .local/acceptance/requirements/solana-implementation-t17b2d4/second.json`：223组、distribution update26/settlement168，原funding18/128、dynamic42、borrow32/56、清算168点/限价96点通过；79类非法输入/setup整次拒绝且stdout为空，model/probe错误区别于零，来源/重复一致性/cleanup通过。新增9类拒绝：全零size、数组长度错、非规范size、缺size、时间空/越域、factor越界、价格无效、未知字段。报告verification.json。
+- 旧199组输入/业务输出逐项相同后原子替换vectors.json；preservation.json记录通过，JSON SHA-256 `78b68e32a1018d2eaa6b352394404b66fce713b916f66bfe815d368d0ea20b75`。固定输入、原生参考JSON及来源摘要/独立核算器在仓库内可共享，不仅依赖本机日志。
+- `yarn sdk:test-offline --suite src/utils/__tests__/fees.spec.ts --suite src/utils/__tests__/positions.spec.ts`：2文件55项passed，0failed/skip；network installations2、blockedAttempts0，sourceUnchanged/toolingUnchanged=true，进程/临时目录cleanup passed。日志evm-sdk.log，原生 `.local/acceptance/sdk-offline/run-wb1uVO/vitest-results.json`。
+- `yarn exec eslint tools/solana-trade-math-vectors/verify.mjs --max-warnings 0` 及 `yarn exec prettier --check tools/solana-trade-math-vectors/inputs.json tools/solana-trade-math-vectors/verify.mjs` 通过。
+
+自审按除法分母、单位/舍入、guard覆盖及值语义分别核对；复用原函数、原输入约束/输出兼容，空仓null与市场0delta/claimable分开。只改工具/文档，未改生产src/SDK/API/UI、共享StateCtx/缓存/存储、lazy/flag-off或依赖锁；未引入旧服务、EVM RPC或并行业务真源。未运行根类型/完整前端/最终bundle及真实页面/钱包/交易；没有新开浏览器或操作既有服务，无模拟、签名、广播。页面仍占位，T17/b2d及整个集成未完成。
+
+下一轮 **T17.b2d5 动态方向反转后旧仓pending与结算**，复用dynamic真实OI演化及funding结算路径，验证同一仓位跨付款/接收方向的累计、两种claims与快照不重复领取；之后动态单边转换、borrow kink/smaller-side、累计费清算/减仓等剩余矩阵。T19完整向量/T04.b reviewed字段、T23 nonce、T25资源/交易授权、T10 revision绑定和T28真实变体/部署身份等前置保持，T24.b2接手点保留。
+
+收尾：五份相关Markdown经 `yarn agent:docs-check --file docs/solana-trade-math-reference.md --file docs/README.md --file docs/solana-implementation-research.md --file solana-implementation-tasks.md --file tools/solana-trade-math-vectors/README.md` 检查209个本地链接、0诊断，`git diff --check` 通过。初次文档检查指出未包裹代码的Rust泛型被视为HTML，已加代码格式并复验。最终9个工具/文档文件变化，Cargo.lock、生产与参考仓库未变，本轮新增仍未提交。
