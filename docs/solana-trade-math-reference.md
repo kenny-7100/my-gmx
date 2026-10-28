@@ -166,3 +166,13 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 固定数学setup：index/long/short decimals=9/9/6，流动性long 100000000000000、short 10000000000000 raw；每个有效仓位抵押long 10000000000或short 1000000000 raw；每次后续增仓1 USD并补long 1000000000或short 100000000 raw。prices、四size、funding factor/cap和时间显式给定；线性fallback、动态参数0、无borrow update、order/swap fee与impact0，其余固定tag defaults不变。沿用clock drift整次拒绝；不是部署参数或外部付款证据。
 
 两次Rust输出字节一致，223组独立核算、79类非法输入/setup拒绝通过；JSON SHA-256 `78b68e32a1018d2eaa6b352394404b66fce713b916f66bfe815d368d0ea20b75`。Rust check/fmt、脚本lint/格式及本轮EVM两文件55项通过，详见[第五十七轮记录](solana-implementation-research.md#第五十七轮实施记录t17b2d4-混合抵押与单边oi-funding2026-10-28)。工具不接入生产SDK/StateCtx/UI，T17/b2d及整个集成仍未完成。下一轮T17.b2d5补动态方向反转后的旧仓pending与结算，之后补动态单边转换、borrow kink/smaller-side及剩余矩阵；T19仍待完整参考与T04.b reviewed字段。
+
+## T17.b2d5 动态反转后旧仓结算子集（2026-10-28）
+
+新增 `dynamic_funding_settlement`，沿用dynamic输入，显式要求 `is_long_collateral`；复用动态轨迹与真实增仓，保留每个仓位并记录每次update后的pending。新增24组：两初始付款方向×两抵押token×普通反转、分段时间、反转后转回、零时间、active min及rate cap，共84次真实funding update、152次后续increase。旧223组输入/业务输出不变，总247组；原dynamic操作仍只有原输出及short抵押，不增加其结算副作用。
+
+每个新仓在真实开仓时取当时market fee和两个claimable因子为初始快照，不能领取开仓前资金费；之后各side的fee/claimable累计分开递增，付款方向改变不会抵消旧的应付与应领。独立BigInt保存每仓出生快照，按每次update的两层ceil/floor结果累计，再用原size解包pending：cost向上取整、两个claims向下取整。两个初始旧仓在最终结算前均有非零应付及应领；首次真实增仓report分别返回两项并更新三份快照，未扣成一个净额；第二次无update增仓返回零，pending也归零。结算顺序改变OI，但没有再次update，不回算已累计funding。逐token总收费≥总领取。
+
+每组只使用一种抵押品：long抵押组long claim非零、short claim为零，short组相反；没有声称同一动态场景同时领取两种非零token。两种抵押token、min/max和两个初始方向都实际验，混合抵押同时参与动态反转仍属剩余矩阵。开仓long 10000000000或short 1000000000 raw；后续每次增仓1 USD并补long 1000000000或short 100000000 raw。其余流动性/价格/模型配置延续dynamic，borrow update不调用、order/swap费与impact0，严格检查时间漂移。本轮是report/快照验收，不是vault或钱包转账。
+
+最终247组两次输出字节一致、独立核算及86类非法输入/setup拒绝通过，SHA-256 `7aeb310ecdceb25ff9967060d45c70658f4685703150094017bb3dbc58bca7af`。Rust check/fmt、脚本lint/格式、本轮EVM费用/仓位55项通过，详见[第五十八轮记录](solana-implementation-research.md#第五十八轮实施记录t17b2d5-动态反转后旧仓结算2026-10-28)。下一轮T17.b2d6从真实全平动作核对非零动态费率转单边OI，验证next清零与既有累计保留，再补混合动态/borrow kink/smaller-side等剩余矩阵。T17及b2d仍实施中，T19依赖完整参考与T04.b reviewed字段，未接生产共享状态或UI。

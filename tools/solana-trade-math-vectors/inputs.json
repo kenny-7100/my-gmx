@@ -10217,6 +10217,1170 @@
           "elapsed_seconds": [10000]
         }
       }
+    },
+    {
+      "id": "dynamic-settlement-long-standard",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-split",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-return",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "1200000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-zero-time",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 0
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-minimum",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "10000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-capped",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "2000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-short-standard",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-short-split",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-short-return",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "1200000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-short-zero-time",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 0
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-short-minimum",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "10000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-short-capped",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "2000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": false
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-long-standard",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-long-split",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-long-return",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "1200000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-long-zero-time",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 0
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-long-minimum",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "10000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-long-capped",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "2000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "300000000000000000000000",
+              "add_short_usd20": "100000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "600000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-short-standard",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-short-split",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 5
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-short-return",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "1200000000000000000000000",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-short-zero-time",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 0
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-short-minimum",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "10000000000000",
+          "max_factor_per_second": "1000000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
+    },
+    {
+      "id": "dynamic-settlement-long-collateral-short-capped",
+      "input": {
+        "operation": "dynamic_funding_settlement",
+        "scenario": {
+          "prices": {
+            "index": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "long": {
+              "min": "10000000000007",
+              "max": "10000000000019"
+            },
+            "short": {
+              "min": "100000000000003",
+              "max": "100000000000006"
+            }
+          },
+          "increase_factor_per_second": "1000000000000",
+          "decrease_factor_per_second": "100000000000",
+          "min_factor_per_second": "0",
+          "max_factor_per_second": "2000000000000",
+          "stable_threshold": "40000000000000000000",
+          "decrease_threshold": "20000000000000000000",
+          "steps": [
+            {
+              "add_long_usd20": "100000000000000000000000",
+              "add_short_usd20": "300000000000000000000000",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "600000000000000000000000",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            },
+            {
+              "add_long_usd20": "0",
+              "add_short_usd20": "0",
+              "elapsed_seconds": 10
+            }
+          ]
+        },
+        "is_long_collateral": true
+      }
     }
   ]
 }
