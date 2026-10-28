@@ -1,6 +1,6 @@
 # Solana 交易数学差异与独立参考向量
 
-核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2d11限定数学子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和483组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
+核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2d14a限定数学子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和767组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
 
 ## 固定版本与证据范围
 
@@ -248,3 +248,70 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 总483组两次Rust输出字节一致、独立核算、136类非法输入/setup拒绝通过，旧435组不变；JSON SHA-256 `c37b29b5d5aecd0fee7414333570b49799ef6bed20117e6715163c2fdbed0ea2`。Rust check/fmt无warning、脚本lint/格式及本轮EVM费用/仓位55项通过，命令与证据见[第六十四轮记录](solana-implementation-research.md#第六十四轮实施记录t17b2d11-借款费与funding组合清算2026-10-28)。
 
 下一轮T17.b2d12累计费用与非零关闭impact组合清算，复用现有impact cap和累计费用路径，先核对真实开仓影响token/费用/池的顺序，再补限定相邻边界。盈利状态、同仓应付/claims并存清算、动态skip、完整减仓/min-position/限额及程序费用退款仍待；T17/b2d及整个集成未完成，T19仍待完整矩阵/T04.b reviewed字段，无生产SDK/共享状态/UI接线。
+
+## T17.b2d12a 累计借款费与非零impact清算子集（2026-10-28）
+
+将b2d12累计费用/impact组合拆为可独立验收的子步骤，本轮仅完成borrowing+impact，funding+impact留给b2d12b；b2d12父项未完成。新增 `liquidation_impact_borrowing` 直接复用真实deposit/increase、既有impact及borrow路径，不新增生产业务模型或并行状态。
+
+32组覆盖两side×两抵押token×四种关闭impact（正impact忽略、负impact封顶/未触顶/零cap）×零时间/非零累计，共48次borrow update、96个相邻index价格点。累计factor `1000000000000017`，interval零对照 `[0]` 或 `[17, 10000]`；先初始化borrow clock，再真实开目标仓和必要的对侧仓，按entry prices更新，不注入OI/累计/仓位快照。固定抵押价格，只改变index，独立BigInt推导仿射边界。
+
+开仓负impact即时改变tokens；long reserved必须用真实tokens×index max，不能用名义USD size代替，对侧long亦然。累计borrow USD按collateral min截断为raw amount，再从抵押价值扣减；负关闭impact以liquidation专用cap封顶，正关闭impact不加回抵押。核对固定tag `perp.rs::cap_negative_position_price_impact`，liquidation与ordinary margin predicate均复用该cap，仅最小抵押factor不同。独立检查两侧每步累计、目标pending、真实对侧OI/report、raw/effective impact和累计前后同价格的两种reason。
+
+总515组两次Rust输出字节一致并独立核算，144类非法输入/setup整次拒绝，旧483组输入/业务输出不变。最终JSON SHA-256 `67310a48d992d60395df1f8d9939bf31b5ec3ee8b8c1f0d0de20f509fdd1d6d4`。Rust check/fmt、脚本lint/格式及本轮EVM费用/仓位55项通过；命令和证据见[第六十五轮记录](solana-implementation-research.md#第六十五轮实施记录t17b2d12a-累计借款费与非零impact清算2026-10-28)。
+
+本子集无funding update、方向反转、盈利状态、动态OI或费用结算，不执行清算/付款。下一轮b2d12b funding与非零impact组合清算先核对真实对侧动作改变OI/tokens/impact的顺序，再复用现有路径补限定边界。T17/b2d12/b2d及整个集成仍未完成，T19完整矩阵/T04.b reviewed字段仍待；无生产SDK/共享状态/UI接线，页面仍占位。
+
+## T17.b2d12b funding与非零impact清算子集（2026-10-28）
+
+新增 `liquidation_impact_funding`，复用已有真实开仓、funding累计、impact及清算predicate。明确impact输入的对侧size/collateral必须为零，对侧仓统一由funding输入按long collateral、short collateral顺序真实开出，避免重复OI来源。保留两次真实执行report并独立检查最终两侧OI、逐次开仓raw/capped impact、tokens/执行价/零claims；配置的开仓正impact cap为零，receiver场景第二次对侧动作跨越OI平衡点并产生负impact。
+
+56组覆盖两side×两抵押token×零/非零累计×七profile：payer正关闭impact忽略、payer负impact封顶/未触顶/零cap、receiver负impact三种cap。对侧总size分别为目标的1/4、3/4、3倍，按1/3、2/3分到两抵押仓；不注入OI/累计/快照。factor/max `1000000000000017`，interval `[0]` 或 `[17, 10000]`，共84次真实funding update、168个相邻index探点。固定抵押价格、目标开仓负impact后的tokens，BigInt独立推导loss仿射边界；关闭跨越OI平衡时正段与负段分别算后相减，负结果再用专用liquidation cap。
+
+独立核对四维funding delta、payer两次ceil packing及pending ceil、receiver floor和两token claims、同价格累计前后liquidation/margin reason。16组非零payer均有真实费用并改变至少一项reason（其中12组关闭raw impact为负）；12组非零receiver两claims均非零、reason仍与累计前完全一致。claims不抵费用、不加抵押；28组零时间对照无累计费用/claims。总571组两次输出字节一致并独立核算，152类非法输入/setup整次拒绝；旧515组输入/业务输出不变。JSON SHA-256 `c5380de06e88e9cbc1c0e5cd3358cfdd26d6de656a409cbe55fce757f6bba5e7`，本轮EVM费用/仓位55项及Rust/脚本检查通过，命令证据见[第六十六轮记录](solana-implementation-research.md#第六十六轮实施记录t17b2d12b-funding与非零impact清算2026-10-28)。
+
+本子集无borrow update、动态OI、盈利状态、funding结算/清算执行或付款；不是生产清算验收。下一轮b2d12c合并borrow/funding/impact时，先核对两个对侧真实tokens对long reserved的贡献，再复用共同interval的两种update顺序；不得沿用零impact的名义size近似。T17/b2d12/b2d及整个集成仍未完成，T19完整矩阵/T04.b reviewed字段等前置保留，生产SDK/共享状态/UI未接线。
+
+## T17.b2d12c borrow与funding及impact组合清算子集（2026-10-28）
+
+新增 `liquidation_impact_accrued`，直接复用既有market/position及impact、borrow、funding路径，显式 `funding_first` 且强制interval数组完全一致。112组来自b2d12b的七profile×两side×两抵押token×零/非零累计×两顺序，共各168次borrow/funding update、336个相邻index探点。每段clock仅推进一次、每种费用各update一次；56对镜像除order标记外完整业务输出相同，固定OI/池/价格且不结算期间的结果不推广到任意动作顺序。
+
+两对侧仓由funding统一真实开出，保留逐次impact/tokens/report。独立核算器汇总两仓真实tokens×index max作为对侧long reserved，避免沿用零impact的名义size近似。核对目标及对侧每步borrow累计/目标pending、四维funding delta与两claims、真实开仓tokens和关闭raw/专用cap impact；borrow USD按collateral min截断raw，funding经两ceil packing/ceil unpacking得到raw，分别舍入后相加。receiver虽有两非零claims，仍不能抵borrow或增加抵押；所有非零累计场景均改变至少一项累计前同价格reason，零时间对照不变。
+
+总683组两次输出字节一致并独立核算，160类非法输入/setup整次拒绝，旧571组输入/业务输出不变。JSON SHA-256 `37f9060f16d9d0cf0c6f7bab8707ed078b7c232a40104211ce7d42b9d707cb02`；本轮EVM费用/仓位55项及Rust/脚本检查通过，命令与证据见[第六十七轮记录](solana-implementation-research.md#第六十七轮实施记录t17b2d12c-borrow与funding及impact组合清算2026-10-28)。
+
+本子集固定OI/抵押价格、linear borrow/fallback funding、loss探点；无费用结算、清算执行/付款或生产接线。T17/b2d12/b2d及整个集成未完成。下一轮接既有剩余的同仓funding应付与claimable并存清算（b2d13），先复用方向反转轨迹核对两者快照与费用不净额语义，再补独立边界；盈利状态、动态skip、完整减仓/min-position/限额及程序费用退款等仍待，T19完整矩阵/T04.b reviewed字段前置不变。
+
+## T17.b2d13a 同仓应付与claimable清算单抵押子集（2026-10-28）
+
+b2d13拆为独立验收子步骤：本轮b2d13a在每条轨迹仅使用一种抵押代币，下一b2d13b补混合抵押的两个非零claims。新增 `liquidation_funding_reversal` 复用既有dynamic funding真实market/开仓/clock/update与pending checkpoints，在结算前对两个初始仓位之一调用只读清算/margin predicate；不搬迁或新增业务状态。16组覆盖两初始OI方向×两目标仓位side×两抵押token×普通/封顶动态rate，各3次真实update，共48次更新、48个相邻index探点。额外真实开仓改变OI并反转payer；目标出生时的费用/claims快照保持，每个目标同时有非零应付及非零同token claim，另一claim真实为零。
+
+清算配置显式min position1 USD、min collateral20 USD、ordinary factor10%、liquidation factor5%；impact/order/swap费用为零，沿用entry oracle spread、固定抵押价格，仅index探点变化，均为loss。独立BigInt重放动态rate、四维deltas、出生快照、payer ceil与receiver floor，独立推导仿射价格边界；验证目标tokens/抵押、raw应付/两claims、PnL及两predicate reason。16组均有明确反例：错误地将同token claim抵扣应付会使失败的清算探点变安全。程序总cost只加入funding amount，不净额抵claim或把其计入抵押；未清算/未结算。
+
+总699组两次Rust输出字节一致并独立核算，166类非法输入/setup整次拒绝，旧683组输入/业务输出不变。JSON SHA-256 `2712dc430f15e9e0946026dda9b5274610ce965c9dc15e4a1277fe7bd1dfb21e`；Rust/脚本检查及本轮EVM费用/仓位55项通过，命令和证据见[第六十八轮记录](solana-implementation-research.md#第六十八轮实施记录t17b2d13a-同仓应付与claimable清算单抵押2026-10-28)。新reversalLiquidationProbes48与既有liquidationProbes1176分开计数，合计1224点；不将旧settlement计数当成本轮结算证据。
+
+下一轮b2d13b先复用mixed动态反转/四维快照，补同仓应付与两个非零claims的清算边界；b2d13父项及T17仍实施中。盈利清算、动态skip、完整减仓/min-position/限额及程序费用退款仍待，T19完整矩阵/T04.b reviewed字段与其余外部前置不变；无生产SDK/共享状态/UI接线，页面仍占位。
+
+## T17.b2d13b mixed同仓应付与双claims清算子集（2026-10-28）
+
+新增 `liquidation_funding_mixed`，复用既有mixed开仓/动态funding反转与b2d13a结算前只读清算入口。两组非对称long collateral份额为 `[75%, 30%]`、`[33333333333333333333, 66666666666666666667] / 10^20`，必须严格处于0与1之间；共32组覆盖两矩阵×两初始OI方向×普通/封顶rate×最初四个仓位，96次真实update、96个相邻index探点。目标side/collateral从真实开仓顺序选择，不由缺省bool猜测；target只允许最初四仓。每个目标均有非零应付及两个非零claims，原操作行为保持。
+
+mixed清算夹具的每次真实开仓按 `floor(floor(size_usd20 / 5) / collateral_min_price)` 传入抵押，即20%再截断raw，保证小份额目标也能形成正index价格下的loss边界；这是固定测试配置，不代表部署市场规则。沿用min position1 USD/min collateral20 USD、ordinary10%/liquidation5%、零impact/order/swap费、不调用borrow update；固定entry抵押价格及oracle spread，仅index探点变化。共享mixed份额解析校验，无注入OI/rate/累计或仓位快照。
+
+独立BigInt按真实顺序核对split OI、出生快照、四维funding/claim累计与pending、两种claims各自token单位、target collateral/tokens、PnL和两predicate reason。32组均验证两个错误入账反例：将任一claim按各自代币min价格换成USD计入抵押，都会使失败点变安全。程序应付费用不与claims净额，两claims均不入抵押。没有提前结算或模拟付款。
+
+总731组两次Rust输出字节一致并独立核算，172类非法输入/setup整次拒绝，旧699组输入/业务输出不变。JSON SHA-256 `82754367075be5bd93009eeedf78d8d1d16c6e6da69e1e3179202c1b6f75a691`；Rust/脚本检查及本轮EVM费用/仓位55项通过，命令与证据见[第六十九轮记录](solana-implementation-research.md#第六十九轮实施记录t17b2d13b-mixed同仓应付与双claims清算2026-10-28)。mixed reversal96点/96次update已包含在reversal总144点/144次update中；加既有其他清算1176点，共1320点，不能重复计数或声称本轮执行结算。
+
+b2d13a/b的限定单抵押/mixed并存语义均已核算，T17/b2d父项及整个集成仍未完成。下一轮b2d14接既有盈利清算范围，先核对侧净PnL cap与清算剩余抵押、fee/minimum的关系，再补独立模型边界，不从WASM status生成真值。动态skip、完整减仓/min-position/限额与程序费用退款仍待；T19完整矩阵/T04.b reviewed字段等前置不变，无生产SDK/共享状态/UI接线。
+
+
+## T17.b2d14a 盈利cap与抵押重估清算子集（2026-10-28）
+
+b2d14拆为零费用抵押重估a与盈利成本组合b，本轮完成a限定验收，父项仍实施中。新增 `liquidation_pnl`，复用真实deposit/increase及清算/margin predicate，只增加显式 `max_trader_pnl_factor` 配置和未封顶PnL/侧净PnL/侧pool value输出；旧操作默认配置与输出不变。固定tag的 `PositionExt::pnl_value` 对盈利按侧净PnL比例封顶，`check_liquidatable` 将该PnL加入剩余抵押，正关闭impact不计入、费用仍扣除。本子集不从WASM status取清算真值。
+
+36组覆盖两side×两抵押token×零/有限/未触及cap×minimum/专用清算leverage/普通margin门槛，共108个相邻抵押raw价格点。真实单仓，index min=max固定为盈利40 USD，零impact/order/liquidation fee、不更新borrow/funding；降低抵押价格触发门槛。entry抵押值200 USD、size1000 USD，minimum为80或20 USD，ordinary factor10%/liquidation5%，有限cap factor为10^-6。均为固定数学夹具，不代表部署参数。
+
+独立BigInt：单仓且index无spread，侧净PnL与目标raw盈利相等；`V=side_pool_raw*side_token_min_price`，`P=min(raw_pnl,floor(V*factor/10^20))`，`R=collateral_raw*collateral_min_price+P`。minimum先判 `R<min_collateral`，再判非正和 `R<floor(size*factor/10^20)`，相等安全。有限cap中pool raw乘factor可整除UNIT；若side与collateral相同，cap随抵押价格呈整数斜率，否则为固定offset，可直接以ceil求门槛价格，取前一格/本格/后一格，不用模型搜索真值。零cap保留raw盈利正而capped真零；所有零/有限cap失败点若错误使用raw盈利都会变安全。普通margin的失败不等于可清算。多同侧仓/非零index spread的cap比例已有单项参考，本轮不宣称其组合清算已验。
+
+总767组两次Rust输出字节一致、独立核算通过，178类非法输入/setup整次拒绝且stdout为空，旧731组输入/业务输出逐项不变。JSON SHA-256 `2eaa164a29183869658e1ed724c42fe82ed3828818f5c4a54c146497ea4810ca`；新增profitableLiquidationProbes108独立于既有1176清算点和144反转清算点，共1428点，mixed96已含反转，不重复相加。Rust check/fmt、局部lint/格式及本轮EVM费用/仓位55项通过，命令和原生证据见[第七十轮记录](solana-implementation-research.md#第七十轮实施记录t17b2d14a-盈利cap与抵押重估清算2026-10-28)。
+
+下一轮b2d14b先核对真实开仓fee进入pool的分配、closing cost raw舍入与侧cap的相互影响，再补盈利费用组合的独立边界；不绕过开仓验证或注入余额。非零impact/累计费用组合、动态skip、完整减仓/min-position/限额与程序费用退款等仍待，T17/T19及整个集成未完。没有生产SDK/共享状态/UI接线、费用结算/清算执行、真实账户或钱包交易验收，页面仍占位；外部评审/资源与授权前置不变。

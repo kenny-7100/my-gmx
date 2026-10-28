@@ -28,14 +28,25 @@ for (const [key, path] of [
 }
 assert.match(reference.generator.rustc, /^rustc 1\.90\.0 /);
 assert.equal(reference.reference.commit, "7ce035b41a266cb5ddb0192e5d29deb0c7e67a72");
-assert.equal(reference.cases.length, 483);
-assert.equal(new Set(reference.cases.map((c) => c.id)).size, 483);
+assert.equal(reference.cases.length, 767);
+assert.equal(new Set(reference.cases.map((c) => c.id)).size, 767);
 const unit = 10n ** 20n;
 const min = (...values) => values.reduce((a, b) => (a < b ? a : b));
 const max = (...values) => values.reduce((a, b) => (a > b ? a : b));
 const ceil = (n, d) => (n + d - 1n) / d;
 const operations = {};
 let liquidationProbes = 0;
+let mixedReversalLiquidationProbes = 0;
+let mixedReversalLiquidationUpdates = 0;
+let reversalLiquidationProbes = 0;
+let reversalLiquidationUpdates = 0;
+let tripleLiquidationProbes = 0;
+let tripleBorrowingUpdates = 0;
+let tripleFundingUpdates = 0;
+let impactFundingProbes = 0;
+let impactFundingUpdates = 0;
+let impactBorrowingProbes = 0;
+let impactBorrowingUpdates = 0;
 let combinedLiquidationProbes = 0;
 let combinedBorrowingUpdates = 0;
 let combinedFundingUpdates = 0;
@@ -66,8 +77,9 @@ let mixedSettlements = 0;
 function verifyDynamicFunding(c) {
   const p = c.input.scenario;
   const single = c.input.operation === "dynamic_funding_single_side";
-  const mixed = c.input.operation === "dynamic_funding_mixed";
-  const settle = mixed || single || c.input.operation === "dynamic_funding_settlement";
+  const mixed = ["dynamic_funding_mixed", "liquidation_funding_mixed"].includes(c.input.operation);
+  const liquidation = ["liquidation_funding_reversal", "liquidation_funding_mixed"].includes(c.input.operation);
+  const settle = liquidation || mixed || single || c.input.operation === "dynamic_funding_settlement";
   const collateralIndex = c.input.is_long_collateral ? 0 : 1;
   const fees = [0n, 0n, 0n, 0n],
     claims = [0n, 0n, 0n, 0n],
@@ -203,7 +215,7 @@ function verifyDynamicFunding(c) {
     singleSideUpdates += expected.single_side.updates.length;
     fullCloses += expected.single_side.closing.filter(Boolean).length;
   }
-  if (settle) {
+  if (settle && !liquidation) {
     expected.settlements = positions.map((position) => {
       if (single && position.side === c.input.transition.close_long) return null;
       const due = pending(position),
@@ -255,6 +267,109 @@ function verifyDynamicFunding(c) {
       reversalCheckpoints += checkpoints.length;
       reversalSettlements += positions.length * 2;
     }
+  }
+  if (liquidation) {
+    const target = positions[c.input.liquidation.target_index];
+    const due = pending(target);
+    const collateralIndex = target.col;
+    const isLongCollateral = collateralIndex === 0;
+    if (mixed)
+      assert(
+        due.claimable_amounts.every((v) => BigInt(v) > 0n),
+        c.id
+      );
+    assert(BigInt(due.cost_amount) > 0n && BigInt(due.claimable_amounts[collateralIndex]) > 0n, c.id);
+    assert(
+      checkpoints.some((v) => v.longs_pay !== checkpoints[0].longs_pay),
+      c.id
+    );
+    const entry = BigInt(target.side ? p.prices.index.max : p.prices.index.min);
+    const tokens = target.side ? target.size / entry : ceil(target.size, entry);
+    const collateral = mixed
+      ? target.size / 5n / BigInt((isLongCollateral ? p.prices.long : p.prices.short).min)
+      : isLongCollateral
+        ? 10000000000n
+        : 1000000000n;
+    const reason = (value, factor) =>
+      value < 20n * unit
+        ? "min collateral"
+        : value <= 0n
+          ? "<= 0"
+          : value < (target.size * factor) / unit
+            ? "min collateral for leverage"
+            : null;
+    const probes = c.input.liquidation.probe_prices.map((prices) => {
+      assert.deepEqual(prices.long, p.prices.long, c.id);
+      assert.deepEqual(prices.short, p.prices.short, c.id);
+      const index = BigInt(target.side ? prices.index.min : prices.index.max);
+      const pnl = target.side ? tokens * index - target.size : target.size - tokens * index;
+      assert(pnl < 0n, c.id);
+      const cp = BigInt((isLongCollateral ? prices.long : prices.short).min);
+      const value = collateral * cp + pnl - BigInt(due.cost_amount) * cp;
+      return {
+        pnl_usd20: String(pnl),
+        collateral_usd20: String(collateral * cp),
+        closing_cost_amount: due.cost_amount,
+        reason: reason(value, unit / 20n),
+        margin_reason: reason(value, unit / 10n),
+      };
+    });
+    assert.equal(probes.length, 3, c.id);
+    for (let i = 1; i < 3; i++)
+      assert.equal(
+        BigInt(c.input.liquidation.probe_prices[i].index.min) -
+          BigInt(c.input.liquidation.probe_prices[i - 1].index.min),
+        1n,
+        c.id
+      );
+    assert(probes.some((v) => v.reason === null) && probes.some((v) => v.reason !== null), c.id);
+    // Crediting same-token claims would incorrectly clear liquidation at the failing probe.
+    assert(
+      probes.some(
+        (v) =>
+          v.reason !== null &&
+          reason(
+            BigInt(v.collateral_usd20) +
+              BigInt(v.pnl_usd20) -
+              (BigInt(due.cost_amount) - BigInt(due.claimable_amounts[collateralIndex])) *
+                BigInt((isLongCollateral ? p.prices.long : p.prices.short).min),
+            unit / 20n
+          ) === null
+      ),
+      c.id
+    );
+    expected.liquidation = {
+      size_usd20: String(target.size),
+      size_tokens: String(tokens),
+      collateral_amount: String(collateral),
+      pending_cost_amount: due.cost_amount,
+      claimable_amounts: due.claimable_amounts,
+      probes,
+    };
+    if (mixed) {
+      mixedReversalLiquidationProbes += probes.length;
+      mixedReversalLiquidationUpdates += checkpoints.length;
+      // Claims stay in their own token units; crediting either token's USD value is incorrect.
+      for (const [col, claim] of due.claimable_amounts.entries()) {
+        const claimValue = BigInt(claim) * BigInt((col === 0 ? p.prices.long : p.prices.short).min);
+        assert(
+          probes.some(
+            (v) =>
+              v.reason !== null &&
+              reason(
+                BigInt(v.collateral_usd20) +
+                  BigInt(v.pnl_usd20) -
+                  BigInt(v.closing_cost_amount) * BigInt((isLongCollateral ? p.prices.long : p.prices.short).min) +
+                  claimValue,
+                unit / 20n
+              ) === null
+          ),
+          c.id
+        );
+      }
+    }
+    reversalLiquidationProbes += probes.length;
+    reversalLiquidationUpdates += checkpoints.length;
   }
   assert.deepEqual(c.output, expected, c.id);
   const first = checkpoints[0],
@@ -643,6 +758,103 @@ function verifyIncrease(c) {
   increasePriceProbes += probes.length;
 }
 
+let profitableLiquidationProbes = 0;
+function verifyProfitableLiquidation(c) {
+  const p = c.input.scenario,
+    size = BigInt(p.size_usd20);
+  const entryIndex = BigInt(p.is_long ? p.entry_prices.index.max : p.entry_prices.index.min);
+  const tokens = p.is_long ? size / entryIndex : ceil(size, entryIndex);
+  const collateral = BigInt(p.collateral_amount),
+    capFactor = BigInt(c.input.max_trader_pnl_factor);
+  assert.equal(p.order_fee_factor, "0", c.id);
+  assert.equal(p.liquidation_fee_factor, "0", c.id);
+  assert.deepEqual(
+    c.output.opened,
+    {
+      size_usd20: String(size),
+      size_tokens: String(tokens),
+      collateral_amount: String(collateral),
+      opening_cost_amount: "0",
+      execution_price: String(size / tokens),
+      impact_usd20: "0",
+    },
+    c.id
+  );
+  const reason = (remaining, factor) =>
+    remaining < BigInt(p.min_collateral_usd20)
+      ? "min collateral"
+      : remaining <= 0n
+        ? "<= 0"
+        : remaining < (size * BigInt(factor)) / unit
+          ? "min collateral for leverage"
+          : null;
+  const expected = p.probe_prices.map((prices) => {
+    assert.deepEqual(prices.index, p.probe_prices[0].index, c.id);
+    assert.equal(prices.index.min, prices.index.max, c.id);
+    const index = BigInt(prices.index.min);
+    const raw = p.is_long ? tokens * index - size : size - tokens * index;
+    assert(raw > 0n, c.id);
+    const sidePrice = BigInt((p.is_long ? prices.long : prices.short).min);
+    const pool = BigInt(p.is_long ? p.deposit_long_amount : p.deposit_short_amount) * sidePrice;
+    const cap = (pool * capFactor) / unit,
+      pnl = min(raw, cap);
+    if (c.id.includes("-zero-")) assert.equal(pnl, 0n, c.id);
+    else if (c.id.includes("-finite-")) assert(pnl > 0n && pnl < raw, c.id);
+    else assert.equal(pnl, raw, c.id);
+    const collateralValue = collateral * BigInt((p.is_long_collateral ? prices.long : prices.short).min);
+    const remaining = collateralValue + pnl;
+    const liquidation = reason(remaining, p.liquidation_collateral_factor);
+    const margin = reason(remaining, p.min_collateral_factor);
+    if (!c.id.includes("-unreached-") && (c.id.endsWith("-margin") ? margin : liquidation)) {
+      assert.equal(
+        reason(
+          collateralValue + raw,
+          c.id.endsWith("-margin") ? p.min_collateral_factor : p.liquidation_collateral_factor
+        ),
+        null,
+        c.id
+      );
+    }
+    return {
+      status: "ok",
+      pnl_usd20: String(pnl),
+      uncapped_pnl_usd20: String(raw),
+      side_pool_pnl_usd20: String(raw),
+      side_pool_value_usd20: String(pool),
+      collateral_usd20: String(collateralValue),
+      closing_cost_amount: "0",
+      impact_usd20: "0",
+      liquidatable: liquidation !== null,
+      reason: liquidation,
+      margin_insufficient: margin !== null,
+      margin_reason: margin,
+    };
+  });
+  assert.deepEqual(c.output, { status: "ok", opened: c.output.opened, probes: expected }, c.id);
+  assert.equal(expected.length, 3, c.id);
+  const collateralKey = p.is_long_collateral ? "long" : "short";
+  for (let i = 1; i < 3; i++) {
+    assert.equal(
+      BigInt(p.probe_prices[i][collateralKey].min) - BigInt(p.probe_prices[i - 1][collateralKey].min),
+      1n,
+      c.id
+    );
+  }
+  const failures = expected.map((v) => (c.id.endsWith("-margin") ? v.margin_insufficient : v.liquidatable));
+  assert.deepEqual(failures, [true, false, false], c.id);
+  if (c.id.endsWith("-margin"))
+    assert(
+      expected.every((v) => !v.liquidatable),
+      c.id
+    );
+  if (c.id.endsWith("-leverage"))
+    assert(
+      expected.every((v) => v.margin_insufficient),
+      c.id
+    );
+  profitableLiquidationProbes += expected.length;
+}
+
 function verifyLiquidation(c) {
   const p = c.input.scenario;
   const size = BigInt(p.size_usd20);
@@ -656,19 +868,28 @@ function verifyLiquidation(c) {
   const openingAmount = -ceil(-openingImpact, BigInt(p.entry_prices.index.min));
   const baseTokens = p.is_long ? size / entryIndex : ceil(size, entryIndex);
   const tokens = p.is_long ? baseTokens + openingAmount : baseTokens - openingAmount;
-  const oppositeSize = impact ? BigInt(impact.opposite_size_usd20) : 0n;
+  const impactFunding = impact && c.input.funding;
+  const oppositeSize = impactFunding
+    ? c.input.funding.opposite_sizes_usd20.map(BigInt).reduce((a, b) => a + b, 0n)
+    : impact
+      ? BigInt(impact.opposite_size_usd20)
+      : 0n;
   const rawImpact = !impact
     ? 0n
     : oppositeSize === 0n
       ? (size * min(BigInt(impact.positive_factor), BigInt(impact.negative_factor))) / unit
-      : -(size * BigInt(impact.negative_factor)) / unit;
+      : oppositeSize < size
+        ? ((size - oppositeSize) * min(BigInt(impact.positive_factor), BigInt(impact.negative_factor))) / unit -
+          (oppositeSize * BigInt(impact.negative_factor)) / unit
+        : -(size * BigInt(impact.negative_factor)) / unit;
   const effectiveImpact =
     rawImpact >= 0n ? 0n : -min(-rawImpact, (size * BigInt(impact.liquidation_cap_factor)) / unit);
+  let oppositeTokens = 0n;
   if (impact) {
     assert.equal(p.order_fee_factor, "0", c.id);
-    assert(oppositeSize === 0n || oppositeSize === 3n * size, c.id);
+    assert(impactFunding || oppositeSize === 0n || oppositeSize === 3n * size, c.id);
     let oppositeReport = null;
-    if (oppositeSize) {
+    if (oppositeSize && !impactFunding) {
       const seedImpact =
         (size * min(BigInt(impact.positive_factor), BigInt(impact.negative_factor))) / unit -
         ((oppositeSize - size) * BigInt(impact.negative_factor)) / unit;
@@ -677,12 +898,46 @@ function verifyLiquidation(c) {
       const seedTokens = p.is_long
         ? ceil(oppositeSize, BigInt(p.entry_prices.index.min)) - seedAmount
         : oppositeSize / BigInt(p.entry_prices.index.max) + seedAmount;
+      oppositeTokens = seedTokens;
       oppositeReport = {
         impact_usd20: String(seedImpact),
         size_tokens: String(seedTokens),
         execution_price: String(oppositeSize / seedTokens),
         claimable_funding_amounts: ["0", "0"],
       };
+    }
+    if (impactFunding) {
+      assert.equal(impact.opposite_size_usd20, "0", c.id);
+      assert.equal(impact.opposite_collateral_amount, "0", c.id);
+      let previousOpposite = 0n;
+      oppositeReport = c.input.funding.opposite_sizes_usd20.map((value) => {
+        const delta = BigInt(value),
+          nextOpposite = previousOpposite + delta;
+        const before = size >= previousOpposite ? size - previousOpposite : previousOpposite - size;
+        const after = size >= nextOpposite ? size - nextOpposite : nextOpposite - size;
+        const positive = min(BigInt(impact.positive_factor), BigInt(impact.negative_factor));
+        const negative = BigInt(impact.negative_factor);
+        const raw =
+          previousOpposite < size && nextOpposite > size
+            ? (before * positive) / unit - (after * negative) / unit
+            : after < before
+              ? (before * positive) / unit - (after * positive) / unit
+              : (before * negative) / unit - (after * negative) / unit;
+        // This fixture's configured positive execution cap is zero.
+        const applied = min(raw, 0n),
+          amount = -ceil(-applied, BigInt(p.entry_prices.index.min));
+        const seedTokens = p.is_long
+          ? ceil(delta, BigInt(p.entry_prices.index.min)) - amount
+          : delta / BigInt(p.entry_prices.index.max) + amount;
+        oppositeTokens += seedTokens;
+        previousOpposite = nextOpposite;
+        return {
+          impact_usd20: String(applied),
+          size_tokens: String(seedTokens),
+          execution_price: String(delta / seedTokens),
+          claimable_funding_amounts: ["0", "0"],
+        };
+      });
     }
     assert.deepEqual(
       c.output.state,
@@ -720,19 +975,21 @@ function verifyLiquidation(c) {
       BigInt(p.is_long ? p.deposit_long_amount : p.deposit_short_amount) *
       BigInt((p.is_long ? p.entry_prices.long : p.entry_prices.short).min);
     const rate = (((reserved * unit) / poolValue) * BigInt(borrowing.factor)) / unit;
-    const oppositeSize = c.input.funding
+    const oppositeBorrowSize = c.input.funding
       ? c.input.funding.opposite_sizes_usd20.map(BigInt).reduce((a, b) => a + b, 0n)
-      : 0n;
+      : oppositeSize;
     const oppositeReserved = p.is_long
-      ? oppositeSize
-      : c.input.funding
-        ? c.input.funding.opposite_sizes_usd20
-            .map(BigInt)
-            .reduce(
-              (sum, value) => sum + (value / BigInt(p.entry_prices.index.max)) * BigInt(p.entry_prices.index.max),
-              0n
-            )
-        : 0n;
+      ? oppositeBorrowSize
+      : impactFunding
+        ? oppositeTokens * BigInt(p.entry_prices.index.max)
+        : c.input.funding
+          ? c.input.funding.opposite_sizes_usd20
+              .map(BigInt)
+              .reduce(
+                (sum, value) => sum + (value / BigInt(p.entry_prices.index.max)) * BigInt(p.entry_prices.index.max),
+                0n
+              )
+          : oppositeTokens * BigInt(p.entry_prices.index.max);
     const oppositePoolValue =
       BigInt(p.is_long ? p.deposit_short_amount : p.deposit_long_amount) *
       BigInt((p.is_long ? p.entry_prices.short : p.entry_prices.long).min);
@@ -836,7 +1093,7 @@ function verifyLiquidation(c) {
     if (borrowing || funding) {
       assert.deepEqual(prices.long, p.entry_prices.long, c.id);
       assert.deepEqual(prices.short, p.entry_prices.short, c.id);
-      const before = collateralValue + pnl - (feeValue / collateralPrice) * collateralPrice;
+      const before = collateralValue + pnl + effectiveImpact - (feeValue / collateralPrice) * collateralPrice;
       for (const output of [borrowingOutput, fundingOutput].filter(Boolean))
         output.before_probes.push({
           reason: reason(before, p.liquidation_collateral_factor ?? p.min_collateral_factor),
@@ -947,6 +1204,19 @@ function verifyLiquidation(c) {
     delete other.funding_first;
     assert.deepEqual(result, other, c.id);
   }
+  if (impact && borrowing && funding) {
+    tripleLiquidationProbes += probes.length;
+    tripleBorrowingUpdates += borrowing.elapsed_seconds.length;
+    tripleFundingUpdates += funding.elapsed_seconds.length;
+  }
+  if (impact && funding) {
+    impactFundingProbes += probes.length;
+    impactFundingUpdates += funding.elapsed_seconds.length;
+  }
+  if (impact && borrowing) {
+    impactBorrowingProbes += probes.length;
+    impactBorrowingUpdates += borrowing.elapsed_seconds.length;
+  }
   liquidationProbes += probes.length;
   if (impact) impactLiquidationProbes += probes.length;
 }
@@ -955,10 +1225,20 @@ for (let index = 0; index < reference.cases.length; index++) {
   assert.equal(c.id, inputs.cases[index].id);
   assert.deepEqual(c.input, inputs.cases[index].input);
   const p = c.input;
+  if (p.operation === "liquidation_pnl") {
+    verifyProfitableLiquidation(c);
+    operations[p.operation] = (operations[p.operation] ?? 0) + 1;
+    continue;
+  }
   if (
-    ["dynamic_funding", "dynamic_funding_settlement", "dynamic_funding_single_side", "dynamic_funding_mixed"].includes(
-      p.operation
-    )
+    [
+      "dynamic_funding",
+      "dynamic_funding_settlement",
+      "dynamic_funding_single_side",
+      "dynamic_funding_mixed",
+      "liquidation_funding_reversal",
+      "liquidation_funding_mixed",
+    ].includes(p.operation)
   ) {
     verifyDynamicFunding(c);
     operations[p.operation] = (operations[p.operation] ?? 0) + 1;
@@ -986,6 +1266,9 @@ for (let index = 0; index < reference.cases.length; index++) {
       "liquidation_borrowing",
       "liquidation_funding",
       "liquidation_accrued",
+      "liquidation_impact_borrowing",
+      "liquidation_impact_funding",
+      "liquidation_impact_accrued",
     ].includes(p.operation)
   ) {
     verifyLiquidation(c);
@@ -1512,6 +1795,144 @@ try {
       s.cases[435].input.funding.elapsed_seconds = [];
     }
   );
+  invalid.push(
+    (s) => {
+      delete s.cases[483].input.impact;
+    },
+    (s) => {
+      delete s.cases[483].input.borrowing;
+    },
+    (s) => {
+      s.cases[483].input.impact.negative_factor = "01";
+    },
+    (s) => {
+      s.cases[483].input.impact.liquidation_cap_factor = String(unit + 1n);
+    },
+    (s) => {
+      s.cases[483].input.impact.opposite_collateral_amount = "1";
+    },
+    (s) => {
+      s.cases[483].input.borrowing.factor = "-1";
+    },
+    (s) => {
+      s.cases[483].input.borrowing.elapsed_seconds = [];
+    },
+    (s) => {
+      s.cases[483].input.unknown = true;
+    }
+  );
+  invalid.push(
+    (s) => {
+      delete s.cases[515].input.impact;
+    },
+    (s) => {
+      delete s.cases[515].input.funding;
+    },
+    (s) => {
+      s.cases[515].input.impact.opposite_size_usd20 = "1";
+    },
+    (s) => {
+      s.cases[515].input.impact.opposite_collateral_amount = "1";
+    },
+    (s) => {
+      s.cases[515].input.funding.opposite_sizes_usd20[0] = "0";
+    },
+    (s) => {
+      s.cases[515].input.funding.elapsed_seconds = [];
+    },
+    (s) => {
+      s.cases[515].input.funding.max_factor_per_second = String(unit + 1n);
+    },
+    (s) => {
+      s.cases[515].input.unknown = true;
+    }
+  );
+  invalid.push(
+    (s) => {
+      delete s.cases[571].input.impact;
+    },
+    (s) => {
+      delete s.cases[571].input.borrowing;
+    },
+    (s) => {
+      delete s.cases[571].input.funding;
+    },
+    (s) => {
+      delete s.cases[571].input.funding_first;
+    },
+    (s) => {
+      s.cases[571].input.funding_first = "true";
+    },
+    (s) => {
+      s.cases[571].input.borrowing.elapsed_seconds = [1];
+    },
+    (s) => {
+      s.cases[571].input.impact.opposite_size_usd20 = "1";
+    },
+    (s) => {
+      s.cases[571].input.unknown = true;
+    }
+  );
+  invalid.push(
+    (s) => {
+      delete s.cases[683].input.liquidation;
+    },
+    (s) => {
+      s.cases[683].input.liquidation.target_index = 2;
+    },
+    (s) => {
+      s.cases[683].input.liquidation.probe_prices = [];
+    },
+    (s) => {
+      s.cases[683].input.liquidation.probe_prices[0].index.min = "0";
+    },
+    (s) => {
+      s.cases[683].input.liquidation.unknown = true;
+    },
+    (s) => {
+      s.cases[683].input.scenario.steps = [s.cases[683].input.scenario.steps[0]];
+    }
+  );
+  invalid.push(
+    (s) => {
+      delete s.cases[699].input.long_collateral_factors;
+    },
+    (s) => {
+      s.cases[699].input.long_collateral_factors[0] = "0";
+    },
+    (s) => {
+      s.cases[699].input.long_collateral_factors[1] = String(unit);
+    },
+    (s) => {
+      s.cases[699].input.liquidation.target_index = 4;
+    },
+    (s) => {
+      delete s.cases[699].input.liquidation;
+    },
+    (s) => {
+      s.cases[699].input.scenario.steps = [s.cases[699].input.scenario.steps[0]];
+    }
+  );
+  invalid.push(
+    (s) => {
+      delete s.cases[731].input.max_trader_pnl_factor;
+    },
+    (s) => {
+      s.cases[731].input.max_trader_pnl_factor = String(unit + 1n);
+    },
+    (s) => {
+      s.cases[731].input.max_trader_pnl_factor = "-1";
+    },
+    (s) => {
+      s.cases[731].input.max_trader_pnl_factor = "00";
+    },
+    (s) => {
+      s.cases[731].input.scenario.probe_prices = [];
+    },
+    (s) => {
+      s.cases[731].input.unknown = true;
+    }
+  );
   for (const mutate of invalid) {
     const suite = structuredClone(inputs);
     mutate(suite);
@@ -1552,6 +1973,18 @@ process.stdout.write(
       cases: reference.cases.length,
       operations,
       liquidationProbes,
+      profitableLiquidationProbes,
+      mixedReversalLiquidationProbes,
+      mixedReversalLiquidationUpdates,
+      reversalLiquidationProbes,
+      reversalLiquidationUpdates,
+      tripleLiquidationProbes,
+      tripleBorrowingUpdates,
+      tripleFundingUpdates,
+      impactFundingProbes,
+      impactFundingUpdates,
+      impactBorrowingProbes,
+      impactBorrowingUpdates,
       combinedLiquidationProbes,
       combinedBorrowingUpdates,
       combinedFundingUpdates,

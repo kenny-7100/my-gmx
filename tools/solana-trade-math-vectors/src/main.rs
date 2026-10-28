@@ -49,6 +49,37 @@ struct Case {
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
 enum Input {
+    LiquidationPnl {
+        scenario: LiquidationInput,
+        max_trader_pnl_factor: String,
+    },
+    LiquidationFundingMixed {
+        scenario: DynamicFundingInput,
+        long_collateral_factors: [String; 2],
+        liquidation: ReversalLiquidationInput,
+    },
+    LiquidationFundingReversal {
+        scenario: DynamicFundingInput,
+        is_long_collateral: bool,
+        liquidation: ReversalLiquidationInput,
+    },
+    LiquidationImpactAccrued {
+        scenario: LiquidationInput,
+        impact: LiquidationImpactInput,
+        borrowing: LiquidationBorrowingInput,
+        funding: LiquidationFundingInput,
+        funding_first: bool,
+    },
+    LiquidationImpactFunding {
+        scenario: LiquidationInput,
+        impact: LiquidationImpactInput,
+        funding: LiquidationFundingInput,
+    },
+    LiquidationImpactBorrowing {
+        scenario: LiquidationInput,
+        impact: LiquidationImpactInput,
+        borrowing: LiquidationBorrowingInput,
+    },
     LiquidationAccrued {
         scenario: LiquidationInput,
         borrowing: LiquidationBorrowingInput,
@@ -201,12 +232,30 @@ struct SingleSideInput {
     elapsed_seconds: Vec<u64>,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ReversalLiquidationInput {
+    target_index: usize,
+    probe_prices: Vec<PricesInput>,
+}
+
+fn mixed_funding_factors(values: &[String; 2]) -> Result<[u128; 2]> {
+    let factors = [factor(&values[0])?, factor(&values[1])?];
+    if factors.iter().any(|value| *value == 0 || *value == UNIT) {
+        return Err(
+            "Mixed funding requires both collateral shares strictly between zero and one".into(),
+        );
+    }
+    Ok(factors)
+}
+
 fn dynamic_funding(
     input: &DynamicFundingInput,
     settle: bool,
     is_long_collateral: bool,
     transition: Option<&SingleSideInput>,
     mixed_factors: Option<[u128; 2]>,
+    liquidation: Option<&ReversalLiquidationInput>,
 ) -> Result<Value> {
     if let Some(transition) = transition {
         if transition.elapsed_seconds.is_empty()
@@ -244,6 +293,17 @@ fn dynamic_funding(
     config.swap_impact_params = no_impact;
     config.order_fee_params = no_fee;
     config.swap_fee_params = no_fee;
+    if liquidation.is_some() {
+        config.position_params = PositionParams::builder()
+            .min_position_size_usd(UNIT)
+            .min_collateral_value(20 * UNIT)
+            .min_collateral_factor(UNIT / 10)
+            .min_collateral_factor_for_liquidation(Some(UNIT / 20))
+            .max_positive_position_impact_factor(0)
+            .max_negative_position_impact_factor(0)
+            .max_position_impact_factor_for_liquidations(0)
+            .build();
+    }
     config.funding_fee_params = FundingFeeParams::builder()
         .exponent(UNIT)
         .funding_factor(0)
@@ -299,7 +359,15 @@ fn dynamic_funding(
                 .ops(&mut market)
                 .increase(
                     prices,
-                    if is_long_collateral {
+                    if liquidation.is_some() && mixed_factors.is_some() {
+                        // Keep each mixed fixture position at 20% collateral before fees.
+                        (size / 5)
+                            / if is_long_collateral {
+                                prices.long_token_price.min
+                            } else {
+                                prices.short_token_price.min
+                            }
+                    } else if is_long_collateral {
                         10_000_000_000
                     } else {
                         1_000_000_000
@@ -431,7 +499,54 @@ fn dynamic_funding(
         }
         output["single_side"] = json!({"closing":closing, "updates":single_updates});
     }
-    if settle {
+    if let Some(liquidation) = liquidation {
+        if liquidation.probe_prices.len() != 3
+            || liquidation.target_index >= if mixed_factors.is_some() { 4 } else { 2 }
+        {
+            return Err(
+                "Expected three reversal liquidation probes and an initial position index".into(),
+            );
+        }
+        let position = positions
+            .get_mut(liquidation.target_index)
+            .ok_or("Reversal liquidation target position does not exist")?;
+        let ops = position.ops(&mut market);
+        let fees = ops.pending_funding_fees()?;
+        if *fees.amount() == 0
+            || (*fees.claimable_long_token_amount() == 0
+                && *fees.claimable_short_token_amount() == 0)
+        {
+            return Err("Expected simultaneous payable funding and claimable funding".into());
+        }
+        if mixed_factors.is_some()
+            && (*fees.claimable_long_token_amount() == 0
+                || *fees.claimable_short_token_amount() == 0)
+        {
+            return Err("Expected both mixed collateral funding claims to be nonzero".into());
+        }
+        let mut probes = Vec::new();
+        for input in &liquidation.probe_prices {
+            let prices = input.parse()?;
+            let (pnl, _, _) = ops.pnl_value(&prices, ops.size_in_usd())?;
+            let reason = ops
+                .check_liquidatable(&prices, true, true)?
+                .map(|v| v.to_string());
+            let margin = ops
+                .check_liquidatable(&prices, true, false)?
+                .map(|v| v.to_string());
+            probes.push(json!({"pnl_usd20":pnl.to_string(),
+                "collateral_usd20":ops.collateral_value(&prices)?.to_string(),
+                "closing_cost_amount":fees.amount().to_string(),
+                "reason":reason,"margin_reason":margin}));
+        }
+        output["liquidation"] = json!({"size_usd20":ops.size_in_usd().to_string(),
+            "size_tokens":ops.size_in_tokens().to_string(),
+            "collateral_amount":ops.collateral_amount().to_string(),
+            "pending_cost_amount":fees.amount().to_string(),
+            "claimable_amounts":[fees.claimable_long_token_amount().to_string(),fees.claimable_short_token_amount().to_string()],
+            "probes":probes});
+    }
+    if settle && liquidation.is_none() {
         let mut settlements = Vec::new();
         for (index, ((position, is_long), is_long_collateral)) in
             positions.iter_mut().zip(sides).zip(collaterals).enumerate()
@@ -1124,7 +1239,14 @@ fn liquidation_check(
     borrowing: Option<&LiquidationBorrowingInput>,
     funding: Option<&LiquidationFundingInput>,
     funding_first: bool,
+    max_trader_pnl_factor: Option<&str>,
 ) -> Result<Value> {
+    if let (Some(impact), Some(_)) = (impact, funding) {
+        if uint(&impact.opposite_size_usd20)? != 0 || uint(&impact.opposite_collateral_amount)? != 0
+        {
+            return Err("Funding must be the sole source of opposite liquidation positions".into());
+        }
+    }
     if let (Some(borrowing), Some(funding)) = (borrowing, funding) {
         if borrowing.elapsed_seconds != funding.elapsed_seconds {
             return Err(
@@ -1178,6 +1300,9 @@ fn liquidation_check(
                 .unwrap_or(0),
         )
         .build();
+    if let Some(cap) = max_trader_pnl_factor {
+        config.max_pnl_factors.trader = factor(cap)?;
+    }
     // Existing operations retain their original clock behavior.
     let no_impact = PriceImpactParams::builder()
         .exponent(UNIT)
@@ -1323,6 +1448,7 @@ fn liquidation_check(
     let mut borrowing_output = Value::Null;
     let mut funding_output = Value::Null;
     if let Some(funding) = funding {
+        let mut opposite_reports = Vec::new();
         for (index, collateral_long) in [true, false].into_iter().enumerate() {
             let size = uint(&funding.opposite_sizes_usd20[index])?;
             if size == 0 {
@@ -1342,11 +1468,20 @@ fn liquidation_check(
                     None,
                 )?
                 .execute()?;
+            opposite_reports.push(json!({
+                "impact_usd20": report.execution().price_impact_value().to_string(),
+                "size_tokens": report.execution().size_delta_in_tokens().to_string(),
+                "execution_price": report.execution().execution_price().to_string(),
+                "claimable_funding_amounts": [report.claimable_funding_amounts().0.to_string(), report.claimable_funding_amounts().1.to_string()]
+            }));
             if report.fees().total_cost_amount()? != 0
                 || report.claimable_funding_amounts() != (&0, &0)
             {
                 return Err("Expected opposite funding opening without cost or claims".into());
             }
+        }
+        if impact.is_some() {
+            opposite_report = Value::Array(opposite_reports);
         }
         let mut before_probes = Vec::new();
         for prices in &probes {
@@ -1435,7 +1570,7 @@ fn liquidation_check(
     let mut results = Vec::new();
     for prices in probes {
         let result = (|| -> gmsol_model::Result<Value> {
-            let (pnl, _, _) = ops.pnl_value(&prices, ops.size_in_usd())?;
+            let (pnl, uncapped, _) = ops.pnl_value(&prices, ops.size_in_usd())?;
             let collateral = ops.collateral_value(&prices)?;
             let impact = ops.position_price_impact(
                 &-i128::try_from(size)
@@ -1462,6 +1597,17 @@ fn liquidation_check(
                 "liquidatable": reason.is_some(), "reason": reason,
                 "margin_insufficient": margin_reason.is_some(), "margin_reason": margin_reason
             });
+            if max_trader_pnl_factor.is_some() {
+                output["uncapped_pnl_usd20"] = json!(uncapped.to_string());
+                output["side_pool_pnl_usd20"] = json!(ops
+                    .market()
+                    .pnl(&prices.index_token_price, input.is_long, true)?
+                    .to_string());
+                output["side_pool_value_usd20"] = json!(ops
+                    .market()
+                    .pool_value_without_pnl_for_one_side(&prices, input.is_long, false)?
+                    .to_string());
+            }
             if include_impact {
                 let mut effective = impact.value;
                 if effective < 0 {
@@ -1555,41 +1701,92 @@ fn model_error(error: gmsol_model::Error) -> Value {
 
 fn evaluate(input: &Input) -> Result<Value> {
     match input {
+        Input::LiquidationFundingReversal {
+            scenario,
+            is_long_collateral,
+            liquidation,
+        } => dynamic_funding(
+            scenario,
+            true,
+            *is_long_collateral,
+            None,
+            None,
+            Some(liquidation),
+        ),
         Input::FundingDistribution { scenario } => funding_distribution(scenario),
-        Input::DynamicFunding { scenario } => dynamic_funding(scenario, false, false, None, None),
+        Input::DynamicFunding { scenario } => {
+            dynamic_funding(scenario, false, false, None, None, None)
+        }
         Input::DynamicFundingSettlement {
             scenario,
             is_long_collateral,
-        } => dynamic_funding(scenario, true, *is_long_collateral, None, None),
+        } => dynamic_funding(scenario, true, *is_long_collateral, None, None, None),
         Input::DynamicFundingSingleSide {
             scenario,
             is_long_collateral,
             transition,
-        } => dynamic_funding(scenario, true, *is_long_collateral, Some(transition), None),
+        } => dynamic_funding(
+            scenario,
+            true,
+            *is_long_collateral,
+            Some(transition),
+            None,
+            None,
+        ),
+        Input::LiquidationFundingMixed {
+            scenario,
+            long_collateral_factors,
+            liquidation,
+        } => {
+            let factors = mixed_funding_factors(long_collateral_factors)?;
+            dynamic_funding(
+                scenario,
+                true,
+                false,
+                None,
+                Some(factors),
+                Some(liquidation),
+            )
+        }
         Input::DynamicFundingMixed {
             scenario,
             long_collateral_factors,
         } => {
-            let factors = [
-                factor(&long_collateral_factors[0])?,
-                factor(&long_collateral_factors[1])?,
-            ];
-            if factors.iter().any(|value| *value == 0 || *value == UNIT) {
-                return Err(
-                    "Mixed funding requires both collateral shares strictly between zero and one"
-                        .into(),
-                );
-            }
-            dynamic_funding(scenario, true, false, None, Some(factors))
+            let factors = mixed_funding_factors(long_collateral_factors)?;
+            dynamic_funding(scenario, true, false, None, Some(factors), None)
         }
         Input::FundingAccrual { scenario } => funding_accrual(scenario),
         Input::BorrowingAccrual { scenario } => borrowing_accrual(scenario, None),
         Input::BorrowingKink { scenario, params } => borrowing_accrual(scenario, Some(params)),
         Input::IncreaseImpact { scenario } => increase_impact(scenario),
+        Input::LiquidationImpactAccrued {
+            scenario,
+            impact,
+            borrowing,
+            funding,
+            funding_first,
+        } => liquidation_check(
+            scenario,
+            Some(impact),
+            Some(borrowing),
+            Some(funding),
+            *funding_first,
+            None,
+        ),
+        Input::LiquidationImpactFunding {
+            scenario,
+            impact,
+            funding,
+        } => liquidation_check(scenario, Some(impact), None, Some(funding), false, None),
+        Input::LiquidationImpactBorrowing {
+            scenario,
+            impact,
+            borrowing,
+        } => liquidation_check(scenario, Some(impact), Some(borrowing), None, false, None),
         Input::LiquidationBorrowing {
             scenario,
             borrowing,
-        } => liquidation_check(scenario, None, Some(borrowing), None, false),
+        } => liquidation_check(scenario, None, Some(borrowing), None, false, None),
         Input::LiquidationAccrued {
             scenario,
             borrowing,
@@ -1601,15 +1798,27 @@ fn evaluate(input: &Input) -> Result<Value> {
             Some(borrowing),
             Some(funding),
             *funding_first,
+            None,
         ),
         Input::LiquidationFunding { scenario, funding } => {
-            liquidation_check(scenario, None, None, Some(funding), false)
+            liquidation_check(scenario, None, None, Some(funding), false, None)
         }
+        Input::LiquidationPnl {
+            scenario,
+            max_trader_pnl_factor,
+        } => liquidation_check(
+            scenario,
+            None,
+            None,
+            None,
+            false,
+            Some(max_trader_pnl_factor),
+        ),
         Input::LiquidationCheck { scenario } => {
-            liquidation_check(scenario, None, None, None, false)
+            liquidation_check(scenario, None, None, None, false, None)
         }
         Input::LiquidationImpact { scenario, impact } => {
-            liquidation_check(scenario, Some(impact), None, None, false)
+            liquidation_check(scenario, Some(impact), None, None, false, None)
         }
         Input::Fee {
             amount,
@@ -1789,7 +1998,7 @@ fn main() -> Result<()> {
             "rustc": String::from_utf8(rustc.stdout)?.trim()
         },
         "units": {"usd_decimals": "20", "factor_decimals": "20", "shared_usd_decimals": "30", "prices": "USD20 per raw token unit", "token_amounts": "raw units; decimals specified per case or documented per-operation fixtures", "fee_amount": "same unit as input amount; not implicitly USD", "tolerance": "0"},
-        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement", "Mixed-collateral dynamic reversal funding and two-token claimable settlement", "Borrowing kink usage boundaries and strict smaller-side skipping", "Liquidation predicates after real borrowing accrual", "Funding payer costs and uncredited claimables in liquidation predicates", "Combined borrowing and funding liquidation costs with shared intervals and both update orders"],
+        "scope": ["FeeParams::fee", "PerpMarketExt::cap_positive_position_price_impact", "PositionExt::pnl_value", "PositionExt::check_liquidatable (zero-impact, no elapsed funding/borrowing; deposit/increase initialized)", "IncreasePosition::execute (linear impact; explicit pool snapshot; acceptable-price boundaries)", "PositionExt::check_liquidatable (nonzero linear impact; real opposite OI; liquidation impact cap and margin boundaries)", "UpdateBorrowingState and IncreasePosition::execute (linear borrowing; explicit intervals; settlement and no double charge)", "UpdateFundingState and IncreasePosition::execute (linear fallback funding; payer ceil and receiver floor; claimable report reset)", "UpdateFundingState (dynamic funding; signed rate transitions, thresholds and bounds; real OI actions)", "UpdateFundingState and IncreasePosition::execute (asymmetric collateral OI and single-sided fallback funding)", "Dynamic funding reversal pending fees and IncreasePosition::execute settlement snapshots", "Real full closes followed by single-sided dynamic funding updates and survivor settlement", "Mixed-collateral dynamic reversal funding and two-token claimable settlement", "Borrowing kink usage boundaries and strict smaller-side skipping", "Liquidation predicates after real borrowing accrual", "Funding payer costs and uncredited claimables in liquidation predicates", "Combined borrowing and funding liquidation costs with shared intervals and both update orders", "Borrowing accrual combined with capped nonzero liquidation impact", "Funding accrual combined with nonzero liquidation impact and real opposite collateral positions", "Combined borrowing, funding and nonzero liquidation impact with real token reserves and both update orders", "Liquidation predicates with simultaneously payable and claimable funding after a real dynamic reversal", "Mixed collateral reversal liquidation with payable funding and two uncredited token claims", "Profitable capped PnL liquidation predicates with collateral repricing and zero costs"],
         "cases": cases
     });
     // Buffer all cases before writing stdout; callers must still publish output atomically.
