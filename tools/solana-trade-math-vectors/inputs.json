@@ -23709,6 +23709,4470 @@
           "opposite_collateral_amounts": ["20000000000", "2000000000"]
         }
       }
+    },
+    {
+      "id": "liquidation-combined-long-long-payer-zero-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8499999999999",
+                "max": "8499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000000",
+                "max": "8500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000001",
+                "max": "8500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-payer-zero-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8499999999999",
+                "max": "8499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000000",
+                "max": "8500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000001",
+                "max": "8500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-payer-accrued-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8834000170999",
+                "max": "8834000170999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8834000171000",
+                "max": "8834000171000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8834000171001",
+                "max": "8834000171001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-payer-accrued-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8834000170999",
+                "max": "8834000170999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8834000171000",
+                "max": "8834000171000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8834000171001",
+                "max": "8834000171001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-payer-accrued-borrowing-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "9334000170999",
+                "max": "9334000170999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9334000171000",
+                "max": "9334000171000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9334000171001",
+                "max": "9334000171001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-payer-accrued-funding-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "9334000170999",
+                "max": "9334000170999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9334000171000",
+                "max": "9334000171000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9334000171001",
+                "max": "9334000171001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-receiver-zero-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8499999999999",
+                "max": "8499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000000",
+                "max": "8500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000001",
+                "max": "8500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-receiver-zero-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8499999999999",
+                "max": "8499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000000",
+                "max": "8500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000001",
+                "max": "8500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-receiver-accrued-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8500100169999",
+                "max": "8500100169999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500100170000",
+                "max": "8500100170000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500100170001",
+                "max": "8500100170001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-receiver-accrued-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8500100169999",
+                "max": "8500100169999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500100170000",
+                "max": "8500100170000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500100170001",
+                "max": "8500100170001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-receiver-accrued-borrowing-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "9000100169999",
+                "max": "9000100169999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9000100170000",
+                "max": "9000100170000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9000100170001",
+                "max": "9000100170001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-long-receiver-accrued-funding-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "9000100169999",
+                "max": "9000100169999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9000100170000",
+                "max": "9000100170000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9000100170001",
+                "max": "9000100170001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-payer-zero-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8499999999999",
+                "max": "8499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000000",
+                "max": "8500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000001",
+                "max": "8500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-payer-zero-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8499999999999",
+                "max": "8499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000000",
+                "max": "8500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000001",
+                "max": "8500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-payer-accrued-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8834000179999",
+                "max": "8834000179999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8834000180000",
+                "max": "8834000180000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8834000180001",
+                "max": "8834000180001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-payer-accrued-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8834000179999",
+                "max": "8834000179999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8834000180000",
+                "max": "8834000180000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8834000180001",
+                "max": "8834000180001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-payer-accrued-borrowing-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "9334000179999",
+                "max": "9334000179999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9334000180000",
+                "max": "9334000180000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9334000180001",
+                "max": "9334000180001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-payer-accrued-funding-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "9334000179999",
+                "max": "9334000179999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9334000180000",
+                "max": "9334000180000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9334000180001",
+                "max": "9334000180001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-receiver-zero-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8499999999999",
+                "max": "8499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000000",
+                "max": "8500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000001",
+                "max": "8500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-receiver-zero-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8499999999999",
+                "max": "8499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000000",
+                "max": "8500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500000000001",
+                "max": "8500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-receiver-accrued-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8500100169999",
+                "max": "8500100169999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500100170000",
+                "max": "8500100170000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500100170001",
+                "max": "8500100170001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-receiver-accrued-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "8500100169999",
+                "max": "8500100169999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500100170000",
+                "max": "8500100170000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "8500100170001",
+                "max": "8500100170001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-receiver-accrued-borrowing-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "9000100169999",
+                "max": "9000100169999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9000100170000",
+                "max": "9000100170000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9000100170001",
+                "max": "9000100170001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-long-short-receiver-accrued-funding-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": true,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "9000100169999",
+                "max": "9000100169999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9000100170000",
+                "max": "9000100170000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "9000100170001",
+                "max": "9000100170001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-payer-zero-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499999999999",
+                "max": "11499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000000",
+                "max": "11500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000001",
+                "max": "11500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-payer-zero-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499999999999",
+                "max": "11499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000000",
+                "max": "11500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000001",
+                "max": "11500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-payer-accrued-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11165999828999",
+                "max": "11165999828999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11165999829000",
+                "max": "11165999829000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11165999829001",
+                "max": "11165999829001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-payer-accrued-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11165999828999",
+                "max": "11165999828999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11165999829000",
+                "max": "11165999829000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11165999829001",
+                "max": "11165999829001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-payer-accrued-borrowing-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "10665999828999",
+                "max": "10665999828999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10665999829000",
+                "max": "10665999829000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10665999829001",
+                "max": "10665999829001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-payer-accrued-funding-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "10665999828999",
+                "max": "10665999828999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10665999829000",
+                "max": "10665999829000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10665999829001",
+                "max": "10665999829001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-receiver-zero-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499999999999",
+                "max": "11499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000000",
+                "max": "11500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000001",
+                "max": "11500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-receiver-zero-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499999999999",
+                "max": "11499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000000",
+                "max": "11500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000001",
+                "max": "11500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-receiver-accrued-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499899829999",
+                "max": "11499899829999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11499899830000",
+                "max": "11499899830000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11499899830001",
+                "max": "11499899830001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-receiver-accrued-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499899829999",
+                "max": "11499899829999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11499899830000",
+                "max": "11499899830000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11499899830001",
+                "max": "11499899830001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-receiver-accrued-borrowing-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "10999899829999",
+                "max": "10999899829999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10999899830000",
+                "max": "10999899830000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10999899830001",
+                "max": "10999899830001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-long-receiver-accrued-funding-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": true,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "10999899829999",
+                "max": "10999899829999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10999899830000",
+                "max": "10999899830000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10999899830001",
+                "max": "10999899830001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "2000000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-payer-zero-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499999999999",
+                "max": "11499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000000",
+                "max": "11500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000001",
+                "max": "11500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-payer-zero-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499999999999",
+                "max": "11499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000000",
+                "max": "11500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000001",
+                "max": "11500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-payer-accrued-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11165999819999",
+                "max": "11165999819999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11165999820000",
+                "max": "11165999820000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11165999820001",
+                "max": "11165999820001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-payer-accrued-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11165999819999",
+                "max": "11165999819999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11165999820000",
+                "max": "11165999820000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11165999820001",
+                "max": "11165999820001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-payer-accrued-borrowing-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "10665999819999",
+                "max": "10665999819999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10665999820000",
+                "max": "10665999820000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10665999820001",
+                "max": "10665999820001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-payer-accrued-funding-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "10665999819999",
+                "max": "10665999819999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10665999820000",
+                "max": "10665999820000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10665999820001",
+                "max": "10665999820001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["25000000000000000000000", "25000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-receiver-zero-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499999999999",
+                "max": "11499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000000",
+                "max": "11500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000001",
+                "max": "11500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-receiver-zero-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499999999999",
+                "max": "11499999999999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000000",
+                "max": "11500000000000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11500000000001",
+                "max": "11500000000001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [0],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [0]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-receiver-accrued-borrowing-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499899829999",
+                "max": "11499899829999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11499899830000",
+                "max": "11499899830000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11499899830001",
+                "max": "11499899830001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-receiver-accrued-funding-first-leverage",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "11499899829999",
+                "max": "11499899829999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11499899830000",
+                "max": "11499899830000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "11499899830001",
+                "max": "11499899830001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-receiver-accrued-borrowing-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "10999899829999",
+                "max": "10999899829999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10999899830000",
+                "max": "10999899830000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10999899830001",
+                "max": "10999899830001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": false
+      }
+    },
+    {
+      "id": "liquidation-combined-short-short-receiver-accrued-funding-first-margin",
+      "input": {
+        "operation": "liquidation_accrued",
+        "scenario": {
+          "is_long": false,
+          "is_long_collateral": false,
+          "index_decimals": 9,
+          "long_decimals": 9,
+          "short_decimals": 6,
+          "entry_prices": {
+            "index": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "long": {
+              "min": "10000000000000",
+              "max": "10000000000000"
+            },
+            "short": {
+              "min": "100000000000000",
+              "max": "100000000000000"
+            }
+          },
+          "probe_prices": [
+            {
+              "index": {
+                "min": "10999899829999",
+                "max": "10999899829999"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10999899830000",
+                "max": "10999899830000"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            },
+            {
+              "index": {
+                "min": "10999899830001",
+                "max": "10999899830001"
+              },
+              "long": {
+                "min": "10000000000000",
+                "max": "10000000000000"
+              },
+              "short": {
+                "min": "100000000000000",
+                "max": "100000000000000"
+              }
+            }
+          ],
+          "deposit_long_amount": "100000000000000",
+          "deposit_short_amount": "10000000000000",
+          "collateral_amount": "200000000",
+          "size_usd20": "100000000000000000000000",
+          "min_position_size_usd20": "100000000000000000000",
+          "min_collateral_usd20": "2000000000000000000000",
+          "min_collateral_factor": "10000000000000000000",
+          "liquidation_collateral_factor": "5000000000000000000",
+          "order_fee_factor": "0",
+          "liquidation_fee_factor": "0"
+        },
+        "funding": {
+          "factor": "1000000000000017",
+          "max_factor_per_second": "1000000000000017",
+          "elapsed_seconds": [17, 10000],
+          "opposite_sizes_usd20": ["150000000000000000000000", "150000000000000000000000"],
+          "opposite_collateral_amounts": ["20000000000", "2000000000"]
+        },
+        "borrowing": {
+          "factor": "1000000000000017",
+          "elapsed_seconds": [17, 10000]
+        },
+        "funding_first": true
+      }
     }
   ]
 }

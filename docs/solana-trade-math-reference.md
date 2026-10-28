@@ -1,6 +1,6 @@
 # Solana 交易数学差异与独立参考向量
 
-核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2d10限定数学子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和435组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
+核验日期：2026-10-28。对应 [FESOL-57](https://linear.app/gmx-io/issue/FESOL-57/add-gmsol-branches-to-the-sdk-trade-math)、本地 T17/T19。本页记录 **T17.a/b1、b2a至b2d11限定数学子集验收**。复用已授权Rust1.90.0限定构建；生成器、锁文件和483组独立Rust参考值已落盘并验收，SDK数学未修改，T17父任务仍实施中。
 
 ## 固定版本与证据范围
 
@@ -236,3 +236,15 @@ T17.a 仅作源码与文档验收：在线 tag ref 与本地 commit 一致，固
 总435组两次Rust输出字节一致、独立核算、128类非法输入/setup拒绝通过；旧387组输入/业务输出不变，JSON SHA-256 `169d4e3f82b8b59bf327e164bde2969d55bbc8b12c228ac381fbc1c87ee486e4`。Rust check/fmt无warning、脚本lint/格式及本轮EVM费用/仓位55项通过，详见[第六十三轮记录](solana-implementation-research.md#第六十三轮实施记录t17b2d10-累计funding应付与claimable清算2026-10-28)。
 
 下一轮T17.b2d11借款费与funding同时累计的清算成本组合，先核对同一真实market时钟/update顺序及各费用的raw舍入，再补限定边界；非零impact/盈利清算、动态skip、完整减仓/min-position/限额与程序费用退款仍待。T17/b2d父项及整个集成未完成，T19仍需完整矩阵与T04.b reviewed字段；工具无生产SDK/共享状态/UI接线。
+
+## T17.b2d11 借款费与funding组合清算子集（2026-10-28）
+
+新增 `liquidation_accrued`，同时复用borrowing/funding输入，显式必填 `funding_first`。两个elapsed数组必须完全相同；开仓前初始化两个clock，每段只推进market clock一次，再按指定顺序各更新一次。抽取原借款费checkpoint供单项/组合共用；旧435组输入/业务输出不变，不另建计算框架或业务流。
+
+48组涵盖两side/两抵押token、funding payer/receiver、非零累计leverage/margin和零时间leverage对照，各自有两种更新顺序；80次borrowing update、80次funding update、144个相邻index价格点。独立BigInt核对目标及对侧borrow累计、target pending、四维funding delta/claims、各费用raw舍入和最终reason。borrow USD先按collateral min截断，funding保留packing/unpacking的ceil，再将raw成本相加，不把两种费用先合并成USD重舍入。对侧funding receiver虽有两种claims，仍不能抵减所欠borrow费用。
+
+24对顺序镜像除显式order字段外输出完全一致；这只证明固定OI/池/价格、不结算仓位且每段各更新一次的fixture，不能推广到穿插开平仓或池变化的任意顺序。固定抵押价格、零opening fee/impact、linear borrowing/fallback funding；未执行费用结算、清算或付款。
+
+总483组两次Rust输出字节一致、独立核算、136类非法输入/setup拒绝通过，旧435组不变；JSON SHA-256 `c37b29b5d5aecd0fee7414333570b49799ef6bed20117e6715163c2fdbed0ea2`。Rust check/fmt无warning、脚本lint/格式及本轮EVM费用/仓位55项通过，命令与证据见[第六十四轮记录](solana-implementation-research.md#第六十四轮实施记录t17b2d11-借款费与funding组合清算2026-10-28)。
+
+下一轮T17.b2d12累计费用与非零关闭impact组合清算，复用现有impact cap和累计费用路径，先核对真实开仓影响token/费用/池的顺序，再补限定相邻边界。盈利状态、同仓应付/claims并存清算、动态skip、完整减仓/min-position/限额及程序费用退款仍待；T17/b2d及整个集成未完成，T19仍待完整矩阵/T04.b reviewed字段，无生产SDK/共享状态/UI接线。
