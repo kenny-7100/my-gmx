@@ -22,6 +22,14 @@
 
 共享调用入口为 `src/domain/solana/useSolanaBalances.ts`，接收显式 owner，以 `networkId + owner` 构造缓存及失效 key，动态加载 reader。钱包会话、账户弹窗与 USD 展示仍属 FESOL-51，真实交易后的失效调用仍属 FESOL-56。实施分支的通过结果不代替最新 release 上的干净交付验收。
 
+#### release 交付分支重建（2026-11-03）
+
+用户要求按最新 release 的原有 RPC 方案重建独立分支，已创建 `solana-wallet-balances-release-fesol-89`，工作区位于 `/Volumes/kenny/gmx/gmx-interface-fesol-89-release`。提交 `c55f42918ac9e07a580442e80e8cfa11f50486db` 的直接父提交为当时远程最新 release `51205a828c313886463a38714f765f4697a49521`。原 `solana-wallet-balances-fesol-89` 开发分支保留；后续针对交付分支的 Git 操作必须使用上述独立目录，不要在基础设施目录误推开发分支。
+
+交付范围只有 6 个文件：中央 `src/config/rpc.ts`、RPC client、余额 reader、共享 hook 和两份余额测试。Solana 直接引用 release 原有的 fallback key，EVM 原有环境/用途选择逻辑不变，不依赖 `solanaRpc.json`、localhost、个人代理、协作文档、脚本或额外 package/lock 改动。release 已具备 Kit 5.5.1 和静态配置，无需捎带其他需求。key 经生产 Origin 的 Mainnet genesis 实际读取通过。
+
+独立目录已按自身根及 SDK 锁文件安装依赖，使用 release 的原生 SDK 构建；完整类型检查及 lint 通过；交付目录全量单元测试 3171 项通过、1 项原有跳过。提交后的 19 项定向测试通过，报告绑定交付目录、干净状态与上述 commit；交付隔离检查通过，无个人开发基础提交和额外路径。原开发分支的浏览器真实联调不冒充交付分支的浏览器/构建验收。证据仅在本机 `.local/acceptance/frontend-offline/solana-balances/delivery-*.json` 与日志；尚未推送新分支或创建 PR。
+
 ## 默认交付证据归档
 
 需求完成相关验收与最终交付隔离检查后、创建或更新 Draft PR 前，默认按[证据包交接步骤](agent-evidence.md#交付默认步骤)准备可移交材料。包括：冻结的工作表及其一致性报告、支持打包的实际工具报告、包外保存的 manifestSha256，以及未纳入包的原生测试结果、日志、截图/trace 和交付检查报告清单。按真实目标 commit、观察时间和未覆盖项记录，不能用开发目录历史通过替代最终交付版本。
