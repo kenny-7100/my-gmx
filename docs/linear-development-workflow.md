@@ -203,6 +203,18 @@ yarn agent:delivery-check --project-dir /path/to/api-delivery-checkout --require
 
 本轮没有创建或切换主仓库分支，没有修改业务源码。证据在本机忽略目录 `.local/acceptance/delivery-check/worktree/`：`lifecycle.tap`、`tools.tap` 与 `main-readonly.json`。正式交付仍须按流程更新上游、检查完整 diff 和完成需求验收。
 
+#### RPC 架构修订（2026-11-03）
+
+用户明确确认：Solana 沿用公共节点作为 `default`、Alchemy 作为 `fallback`，尊重现有中央配置、健康跟踪和请求故障切换架构；不能以复用 key 常量代替架构复用。本次确认优先于 gmx-prompts Solana 规范中旧的单 Alchemy URL / 禁止公共节点方案，未修改规范仓库。
+
+修订位于交付目录 `gmx-interface-fesol-89-release`，已提交为 `0159fcdb70` 并推送至个人镜像及正式 fork 的交付分支，更新 [Draft PR #3190](https://github.com/gmx-io/gmx-interface/pull/3190)。中央 `RPC_CONFIGS` 增加 Solana，Alchemy 直接复用原 `getAlchemyProvider` 的开发环境、DebugAlchemy 和用途选择，不更换任何现有 key。懒加载的 Solana RPC 适配器组合通用 `FallbackTracker`、`NetworkStatusObserver`、排序工具和 `withFallback`，探测 Mainnet genesis / confirmed slot，按 URL 缓存 client；失败时在备用节点重读整组账户，不拼接两端点的部分结果。余额 reader/hook 的业务接口保持不变，不引入 EVM 的大账户资格判断。PR 正文同步说明修订和实际验证结果，保留开发 Alchemy 的真实验收缺口；继续保持 Draft，不请求 reviewer。
+
+真实 Chrome（生产 Origin）确认 `solana-rpc.publicnode.com` 支持跨域和 Mainnet，但 `getMultipleAccounts` 上限为 10；已在中央节点配置显式记录该限制，Alchemy 仍每批最多 100，读取资产范围不变。5 批并发读取各 10 个账户均成功。官方公共节点返回 403，dRPC 公共节点要求付费，OnFinality 公共节点返回限流错误，均未加入配置。不能只凭 genesis 或单账户读取通过就认定候选支持完整余额批次。
+
+本轮修改版本的定向离线测试 28 项通过，完整类型检查、ESLint、Prettier、diff whitespace 通过；全量前端测试 3180 项通过、1 项原有跳过。独立 Vite + Chrome 实际调用修改后的 reader，通过公共节点返回 47 项资产，全部为 bigint，SOL 与独立 getBalance 一致；这不是钱包会话/UI 集成验收，也未运行生产前端构建。本次 Vite 已正常停止，未停止原开发目录的既有服务。离线报告 `.local/acceptance/frontend-offline/solana-balances/rpc-revision-tests.json` 绑定 dirty 源码指纹 `6c537f438e67c2ac7d8c96ceab0886242d37f403a594514cb59aecd006f9f451`，浏览器原始结果见同目录 `rpc-revision-browser.json`；均仅本机可用。
+
+待用户处理：原有开发 Alchemy app 返回 `403: SOLANA_MAINNET is not enabled for this app`，需要在 Alchemy 控制台该 app 的 Networks 页面启用 Solana Mainnet，无需更换或在对话中提供 key。生产 fallback app 的 genesis 和账户读取正常。开发 fallback 的真实验收暂停，开通后再复验；不以固定生产 key 绕过。离线测试已验证 HTTP/RPC/超时错误及不完整批次的切换、全部失败时抛错、节点探测恢复、slot 异常及封禁排序。
+
 ## 分支、commit 和 PR 命名
 
 来源为 [上游交付规范](../gmx-prompts/docs/onboarding/release-process.md#3-pull-requests-and-ci)，并参考真实 PR 与本地 `origin/release` 提交记录。上游仅要求任务分支使用 kebab-case，没有固定前缀；以下是本协作采用的统一写法，不宣称为上游强制格式。
