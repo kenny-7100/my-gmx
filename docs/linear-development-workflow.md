@@ -28,7 +28,13 @@
 
 交付范围只有 6 个文件：中央 `src/config/rpc.ts`、RPC client、余额 reader、共享 hook 和两份余额测试。Solana 直接引用 release 原有的 fallback key，EVM 原有环境/用途选择逻辑不变，不依赖 `solanaRpc.json`、localhost、个人代理、协作文档、脚本或额外 package/lock 改动。release 已具备 Kit 5.5.1 和静态配置，无需捎带其他需求。key 经生产 Origin 的 Mainnet genesis 实际读取通过。
 
-独立目录已按自身根及 SDK 锁文件安装依赖，使用 release 的原生 SDK 构建；完整类型检查及 lint 通过；交付目录全量单元测试 3171 项通过、1 项原有跳过。提交后的 19 项定向测试通过，报告绑定交付目录、干净状态与上述 commit；交付隔离检查通过，无个人开发基础提交和额外路径。原开发分支的浏览器真实联调不冒充交付分支的浏览器/构建验收。证据仅在本机 `.local/acceptance/frontend-offline/solana-balances/delivery-*.json` 与日志；尚未推送新分支或创建 PR。
+独立目录已按自身根及 SDK 锁文件安装依赖，使用 release 的原生 SDK 构建；完整类型检查及 lint 通过；交付目录全量单元测试 3171 项通过、1 项原有跳过。提交后的 19 项定向测试通过，报告绑定交付目录、干净状态与上述 commit；交付隔离检查通过，无个人开发基础提交和额外路径。原开发分支的浏览器真实联调不冒充交付分支的浏览器/构建验收。证据仅在本机 `.local/acceptance/frontend-offline/solana-balances/delivery-*.json` 与日志。已创建 [Draft PR #3190](https://github.com/gmx-io/gmx-interface/pull/3190)，目标为 `release`，head 为上述 `c55f42918a`；未请求 reviewer。
+
+本次交付发现：个人 `my-gmx`（`kenny-7100/my-gmx`）是独立仓库，不属于上游 fork 网络，GitHub 拒绝直接从其分支创建上游 PR。相同提交已另推送至账号下现有正式 fork `kenny-7100/gmx-interface`，通过个人 remote `my-gmx-pr` 创建 PR；原开发分支及协作文档仍推送 `my-gmx`，未向 `origin` 推送。后续跨仓库 PR 应先核实 GitHub 的 `isFork` / `parent`，不能仅凭 remote 名称判断。
+
+已核对实际 PR head、base、6 个文件及完整 diff，与本地验证版本一致。按 gmx-prompts 做 T2 人工自审，检查 hook 生命周期及钱包切换、原生与包装资产区分、bigint 精度、RPC 批次顺序与错误传播、功能开关和懒加载，未发现需修改的问题。当前会话无 `/code-review` 工具，不声称已运行该工具。创建后的 GitHub CI 正在执行，不作为已通过记录。
+
+本地证据包 `.local/acceptance/evidence/fesol-89-c55f42918a-pr` 已打包并使用包外预期摘要验证，`manifestIdentity=matched`；SHA-256 为 `973fbee69bde3780ccda2a15a9b8a3efa272d8d0dbfb02f68ea4da63e6757264`。包内有冻结工作表、检查报告、源码身份及隔离摘要、定向测试原生结果/日志/网络记录、全量测试日志。工作表结论为 partial，保留交付分支生产前端构建及浏览器联调未执行项；空的 SDK/typecheck stdout 日志未打包，其结果见执行摘要。归档仅本地准备，未上传或移交，不作为 PR 附件。
 
 ## 默认交付证据归档
 
