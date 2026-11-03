@@ -28,7 +28,7 @@ export { getChainName } from "sdk/configs/chains";
 export function getSolanaRpcUrl(): string {
   return import.meta.env.DEV
     ? import.meta.env.VITE_APP_SOLANA_RPC_URL || solanaRpc.localUrl
-    : `${solanaRpc.upstreamHost}/${solanaRpc.fallbackKey}`;
+    : getAlchemyUrl("solana-mainnet.g.alchemy.com/v2", "fallback");
 }
 
 const ENV_ARBITRUM_RPC_URLS = parseRpcUrlsFromEnv(import.meta.env.VITE_APP_ARBITRUM_RPC_URLS);
@@ -368,29 +368,6 @@ function getAlchemyProvider(
     throw new Error(`WebSocket url is not supported for chainId: ${chainId}`);
   }
 
-  let alchemyKey: string;
-
-  if (isDevelopment() && !_debugRpcTracker?.getFlag(RpcDebugFlags.DebugAlchemy)) {
-    alchemyKey = "alch_SQM9S1aMtt02tOJTEmapQ";
-  } else {
-    switch (purpose) {
-      case "fallback":
-        alchemyKey = solanaRpc.fallbackKey;
-        break;
-      case "largeAccount":
-        alchemyKey = "alch_1xqx9RJJd8BJ9vJaDyrmp";
-        break;
-      case "express":
-        alchemyKey = "alch_dcRX8lDnISPgq7QlyWRMP";
-        break;
-      case "default":
-        throw new Error(`Unsupported purpose: ${purpose}`);
-      default:
-        mustNeverExist(purpose);
-        throw new Error(`Unsupported purpose: ${purpose}`);
-    }
-  }
-
   let baseUrl: string;
   switch (chainId) {
     case ARBITRUM:
@@ -426,15 +403,41 @@ function getAlchemyProvider(
     }
   }
 
-  const protocol = type === "ws" ? "wss" : "https";
-
-  const url = `${protocol}://${baseUrl}/${alchemyKey}`;
+  const url = getAlchemyUrl(baseUrl, purpose, type);
 
   return {
     url,
     purpose,
     isPublic: false,
   };
+}
+
+function getAlchemyUrl(baseUrl: string, purpose: RpcPurpose, type: "http" | "ws" = "http"): string {
+  let alchemyKey: string;
+
+  if (isDevelopment() && !_debugRpcTracker?.getFlag(RpcDebugFlags.DebugAlchemy)) {
+    alchemyKey = "alch_SQM9S1aMtt02tOJTEmapQ";
+  } else {
+    switch (purpose) {
+      case "fallback":
+        alchemyKey = solanaRpc.fallbackKey;
+        break;
+      case "largeAccount":
+        alchemyKey = "alch_1xqx9RJJd8BJ9vJaDyrmp";
+        break;
+      case "express":
+        alchemyKey = "alch_dcRX8lDnISPgq7QlyWRMP";
+        break;
+      case "default":
+        throw new Error(`Unsupported purpose: ${purpose}`);
+      default:
+        mustNeverExist(purpose);
+        throw new Error(`Unsupported purpose: ${purpose}`);
+    }
+  }
+
+  const protocol = type === "ws" ? "wss" : "https";
+  return `${protocol}://${baseUrl}/${alchemyKey}`;
 }
 
 const SELF_EXPLANATORY_HOSTNAMES = [

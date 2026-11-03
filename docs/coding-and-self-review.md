@@ -64,6 +64,8 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 | 根类型检查出现 SDK 相关 `TS6305`、源代码中已有的导出却报 `TS2305`，或 SDK 类型字段与源码不一致 | 核对源码与 `sdk/build` 声明产物是否匹配；符合上述前置条件时先构建 SDK，再重跑类型检查 | 2026-10-24 验收中，更新忽略提交的 SDK 产物后完整类型检查通过；这些错误特征本身不等于已证明产物过期 |
 | 完整前端构建在 chunk rendering 阶段出现 `Reached heap limit` / `JavaScript heap out of memory` | 核实 Node 进程堆限制及主机可用资源；资源允许时采用上述 8 GiB 配置，并避免与其他大型检查并发 | 本机默认约 4 GiB 堆构建失败，8 GiB 配置成功；这是本项目已验证配置，不保证其他机器或未来构建同样适用。其他报错按原始错误排查，不持续盲目加内存 |
 
+**Solana Kit RPC 的测试环境（2026-11-03）：** 在当前 happy-dom/Vitest 中测试真实 Kit Node transport 时，若出现 `setMaxListeners` 不接受 `AbortSignal`，先核对 Node transport 与 DOM AbortController 的实现身份。Kit 在导入时捕获 controller，测试需在导入前使用 Node 原生实现，并在各用例清理后重新准备；参考 `src/lib/solana/balances.spec.ts`。这是测试环境适配，不应修改生产 transport、mock 编解码器或把异常当零余额。Kit 5.5.1 的只读字节类型使用比本分支 TypeScript 5.4 更新的泛型声明，测试构造账户字节时可逐字节复制，生产 base64 使用浏览器原生解码后交给 Kit 的账户 decoder；不能仅凭 Vitest 转译成功替代类型检查。
+
 同一任务中已完成且仍有效的准备工作应复用；源码、依赖、工具链或相关配置发生变化时，再判断哪些前置条件和检查失效。不要在每次小改动后重复整套准备。
 
 **API 源码调试验收：** 需要确认 Agent 能连接 inspector、命中当前 TypeScript 源码并读取变量时，使用[源码断点验收](solana-api-local.md#agent-可重复的源码断点验收) `yarn solana:api-debug`，默认独立端口并自动停服；仅在明确要复用已启用 inspector 的管理服务时加 `--attach --port PORT`，独立 checkout 同时指定 `--api-dir PATH`。组合联调按[工作区调试说明](solana-dev-workspace.md#工作区内的-api-源码断点调试)在 up 时显式加 `--api-inspect-port PORT`，先核对报告的调试地址和服务归属，再 attach；已有 API 未启用或端口不匹配时不自动重配。源码映射不一致或断点未命中应检查报告的失败阶段，不把 HTTP 健康检查当成调试通过；无断点需求的任务不增加此项。

@@ -14,6 +14,14 @@
 
 独立交付 checkout 需要前端局部测试时，可从个人基础设施目录运行 `yarn frontend:test-offline --project-dir /path/to/delivery-checkout --suite src/...spec.ts`，无需向交付分支复制工具或 package 脚本。先准备目标依赖并核对报告的目标身份；完整步骤及边界见[前端离线测试](frontend-offline-tests.md#验证独立-checkout)。它不创建交付分支，也不替代下方 Git 隔离检查。
 
+### FESOL-89 与 FESOL-96 的合并范围（2026-11-03）
+
+用户确认这两条需求作为一个独立切片实施，之后由用户合并 Linear issue；本次允许共用 `solana-wallet-balances-fesol-89` 分支，从当时的 `solana-integration`（`e8015302585f74d632d5fea34c65533d20ab4d2b`）创建。此约定只适用于这两条需求，不改变其他需求的分支规则。
+
+范围为配置资产的 ATA 余额 reader、最小 Solana RPC 适配及统一 SWR hook。Alchemy URL 与 key 选择复用 `src/config/rpc.ts` 的 EVM 公共逻辑；不新增服务、凭据配置或公共 RPC 兜底，也不等待旧需求或尚未交付的代理 PR。当前开发基础已有的本地代理入口继续保留，交付时需按内容隔离，不能直接带入个人配置。
+
+共享调用入口为 `src/domain/solana/useSolanaBalances.ts`，接收显式 owner，以 `networkId + owner` 构造缓存及失效 key，动态加载 reader。钱包会话、账户弹窗与 USD 展示仍属 FESOL-51，真实交易后的失效调用仍属 FESOL-56。实施分支的通过结果不代替最新 release 上的干净交付验收。
+
 ## 默认交付证据归档
 
 需求完成相关验收与最终交付隔离检查后、创建或更新 Draft PR 前，默认按[证据包交接步骤](agent-evidence.md#交付默认步骤)准备可移交材料。包括：冻结的工作表及其一致性报告、支持打包的实际工具报告、包外保存的 manifestSha256，以及未纳入包的原生测试结果、日志、截图/trace 和交付检查报告清单。按真实目标 commit、观察时间和未覆盖项记录，不能用开发目录历史通过替代最终交付版本。
