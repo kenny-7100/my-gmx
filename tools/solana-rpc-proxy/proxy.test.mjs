@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { Readable } from "node:stream";
 import test from "node:test";
 
@@ -87,4 +88,32 @@ test("exposes upstream failure categories without leaking the key", async () => 
     fetchImpl: async () => new Response('{"message":"test-key"}', { status: 403 }),
   });
   assert.equal(res.body, '{"message":"[REDACTED]"}');
+});
+
+test("uses the shared largeAccount key and production origin by default", async () => {
+  const config = JSON.parse(readFileSync(new URL("../../src/config/solanaRpc.json", import.meta.url), "utf8"));
+  const handler = createProxyHandler({
+    fetchImpl: async (url, options) => {
+      assert.ok(
+        url === `${config.upstreamHost}/${config.largeAccountKey}`,
+        "Expected the configured largeAccount endpoint"
+      );
+      assert.equal(options.headers.Origin, config.upstreamOrigin);
+      return new Response('{"jsonrpc":"2.0","id":1,"result":1}');
+    },
+  });
+  const req = Readable.from([Buffer.from('{"jsonrpc":"2.0","id":1,"method":"getSlot"}')]);
+  Object.assign(req, { method: "POST", url: "/", headers: {} });
+  const res = {
+    setHeader(name, value) {
+      assert.ok(name && value);
+    },
+    writeHead(status) {
+      assert.equal(status, 200);
+    },
+    end(body) {
+      assert.ok(body.includes('"result":1'));
+    },
+  };
+  await handler(req, res);
 });

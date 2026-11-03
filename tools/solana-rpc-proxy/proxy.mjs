@@ -44,7 +44,7 @@ function isLocalOrigin(origin) {
   }
 }
 
-export function createProxyHandler({ fetchImpl = fetch, key = config.fallbackKey } = {}) {
+export function createProxyHandler({ fetchImpl = fetch, key = config.largeAccountKey } = {}) {
   if (!key) throw new Error("A Solana RPC key is required");
 
   return async (req, res) => {

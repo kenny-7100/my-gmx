@@ -423,7 +423,7 @@ function getAlchemyUrl(baseUrl: string, purpose: RpcPurpose, type: "http" | "ws"
         alchemyKey = solanaRpc.fallbackKey;
         break;
       case "largeAccount":
-        alchemyKey = "alch_1xqx9RJJd8BJ9vJaDyrmp";
+        alchemyKey = solanaRpc.largeAccountKey;
         break;
       case "express":
         alchemyKey = "alch_dcRX8lDnISPgq7QlyWRMP";
