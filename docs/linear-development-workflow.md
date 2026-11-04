@@ -6,6 +6,7 @@
 
 - 开发从 `solana-integration` 创建需求分支。该分支是用户自定义的开发基础，包含方便个人开发的配置、文档和工具，不是可整体交付上游的集成分支。
 - 用户自行定期将 `origin/release` 合入 `solana-integration`；Agent 不自行承担该同步工作。
+- 审查与修复上游 PR 只以固定的远端 release、PR head 和有效上游规范/需求为依据；个人开发基础中的方法、代理和工具不能被当成 release 已有实现，也不能成为交付方案的前置条件。
 - 最终交付分支必须基于交付时重新获取的最新 `origin/release`，只包含当前需求的必要改动。不能合入 `solana-integration`，不能将其自定义改动、历史或无关文件带入上游。
 - 推荐在交付阶段从最新 `origin/release` 创建临时干净分支或独立 worktree，逐项转入已确认属于当前需求的提交或补丁，再整理为该需求的最终分支。保留开发现场直到交付内容核验完成；具体 Git 写操作遵循用户授权。
 - 不对开发分支直接执行普通 rebase 并假定它会自动剔除基础改动，也不能仅将 PR base 改成 `release` 就认为完成隔离。
@@ -35,6 +36,22 @@
 已核对实际 PR head、base、6 个文件及完整 diff，与本地验证版本一致。按 gmx-prompts 做 T2 人工自审，检查 hook 生命周期及钱包切换、原生与包装资产区分、bigint 精度、RPC 批次顺序与错误传播、功能开关和懒加载，未发现需修改的问题。当前会话无 `/code-review` 工具，不声称已运行该工具。创建后的 GitHub CI 正在执行，不作为已通过记录。
 
 本地证据包 `.local/acceptance/evidence/fesol-89-c55f42918a-pr` 已打包并使用包外预期摘要验证，`manifestIdentity=matched`；SHA-256 为 `973fbee69bde3780ccda2a15a9b8a3efa272d8d0dbfb02f68ea4da63e6757264`。包内有冻结工作表、检查报告、源码身份及隔离摘要、定向测试原生结果/日志/网络记录、全量测试日志。工作表结论为 partial，保留交付分支生产前端构建及浏览器联调未执行项；空的 SDK/typecheck stdout 日志未打包，其结果见执行摘要。归档仅本地准备，未上传或移交，不作为 PR 附件。
+
+#### PR #3190 按上游 RPC 规范修正（2026-11-04）
+
+用户确认审查与修复不得受到个人开发分支影响。本轮直接核对 GitHub release `51205a828c313886463a38714f765f4697a49521`、PR 原 head `e007b5a102c50c059d69b02e73ac2d425755b1ef`、上游 `gmx-prompts/main` 的 Solana RPC 条款，以及实时 FESOL-89/96。release 没有 `getSolanaRpcUrl()`；该接口由上游规范指定，本轮在 PR 中新增，不能称为恢复 release 原有方法，也不复制个人分支的代理实现。上节 `c55f42918a` 的文件数、测试及 PR head 均为历史快照，不代表当前版本。
+
+修正提交为 `a696e42162f9478cc9952a1f35b5dac64e1e8312`：Solana 中央配置只保留现有 Alchemy，把现有 fallback 用途的 key 选择与默认请求角色分开；生产/开发/DebugAlchemy 逻辑复用 release，EVM 路由不变。`getSolanaRpcUrl()` 读取中央默认配置；余额读取和 Mainnet genesis/confirmed-slot 探测复用同一个 Kit 客户端。移除 PublicNode、10-account 特例和多端点排名/重试，每批最多 100 个账户，任一批失败拒绝整次快照。
+
+继续复用 PR 的 registry、metrics 和 RPC Debug；在 release 的 `FallbackTracker` 增加默认关闭的 `trackSingleEndpoint`，仅 Solana 显式启用，避免单节点因原 `shouldTrack()` 条件而完全不探测。探测失败明确拒绝读取，成功后恢复同一个客户端，不另建定时器或改动 EVM 的默认行为。原有余额校验、bigint 精度、lazy hook 及钱包/网络缓存隔离保留。
+
+最终交付目录的 SDK 来源核验通过（1,102 个产物）；类型检查、8 个修改文件的 ESLint/Prettier 与 whitespace 检查通过。全量单元测试为 312 文件、3,189 tests passed，另有 1 项既有跳过；干净提交的 6 文件/79 项定向离线测试通过，网络审计安装数 6、意外外连 0、进程和临时目录清理通过。Alchemy 开发/production-preview/DebugAlchemy 三种配置及导出客户端复用的 4 项临时检查通过后删除。交付隔离检查通过，28 个最终路径只包含业务需求内容，并绑定当前干净源码与定向报告。
+
+Chrome 开关冒烟在预检阶段被交付目录缺失的 `public/gmsol-sdk/0.9.0-test.2-v2/entry.js` 阻止，未启动 Vite/Chrome，未自行构建或借用个人分支产物；此项及生产构建均未完成，不将单元测试当作浏览器验收。需获得 SDK 资源构建授权并准备交付目录产物后再复验。证据包 `.local/acceptance/evidence/pr3190-a696e42162-alchemy` 已在本机打包及按包外摘要核验，`manifestIdentity=matched`，摘要 `c50f63f3f8f4da84b92af58d64edb29ef04060dd3d1f2048bdbcbd5b18eb915b`。工作表结论 partial；包内显式保存最终定向原生结果/日志/网络记录、全量测试日志及隔离/预检报告，未上传或移交。
+
+已将修复提交推送至 `my-gmx` 和现有正式 fork 的 `my-gmx-pr`，更新 PR #3190 的英文 Summary、自测表和未覆盖项；GitHub 确认 head 为 `a696e42162`、base 为 release 且保持 Draft。新一轮 GitHub CI 已启动，更新时仍为 pending，不写为通过。未向 origin 推送。
+
+实时开发 Alchemy 验收仍需该 app 开启 Solana Mainnet；此前已记录的 403 不通过公共节点或生产 key 绕过。本轮只实施和更新现有 Draft PR，不转 Ready 或请求 reviewer。当前个人开发分支仅沉淀规则和交接资料，未同步业务源码；后续联调必须显式使用交付 checkout。
 
 ## 默认交付证据归档
 
