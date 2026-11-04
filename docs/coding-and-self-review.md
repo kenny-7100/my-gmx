@@ -61,6 +61,7 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 | 触发条件或错误特征 | 优先检查与处理 | 已确认的边界 |
 | --- | --- | --- |
 | 根测试日志出现嵌套参考仓库路径，或 Vite 扫描旧前端并提示缺少 `@docusaurus/tsconfig` | 先核对 `vite.config.ts` 的测试发现范围和 `tsconfigPaths.projects`，确认当前分支包含范围修复；不要先安装旧仓库依赖 | 当前主仓库测试已限定到 `src`、`landing`，TypeScript 配置发现已显式限定主项目、landing、SDK；正常使用会直接受益，无需每次另做扫描 |
+| Vite 报 `Could not resolve "@solana-program/memo"`，但 package.json/yarn.lock 已声明该包 | 先核对 node_modules 是否缺少锁定依赖，使用 `yarn install --immutable --mode=skip-build` 恢复，再重新启动 Vite；仍沿用旧失败 optimizer 缓存时使用 `--force` | 2026-11-04 本机确认缺失已声明的 0.10.0，恢复依赖后页面正常。普通安装会触发 SDK postinstall 并使来源收据缺失；若已执行，按上文 SDK 授权流程重新 build/verify，不改锁文件或添加业务兜底 |
 | 根类型检查出现 SDK 相关 `TS6305`、源代码中已有的导出却报 `TS2305`，或 SDK 类型字段与源码不一致 | 核对源码与 `sdk/build` 声明产物是否匹配；符合上述前置条件时先构建 SDK，再重跑类型检查 | 2026-10-24 验收中，更新忽略提交的 SDK 产物后完整类型检查通过；这些错误特征本身不等于已证明产物过期 |
 | 完整前端构建在 chunk rendering 阶段出现 `Reached heap limit` / `JavaScript heap out of memory` | 核实 Node 进程堆限制及主机可用资源；资源允许时采用上述 8 GiB 配置，并避免与其他大型检查并发 | 本机默认约 4 GiB 堆构建失败，8 GiB 配置成功；这是本项目已验证配置，不保证其他机器或未来构建同样适用。其他报错按原始错误排查，不持续盲目加内存 |
 

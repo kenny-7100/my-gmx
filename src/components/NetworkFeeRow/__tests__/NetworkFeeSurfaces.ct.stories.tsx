@@ -23,7 +23,7 @@ import { Mode, Operation, type GmPaySource } from "domain/synthetics/markets/typ
 import type { OrderInfo, OrdersInfoData } from "domain/synthetics/orders";
 import type { PositionInfo, PositionsInfoData } from "domain/synthetics/positions";
 import type { TokenData, TokensData } from "domain/synthetics/tokens";
-import type { StoredTradeOptions } from "domain/synthetics/trade/useTradeboxState";
+import type { StoredTradeOptions } from "domain/synthetics/trade/tradeboxStorage";
 import { CtAppProviders } from "domain/testUtils/CtAppProviders";
 import { MOCK_L1_EXPRESS_ORDER_GAS_REFERENCE } from "domain/testUtils/mockChainData";
 import { createMockMarketInfo, MOCK_MARKET_ADDRESS, SECOND_ETH_MARKET_ADDRESS } from "domain/testUtils/mockMarketInfo";
