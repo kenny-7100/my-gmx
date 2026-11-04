@@ -53,6 +53,16 @@ Chrome 开关冒烟在预检阶段被交付目录缺失的 `public/gmsol-sdk/0.9
 
 实时开发 Alchemy 验收仍需该 app 开启 Solana Mainnet；此前已记录的 403 不通过公共节点或生产 key 绕过。本轮只实施和更新现有 Draft PR，不转 Ready 或请求 reviewer。当前个人开发分支仅沉淀规则和交接资料，未同步业务源码；后续联调必须显式使用交付 checkout。
 
+#### PR #3190 单端点故障指标修复（2026-11-04）
+
+用户要求修复审查发现并更新 PR。交付提交 `b9d1c2abed6d6e06fb95f2409ffe61ececa80900` 基于同一 release `51205a828c313886463a38714f765f4697a49521`，只修改现有 metrics 订阅、指标类型和 RPC 测试三个文件。单端点没有切换事件，原订阅在探测失败时也没有 timing/gap 可上报；不能用手动发送 `endpointsUpdated` 或 ban 事件的测试证明真实故障可观测。
+
+本次在实际 `trackingFinished` 路径新增仅 Solana 使用的 `rpcTracker.endpoint.health`：首次失败和从健康转为失败时上报 `isHealthy=false`、`isError=true`，恢复时上报相反状态，连续相同状态不重复上报；端点仅记录提供商名称，不含 RPC key。不改变 EVM 现有指标、余额读取拦截或 RPC 配置。回归使用真实 tracker 注册和定时器，覆盖初始健康/失败、连续失败及恢复。
+
+最终干净提交的类型检查、三个修改文件的 ESLint/Prettier、完整 PR whitespace 检查通过；全量 312 文件、3,191 tests passed，1 项既有 skipped；六文件 81 项定向离线测试、网络审计、清理和交付隔离及证据绑定通过。已推送 `my-gmx` 与 `my-gmx-pr` 并更新 PR 英文正文；GitHub 确认 head 为 `b9d1c2abed`、base 为 release、仍为 Draft，新 CI 更新时仍在运行。原开发分支未同步业务代码。
+
+本机证据包 `.local/acceptance/evidence/pr3190-b9d1c2abed-health` 已验证 `manifestIdentity=matched`，包外摘要 `4070271686cd4008942e5e09f865f18e341f12d0b9f489eca081d845b619a1c6`；含冻结工作表、原始定向结果/日志/网络记录、全量日志及隔离报告，未上传或移交。工作表结论 partial：仅确认前端指标生成，监控后端摄取、仪表盘及告警仍需核对；原浏览器、开发 Alchemy Mainnet 和生产构建未覆盖项保留，本轮未重新探测或绕过资源缺口。
+
 ## 默认交付证据归档
 
 需求完成相关验收与最终交付隔离检查后、创建或更新 Draft PR 前，默认按[证据包交接步骤](agent-evidence.md#交付默认步骤)准备可移交材料。包括：冻结的工作表及其一致性报告、支持打包的实际工具报告、包外保存的 manifestSha256，以及未纳入包的原生测试结果、日志、截图/trace 和交付检查报告清单。按真实目标 commit、观察时间和未覆盖项记录，不能用开发目录历史通过替代最终交付版本。
