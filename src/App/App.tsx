@@ -45,9 +45,9 @@ if (window?.ethereum?.autoRefreshOnNetworkChange) {
 }
 
 function SWRConfigWithKey({ children }: { children: React.ReactNode }) {
-  const { chainId } = useChainId();
+  const { networkId } = useChainId();
   return (
-    <SWRConfig key={chainId} value={SWRConfigProp}>
+    <SWRConfig key={networkId} value={SWRConfigProp}>
       {children}
     </SWRConfig>
   );
