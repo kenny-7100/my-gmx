@@ -215,6 +215,19 @@ yarn agent:delivery-check --project-dir /path/to/api-delivery-checkout --require
 
 待用户处理：原有开发 Alchemy app 返回 `403: SOLANA_MAINNET is not enabled for this app`，需要在 Alchemy 控制台该 app 的 Networks 页面启用 Solana Mainnet，无需更换或在对话中提供 key。生产 fallback app 的 genesis 和账户读取正常。开发 fallback 的真实验收暂停，开通后再复验；不以固定生产 key 绕过。离线测试已验证 HTTP/RPC/超时错误及不完整批次的切换、全部失败时抛错、节点探测恢复、slot 异常及封禁排序。
 
+#### PR #3190 审查修复（2026-11-04）
+
+用户要求最大程度复用 EVM 模式与架构，并授权实施已确认的四项问题；仅暂缓开发环境真实 fallback 的最终在线验收。本轮改动保留在独立交付目录 `/Volumes/kenny/gmx/gmx-interface-fesol-89-release`，基于 `0159fcdb70`，尚未提交、推送或更新 PR。
+
+- 实际请求重新依据当前健康排名筛选已选节点，避免 tracker 保留旧 primary 后仍先读取探测失败的节点；无健康候选时显式报错。
+- 参照 EVM，以 default 公共节点计算高度基准，探测成功的指定 fallback 不参与公共节点的 slot 异常淘汰；错误网络和探测失败仍排除。通用 tracker 的 banned 用于降优先级而非永久禁用，两个节点均 banned 时仍可尝试和恢复。
+- 余额读取在派生 ATA 前排除 synthetic；当前 7 个有效 mint 加原生 SOL 共 8 个账户。Token-2022 解码校验通过纯函数回归保留，未扩大余额范围。
+- 通过公共观察接口和 registry 复用现有 metrics/debug 订阅与 RPC Debug 页面，Solana 懒加载注册；slot 保持 bigint 运算和字符串展示，事件标明 slot 单位。EVM Express 仍使用 EVM 专用 tracker，不接入 Solana。前端上报接入不代表监控服务已完成入库或告警配置。
+
+最终定向离线回归 5 个文件、40 项通过，源码和工具指纹稳定，网络审计通过（5 次安装、0 次拒绝），进程与临时目录清理通过；报告 `.local/acceptance/frontend-offline/run-o986Mr/report.json`。临时 RPC Debug 组件集成测试另验证了 flag 关闭不注册、flag 开启显示精确 slot、切回 EVM 恢复控件，完成后已删除 scratch 测试；报告 `.local/acceptance/frontend-offline/run-gQjD4G/report.json`，不作为真实 Chrome 验收。
+
+用户另行明确授权 SDK 构建；构建完成 1,102 个产物，来源核验及类型检查通过。临时构建脚本已移除，目标 `.local` 的构建日志与旧产物备份归档到基础设施 `.local/acceptance/pr-3190/sdk-target-local/`；收据的历史 runDir 路径对应归档前位置，归档后来源核验仍通过。修改文件 ESLint、Prettier 通过，Lingui 提取与编译通过。 清理 SDK 备份后最终全量前端回归 312 个文件、3,191 项通过，1 个文件及其 1 项原有跳过，退出 0；日志 `.local/acceptance/pr-3190/gmx-3190-tests-final-clean.log`。归档前有一次误扫备份的测试已中止（退出 130），不作为验收结果；未修改 Vitest 发现规则。未执行生产前端构建、真实 Chrome 或线上监控验收，开发 Alchemy 的外部开通条件延续上节记录。
+
 ## 分支、commit 和 PR 命名
 
 来源为 [上游交付规范](../gmx-prompts/docs/onboarding/release-process.md#3-pull-requests-and-ci)，并参考真实 PR 与本地 `origin/release` 提交记录。上游仅要求任务分支使用 kebab-case，没有固定前缀；以下是本协作采用的统一写法，不宣称为上游强制格式。
