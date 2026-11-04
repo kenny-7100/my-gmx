@@ -15,6 +15,7 @@ import { useLatest, useMountedState } from "react-use";
 import type { ReplacementReturnType } from "viem";
 
 import { getExplorerUrl, isSolanaNetwork } from "config/chains";
+import { getIsSolanaNetworkSelected } from "config/solanaNetwork";
 import { useSettings } from "context/SettingsContext/SettingsContextProvider";
 import { useChainId } from "lib/chains";
 import { parseError } from "lib/errors";
@@ -168,6 +169,8 @@ function PendingTxnsPoller({
         for (let i = 0; i < pendingTxns.length; i++) {
           const pendingTxn = pendingTxns[i];
           if (!isMounted() || !latestPendingTxns.current.includes(pendingTxn)) continue;
+          // This provider sits above EvmProviders, so a poll can still be running when Solana gets selected.
+          if (getIsSolanaNetworkSelected()) break;
 
           const txnChainId = pendingTxn.chainId ?? chainId;
           const txnProvider = pendingTxn.chainId ? getProvider(undefined, txnChainId) : provider;
