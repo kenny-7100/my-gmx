@@ -34,6 +34,12 @@ yarn tscheck
 
 摘要用于本地来源与完整性检查，不是安全签名；不能防止收据和产物被共同篡改。锁文件约束依赖版本，但未逐字节验证所有已安装第三方依赖，也不证明运行时、链上或发布兼容性。源码和产物变更后应重新 verify，检查通过不允许后续并发修改。
 
+## 独立交付目录的测试发现
+
+2026-11-04 实测：上游 Vite 配置可能没有个人基础中的测试范围限制，也可能不排除 `.local`。SDK 重建保留的 `previous-build` 含编译后的 `*.spec.js`，直接运行 `yarn test:ci` 会误收集它们并报零测试。完整测试前，将该次 `previous-build` 备份归档到基础设施 checkout 的忽略目录，并记录原路径和新路径；保留当前 `sdk/build`、来源收据及构建日志，不修改业务测试或上游 Vite 配置。归档后重新运行完整测试，不能将误收集失败当作源码回归。
+
+本次原备份为独立 FESOL-89 目录的 `.local/acceptance/sdk-artifacts/build-4x7gfv/previous-build`，已移到基础设施目录的 `.local/acceptance/sdk-artifacts/fesol-89-previous-build-20261104`。
+
 ## 实际验收
 
 2026-10-26，Node v22.17.0：

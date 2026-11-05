@@ -25,7 +25,7 @@
 | [Solana 集成 Agent 友好度历史实施记录](solana-agent-friendliness-history.md) | 按需追溯路线表的历史验收、命令、结果与本机证据位置；不是日常启动入口或实时环境就绪证明 |
 | [Agent 需求验收映射](agent-acceptance-workflow.md) | A07：先映射需求条件，涉及现有行为/真实数据时先核对线上基线，再选择预检与验证；工作表模板、状态汇总规则及 FESOL-55 实例；Markdown 工作表一致性检查及可选逐条件 JSON 映射，拒绝错误汇总与无效证据引用 |
 | [真实 SDK/WASM 与基础数值向量](solana-sdk-vectors.md) | A11：离线执行真实固定 WASM，以独立 Python 参考值核对基础定点运算；不证明复杂业务数学或链上兼容 |
-| [SDK 构建产物准备与过期检查](sdk-artifacts.md) | 根类型检查前只读 verify；显式隔离 prebuild/编译，成功后替换忽略的产物，保留来源收据与日志 |
+| [SDK 构建产物准备与过期检查](sdk-artifacts.md) | 根类型检查前只读 verify；显式隔离 prebuild/编译，成功后替换忽略的产物，保留来源收据与日志；独立交付目录完整测试前归档旧产物，避免误收集编译后的测试 |
 | [前端源码离线测试](frontend-offline-tests.md) | 精确运行当前或独立 checkout 的 src/landing 原有单测，支持按真实依赖图从前端/SDK 源码或显式 Git 基线的变更范围选择前端关联测试，可只发现清单后决定执行范围；复用 Vite/happy-dom 初始化，隔离本机环境并阻止意外联网，运行器独立核对网络事件及执行前后工具指纹；单 suite 可进行源码断点调试，不启动应用服务或浏览器 |
 | [全栈测试范围规划与执行](agent-test-plan.md) | 前端/SDK/API 各自 Git 基线或显式源码发现，API profile 明确选择离线/隔离数据库；保留混合变更与未分配项，按计划执行并汇总原生失败；兼容原两侧模式，汇总不作为单侧交付证据 |
 | [SDK 源码离线回归](sdk-offline-tests.md) | 复用 SDK 原 Vitest 配置与目标目录测试运行器，支持独立交付 checkout 和锁文件身份，默认运行 BigInt、数值及费用原有测试；支持精确选文件、按源码依赖图或目标 Git 基线变更范围自动选择后离线执行，也可只发现清单再选择执行环境；支持环境隔离、阻止意外联网及执行前后工具指纹复核；单 suite 可启用 loopback 源码断点调试，共享进程组工具核实取消与清理，不需要 SDK 构建 |
