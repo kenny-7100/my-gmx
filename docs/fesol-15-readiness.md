@@ -64,3 +64,21 @@ FESOL-64 已 Done，线上 config/values 已可读取。本轮完成样例及真
 本地证据保存在已忽略的 `.local/acceptance/frontend-offline/fesol-15/`：`fesol-15-test-ci.log`、`fesol-15-final-unit.log`、`fesol-15-interactions.log`（样例）、`fesol-15-interactions.json`（真实数据与状态）、`fesol-15-live-parity.log`、`fesol-15-flags.log` 和页面截图。临时验收脚本留在该目录，不随需求提交。
 
 自审覆盖本轮差异的网络隔离、SWR 日期缓存、base58 大小写、native/wrapped 区分、展示倍率与原始价格分离，以及 Solana lazy import 边界。未调用不可用的原生 `/code-review` 或宣称完成正式 PR 审查；未运行前端生产构建或分支预览。
+
+
+## 2026-11-05 用户已打开页面复验
+
+在用户现有 Chrome 的 `http://localhost:3011/trade` 标签页执行，保留中文界面和真实网络配置；未另开隔离浏览器替代。确认 `solanaNetwork` 开启，`gmsol-api-fixtures` 和 `solana-api-url` 均未设置。通过 DevTools 对实际 fetch 与 SDK 返回值增加临时只读观察，未替换返回数据；验收结束已还原原函数、关闭 DevTools，并恢复 DOGE 市场。没有修改业务源码、连接钱包、签名或广播交易。
+
+- 实际 keeper `/prices/tickers` 和 `/prices/24h` 返回 200，分别提供当前价格和涨跌统计；市场 values 为 67 条，pairs 为 95 条。观察器结束时记录了 56 次成功的 values 返回，滚动保留的数据中有 53 次 ticker 返回；这些是观察窗口内计数，不是服务 SLA。
+- 列表 40 标的；Crypto/Meme 分类、`Shiba` 名称搜索、带首尾空格的 `kPEPE` 搜索与 Enter 选择均正常。DeFi 下搜索 BONK 正确显示分类无结果，“搜索所有永续合约市场”恢复结果；不存在的名称显示无匹配提示。
+- 全部 40 行显示价格降序断言通过，包括 k 系列以放大后价格参与排序；列表图片均已加载，没有 New 或 Recently Listed。
+- kBONK 原始 midpoint ×1,000 为 `0.0030035793`，Header 显示 `$0.0030036`；OI `$1.1k / $5.6k`，净费率 `+0.0526% / -0.0107%`，与共享计算及实际消费的市场响应相符。
+- kSHIB 放大后 midpoint 为 `0.0047071305`，显示 `$0.0047071`；pairs 成交量 `0.0999748` USD 显示 `$0.1`；净费率 `-0.0088% / +0.0112%`。
+- kPEPE 放大后 midpoint 为 `0.0049262445`，显示 `$0.0049262`；pairs 成交量 `21339.858055002696` USD 显示 `$21.3k`；净费率 `+0.0035% / -0.0044%`。
+- 三个 k 系列标的的 OI 与实际 SDK 响应匹配，按 factor、支付方向、OI 比例及 3,600 秒独立核算 funding/borrowing/net 均通过；流动性与共享 `getAvailableUsdLiquidityForPosition` 一致。kPEPE 费率明细提示正确分开展示资金费用与借贷费用。
+- kPEPE 后续 raw min/max 发生变化，新的 midpoint ×1,000 为 `0.0049243035`，Header 更新为 `$0.0049243`；采样时价格响应年龄约 2.1 秒。上述数值是不同采样时刻的证据，不应混作同一快照。
+
+界面与环境边界：`Page outdated. Refresh` 对应本地 `UI_VERSION=2`、生产配置要求 `2.1`，由既有 `useHasOutdatedUi` 触发，不代表本次市场价格未刷新。没有通过 localStorage 覆盖或改版本号绕过该门槛。打开 DevTools 时已有 multicall 历史错误，新增观察窗口内没有捕获到新的 console error；其历史根因本轮未复现。另看到 3 次 `Load history candles failed / Oracle candles timeout` 警告，图表随后能够显示对应标的，不能声称整个图表或整页所有外部请求完全无异常；图表行为不属于本次 selector/header 范围。
+
+本次数据证据：`.local/acceptance/frontend-offline/fesol-15/fesol-15-user-browser-2026-11-05.json`，浏览器记录时间 `2026-11-05T08:03:52.701Z`（北京时间 16:03:52）。包含公开市场快照、界面文本、排序结果及错误记录；未采集钱包凭据。结论：本轮未发现 FESOL-15 范围内新增功能问题；未重跑全量测试、网络开关回归或生产构建。
