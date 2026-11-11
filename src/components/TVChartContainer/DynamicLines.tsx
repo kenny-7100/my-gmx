@@ -13,6 +13,7 @@ import {
 } from "context/SyntheticsStateContext/selectors/expressSelectors";
 import {
   selectChainId,
+  selectMarketsInfoData,
   selectOrdersInfoData,
   selectSrcChainId,
   selectSubaccountForChainAction,
@@ -27,6 +28,7 @@ import {
   getExpressParamsForSubmit,
   reportMultichainExpressSubmitError,
 } from "domain/synthetics/express/validateMultichainExpressSubmit";
+import { useMarkets } from "domain/synthetics/markets";
 import { sendBatchOrderTxn } from "domain/synthetics/orders/sendBatchOrderTxn";
 import { useOrderTxnCallbacks } from "domain/synthetics/orders/useOrderTxnCallbacks";
 import { helperToast } from "lib/helperToast";
@@ -35,6 +37,7 @@ import { getByKey } from "lib/objects";
 import { useJsonRpcProvider } from "lib/rpc";
 import { getPageOutdatedError, useHasOutdatedUi } from "lib/useHasOutdatedUi";
 import useWallet from "lib/wallets/useWallet";
+import { getToken } from "sdk/configs/tokens";
 import { getOrderKeys } from "sdk/utils/orders";
 import { PositionOrderInfo } from "sdk/utils/orders/types";
 
@@ -63,6 +66,7 @@ export function DynamicLines({
   const [editingOrderState, setEditingOrderState] = useEditingOrderState();
   const setTriggerPriceInputValue = useSelector(selectOrderEditorSetTriggerPriceInputValue);
   const ordersInfoData = useSelector(selectOrdersInfoData);
+  const { marketsData } = useMarkets(chainId);
   const { pendingOrdersUpdates } = useSyntheticsEvents();
   const globalExpressParams = useSelector(selectExpressGlobalParams);
   const unavailableGasPaymentToken = useSelector(selectUnavailableExpressFeeToken);
@@ -159,10 +163,18 @@ export function DynamicLines({
 
       return calcSelector((state) => {
         const order = getByKey(selectOrdersInfoData(state), id) as PositionOrderInfo;
+        const chainId = selectChainId(state);
+        const marketsInfoData = selectMarketsInfoData(state);
 
-        if (!order?.indexToken) return undefined;
+        if (!order) return undefined;
 
-        triggerPrice = triggerPrice / BigInt(order.indexToken.visualMultiplier ?? 1);
+        const indexTokenAddress = getByKey(marketsInfoData, order.marketAddress)?.indexTokenAddress;
+        if (!indexTokenAddress) return undefined;
+
+        const indexToken = getToken(chainId, indexTokenAddress);
+        if (!indexToken) return undefined;
+
+        triggerPrice = triggerPrice / BigInt(indexToken?.visualMultiplier ?? 1);
 
         return makeSelectOrderEditorPositionOrderError(id, triggerPrice)(state);
       });
@@ -174,9 +186,13 @@ export function DynamicLines({
     (id: string, price?: number) => {
       setEditingOrderState({ orderKey: id, source: "PriceChart" });
       const order = getByKey(ordersInfoData, id) as PositionOrderInfo;
-      if (!order?.indexToken) return;
+      if (!order) return;
 
-      const indexToken = order.indexToken;
+      const indexTokenAddress = getByKey(marketsData, order.marketAddress)?.indexTokenAddress;
+      if (!indexTokenAddress) return;
+
+      const indexToken = getToken(chainId, indexTokenAddress);
+      if (!indexToken) return;
 
       const decimals = calculateDisplayDecimals(order.triggerPrice, USD_DECIMALS, indexToken?.visualMultiplier);
       const formattedInitialPrice = formatAmount(
@@ -189,7 +205,7 @@ export function DynamicLines({
       );
       setTriggerPriceInputValue(price !== undefined ? String(price) : formattedInitialPrice);
     },
-    [ordersInfoData, setEditingOrderState, setTriggerPriceInputValue]
+    [chainId, marketsData, ordersInfoData, setEditingOrderState, setTriggerPriceInputValue]
   );
 
   return lines.map(({ updatedAtTime: _, ...line }) => (
