@@ -103,3 +103,13 @@ FESOL-56 范围含 market/limit increase、market decrease、TP/SL、原子 incr
 
 
 收尾：业务提交 `a8733143f47230d996303d174b2ca9dcaf0b1c87`（Build and validate Solana order transactions FESOL-56），需求 worktree clean；本地目标绑定更新至此 HEAD。基础 issue 记录独立提交，业务没有整支回流个人基础。原 kenny Chrome 标签页留回 `http://127.0.0.1:3016/trade`；本任务 Vite 保留供用户检查，未创建新的浏览器/profile。没有 push、PR、Linear 修改或外部 review。主网生产验收未全部通过，TODO 条件如上；本轮完成可独立实施与验证的最大范围。
+
+
+### 继续验收与收尾修正（2026-11-13）
+
+- 增补真实无签名 compound simulation：create+update 897 bytes/slot 468614384，返回协议 Order 2472 bytes，按 pinned ABI offset 2184 读取 size_delta_value=2000000000000000000000（20 USD）；create+cancel 869 bytes/slot 468614384、create+update+cancel 959 bytes/slot 468614385 均成功，返回 System Program owner、lamports=0、dataLength=0。诊断组合由各自 builder+validator 通过的动作拼接，不是产品新增动作；不等价于分别落链及索引已确认。
+- 缺失 user/position 真实模拟成功（slot 468617037）：随机临时 owner/user/position 预先查询均不存在；诊断交易用已有钱包在模拟中提供资金，并接生产 builder 的 native SOL limit order。1004 bytes、120254 CU，返回协议拥有的 user 520 bytes/position 680 bytes。未持久保存临时私钥、未签名、未广播；生产 allowlist 未加入任意资金转移。
+- 修正异步生命周期：组件卸载后禁止开始 submit、prepare 完成后的签名及广播；发送过程的 live wallet getter 同时要求 owning flow mounted，已广播交易仍继续查询并刷新缓存。新回归测试覆盖 preparation 尚未完成时卸载，不触发 sign/send。
+- 重新实时读取 FESOL-71：Todo，updatedAt 2026-11-03T15:43:51.287Z，无评论/替代地址。正文要求各开发者自有钱包、第三方表未冻结则用 GMX-owned copies，并没有要求 GMX-owned copies 必须冻结。前一阶段规则只允许 frozen 过严，已改为 frozen 或配置中逐表登记的已核实 GMX authority；`GMSOL_LOOKUP_TABLE_AUTHORITIES` 当前为空，不把现有第三方 authority 当作 GMX。再次在现有 Chrome 真实读取，仍拒绝当前表，错误为 Trading requires frozen or reviewed GMX-owned lookup tables。
+- 最后修正的 5 文件/14 tests 通过，root typecheck、变更 lint、format/diff 检查通过，生产 build（命令级 8 GiB heap）通过。复用上一阶段全量 3423 passed/1既有skip及 landing 类型检查，未宣称全量在新增修正后重跑。日志 `/tmp/fesol56-trust-{tests,types,lint,build}.log`、`/tmp/fesol56-continuation-format.log`。
+- 完整验收仍有未完成项：受信任 LUT provisioning、四钱包真实 LUT 签名与落链、keeper 执行；不绕过生产 trust gate，不擅自创建链上 LUT/消耗钱包余额。继续条件及产品限制仍在业务 README。基础目录同时出现其他 progress/AGENTS 文档改动，未纳入本任务提交。
