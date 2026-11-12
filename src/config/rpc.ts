@@ -19,17 +19,10 @@ import {
 } from "sdk/configs/chains";
 
 import { isDevelopment } from "./env";
-import solanaRpc from "./solanaRpc.json";
 
 export type { RpcConfig } from "lib/rpc/types";
 export * from "sdk/configs/chains";
 export { getChainName } from "sdk/configs/chains";
-
-export function getSolanaRpcUrl(): string {
-  return import.meta.env.DEV
-    ? import.meta.env.VITE_APP_SOLANA_RPC_URL || solanaRpc.localUrl
-    : `${solanaRpc.upstreamHost}/${solanaRpc.fallbackKey}`;
-}
 
 const ENV_ARBITRUM_RPC_URLS = parseRpcUrlsFromEnv(import.meta.env.VITE_APP_ARBITRUM_RPC_URLS);
 
@@ -373,7 +366,7 @@ function getAlchemyProvider(
   } else {
     switch (purpose) {
       case "fallback":
-        alchemyKey = solanaRpc.fallbackKey;
+        alchemyKey = "alch_RCUyAwn71kwGwf3IeEyMp";
         break;
       case "largeAccount":
         alchemyKey = "alch_1xqx9RJJd8BJ9vJaDyrmp";

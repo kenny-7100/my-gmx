@@ -2,7 +2,7 @@ import { t, Trans } from "@lingui/macro";
 import pickBy from "lodash/pickBy";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useHistory } from "react-router-dom";
-import { useKey } from "react-use";
+import { useKey, useLatest } from "react-use";
 import { Address } from "viem";
 
 import { getChainName } from "config/chains";
@@ -93,7 +93,7 @@ import { NumericValue } from "components/NumericValue/NumericValue";
 import { UsdPriceValue } from "components/NumericValue/UsdPriceValue";
 import { UsdValue } from "components/NumericValue/UsdValue";
 import Tabs from "components/Tabs/Tabs";
-import TooltipWithPortal from "components/Tooltip/TooltipWithPortal";
+import StandardTooltip from "components/Tooltip/StandardTooltip";
 import { MarginPercentageSlider } from "components/TradeboxMarginFields/MarginPercentageSlider";
 import { TradeInputBox } from "components/TradeboxMarginFields/TradeInputBox";
 import { TradeInputField } from "components/TradeboxMarginFields/TradeInputField";
@@ -454,16 +454,18 @@ export function PositionEditor() {
     collateralDeltaAmount > 0n &&
     (!isAtPriceDeposit || triggerPrice !== undefined);
 
+  const latestOnSubmit = useLatest(submitButtonState.onSubmit);
+
   useKey(
     "Enter",
     () => {
       if (isVisible && !submitButtonState.disabled) {
         submitButtonRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-        submitButtonState.onSubmit();
+        latestOnSubmit.current();
       }
     },
     {},
-    [isVisible, submitButtonState.disabled]
+    [isVisible, submitButtonState.disabled, latestOnSubmit]
   );
 
   useEffect(
@@ -596,13 +598,13 @@ export function PositionEditor() {
   );
 
   const button = submitButtonState.tooltipContent ? (
-    <TooltipWithPortal
+    <StandardTooltip
       className="w-full"
       content={submitButtonState.tooltipContent}
       isHandlerDisabled={submitButtonState.disabled}
       handle={buttonContent}
       handleClassName="w-full"
-      position="top"
+      position="bottom"
       variant="none"
     />
   ) : (
