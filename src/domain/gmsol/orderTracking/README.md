@@ -13,7 +13,8 @@ identify a filled order. A receipt indexing delay must not turn a successful
 send into a failed send.
 
 `readOrderLifecycle` reads the history of this specific order through the
-configured GMX RPC, stopping at its creation signature. It never enumerates a
+configured GMX RPC, collecting through the full creation slot and requiring its
+creation signature as an anchor. It never enumerates a
 wallet's orders. The read is bounded to 500 signatures and a 20-second deadline;
 missing history or receipts remain unresolved. Same-slot observations require
 transaction ordering from the block's signature list. `watchOrderLifecycle`
@@ -36,3 +37,19 @@ They exercise the supported decoder contract, not current deployment acceptance.
 Synthetic test mutations are state-machine edge cases, not additional observed
 mainnet transactions. Verify deployment compatibility and live order/toast
 behavior before release; offline tests do not authorize signing or broadcasting.
+
+The sender reports confirmed `trackingRequests` without waiting for transaction
+indexing. `watchSubmittedOrders` retries the creation receipt for up to one
+minute to recover typed identities, then starts lifecycle tracking. This keeps
+confirmation feedback independent from indexing and API refresh latency.
+
+Shared order-entry consumers use
+`useSolanaOrderNotifications().begin({ title, trackExecution })`, call
+`submitted({ signatures, orders, trackingRequests })` at confirmation, and pass
+caught submission errors to `failed(error)`. Known chain failures, wallet
+rejections and ambiguous broadcasts are distinct. Notifications reuse the GMX
+status and transaction-row components with explicit Solana explorer links.
+Dismissing a toast, switching owner/network or unmounting the consumer cancels
+its tracking. A tracking deadline leaves a visible unconfirmed outcome, never a
+fabricated fill or failure. Live browser acceptance of newly submitted orders
+remains separate from historical RPC replay and offline fixture verification.
