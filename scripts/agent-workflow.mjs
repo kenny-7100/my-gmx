@@ -176,14 +176,46 @@ async function contextStatus(root, record, common) {
 }
 function validateContext(patch) {
   assert.ok(patch && typeof patch === "object" && !Array.isArray(patch), "Context must be an object.");
-  const strings = ["objective", "next"];
+  const strings = ["objective", "next", "coordinator"];
   const arrays = ["acceptance", "decisions", "blockers", "links", "observations"];
   const text = (value) => typeof value === "string" && value.length <= 8000;
   for (const [key, value] of Object.entries(patch)) {
-    assert.ok([...strings, ...arrays, "verification"].includes(key), `Unknown context field: ${key}`);
+    assert.ok([...strings, ...arrays, "assignments", "verification"].includes(key), `Unknown context field: ${key}`);
     if (strings.includes(key)) assert.ok(text(value), `Invalid ${key}`);
     if (arrays.includes(key))
       assert.ok(Array.isArray(value) && value.length <= 30 && value.every(text), `Invalid ${key}`);
+    if (key === "assignments") {
+      assert.ok(Array.isArray(value) && value.length <= 20, "Invalid assignments.");
+      const ids = new Set();
+      for (const item of value) {
+        assert.ok(item && typeof item === "object" && !Array.isArray(item), "Invalid assignment.");
+        assert.ok(
+          Object.keys(item).every((field) =>
+            ["id", "owner", "paths", "goal", "doneWhen", "state", "worktree", "contract", "commit"].includes(field)
+          ),
+          "Unknown assignment field."
+        );
+        for (const field of ["id", "owner", "goal", "doneWhen", "state"])
+          assert.ok(text(item[field]) && item[field].length > 0, `Invalid assignment ${field}`);
+        assert.ok(!ids.has(item.id), "Duplicate assignment id.");
+        ids.add(item.id);
+        assert.ok(
+          ["planned", "produced", "accepted", "integrated", "verified"].includes(item.state),
+          "Invalid assignment state."
+        );
+        assert.ok(
+          Array.isArray(item.paths) &&
+            item.paths.length > 0 &&
+            item.paths.every(
+              (file) => text(file) && file.length > 0 && !path.isAbsolute(file) && !file.split(/[\\/]/).includes("..")
+            ),
+          "Assignment paths must stay within the target project."
+        );
+        for (const field of ["worktree", "contract", "commit"])
+          if (field in item) assert.ok(text(item[field]), `Invalid assignment ${field}`);
+        if (item.commit) assert.match(item.commit, /^[0-9a-f]{40}$/);
+      }
+    }
     if (key === "verification" && value !== null) {
       assert.ok(value && typeof value === "object" && !Array.isArray(value), "Invalid verification.");
       assert.deepEqual(Object.keys(value).sort(), ["command", "head", "result", "worktree"]);
@@ -219,14 +251,60 @@ async function missingCommits(root, target, commits) {
   return missing;
 }
 
+function taskKey(issue, task) {
+  assert.ok(!(issue && task), "Use either --issue or --task, not both.");
+  if (task) {
+    assert.ok(task.length <= 80 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(task), "Provide a kebab-case local task name.");
+    return `local-${task}`;
+  }
+  assert.match(issue ?? "", /^[A-Z][A-Z0-9]*-[0-9]+$/, "Provide --issue or a local --task name.");
+  return issue;
+}
+async function binding(root, common, { worktree, branch, base, head, previous, prFile }) {
+  worktree = await realpath(worktree ?? root);
+  branch = branch ?? (await git(worktree, "branch", "--show-current"));
+  assert.ok(branch, "Bind a named branch, not a detached HEAD.");
+  const actual = await assertWorkspace({ branch, worktree }, common);
+  assert.equal(actual.head, head, "Acknowledge the actual workspace HEAD with --head.");
+  assert.equal(actual.operation, null, "Finish the existing Git operation before binding.");
+  assert.ok(base ?? previous?.base, "Provide the reviewed task baseline with --base.");
+  base = await git(root, "rev-parse", "--verify", "--end-of-options", `${base ?? previous.base}^{commit}`);
+  await git(root, "merge-base", "--is-ancestor", base, actual.head);
+  if (previous) {
+    const prior = await workspaceStatus(previous, common);
+    if (!prior.unavailable && (await realpath(prior.worktree)) !== worktree) {
+      assert.ok(!prior.dirty && !prior.operation, "Preserve the previous active workspace before rebinding.");
+    }
+  }
+  let pr;
+  if (prFile) {
+    pr = JSON.parse(await readFile(prFile, "utf8"));
+    assert.match(pr.url ?? "", /^https:\/\/github\.com\/gmx-io\/gmx-interface\/pull\/[1-9][0-9]*$/);
+    assert.equal(pr.headRefName, actual.branch, "PR branch does not match this workspace.");
+    assert.equal(pr.headRefOid, actual.head, "PR head does not match this workspace; fetch and inspect it first.");
+    assert.equal(pr.baseRefName, "release", "The registered business PR must target release.");
+    pr = {
+      url: pr.url,
+      headRefName: pr.headRefName,
+      headRefOid: pr.headRefOid,
+      baseRefName: pr.baseRefName,
+      recordedAt: new Date().toISOString(),
+      source: "Agent-supplied gh snapshot; recheck remotely at task boundaries.",
+    };
+  }
+  return { workspace: { branch, worktree, base, head: actual.head }, actual, pr };
+}
+
 export async function workflow(options) {
   const root = await realpath(options.projectDir ?? process.cwd());
   assert.equal(await realpath(await git(root, "rev-parse", "--show-toplevel")), root, "Select a Git checkout root.");
   const common = await realpath(path.resolve(root, await git(root, "rev-parse", "--git-common-dir")));
   const directory = path.join(common, "agent-workflow");
   if (options.command === "status") return runWorkflow({ ...options, root, common });
-  return withWorkflowLock(directory, `${options.command}:${options.issue ?? BASE}`, () =>
-    runWorkflow({ ...options, root, common })
+  return withWorkflowLock(
+    directory,
+    `${options.command}:${options.command === "sync" ? BASE : taskKey(options.issue, options.task)}`,
+    () => runWorkflow({ ...options, root, common })
   );
 }
 async function runWorkflow({
@@ -234,6 +312,10 @@ async function runWorkflow({
   root,
   common,
   issue,
+  task,
+  role,
+  base,
+  prFile,
   branch,
   worktree,
   commits = [],
@@ -243,8 +325,8 @@ async function runWorkflow({
   head: reviewedHead,
 }) {
   if (command === "sync") return sync(root);
-  assert.match(issue ?? "", /^[A-Z][A-Z0-9]*-[0-9]+$/, "Provide an issue identifier.");
-  const recordFile = path.join(common, "agent-workflow", `${issue}.json`);
+  const key = taskKey(issue, task);
+  const recordFile = path.join(common, "agent-workflow", `${key}.json`);
   let record;
   try {
     record = JSON.parse(await readFile(recordFile, "utf8"));
@@ -252,7 +334,7 @@ async function runWorkflow({
     if (error.code !== "ENOENT") throw error;
   }
   const save = async () => {
-    record.version = 2;
+    record.version = 3;
     record.updatedAt = new Date().toISOString();
     await writeRecord(recordFile, record);
   };
@@ -272,7 +354,63 @@ async function runWorkflow({
       ...(record ? { resume: await contextStatus(root, record, common) } : {}),
     };
   }
-  assert.ok(["start", "backflow", "deliver", "note", "recover"].includes(command), "Unknown workflow command.");
+  assert.ok(
+    ["start", "register", "rebind", "backflow", "deliver", "note", "recover"].includes(command),
+    "Unknown workflow command."
+  );
+  if (command === "register" || command === "rebind") {
+    assert.ok(!record?.pending, "Resolve the recorded pending operation before rebinding.");
+    assert.ok(
+      command === "register" ? !record : record,
+      command === "register"
+        ? "Task already registered; use rebind after inspecting the existing state."
+        : "Register the existing task first."
+    );
+    role = role ?? (record?.delivery ? "delivery" : "development");
+    assert.ok(["development", "delivery"].includes(role), "Choose development or delivery as the binding role.");
+    assert.ok(!prFile || role === "delivery", "PR snapshots belong to the delivery workspace.");
+    const previous = record?.[role];
+    const resolved = await binding(root, common, { worktree, branch, base, head: reviewedHead, previous, prFile });
+    if (role === "delivery") {
+      const release = await git(root, "rev-parse", "origin/release");
+      await git(root, "merge-base", "--is-ancestor", resolved.workspace.base, release);
+    }
+    record = record ?? {
+      key,
+      issue: issue ?? null,
+      task: task ?? null,
+      development: resolved.workspace,
+      infrastructure: [],
+      delivery: null,
+    };
+    record[role] =
+      role === "delivery"
+        ? {
+            ...resolved.workspace,
+            remote: "my-gmx-pr",
+            commits: (
+              await git(root, "rev-list", "--reverse", `${resolved.workspace.base}..${resolved.workspace.head}`)
+            )
+              .split("\n")
+              .filter(Boolean),
+          }
+        : resolved.workspace;
+    // Rebinding is local metadata only. Do not silently retain old PR observations or test claims.
+    if (role === "delivery") record.pr = resolved.pr ?? null;
+    if (record.context) record.context.verification = null;
+    record.lastBinding = {
+      role,
+      previous: previous ?? null,
+      actual: resolved.actual,
+      reviewedAt: new Date().toISOString(),
+    };
+    await save();
+    return {
+      recordFile,
+      record,
+      next: "Inspect status, remote PR facts and the complete diff; binding does not certify business-only scope or validation.",
+    };
+  }
   if (command === "note") {
     assert.ok(record && !record.pending, "Start the task and resolve pending operations before updating context.");
     const patch = contextFile ? JSON.parse(await readFile(contextFile, "utf8")) : context;
@@ -350,7 +488,14 @@ async function runWorkflow({
     assert.ok(!record, "This issue already has a workspace; use status to resume it.");
     const { base, release } = await sync(root);
     await git(root, "worktree", "add", "-b", branch, worktree, base);
-    record = { issue, development: { branch, worktree, base, release }, infrastructure: [], delivery: null };
+    record = {
+      key,
+      issue: issue ?? null,
+      task: task ?? null,
+      development: { branch, worktree, base, release },
+      infrastructure: [],
+      delivery: null,
+    };
     await save();
     return { recordFile, record };
   }
@@ -424,6 +569,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     options: {
       "project-dir": { type: "string" },
       issue: { type: "string" },
+      task: { type: "string" },
+      role: { type: "string" },
+      base: { type: "string" },
+      "pr-file": { type: "string" },
       branch: { type: "string" },
       worktree: { type: "string" },
       commit: { type: "string", multiple: true },
@@ -435,13 +584,17 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   });
   if (values.help) {
     console.log(
-      "Usage: node scripts/agent-workflow.mjs sync|start|status|note|backflow|deliver|recover --project-dir PATH [--issue FESOL-123] [--branch NAME --worktree PATH] [--commit SHA ...] [--context-file JSON] [--outcome completed|aborted --head SHA]\nstatus provides live workspace and knowledge locations; note merges task context; recover acknowledges reviewed native Git recovery. start synchronizes solana-integration; backflow transfers reviewed infrastructure commits; deliver transfers reviewed business commits onto freshly fetched origin/release. No dependency install, push, PR, force update or evidence packaging. Git failures preserve pending state; inspect and finish/abort it, then use recover."
+      "Usage: node scripts/agent-workflow.mjs sync|start|register|rebind|status|note|backflow|deliver|recover --project-dir PATH [--issue FESOL-123 | --task local-name] [--branch NAME --worktree PATH] [--commit SHA ...] [--context-file JSON] [--role development|delivery --base REF --head SHA --pr-file GH_JSON] [--outcome completed|aborted --head SHA]\nregister/rebind inspect existing workspaces without changing Git files or history; --pr-file validates an Agent-supplied gh snapshot, not live PR freshness. status provides live workspace and knowledge locations; note merges task context; recover acknowledges reviewed native Git recovery. start synchronizes solana-integration; backflow transfers reviewed infrastructure commits; deliver transfers reviewed business commits onto freshly fetched origin/release. No dependency install, push, PR, force update or evidence packaging. Git failures preserve pending state; inspect and finish/abort it, then use recover."
     );
   } else {
     workflow({
       command: positionals[0],
       projectDir: values["project-dir"],
       issue: values.issue,
+      task: values.task,
+      role: values.role,
+      base: values.base,
+      prFile: values["pr-file"],
       branch: values.branch,
       worktree: values.worktree,
       commits: values.commit,
