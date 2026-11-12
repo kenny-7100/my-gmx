@@ -126,7 +126,7 @@ export async function sendGmsolOrderTransactions({
   let slot = 0n;
   let pendingSignature: string | undefined;
   try {
-    // Tables are fetched again at the signature boundary and must still be frozen and match the build.
+    // Tables are fetched again at the signature boundary; their authority policy and contents must still match.
     const liveTables = await fetchGmsolLookupTables();
     requireGmsol(
       GMSOL_LOOKUP_TABLE_ADDRESSES.every((key) => plan.lookupTables[key]),
