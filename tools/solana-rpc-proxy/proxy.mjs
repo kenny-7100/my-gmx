@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 
-const config = JSON.parse(readFileSync(new URL("../../src/config/solanaRpc.json", import.meta.url), "utf8"));
+const config = JSON.parse(readFileSync(new URL("./config.json", import.meta.url), "utf8"));
 const MAX_BODY_BYTES = 1024 * 1024;
 const MAX_BATCH_SIZE = 100;
 const TIMEOUT_MS = 20_000;
