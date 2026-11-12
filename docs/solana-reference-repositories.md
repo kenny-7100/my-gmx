@@ -1,6 +1,6 @@
 # Solana 迁移参考仓库
 
-本页供后续 Agent 定位资料、核对协议行为和接口使用。核验日期：2026-10-24。
+本页供后续 Agent 定位资料、核对协议行为和接口使用。仓库用途记录于 2026-10-24；按需更新规则于 2026-11-12 补充。
 分支、部署版本、SDK 版本和 remote 配置会变化，开始任务时应重新检查相关仓库。
 
 ## 核心集成原则
@@ -23,7 +23,7 @@
 | 本地路径 | 上游仓库 | 用途与查阅入口 |
 | --- | --- | --- |
 | `./` | [gmx-io/gmx-interface](https://github.com/gmx-io/gmx-interface) | 集成目标。复用 `src/components/`、`src/domain/`、`src/context/` 和现有页面；共享计算与类型位于 `sdk/`。 |
-| `gmx-api/` | [gmx-io/gmx-api](https://github.com/gmx-io/gmx-api) | 数据服务，已作为 Git 子模块引入。查阅 `README.md`、`src/solanaApp.ts`、`src/domain/solana/`；区分样例响应与真实链上读取，不把样例路由当成已完成的数据服务。 |
+| `gmx-api/` | [gmx-io/gmx-api](https://github.com/gmx-io/gmx-api) | 数据服务，当前以 gitlink 记录但没有 `.gitmodules`，不能假定可用 submodule update 初始化。查阅 `README.md`、`src/solanaApp.ts`、`src/domain/solana/`；区分样例响应与真实链上读取，不把样例路由当成已完成的数据服务。 |
 | `gmx-prompts/` | [gmx-io/gmx-prompts](https://github.com/gmx-io/gmx-prompts) | 工程规范。先看 `skills/gmx-interface-dev/SKILL.md` 和 `skills/gmx-solana/SKILL.md`，再按其指引查阅相关文档。 |
 | `gmx-solana-interface/` | [gmsol-labs/gmx-solana-interface](https://github.com/gmsol-labs/gmx-solana-interface) | 原 Solana 前端参考。了解资源、接口调用、钱包及订单交互；仅提取所需行为，不能直接搬运页面、业务逻辑或 UI 组件。 |
 | `gmtrade-web-backend/` | 用户提供的压缩包，无上游 remote 信息 | 旧 Solana Web 后端源码快照。查阅 `src/lib.rs`、`src/http/mod.rs`、`src/refresh.rs`、`src/aggregate/` 和 `src/sources/`；详见[参考说明](gmtrade-web-backend-reference.md)。 |
@@ -34,6 +34,43 @@
 | `gmtrade-sqd/` | [gmsol-labs/gmtrade-sqd](https://github.com/gmsol-labs/gmtrade-sqd) | 历史与统计索引。先看根 README，再看 `squids/core/README.md`、对应 GraphQL schema 和 `squids/gt/`。不是首发实时市场、持仓、订单数据服务的替代品。 |
 | `gmx-solana-programs/` | [gmsol-labs/gmx-solana-programs](https://github.com/gmsol-labs/gmx-solana-programs) | 基于 IDL 自动生成的 Rust SDK。查阅 `idls/gmsol_store.json`、`idls/gmsol_treasury.json` 和 `src/`，辅助核对账户与指令定义。 |
 | `gmx-solana-audits/` | [gmsol-labs/gmx-solana-audits](https://github.com/gmsol-labs/gmx-solana-audits) | 审计 PDF 和 `known_issues/`。涉及交易校验、清算或协议边界时，结合报告对应提交和实际部署版本查阅。审计结论只覆盖其审计范围。 |
+
+## 子仓库按需核验与更新
+
+此规则覆盖配套 Git 仓库，以及今后新增的相关仓库；`gmtrade-web-backend` 是无 remote 的源码快照，不能自动拉取。`sdk/`、`landing/` 等若与主项目共享 Git 根，则随主仓库同步，不当作独立仓库。先用 `git -C PATH rev-parse --show-toplevel` 确认边界。
+
+### 何时核验
+
+- 即将首次读取工程规范、参考协议/IDL、使用 API/SDK 契约、启动子项目联调或依赖它验收时，只核对相关仓库。跨会话恢复、收到相关 PR/契约变化提示、交付前需要确认跨仓库兼容时再核对。
+- 同一任务轮次已成功核验、没有相关变化时复用观察；不定时轮询、不每轮 fetch 所有仓库，不把本地 `origin/*` 未刷新状态称为最新。
+- 分析/推荐/进度查询优先 GitHub CLI/API 读取相关远端 SHA、PR 和文件，不移动本地 checkout；实施任务可自主 fetch，并按下表处理。仅要求 push 时不插入更新流程。
+
+### 如何选择更新方式
+
+先核对真实 Git 根、工作区/暂存区、当前分支、目标上游、领先/落后、未完成操作及关联 worktree/正在使用的服务。目标以当前需求为准：release、默认分支、特定 PR 或固定版本可能各不相同；个人推送 remote 不等于需要跟随的官方上游。目标不清楚先查远端默认分支和任务依赖，不能一律 pull main。
+
+| 当前用途与现场 | Agent 的默认处理 |
+| --- | --- |
+| 纯参考、无固定版本、干净且未被其他任务/服务占用的普通跟踪分支 | fetch 对应官方远端；确认仅落后后用 `merge --ff-only` 主动快进，更新后再读相关文件。已最新则直接继续。 |
+| 有本地改动、领先提交、分叉、未完成操作，或正在开发/运行服务 | fetch 只刷新远端引用；通过 `git show` / diff 核对相关变化，保持原现场。需要新版本运行/修改时另建独立 worktree，不自动切分支、stash、rebase、reset 或合并功能分支。 |
+| 父仓库记录为 gitlink、子模块、detached HEAD，或任务固定了 SHA/tag/依赖版本 | 核验最新变化与固定版本的差异，默认使用 `git show REMOTE_REF:PATH` 或独立 worktree 阅读最新版；不直接移动固定 checkout 或暂存父仓库指针。确需升级版本时按任务范围单独审查、更新引用并验证消费者。 |
+| 只读快照、无 remote、网络/权限失败或目标分支已删除 | 说明来源与新鲜度缺口，继续可独立完成的部分；不自行添加 remote、换来源，失败不标为已最新。 |
+
+```sh
+# Example for an unused, clean, unpinned reference checkout on main tracking origin/main.
+git -C gmx-prompts status --porcelain
+git -C gmx-prompts branch -vv
+git -C gmx-prompts fetch --no-recurse-submodules origin
+git -C gmx-prompts rev-list --left-right --count HEAD...origin/main
+# Only after confirming the safety conditions above and a pure fast-forward:
+git -C gmx-prompts merge --ff-only origin/main
+# Read a newer reference without moving a pinned or active checkout:
+git -C gmx-adrs show origin/adr-0015-solana-gmx-api:adr/0015-serve-solana-data-through-gmx-api.md
+```
+
+更新源码不代表已更新运行服务、生成路由、安装依赖或 SDK/WASM 产物。按实际差异与任务需要验证这些消费者，相关构建/启动沿用根授权；参考仓库最新版也不证明与当前 npm SDK、IDL 或链上部署兼容。发现有意义的变化，简短记录仓库、目标 ref/SHA、兼容影响与处理；未变化不新增流水账，本地观察留在任务记录，长期规则更新已有主题。
+
+2026-11-12 本地盘点发现 10 个独立配套 Git 仓库，当前均在 main、跟踪 origin/main 且工作区干净；这只是本地现场，不代表远端最新。其中 8 个在父仓库中记录为 gitlink，没有 `.gitmodules`；`gmx-prompts` 和旧前端为忽略目录。更新前仍需现场复核，不对所有目录递归 pull 或执行 `submodule update --remote`。本次实际 fetch 后确认 `gmx-prompts` 仅落后 3 个提交，已安全快进至 `7204161`，包含 review 的 merge-result/runtime/acceptance 更新及颜色迁移 skill；其余仓库未执行远端更新，不能视为已核验最新。
 
 ## 必看：ADR-0015 的专门分支
 
@@ -80,7 +117,7 @@ git -C gmx-adrs show origin/adr-0015-solana-gmx-api:adr/0015-serve-solana-data-t
 
 | 仓库 | 上游 remote | 个人推送 remote |
 | --- | --- | --- |
-| 主项目 | `origin` → `gmx-io/gmx-interface` | `my-gmx` → `kenny-7100/my-gmx` |
+| 主项目 | `origin` → `gmx-io/gmx-interface` | 个人基础 `my-gmx` → `kenny-7100/my-gmx`；业务 PR `my-gmx-pr` → `kenny-7100/gmx-interface` |
 | `gmx-api` | `origin` → `gmx-io/gmx-api` | `my-gmx-api` → `kenny-7100/my-gmx-api` |
 | `gmx-solana-interface` | `origin` → `gmsol-labs/gmx-solana-interface` | `my-gmt` → `kenny-7100/my-gmt` |
 | `gmx-prompts` | `origin` → `gmx-io/gmx-prompts` | 例外，不套用个人镜像推送规则 |
@@ -91,4 +128,4 @@ git -C gmx-adrs show origin/adr-0015-solana-gmx-api:adr/0015-serve-solana-data-t
 
 新增 7 个目录都是独立嵌套 Git 仓库，已在提交 `567331a4d4` 中以 gitlink（模式 `160000`）记录，但未配置对应的 `.gitmodules` 条目。因此重新 clone 主项目不会自动得到这些参考仓库的源码；需要时按上表地址分别 clone。用户明确要求 `push` 时，按根 `AGENTS.md` 直接暂存、提交和推送，不再为这些目录请求确认。
 
-本地主项目已通过 `git config --local commit.gpgsign false` 关闭提交签名，避免自动提交时等待 GPG 口令。这是 `.git/config` 中的本地设置，不随 push 共享，也不适用于其他仓库；换机器或重新 clone 后需重新核实。
+提交签名以各仓库当前 Git 配置为准，不依赖历史记录推断。本轮主项目的长期签名配置仍为启用；此前维护提交仅通过命令级配置关闭签名，没有永久修改。签名失败时按现场诊断，不自动更改长期配置。
