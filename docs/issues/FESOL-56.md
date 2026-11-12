@@ -95,8 +95,11 @@ FESOL-56 范围含 market/limit increase、market decrease、TP/SL、原子 incr
 - 真实 GMX RPC mainnet genesis 正确，实时 solanaTrading=true。两个配置 LUT 分别 73/155 个地址，authorityOption 均 1、active，**仍可变**；生产 prepare 明确拒绝“Trading requires frozen lookup tables”。FESOL-71 须提供冻结表/GMX 审查后的冻结副本，且核验内容对所需市场和原子组合的覆盖。
 - 为覆盖实际协议执行，仅在忽略的本地只读验收工具中用现有可变 LUT 的快照做诊断模拟；没有签名或广播，也未放宽生产入口。连接 Phantom 的公开 account 上，BTC/USDC limit increase 成功（807 bytes，网络费估算 45000 lamports）；increase+TP 成功（1044 bytes/55000）；increase+TP+SL 成功（1221 bytes/65000），最后确认模拟 slot=468611155。后两例 TP/SL 使用明确 unlimited acceptable price（协议 None），不是自动修改有限边界。
 - 相同 3 单均指定有限 acceptable price 时为 1255 bytes，超过 1232，安全拒绝。不能为追求塞进单笔而静默删用户边界；FESOL-71 还需更完善的 LUT 覆盖。冻结现有内容本身不证明所有输入能原子发送。
-- 全量 frontend 337 文件通过、1 既有文件跳过；3423 tests passed、1 既有 skipped。最后安全/会话修正后定向 4 文件/12 tests passed；root+landing typecheck、变更 ESLint 与 Prettier 通过（收尾仍核对进程退出码）。首次 production app build 在 render chunks 达默认 Node heap 上限，正在以命令级 8 GiB heap 复验；不是业务断言失败。
+- 全量 frontend 337 文件通过、1 既有文件跳过；3423 tests passed、1 既有 skipped。最后安全/会话修正后定向 4 文件/12 tests passed；root+landing typecheck、变更 ESLint、Prettier 与 git diff --check 均通过（退出码已核对）。首次 production app build 在 render chunks 达默认 Node heap 上限；以命令级 8 GiB heap 重试成功，含 hash 保护的 WASM bundle 与 Solana 生产模块隔离检查。
 
 当前业务说明及 TODO 在需求分支 `src/domain/gmsol/transactions/README.md`。未完成主网广播/keeper 和四钱包真实 LUT 签名验收；固定 SDK 高层 create 不暴露显式 nonce/自定义 execution fee；callback/swap/Token-2022 均拒绝而非推测性兜底；FESOL-19/20 消费 UI/回执与 FESOL-112 数学部署仍需继续。这些是明确范围/条件限制，不声称 FESOL-56 所有验收项已通过。
 
 本轮可复用日志：`/tmp/fesol56-implementation-full-tests.log`、`/tmp/fesol56-final-targeted.log`、`/tmp/fesol56-final-{root-types,landing-types,lint,format}.log`；首次 OOM `/tmp/fesol56-final-app-build.log`，8 GiB 重试 `/tmp/fesol56-final-app-build-8gb.log`。忽略的本地浏览器验收工具在目标 `.local/fesol56/`，使用 native CUA 操作原窗口；不可把诊断绕过冻结检查误当作生产准备通过。
+
+
+收尾：业务提交 `a8733143f47230d996303d174b2ca9dcaf0b1c87`（Build and validate Solana order transactions FESOL-56），需求 worktree clean；本地目标绑定更新至此 HEAD。基础 issue 记录独立提交，业务没有整支回流个人基础。原 kenny Chrome 标签页留回 `http://127.0.0.1:3016/trade`；本任务 Vite 保留供用户检查，未创建新的浏览器/profile。没有 push、PR、Linear 修改或外部 review。主网生产验收未全部通过，TODO 条件如上；本轮完成可独立实施与验证的最大范围。
