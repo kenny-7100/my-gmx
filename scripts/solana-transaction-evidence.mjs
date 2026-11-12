@@ -119,7 +119,7 @@ async function sourceEvidence() {
   const files = [
     "scripts/solana-transaction-evidence.mjs",
     "scripts/agent-wallet-balance.mjs",
-    "src/config/solanaRpc.json",
+    "tools/solana-rpc-proxy/config.json",
   ];
   const sha256 = {};
   for (const file of files)

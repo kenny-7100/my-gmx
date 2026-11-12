@@ -54,7 +54,9 @@ async function rpcRequest({ rpcUrl, method, params, id, fetchImpl }) {
 
 export async function connectSolanaMainnet({ rpcUrl, fetchImpl = fetch }) {
   if (!rpcUrl) {
-    const config = JSON.parse(await readFile(new URL("../src/config/solanaRpc.json", import.meta.url), "utf8"));
+    const config = JSON.parse(
+      await readFile(new URL("../tools/solana-rpc-proxy/config.json", import.meta.url), "utf8")
+    );
     rpcUrl = process.env.SOLANA_RPC_PROXY_URL ?? config.localUrl;
   }
   let parsedUrl;

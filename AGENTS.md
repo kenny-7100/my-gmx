@@ -1,62 +1,30 @@
-## 迁移背景
+# Agent 协作入口
 
-本次集成的核心原则是在现有 GMX 架构和统一数据流下支持 Solana，复用主项目的前端组件、状态管理、交互及业务体系，降低长期维护成本。链特有能力应在现有架构边界内适配，不另建并行的 Solana 应用或业务数据流。
+## 长期约定
 
-`gmx-solana-interface` 和旧 Solana 后端 `gmtrade-web-backend/` 仅用于理解资源、接口和行为，不直接迁移其架构或业务体系，也不将其作为目标实现的长期依赖。旧前端后续会废弃，旧后端可能废弃。后端已作为源码快照收录，并非现有 `gmx-api`；用途和缺失依赖见[后端参考说明](docs/gmtrade-web-backend-reference.md)。详见[集成原则](docs/solana-reference-repositories.md#核心集成原则)。
+- 中文沟通和协作文档；代码、注释、日志、commit、PR 和 review 内容使用英文，产品文案遵循既有本地化规范。
+- Solana 接入 GMX 统一数据流，复用现有状态、计算、组件和交互，降低维护成本并保留 EVM 行为。旧前后端只作参考；主项目没有对应的新产品组件或行为不明确时先确认。详见[架构与参考仓库](docs/solana-reference-repositories.md)。
+- `solana-integration` 是个人开发基础，主动新增的差异尽量限定于工具、知识和本地环境；业务能力只在需求分支实施。默认操作路径见[开发、回流与交付](docs/linear-development-workflow.md)。
+- 已授权开发任务包含必要的建分支、worktree、普通提交、选择性 cherry-pick，以及适时将最新 release 合入个人基础、将已核实的基础设施沉淀回流个人基础。先检查现场；不覆盖未提交工作，不整支合入业务分支，不自动重写历史、强推或清理他人现场。常规维护自主完成，产品语义冲突或范围歧义再询问。
+- 新任务、相关依赖变化和交付前，按上述流程主动核对上游、目标 Linear 和 PR；不轮询，不每轮全量调研，不修改 Linear，除非用户另有明确指令。
+- 主动识别并沉淀可复用经验，先更新已有 docs 或项目 skill；本文件只保留稳定规则和索引。功能分支中的沉淀按内容独立提交并主动回流，不能只留在聊天或功能分支。见[知识维护](docs/documentation-maintenance.md)。
+- 聚焦当前任务，保持改动渐进、便于验证；不顺带重构，不用推测性兜底、替代服务或模拟数据掩盖缺失条件。缺资源时说明用途与配置位置，暂停依赖项，继续独立工作；不暴露秘密或自行注册采购。
 
-## Solana 迁移
+## 按需查阅
 
-参考仓库的用途、查阅顺序、版本注意事项和 remote 配置记录在 [docs/solana-reference-repositories.md](docs/solana-reference-repositories.md) 中。开展迁移工作前，先阅读相关条目。特别注意：需要查看 `gmx-adrs` 的 `origin/adr-0015-solana-gmx-api` 分支中的 ADR-0015；记录时该文档尚未进入默认分支。使用前应重新核实其提案及合并状态。
+| 场景 | 入口 |
+| --- | --- |
+| 实施需求、回流沉淀、整理 PR | [交付 skill](.agents/skills/gmx-solana-task-delivery/SKILL.md)、[日常流程](docs/linear-development-workflow.md) |
+| 开发与自审 | [编码规范](docs/coding-and-self-review.md)：按任务读取 gmx-prompts 开发、Solana、测试及 review 规范 |
+| 本地运行、测试和排障 | [任务启动卡](docs/agent-task-start.md)，仅选择本次需要的入口 |
+| Linear 单条/快照 | [查询 skill](.agents/skills/gmx-linear-requirements/SKILL.md)；GMTrade 标签属于旧项目，核对项目归属 |
+| 推荐下一条需求 | [就绪核验 skill](.agents/skills/gmx-solana-next-task/SKILL.md)：核对 Linear、相关 PR 和实际代码 |
+| 实际迁移进度 | [进度 skill](.agents/skills/gmx-solana-progress/SKILL.md)：区分现有需求与完整迁移两种口径，中英文简述 |
+| 专题知识、历史记录 | [文档索引](docs/README.md)，历史状态不当作当前结论 |
 
-1. 使用 `gmx-solana-interface` 理解 Solana 相关资源、数据访问方式、接口和可观察行为，不要将其视为需要整体移植的源码。
-2. 实现 Solana 支持时，保留主项目现有的架构、前端组件、页面结构、状态管理、交互模式和业务逻辑。
-3. 对每个 Solana 模块，如果主项目已有对应的前端组件或模块，必须复用。如果主项目没有对应实现，且确实需要新增前端组件或模块，应先向用户确认再引入。
-4. 不要直接移植参考项目的业务逻辑、页面或 UI 组件。仅使用主项目现有模式重新实现所需行为，并适配参考数据或接口。
-5. 迁移改动应聚焦 Solana 集成，避免无关重构或组件改动。
-6. 查阅相关参考代码后，如果所需行为、数据契约或集成方式仍不明确，应先向用户澄清再实现。
+## 操作边界
 
-需求查阅与进度复盘遵循 [Linear 需求工具说明](docs/linear-requirements.md)：单条需求实施前实时核对，整体复盘按需同步本地快照，线上 Linear 为权威来源。 带 `GMTrade` 标签的需求属于仍在迭代的旧 `gmx-solana-interface`，仅供参考，不属于本次迁移需求；查阅和统计时核对标签及项目归属。
-
-需求开发遵循 [分支与 PR 交付流程](docs/linear-development-workflow.md)：一条 Linear 需求对应一个独立分支，开发从 `solana-integration` 创建，最终交付必须基于最新 `origin/release` 且只包含当前需求改动，严禁混入个人开发基础改动。用户自行维护 `solana-integration` 与上游的同步。PR 向上游 `release` 提出并保持 Draft，附英文 Summary、Linear 链接和英文自测结果表格；提出后按 gmx-prompts 审查，用户明确同意前不转 Ready 或请求 reviewer。
-
-推荐下一条需求前，必须结合实时 Linear、GitHub 相关 PR 及最新上游代码核验依赖、重复工作与独立交付条件，不能仅凭需求状态判断。流程见[需求推荐与就绪核验](docs/solana-next-task.md)。
-
-迁移实际进度评估使用 `gmx-solana-progress`：核验全量需求及跨仓库相关分支、PR 和代码，分别估算现有有效 Linear 需求工作量与完整迁移工作量进度，提供中英文简述；不能以 Done 条数代替实际进度。方法见[进度评估说明](docs/solana-progress.md)。
-
-项目 skill 位于 `.agents/skills/`：需求查询与复盘使用 `gmx-linear-requirements`，下一条需求推荐使用 `gmx-solana-next-task`，实际进度评估使用 `gmx-solana-progress`，需求开发及 Draft PR 交付使用 `gmx-solana-task-delivery`；详细资料仍维护在 `docs/`，skill 不扩大任务或操作授权。这些 skill 属于个人开发基础，不随业务需求交付上游。
-
-## 工程规范
-
-定位 Solana 链上问题时，在适合且不依赖 UI 的场景优先使用本地 Solana CLI 核对链上事实，再结合 SDK、API 或页面排查；先确认网络与账户，具体入口及授权边界见 [本地钱包与 CLI](docs/agent-wallet.md#本地-solana-cli-排障约定)。
-
-1. 编码和自我代码审查必须参考 `gmx-prompts`：开发看 `skills/gmx-interface-dev/SKILL.md`，前端及 SDK 自审看 `skills/gmx-interface-review/SKILL.md`，Solana 改动同时看 `skills/gmx-solana/SKILL.md`，测试看 `skills/gmx-tests/SKILL.md`；涉及 API 审查时看 `skills/gmx-api-review/SKILL.md`。按入口阅读相关规范与审查细则，不能仅凭通用经验检查。
-2. 查阅入口和自审重点见 [编码与自审规范](docs/coding-and-self-review.md)。同时遵循本文件的项目专属要求；上游流程不得覆盖用户已确认的 push、语言、Git 操作及 UI 运行授权约定。
-3. 执行类型检查、测试、构建或验收前，先按[执行前的环境检查与顺序](docs/coding-and-self-review.md#执行前的环境检查与顺序)处理适用的已知环境前置条件，再运行检查；该入口不扩大操作授权，也不改变直接 `push` 流程。
-
-## 语言约定
-
-1. 与用户沟通、`AGENTS.md` 和 `docs/` 中沉淀的协作资料使用中文，表达简明、准确，便于人类和后续 Agent 阅读。
-2. 代码及代码相关内容使用英文，包括注释、标识符、代码中的说明文本、日志、错误信息和测试描述；Git commit 信息、PR 标题、正文及审查评论也使用英文。产品本地化文案遵循项目现有国际化规范。
-3. 中文文档中的代码示例遵循英文代码约定；命令、路径、配置键、专有名称及需保真的原始引用保留原文。
-
-## 协作知识沉淀
-
-1. 协作中主动识别并记录用户确认的长期偏好、可复用结论、重要决策、排障经验和接手所需信息，无需等待用户再次要求；仅更新当前任务相关文档，不影响 `push` 的直接执行流程。
-2. 保持 `AGENTS.md` 精简，仅保留长期有效的执行规则和必要入口；背景、证据、操作步骤、版本限制和阶段性交接信息放入 `docs/`，优先更新已有主题，避免重复。
-3. 后续 Agent 从 [docs/README.md](docs/README.md) 查找相关资料。新增或更新文档时遵循 [文档维护约定](docs/documentation-maintenance.md)，同步维护索引，区分已确认事实、提案和待验证事项，及时修正本次工作发现的过期内容。
-   已确认、可复用的环境排障经验必须进入通用执行入口，影响下次任务的检查顺序，不能只留在阶段记录中；具体提升方法见文档维护约定。
-4. 主动发现重复、耗时且规则明确的工作，优先复用现有能力，并在当前任务范围内沉淀为小型脚本、验证工具或其他可复用能力，无需等待再次要求。遵循[自动化工具沉淀约定](docs/automation-tools.md)，验证实际效果并记录入口，降低后续 Agent 的耗时、错误和成本；不为假想需求建设工具，不改变既有操作授权或 push 流程。
-
-## 通用要求
-
-1. 未经用户明确要求，不要执行有副作用的 Git 命令。只读检查类 Git 命令始终允许执行。
-2. 用户明确要求 `push` 时，视为已授权将当前仓库的全部改动暂存、提交并推送。根据当前会话和改动简要总结一条 commit message，然后直接执行 `git add . && git commit -m 'xxx' && git push <个人 remote> HEAD`。不要额外开展代码审查、测试、构建、无关排查或修改，不要因未跟踪文件、嵌套仓库或提交范围再次请求确认；本条优先于参考文档中的提交前确认要求。仅在命令失败或缺少必要的推送目标时处理具体阻碍并简短说明。除 `gmx-prompts` 外，推送到个人的 `my-` remote，不得推送到上游 `origin`：主项目使用 `my-gmx`，`gmx-api` 使用 `my-gmx-api`，`gmx-solana-interface` 使用 `my-gmt`。其他仓库使用已配置的个人 `my-` remote；若未配置且用户未指定目标，再向用户确认。`gmx-prompts` 按其已有推送配置执行。
-3. 面向用户的回复应简洁、准确，清晰说明问题本质，便于理解。
-4. 解决任务时，仅聚焦用户要求的问题，不要顺带优化、重构、调整格式或修改无关内容。
-5. 用户已于 2026-10-25 长期授权后续任务启动本地 Vite 和 Chrome；执行已授权任务所需的本地页面验收（包括 Chrome/Playwright）时无需重复确认。构建、部署及其他服务启动仍按各自的明确授权执行；本条不授予钱包签名、交易广播或外部写入权限。
-6. 需求、上下文或预期行为不明确时，应先向用户澄清再实现，不要基于假设或猜测推进。
-7. 需求、上下文或预期行为不明确时，不要罗列多种可能性或提供冗长的推测说明，应简短指出不明确之处并直接向用户提问。
-8. 默认将问题视为解释或分析请求。只有用户明确要求采取行动时，才修改代码、编辑文件或执行命令。
-9. 不要通过添加推测性的兜底逻辑来弥补不确定性。应清晰暴露错误，避免静默掩盖问题。
-10. 除非用户明确要求一次性完整实现，否则优先采用渐进式、便于测试的小范围改动，确保改动聚焦且易于人工审查和测试。
-11. 实施中发现必须由用户注册服务、开通鉴权或权限、订阅或采购、提供凭据或其他资源时，立即暂停依赖该前置条件的工作，简明说明所需资源、用途和用户需完成的操作，等待用户处理并确认可用后再继续。不得自行采用降级方案、替代服务、模拟数据、跳过鉴权或减少功能来绕过缺失条件，也不得擅自注册、付费或采购。只说明凭据的配置位置，不要求用户在对话或文档中暴露密钥。
+- 分析/查询只读；实施按任务授权执行上述常规维护。创建 PR 须有交付指令；保持 Draft，未经明确同意不转 Ready、请求 reviewer 或合并。上游 `origin` 只读；个人基础推送到 `my-gmx`，业务 PR 推送到正式 fork `my-gmx-pr`。
+- 用户只说 `push` 时，直接将当前仓库全部改动 `git add .`、英文总结 commit、推送个人 remote HEAD；不插入测试、自审、回流或无关修改，不再次确认范围。当前登记的交付分支用 `my-gmx-pr`，其他主项目分支用 `my-gmx`；gmx-api 用 `my-gmx-api`，旧前端用 `my-gmt`，其他仓库用已有个人 remote，gmx-prompts 按原配置。命令失败时只处理具体阻碍。
+- 本地 Vite、Chrome 及已授权任务的页面验收已有长期授权。构建（含 SDK）、其他服务启动仍按明确授权，不把已有产物缺失当作业务缺陷。部署、钱包签名、交易广播及外部写入需各自授权。
+- 链上排障适合时优先本地 Solana CLI，先核对网络和账户，见[钱包与 CLI](docs/agent-wallet.md)。

@@ -317,7 +317,7 @@ yarn gmx-api:test-offline --api-dir /path/to/api-checkout --suite src/domain/gmU
 
 此能力不改变默认 Solana suites，也不改变样例 HTTP 服务、doctor/check 或 `solana:api-debug` 的样例文件要求；测试通过不等于 API 已部署、真实数据或整项需求验收通过。
 
-需要作为 API 交付证据时，按[API 测试证据绑定](linear-development-workflow.md#api-测试证据绑定)对当前 API checkout 使用 `agent:delivery-check --require-clean --api-report PATH`，可同时选择离线和数据库报告。两类报告新增 `schemaVersion`、`sourceAfter`、`toolSha256`、`runtime` 和 `toolingUnchanged`；离线另显式记录 `temporaryDirectoryCleanup`。工具或 Node/Jest/转换器版本运行中变化会失败；交付检查还会重新核对原始结果和网络日志。旧报告需重跑，不手工补字段。
+需要作为 API 交付证据时，按[API 测试证据绑定](agent-delivery-evidence.md#api-测试证据绑定)对当前 API checkout 使用 `agent:delivery-check --require-clean --api-report PATH`，可同时选择离线和数据库报告。两类报告新增 `schemaVersion`、`sourceAfter`、`toolSha256`、`runtime` 和 `toolingUnchanged`；离线另显式记录 `temporaryDirectoryCleanup`。工具或 Node/Jest/转换器版本运行中变化会失败；交付检查还会重新核对原始结果和网络日志。旧报告需重跑，不手工补字段。
 
 ### API 离线测试源码断点调试
 
@@ -397,7 +397,7 @@ yarn gmx-api:tscheck --api-dir /path/to/api-checkout
 
 每次结果位于基础设施目录 `.local/acceptance/gmx-api-tscheck/run-*/`：`tsc.log` 保留原生诊断，`report.json` 和 stdout 记录实际 apiDir、Git commit/dirty、源码前后指纹、Node/目标 TypeScript 版本与编译器内容指纹、路由前后证据、退出码、原始日志 SHA-256 及所属进程组清理。退出 0 / passed 要求原生编译成功、无中断/超时/信号异常、进程清理成功，源码/工具/路由前后均一致；类型错误或检查期间变化退出 1 / failed。普通编译失败查看报告的 `logFile`，不修改类型断言或业务逻辑来绕过错误。整次编译限时 180 秒，SIGINT/SIGTERM 复用现有进程组清理工具；SIGKILL/机器崩溃仍需人工核实所属进程。
 
-源码指纹覆盖 `src/`（含忽略的生成文件）、可选 `scripts/`、`migrations/` 中全部普通文件，以及根 JSON/TS/JS 配置与 yarn.lock；拒绝这些源码目录中的符号链接。编译器指纹覆盖实际 TypeScript lib/bin，未逐字节核对全部第三方依赖，外部扩展配置或其他自定义源码目录也不在本轮指纹范围。dirty checkout 可用于开发反馈，但报告不能充当干净交付版本证明。用于干净 API 交付版本时，按[类型检查证据绑定](linear-development-workflow.md#api-类型检查证据绑定)使用 `--require-clean --api-typecheck-report PATH`，只读复核当前身份、源码/编译器、路由来源及原始日志摘要；`--api-report` 仍只接受原有测试报告，不把类型检查当作测试或业务验收。
+源码指纹覆盖 `src/`（含忽略的生成文件）、可选 `scripts/`、`migrations/` 中全部普通文件，以及根 JSON/TS/JS 配置与 yarn.lock；拒绝这些源码目录中的符号链接。编译器指纹覆盖实际 TypeScript lib/bin，未逐字节核对全部第三方依赖，外部扩展配置或其他自定义源码目录也不在本轮指纹范围。dirty checkout 可用于开发反馈，但报告不能充当干净交付版本证明。用于干净 API 交付版本时，按[类型检查证据绑定](agent-delivery-evidence.md#api-类型检查证据绑定)使用 `--require-clean --api-typecheck-report PATH`，只读复核当前身份、源码/编译器、路由来源及原始日志摘要；`--api-report` 仍只接受原有测试报告，不把类型检查当作测试或业务验收。
 
 见[历史验收记录](solana-api-local-history.md#api-类型检查验收记录)。
 
@@ -415,7 +415,7 @@ yarn gmx-api:test-integration --api-dir /path/to/api-checkout --require-routes \
 
 `--require-routes` 在 API 目录规范化后、Docker 环境及容器准备之前，复用 prepare 的只读 verify；收据缺失、旧版本、输入/生成器/产物过期或生成锁存在时，返回退出 1 / `generated-routes-prerequisite`。它不会自动生成、安装或修复产物。已明确需要运行测试时可直接调用带此参数的集成入口，无需先重复 verify；预先 prepare 的操作与授权仍按上节处理。
 
-Jest 执行、进程和容器清理结束后，再次 verify 并逐项比较 schema、API 目录、源码输入、工具与四个产物摘要。报告 `generatedRoutes.before/after` 保留两次证据，全部一致为 passed；缺失、过期或变化为 failed / `generated-routes-changed`，即使原生 Jest 断言全通过也不接受整体结果。`generatedRoutes=not-checked` 表示未选择该前置，不代表产物已验证。默认纯计算/数据库场景保持原流程；不根据文件名猜测是否需要路由，调用者须按真实导入选择。API 测试工具指纹已包含准备脚本，工具变化后旧测试证据需要重跑。用于[API 交付证据绑定](linear-development-workflow.md#api-测试证据绑定)时，delivery-check 会再次只读 verify，并比较测试前、测试后与当前来源；测试通过后改动生成器或忽略产物、丢失收据也会 blocked。未启用路由校验的报告在交付结果中明确标记 not-checked。
+Jest 执行、进程和容器清理结束后，再次 verify 并逐项比较 schema、API 目录、源码输入、工具与四个产物摘要。报告 `generatedRoutes.before/after` 保留两次证据，全部一致为 passed；缺失、过期或变化为 failed / `generated-routes-changed`，即使原生 Jest 断言全通过也不接受整体结果。`generatedRoutes=not-checked` 表示未选择该前置，不代表产物已验证。默认纯计算/数据库场景保持原流程；不根据文件名猜测是否需要路由，调用者须按真实导入选择。API 测试工具指纹已包含准备脚本，工具变化后旧测试证据需要重跑。用于[API 交付证据绑定](agent-delivery-evidence.md#api-测试证据绑定)时，delivery-check 会再次只读 verify，并比较测试前、测试后与当前来源；测试通过后改动生成器或忽略产物、丢失收据也会 blocked。未启用路由校验的报告在交付结果中明确标记 not-checked。
 
 该检查不锁住整个测试期间的产物，也不能证明外部消费者没有并发修改后又恢复文件；测试期间避免同时生成或人工修改。它验证来源与前后稳定性，不替代业务路由契约、线上部署或完整 API 测试。
 

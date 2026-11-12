@@ -85,7 +85,7 @@ yarn agent:test-plan --project-dir /path/to/feature-checkout --changed-since HEA
 
 **规划 passed 不表示任何测试通过，也不证明需求覆盖完整。** 它不能作为交付 `--frontend-report` 或 `--sdk-report`；交付仍需实际执行后生成的测试报告。依赖图对运行时拼接导入、非源码资源和外部数据的局限沿用两个原入口。选择局部命令前审查完整清单，不能只挑通过的 suite 来声称全组通过。
 
-相关入口：[前端只发现](frontend-offline-tests.md#只发现关联测试)、[SDK 只发现](sdk-offline-tests.md#只发现关联测试)、[交付隔离与证据绑定](linear-development-workflow.md#交付隔离自动检查)。
+相关入口：[前端只发现](frontend-offline-tests.md#只发现关联测试)、[SDK 只发现](sdk-offline-tests.md#只发现关联测试)、[交付隔离与证据绑定](agent-delivery-evidence.md#交付隔离自动检查)。
 
 ## 按规划执行明确范围
 
