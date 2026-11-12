@@ -61,7 +61,7 @@ yarn solana:rpc-proxy
 yarn agent:wallet balances --network solana-mainnet
 ```
 
-工具默认复用 `src/config/solanaRpc.json` 的本地代理 URL。需要更改地址时，通过当前进程的 `SOLANA_RPC_PROXY_URL` 指定 HTTP(S) URL；该覆盖项不会自动从 `.env.local` 加载。钱包助记词仍只从根 `.env.local` 读取。验收后关闭本次自行启动的代理；不关闭其他任务启动的服务。
+工具默认复用 `tools/solana-rpc-proxy/config.json` 的本地代理 URL。需要更改地址时，通过当前进程的 `SOLANA_RPC_PROXY_URL` 指定 HTTP(S) URL；该覆盖项不会自动从 `.env.local` 加载。钱包助记词仍只从根 `.env.local` 读取。验收后关闭本次自行启动的代理；不关闭其他任务启动的服务。
 
 工具先读取并严格校验完整 Mainnet genesis hash，再请求该公开地址的 `getBalance`，commitment 为 `confirmed`。输出 JSON 包含 `status`、`checkedAt`、网络、genesis、`rpcOrigin`、公开地址、路径、slot、资产、lamports 与 SOL。金额和 slot 为字符串；使用 Node 22 的原始 JSON 数字 token 和 BigInt，避免超过安全整数范围时丢失精度，SOL 固定九位小数。这里只检查原生 SOL，不包含 SPL/WSOL、协议账户、持仓或订单。
 

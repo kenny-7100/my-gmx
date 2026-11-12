@@ -4,7 +4,7 @@
 
 本机条件未知时使用[本地环境清单](agent-environment.md) `yarn agent:environment` 或显式 `--checks`，复用 SDK/WASM、浏览器依赖核验，记录关键包版本、选定范围、时间及前后输入身份；外部服务和秘密资源始终 not-checked。回归 `yarn test:agent-environment` 自动纳入统一工具范围，不将本地 ready 当成业务验收通过。
 
-交付分支使用[隔离检查](linear-development-workflow.md#交付隔离自动检查) `yarn agent:delivery-check --head REF --allow-path FILE ...`：只读固定 release、开发基础及交付 SHA，检查祖先关系、混入的基础提交/等价补丁及清单外文件；不 fetch、切分支或转移补丁。回归 `yarn test:agent-delivery-check` 使用真实临时 Git 历史，工具通过仍需审查清单内的完整内容。 已完成离线测试时，使用 `--require-clean` 并显式选择 `--frontend-report` / `--sdk-report` / `--browser-report`，复核原生结果、目标目录、交付 commit 与当前源码/工具身份；三项可同时核对，检查不重新执行测试或启动服务。
+交付分支使用[隔离检查](agent-delivery-evidence.md#交付隔离自动检查) `yarn agent:delivery-check --head REF --allow-path FILE ...`：只读固定 release、开发基础及交付 SHA，检查祖先关系、混入的基础提交/等价补丁及清单外文件；不 fetch、切分支或转移补丁。回归 `yarn test:agent-delivery-check` 使用真实临时 Git 历史，工具通过仍需审查清单内的完整内容。 已完成离线测试时，使用 `--require-clean` 并显式选择 `--frontend-report` / `--sdk-report` / `--browser-report`，复核原生结果、目标目录、交付 commit 与当前源码/工具身份；三项可同时核对，检查不重新执行测试或启动服务。
 
 全栈联调优先复用 [Agent Solana 工作区](solana-dev-workspace.md)：`yarn solana:dev` 管理选定 API/Vite/RPC 及开发代理，`solana:dev:browser` 与 trace 查询关联真实请求，contracts 提供来源固定的未评审样例形状检查。借用服务不被 stop 清理，业务消费和 reviewed contract 缺口明确报告；仅属个人开发基础，不进入上游业务交付。
 
@@ -36,7 +36,7 @@ API 离线和隔离数据库测试共用 `scripts/lib/gmx-api-source.mjs` 的 Gi
 
 [API 类型检查](solana-api-local.md#独立-api-checkout-的类型检查)使用 `yarn gmx-api:tscheck --api-dir PATH`，复用目标编译器与配置、既有只读路由 verify 和进程组清理；不构建或写入目标，独立保存原始诊断、身份、来源指纹和退出结果。根前端类型检查不覆盖嵌套 API。 干净 API 交付版本可用 `agent:delivery-check --require-clean --api-typecheck-report PATH` 重新核对来源、编译器和日志摘要，独立于 `--api-report` 的测试证据。
 
-API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测试运行时；[交付检查](linear-development-workflow.md#api-测试证据绑定)可重复传 `--api-report PATH`，重新核对当前 API 源码、原生 Jest 结果、网络事件和清理；声明路由校验的报告还须与当前只读路由 verify 一致，避免复用其他目录或旧版本的 passed。
+API 离线和数据库报告通过共享的 `apiTestTooling` 记录工具与测试运行时；[交付检查](agent-delivery-evidence.md#api-测试证据绑定)可重复传 `--api-report PATH`，重新核对当前 API 源码、原生 Jest 结果、网络事件和清理；声明路由校验的报告还须与当前只读路由 verify 一致，避免复用其他目录或旧版本的 passed。
 
 [组合联调](solana-dev-workspace.md#独立-api-checkout-的组合联调)复用既有 API manager：up 用 `--api-dir` 选择独立 API，健康检查绑定路径和实例，浏览器诊断读取实际 API checkout 的源码身份；不从基础设施固定路径猜测 API 版本，owned/borrowed 清理规则保持一致。
 
@@ -151,13 +151,13 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 已沉淀 [Solana 持续联调服务](solana-api-local.md#持续运行的-solana-联调环境)：`yarn solana:api-dev up/status/logs/stop` 管理原 Solana 入口及 tsx watch，提供显式 loopback inspector、环境隔离、状态验证、所属进程清理和持久日志；16 项生命周期/异常检查及真实 Chrome 跨域访问已通过。当前入口仍为 sample，不启动数据库/采集，不修改前端 host 或业务代码。
 
 
-交付隔离复用[既有 delivery-check](linear-development-workflow.md#交付隔离自动检查)：`--project-dir PATH --require-clean` 可从基础设施目录核对独立交付 checkout 的 HEAD 与暂存、未暂存、未跟踪状态；默认仍仅看提交历史，检查不改 Git 或文件。真实 Git 回归覆盖三种脏状态、目标身份、特殊文件名、忽略产物及只读保持，不复制工具到业务分支。
+交付隔离复用[既有 delivery-check](agent-delivery-evidence.md#交付隔离自动检查)：`--project-dir PATH --require-clean` 可从基础设施目录核对独立交付 checkout 的 HEAD 与暂存、未暂存、未跟踪状态；默认仍仅看提交历史，检查不改 Git 或文件。真实 Git 回归覆盖三种脏状态、目标身份、特殊文件名、忽略产物及只读保持，不复制工具到业务分支。
 
 
 API 数据库集成入口也复用共享测试进程组工具：`yarn gmx-api:test-integration` 分别记录 `exit.cleanup` 与容器/临时目录 `cleanup`，中断、超时或任一清理失败都不能 passed。已通过隔离 API 副本复现并修复 Jest `--forceExit` 后派生进程残留；具体执行与验收见[API 集成测试说明](solana-api-local.md#测试派生进程清理验收2026-10-27)。共享生命周期回归纳入 `yarn test:agent-tools`，不另建重复测试框架。
 
 
-前端交付证据绑定复用 `agent:delivery-check --require-clean --frontend-report PATH`，校验现有报告与目标 checkout、head、当前源码/工具指纹及原生测试结果的一致性；不重跑测试、不更新历史报告。具体命令、拒绝条件和真实独立 checkout 验收见[交付说明](linear-development-workflow.md#前端测试证据绑定)。前端运行器与该检查共享原有源码、工具摘要计算，读取 Git 状态禁用可选索引写入。
+前端交付证据绑定复用 `agent:delivery-check --require-clean --frontend-report PATH`，校验现有报告与目标 checkout、head、当前源码/工具指纹及原生测试结果的一致性；不重跑测试、不更新历史报告。具体命令、拒绝条件和真实独立 checkout 验收见[交付说明](agent-delivery-evidence.md#前端测试证据绑定)。前端运行器与该检查共享原有源码、工具摘要计算，读取 Git 状态禁用可选索引写入。
 
 
 文档维护复用[本地链接检查](documentation-maintenance.md#本地链接与锚点检查)：`yarn agent:docs-check --file docs/PATH.md` 可重复显式选文件，离线检查本地路径和受支持 Markdown 标题锚点，输出文件/行号诊断与输入摘要；`yarn test:agent-docs-check` 使用真实临时文件，自动纳入工具回归。复杂语法明确保留边界，不联网、不执行内容、不自动修改文档或 Git。

@@ -14,10 +14,10 @@ const TASKS = {
   wallet: { args: ["scripts/agent-wallet.mjs", "balances", "--network", "solana-mainnet"], timeout: 60_000 },
 };
 const SUPPORTING_FILES = {
-  rpc: ["src/config/solanaRpc.json"],
+  rpc: ["tools/solana-rpc-proxy/config.json"],
   keeper: ["sdk/src/configs/oracleKeeper.ts", "sdk/src/configs/tokens.ts", "sdk/src/configs/chains.ts"],
   api: [],
-  wallet: ["scripts/agent-wallet-balance.mjs", "scripts/agent-wallet-tokens.mjs", "src/config/solanaRpc.json"],
+  wallet: ["scripts/agent-wallet-balance.mjs", "scripts/agent-wallet-tokens.mjs", "tools/solana-rpc-proxy/config.json"],
 };
 const STATUSES = ["passed", "failed", "blocked", "not-run"];
 const validCode = (value) => typeof value === "string" && /^[a-z0-9-]{1,80}$/.test(value);

@@ -2,6 +2,12 @@
 set -e
 . "$(dirname "$0")/_/husky.sh"
 
+# Personal infrastructure has no application build inputs. Mixed changes use the full upstream path.
+if node scripts/agent-infrastructure-scope.mjs; then
+  git diff --cached --check
+  exit 0
+fi
+
 # Step 1: Start independent tasks in parallel
 yarn lingui:prepare &
 LINGUI_PID=$!
