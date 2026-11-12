@@ -7,3 +7,5 @@
 早期描述中 development Alchemy key 不可用已被后续 review 更新：Divhead 11 月 5 日确认现有 key 启用且 preview balances 可用；11 月 6 日确认 47-address batched read、Token-2022 等余额。仍有 review 提出的 reader 边界、历史提交及范围整理问题；未逐条判定当前是否已修复，当前审查结论仍要求修改。不能把旧 key 故障当作当前事实，也不能以 CI 绿代替 review。
 
 56 需复用该 raw balance/RPC 与 hook key 做发送确认后的刷新；本轮未运行页面/RPC。详见 [FESOL-56](FESOL-56.md)。
+
+本轮已 merge #3195 至 56 开发分支并与最新 #3193 RPC 生命周期组合。新增发现：余额 hook 尚未被 Solana 统一 TokensData provider 消费，交易校验会把 undefined 当 0；这是跨 PR 集成缺口，不代表余额 decoder 本身错误。后续接入与 mutate 复用见 [FESOL-56](FESOL-56.md)。

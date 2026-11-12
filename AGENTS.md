@@ -71,7 +71,7 @@
 - 创建 PR 须有交付指令；保持 Draft，未经明确同意不转 Ready、请求 reviewer 或合并。上游 `origin` 只读；个人基础推送 `my-gmx`，业务 PR 推送正式 fork `my-gmx-pr`。
 - 用户只说 `push` 时，直接将当前仓库全部改动 `git add .`、英文总结 commit、推送个人 remote HEAD；不插入测试、自审、回流或无关修改，不再次确认范围。
 - 直接 push 的 remote：登记的交付分支用 `my-gmx-pr`，其他主项目分支用 `my-gmx`；gmx-api 用 `my-gmx-api`，旧前端用 `my-gmt`，其他仓库用已有个人 remote，gmx-prompts 按原配置。失败只处理具体阻碍。
-- 本地 Vite、Chrome 及已授权任务的页面验收已有长期授权；构建（含 SDK）、其他服务启动仍按明确授权。产物缺失不直接认定业务缺陷。
+- 本地 Vite、Chrome、已授权任务的页面验收及本仓库开发验证所需构建（含 SDK/WASM）已有长期授权，无需重复询问；其他服务启动仍按明确授权。产物缺失不直接认定业务缺陷。
 - 部署、钱包签名、交易广播及其他外部写入需各自授权；链上排障适合时优先本地 Solana CLI，先核对网络和账户，见[钱包与 CLI](docs/agent-wallet.md)。
 
 ## 按需查阅
