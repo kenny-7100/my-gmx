@@ -7,14 +7,14 @@ description: 查询 FESOL 单条需求、同步需求快照或复盘 GMX Solana 
 
 先遵守仓库根目录 [AGENTS.md](../../../AGENTS.md)，按当前请求选择下面的模式。脚本和命令均相对于仓库根目录；不受当前 shell 工作目录影响的调用方式见[工具说明](../../../docs/linear-requirements.md)。不要复制脚本实现或另建同步工具。
 
-任务实施中在开始/恢复、验收交付及相关 review/依赖变化节点主动重读单条需求，比较正文、关系和评论；不轮询、不每轮全量同步。CLI 凭据不可用时可复用已连接的 Linear MCP，不新增同步实现。
+查询前先检索固定 issue 记录及关联的重要结论；本地 task 未登记也可用最新版 agent-workflow status 定位。任务实施中在开始/恢复、验收交付及相关 review/依赖变化节点主动重读单条需求，比较正文、关系和评论；不轮询、不每轮全量同步。CLI 凭据不可用时可复用已连接的 Linear MCP，不新增同步实现。
 
 ## 单条需求
 
 - 查当前需求或为实施核对需求时，运行 `node scripts/linear-requirements.mjs show FESOL-编号 --live --json`，读取正文、父任务、双向关系及评论。用户明确查历史时，使用 `--snapshot PATH` 离线读取并标明时间。
 - 区分需求原文、当前状态、验收条件和待澄清事项；需要精确项目或标签判断时使用 JSON 字段，不仅看文本摘要。
 - 解释阻塞方向：`relations` 的 `blocks` 是当前任务阻塞 `relatedIssue`；`inverseRelations` 的 `blocks` 是 `issue` 阻塞当前任务。
-- 输出需求编号及线上链接、抓取时间、范围、关键验收条件与阻碍。查询请求不授权修改业务代码或 Linear；经手 issue 的调研活动、结论及重要信息按[issue 沉淀规则](../../../docs/documentation-maintenance.md#按-issue-沉淀)保存到本地版本化知识，包含他人负责的 issue，不为记录而建业务分支。
+- 输出需求编号及线上链接、抓取时间、范围、关键验收条件与阻碍。查询请求不授权修改业务代码或 Linear；经手 issue 的调研活动、结论及重要信息按[issue 知识入口](../../../docs/issues/README.md)更新 `docs/issues/编号.md`，包含他人负责的 issue，不为记录而建业务分支。
 
 ## 全量复盘与历史比较
 

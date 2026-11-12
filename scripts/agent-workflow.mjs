@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { access, readFile, realpath } from "node:fs/promises";
+import { access, lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -174,6 +174,71 @@ async function contextStatus(root, record, common) {
       "Agent-reported result only; matching a clean checkout does not prove execution, ignored inputs, deployment or external freshness.",
   };
 }
+async function issueKnowledge(root, issue) {
+  if (!issue) return null;
+  const relativePath = `docs/issues/${issue}.md`;
+  let worktree;
+  try {
+    worktree = await realpath(await baseWorktree(root, false));
+  } catch {
+    return {
+      relativePath,
+      state: "base-unavailable",
+      instruction:
+        "Locate the solana-integration checkout before assuming issue knowledge is absent. No branch or task registration is required for research notes.",
+    };
+  }
+  const file = path.join(worktree, relativePath);
+  try {
+    const stat = await lstat(file);
+    const resolved = await realpath(file);
+    const relative = path.relative(worktree, resolved);
+    assert.ok(
+      stat.isFile() &&
+        !stat.isSymbolicLink() &&
+        relative !== ".." &&
+        !relative.startsWith(`..${path.sep}`) &&
+        !path.isAbsolute(relative),
+      "Issue knowledge must be a regular file within the personal base."
+    );
+    let tracked = true;
+    try {
+      await git(worktree, "ls-files", "--error-unmatch", "--", relativePath);
+    } catch (error) {
+      if (error.code !== 1) throw error;
+      tracked = false;
+    }
+    return {
+      relativePath,
+      worktree,
+      path: file,
+      state: "available",
+      tracked,
+      changed: Boolean(await git(worktree, "status", "--porcelain", "--untracked-files=all", "--", relativePath)),
+      instruction:
+        "Read this durable note and follow relevant source links; recheck time-sensitive facts. Untracked or changed notes still need review and a knowledge commit.",
+    };
+  } catch (error) {
+    if (error.code === "ENOENT")
+      return {
+        relativePath,
+        worktree,
+        path: file,
+        state: "missing",
+        instruction:
+          "Search existing issue references before writing a concise note here. Keep historical conclusions dated; no mandatory template or delivery gate.",
+      };
+    return {
+      relativePath,
+      worktree,
+      path: file,
+      state: "blocked",
+      instruction:
+        "Inspect the issue knowledge path or Git access; do not treat an unreadable or redirected path as missing knowledge.",
+    };
+  }
+}
+
 function validateContext(patch) {
   assert.ok(patch && typeof patch === "object" && !Array.isArray(patch), "Context must be an object.");
   const strings = ["objective", "next", "coordinator"];
@@ -350,6 +415,7 @@ async function runWorkflow({
     return {
       recordFile,
       record: record ?? null,
+      issueKnowledge: await issueKnowledge(root, issue),
       writer,
       ...(record ? { resume: await contextStatus(root, record, common) } : {}),
     };
@@ -584,7 +650,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   });
   if (values.help) {
     console.log(
-      "Usage: node scripts/agent-workflow.mjs sync|start|register|rebind|status|note|backflow|deliver|recover --project-dir PATH [--issue FESOL-123 | --task local-name] [--branch NAME --worktree PATH] [--commit SHA ...] [--context-file JSON] [--role development|delivery --base REF --head SHA --pr-file GH_JSON] [--outcome completed|aborted --head SHA]\nregister/rebind inspect existing workspaces without changing Git files or history; --pr-file validates an Agent-supplied gh snapshot, not live PR freshness. status provides live workspace and knowledge locations; note merges task context; recover acknowledges reviewed native Git recovery. start synchronizes solana-integration; backflow transfers reviewed infrastructure commits; deliver transfers reviewed business commits onto freshly fetched origin/release. No dependency install, push, PR, force update or evidence packaging. Git failures preserve pending state; inspect and finish/abort it, then use recover."
+      "Usage: node scripts/agent-workflow.mjs sync|start|register|rebind|status|note|backflow|deliver|recover --project-dir PATH [--issue FESOL-123 | --task local-name] [--branch NAME --worktree PATH] [--commit SHA ...] [--context-file JSON] [--role development|delivery --base REF --head SHA --pr-file GH_JSON] [--outcome completed|aborted --head SHA]\nregister/rebind inspect existing workspaces without changing Git files or history; --pr-file validates an Agent-supplied gh snapshot, not live PR freshness. status locates docs/issues/ISSUE.md in the personal base even without a task record, and provides live workspace and knowledge locations; note merges task context; recover acknowledges reviewed native Git recovery. start synchronizes solana-integration; backflow transfers reviewed infrastructure commits; deliver transfers reviewed business commits onto freshly fetched origin/release. No dependency install, push, PR, force update or evidence packaging. Git failures preserve pending state; inspect and finish/abort it, then use recover."
     );
   } else {
     workflow({

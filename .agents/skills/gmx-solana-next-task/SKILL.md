@@ -7,6 +7,8 @@ description: 在本仓库推荐下一条最值得实施的 Solana 迁移需求�
 
 先遵守根目录 [AGENTS.md](../../../AGENTS.md)，阅读[需求推荐与就绪核验](../../../docs/solana-next-task.md)。推荐属于分析，不自动进入开发或交付。
 
+经手候选/依赖 issue 时先检索既有记录，实际调研获得的结论及重要信息按[issue 知识入口](../../../docs/issues/README.md)版本化沉淀；不为记录建业务分支，不把本机快照作为唯一落点。
+
 1. 使用 [gmx-linear-requirements](../gmx-linear-requirements/SKILL.md) 刷新全量需求，理解正文、范围和状态，排除旧 `GMTrade` 需求；对少量候选及关键前置实时补读评论和双向关系。追踪父任务、拆分、替代方案及正文中的隐含依赖。
 2. 推荐前必须在线核验候选、原始任务及关键依赖的 GitHub PR：状态、base/head、最新提交、实际 diff、审查意见及检查结果。核对最新上游 `release` 中的实际实现，不能仅凭 Linear Done 或 PR merged 判断能力可用，也不能仅凭 related 判断代码无依赖。
 3. 沿相关代码调用路径验证前置接口与任务边界；按需核对跨仓库 API、SDK、协议与部署契约。区分本地 `solana-integration`、最新上游基线和开放 PR，检查重复工作、回退与未合入依赖，以及最终能否独立交付。
