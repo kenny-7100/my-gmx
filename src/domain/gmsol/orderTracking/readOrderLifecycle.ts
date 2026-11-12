@@ -70,19 +70,27 @@ export async function readOrderLifecycle({
   let before: string | undefined;
   try {
     const signatures: { signature: string; slot: bigint; err: unknown }[] = [];
+    let creationSlot: bigint | undefined;
     while (signatures.length < MAX_HISTORY_TRANSACTIONS) {
       abortSignal.throwIfAborted();
       const page = await reader.getSignatures({ order: action.order, before, signal: abortSignal });
-      if (!page.length) break;
+      if (!page.length) {
+        historyComplete = creationSlot !== undefined;
+        break;
+      }
       for (const item of page) {
+        if (creationSlot !== undefined && item.slot < creationSlot) {
+          historyComplete = true;
+          break;
+        }
         if (seen.has(item.signature)) return unresolved();
         seen.add(item.signature);
         signatures.push(item);
         if (item.signature === action.creationSignature) {
-          historyComplete = true;
-          break;
+          creationSlot = item.slot;
         }
       }
+      if (page.length < PAGE_SIZE) historyComplete = creationSlot !== undefined;
       if (historyComplete || page.length < PAGE_SIZE) break;
       before = page[page.length - 1].signature;
     }
