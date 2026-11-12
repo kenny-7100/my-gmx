@@ -1,41 +1,65 @@
 import type { IHttp } from "utils/http/types";
-import { readApiString, readApiUnsignedBigInt } from "utils/http/validation";
-import { isRecord } from "utils/objects";
 
 import type { FeeDiscount } from "./types";
 
 const FEE_DISCOUNT_ENDPOINT = "/v1/fee-discount";
 
+function readString(raw: Record<string, unknown>, name: string): string {
+  const value = raw[name];
+  if (typeof value !== "string") {
+    throw new Error(`${FEE_DISCOUNT_ENDPOINT}: expected string field "${name}"`);
+  }
+  return value;
+}
+
+function readBigInt(raw: Record<string, unknown>, name: string): bigint {
+  const value = raw[name];
+  if (
+    !(typeof value === "string" && /^\d+$/.test(value)) &&
+    !(typeof value === "number" && Number.isSafeInteger(value) && value >= 0)
+  ) {
+    throw new Error(`${FEE_DISCOUNT_ENDPOINT}: expected bigint field "${name}"`);
+  }
+  return BigInt(value as string | number);
+}
+
+function readUint(raw: Record<string, unknown>, name: string): number {
+  const value = raw[name];
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    throw new Error(`${FEE_DISCOUNT_ENDPOINT}: expected number field "${name}"`);
+  }
+  return value;
+}
+
 export function parseFeeDiscount(raw: unknown): FeeDiscount {
-  if (!isRecord(raw)) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
     throw new Error(`${FEE_DISCOUNT_ENDPOINT}: expected an object`);
   }
 
-  const record = raw;
-  const endpoint = FEE_DISCOUNT_ENDPOINT;
+  const record = raw as Record<string, unknown>;
 
   if (typeof record.attachedOnChain !== "boolean") {
     throw new Error(`${FEE_DISCOUNT_ENDPOINT}: expected boolean field "attachedOnChain"`);
   }
 
-  if (typeof record.tierId !== "number" || !Number.isSafeInteger(record.tierId) || record.tierId < 0) {
-    throw new Error(`${FEE_DISCOUNT_ENDPOINT}: expected number field "tierId"`);
-  }
-
   return {
     userReferralInfo: {
-      userReferralCode: readApiString({ record, name: "userReferralCode", endpoint }),
-      userReferralCodeString: readApiString({ record, name: "userReferralCodeString", endpoint }),
-      referralCodeForTxn: readApiString({ record, name: "referralCodeForTxn", endpoint }),
+      userReferralCode: readString(record, "userReferralCode"),
+      userReferralCodeString: readString(record, "userReferralCodeString"),
+      referralCodeForTxn: readString(record, "referralCodeForTxn"),
       attachedOnChain: record.attachedOnChain,
-      affiliate: readApiString({ record, name: "affiliate", endpoint }),
-      tierId: record.tierId,
-      totalRebate: readApiUnsignedBigInt({ record, name: "totalRebate", endpoint }),
-      totalRebateFactor: readApiUnsignedBigInt({ record, name: "totalRebateFactor", endpoint }),
-      discountShare: readApiUnsignedBigInt({ record, name: "discountShare", endpoint }),
-      discountFactor: readApiUnsignedBigInt({ record, name: "discountFactor", endpoint }),
+      affiliate: readString(record, "affiliate"),
+      tierId: readUint(record, "tierId"),
+      totalRebate: readBigInt(record, "totalRebate"),
+      totalRebateFactor: readBigInt(record, "totalRebateFactor"),
+      discountShare: readBigInt(record, "discountShare"),
+      discountFactor: readBigInt(record, "discountFactor"),
     },
-    orderFeeDiscountFactor: readApiUnsignedBigInt({ record, name: "orderFeeDiscountFactor", endpoint }),
+    orderFeeDiscountFactor: readBigInt(record, "orderFeeDiscountFactor"),
+    gtRank: readUint(record, "gtRank"),
+    rankDiscountFactor: readBigInt(record, "rankDiscountFactor"),
+    referrer: record.referrer === null ? undefined : readString(record, "referrer"),
+    referredUserDiscountFactor: readBigInt(record, "referredUserDiscountFactor"),
     updatedAt: typeof record.updatedAt === "number" ? record.updatedAt : undefined,
   };
 }
