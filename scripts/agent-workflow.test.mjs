@@ -330,3 +330,177 @@ test("shared write locking excludes concurrent worktrees while atomic records re
     assert.equal(await git(root, "status", "--porcelain"), "");
   });
 });
+
+test("existing dirty workspaces register as local tasks and safely rebind after a worktree move", async () => {
+  await fixture(async ({ dir, root, dev }) => {
+    const options = { projectDir: root, task: "existing-work" };
+    const head = await git(dev, "rev-parse", "HEAD");
+    await writeFile(path.join(dev, "src/in-progress.ts"), "Keep unfinished work\n");
+    const registered = await workflow({ ...options, command: "register", worktree: dev, base: head, head });
+    assert.equal(registered.record.issue, null);
+    assert.equal(registered.record.task, "existing-work");
+    assert.equal(registered.record.lastBinding.actual.dirty, true);
+    assert.match(registered.recordFile, /local-existing-work\.json$/);
+    await assert.rejects(
+      workflow({ ...options, command: "register", worktree: dev, base: head, head }),
+      /already registered/
+    );
+    await assert.rejects(workflow({ ...options, issue: "FESOL-123", command: "status" }), /either/);
+    await assert.rejects(workflow({ ...options, task: "../escape", command: "status" }), /kebab-case/);
+    await assert.rejects(
+      workflow({ ...options, command: "rebind", worktree: root, head: await git(root, "rev-parse", "HEAD") }),
+      /previous active workspace/
+    );
+    const moved = path.join(dir, "moved-feature");
+    await git(root, "worktree", "move", dev, moved);
+    await assert.rejects(
+      workflow({ ...options, command: "rebind", worktree: moved, head: "0".repeat(40) }),
+      /actual workspace HEAD/
+    );
+    await workflow({ ...options, command: "rebind", worktree: moved, head });
+    const status = await workflow({ ...options, projectDir: moved, command: "status" });
+    assert.equal(await realpath(status.resume.authority.worktree), await realpath(moved));
+    assert.equal(status.resume.authority.dirty, true);
+    assert.equal(await readFile(path.join(moved, "src/in-progress.ts"), "utf8"), "Keep unfinished work\n");
+    assert.equal(await git(root, "status", "--porcelain"), "");
+    const foreign = path.join(dir, "foreign");
+    await mkdir(foreign);
+    await git(foreign, "init", "--initial-branch=foreign");
+    await assert.rejects(workflow({ ...options, command: "rebind", worktree: foreign, head }), /another repository/);
+  });
+});
+
+test("existing PR delivery registration checks supplied PR identity and leaves checkout contents unchanged", async () => {
+  await fixture(async ({ dir, root, dev }) => {
+    const base = await git(root, "rev-parse", "origin/release");
+    const delivery = path.join(dir, "existing-delivery");
+    await git(root, "worktree", "add", "-b", "existing-pr", delivery, base);
+    const head = await commit(delivery, "src/delivery.ts", "Delivery change\n");
+    const prFile = path.join(dir, "pr.json");
+    const pr = {
+      url: "https://github.com/gmx-io/gmx-interface/pull/123",
+      headRefName: "existing-pr",
+      headRefOid: head,
+      baseRefName: "release",
+    };
+    const options = {
+      projectDir: root,
+      issue: "FESOL-124",
+      command: "register",
+      role: "delivery",
+      worktree: delivery,
+      base,
+      head,
+      prFile,
+    };
+    for (const incorrect of [
+      { headRefOid: base },
+      { headRefName: "wrong" },
+      { baseRefName: "master" },
+      { url: "https://github.com/other/repo/pull/123" },
+    ]) {
+      await writeFile(prFile, JSON.stringify({ ...pr, ...incorrect }));
+      await assert.rejects(workflow(options));
+      assert.equal((await workflow({ projectDir: root, issue: "FESOL-124", command: "status" })).record, null);
+    }
+    await writeFile(prFile, JSON.stringify(pr));
+    const result = await workflow(options);
+    assert.equal(result.record.delivery.head, head);
+    assert.equal(result.record.pr.url, pr.url);
+    await workflow({
+      ...options,
+      command: "note",
+      context: { verification: { head, worktree: delivery, command: "fixture validation", result: "passed" } },
+    });
+    await workflow({ ...options, command: "rebind", prFile: undefined });
+    const rebound = await workflow({ projectDir: dev, issue: "FESOL-124", command: "status" });
+    assert.equal(rebound.record.pr, null);
+    assert.equal(rebound.record.context.verification, null);
+    assert.equal(await git(delivery, "rev-parse", "HEAD"), head);
+    assert.equal(await git(delivery, "status", "--porcelain"), "");
+  });
+});
+
+test("coordination notes preserve scoped assignments without treating claims as integrated validation", async () => {
+  await fixture(async ({ options }) => {
+    const assignment = {
+      id: "orders",
+      owner: "worker-orders",
+      paths: ["src/domain/orders/"],
+      goal: "Refresh affected orders",
+      doneWhen: "Execution and cancellation paths reviewed",
+      state: "produced",
+      contract: "Use the shared order model",
+    };
+    await workflow({ ...options, command: "note", context: { coordinator: "main", assignments: [assignment] } });
+    const status = await workflow({ ...options, command: "status" });
+    assert.equal(status.record.context.coordinator, "main");
+    assert.equal(status.record.context.assignments[0].state, "produced");
+    assert.equal(status.resume.verificationCurrent, false);
+    for (const assignments of [
+      [assignment, assignment],
+      [{ ...assignment, paths: ["../other"] }],
+      [{ ...assignment, paths: ["/tmp/other"] }],
+      [{ ...assignment, state: "done" }],
+    ]) {
+      await assert.rejects(workflow({ ...options, command: "note", context: { assignments } }));
+    }
+    assert.deepEqual((await workflow({ ...options, command: "status" })).record.context.assignments, [assignment]);
+  });
+});
+
+test("independent worktree contributions are integrated into one delivery with final validation kept distinct", async () => {
+  await fixture(async ({ dir, root, dev, options }) => {
+    const base = await git(dev, "rev-parse", "HEAD");
+    const assignments = [];
+    for (const name of ["orders", "wallet"]) {
+      const worker = path.join(dir, name);
+      await git(root, "worktree", "add", "-b", `worker-${name}`, worker, base);
+      const sha = await commit(worker, `src/${name}.ts`, `export const ${name} = true;\n`);
+      assignments.push({
+        id: name,
+        owner: `worker-${name}`,
+        worktree: worker,
+        paths: [`src/${name}.ts`],
+        goal: `Implement ${name}`,
+        doneWhen: "Contribution reviewed and integrated",
+        state: "produced",
+        commit: sha,
+      });
+    }
+    await workflow({ ...options, command: "note", context: { coordinator: "main", assignments } });
+    assert.equal((await workflow({ ...options, command: "status" })).resume.verificationCurrent, false);
+    const integrated = [];
+    for (const assignment of assignments) {
+      await git(dev, "cherry-pick", assignment.commit);
+      assignment.state = "integrated";
+      assignment.commit = await git(dev, "rev-parse", "HEAD");
+      integrated.push(assignment.commit);
+    }
+    await workflow({ ...options, command: "note", context: { assignments } });
+    const delivery = path.join(dir, "combined-delivery");
+    await workflow({
+      ...options,
+      command: "deliver",
+      branch: "combined-delivery",
+      worktree: delivery,
+      commits: integrated,
+    });
+    assert.equal((await workflow({ ...options, command: "status" })).resume.verificationCurrent, false);
+    await git(delivery, "diff", "--check", "origin/release", "HEAD");
+    const head = await git(delivery, "rev-parse", "HEAD");
+    await workflow({
+      ...options,
+      command: "note",
+      context: {
+        verification: { worktree: delivery, head, command: "git diff --check origin/release HEAD", result: "passed" },
+      },
+    });
+    const final = await workflow({ ...options, command: "status" });
+    assert.equal(final.resume.authority.worktree, delivery);
+    assert.equal(final.resume.verificationCurrent, true);
+    assert.equal(await git(delivery, "diff", "--name-only", "origin/release", "HEAD"), "src/orders.ts\nsrc/wallet.ts");
+    assert.equal(await git(root, "rev-parse", "HEAD"), base);
+    for (const assignment of assignments) assert.equal(await git(assignment.worktree, "status", "--porcelain"), "");
+  });
+});
