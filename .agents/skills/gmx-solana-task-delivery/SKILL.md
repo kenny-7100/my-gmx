@@ -8,7 +8,7 @@ description: 实施明确的 GMX Solana 需求、回流个人基础设施经验�
 遵守根 [AGENTS.md](../../../AGENTS.md)，具体操作只读[日常流程](../../../docs/linear-development-workflow.md)的当前阶段；不把整套测试和证据工具作为每次任务前置。
 
 - 新任务先实时核对目标 Linear、关键依赖 PR 和当前代码。按任务节点更新，不轮询、不每轮全量复盘；语义变化影响当前实现时才调整或澄清。
-- 已授权开发包含适时同步 `origin/release` 到 `solana-integration`、创建需求 worktree 和普通提交。用 `agent-workflow.mjs start/status` 管理现场；保护未提交工作，冲突按语义处理，不自动 stash/reset/强推。
+- 已授权开发包含适时同步 `origin/release` 到 `solana-integration`、创建需求 worktree 和普通提交。从个人基础调用最新版工具管理现场，status 恢复当前目标/决策/阻碍和权威目录、按需读取新知识；阶段变化时 note 简记，冲突经原生 Git 恢复后 recover 登记，见[上下文与恢复](../../../docs/linear-development-workflow.md#任务上下文与恢复)；保护未提交工作，冲突按语义处理，不自动 stash/reset/强推。
 - 编码按 [gmx-interface-dev](../../../gmx-prompts/skills/gmx-interface-dev/SKILL.md)、[gmx-solana](../../../gmx-prompts/skills/gmx-solana/SKILL.md)，测试及自审按相关规范。个人基础不新增业务能力，保持统一数据流及 EVM 行为。
 - 业务与基础设施独立提交，确认的知识主动更新已有 docs/skill，选择性 backflow 到个人基础；混合配置按内容拆分。禁止整支业务分支合入个人基础。
 - 获交付指令后，fetch 最新 release，只转入本需求业务提交；在实际目标验证最终 diff/历史及相关行为。缺未合并业务依赖时如实说明，不捎带其他需求。复杂证据绑定和归档见[可选严格检查](../../../docs/agent-delivery-evidence.md)，普通需求默认不打包。

@@ -21,6 +21,32 @@ node scripts/agent-workflow.mjs status --issue FESOL-123
 
 start 会先同步个人基础再创建独立 worktree，不切换调用方分支。按根规则已获开发授权时直接执行。Git 共享目录 `agent-workflow/FESOL-123.json` 保存开发目录/基线、回流提交及交付目录，不进入源码或 PR；新会话先读 status，不依赖旧聊天。现有旧任务没有登记时先核对实际 PR head 和工作区，按下面原生命令处理；不要为登记而重建已存在的开发分支。
 
+## 任务上下文与恢复
+
+跨会话恢复、实现方案/阻碍变化、验证完成或交付位置改变时，Agent 主动更新少量当前上下文；没有变化不重复写。使用个人基础 worktree 的最新版工具，显式指定实际目标，旧分支不必合入个人基础来获得新知识：
+
+```sh
+node /path/to/base/scripts/agent-workflow.mjs status \
+  --project-dir /path/to/task --issue FESOL-123
+node /path/to/base/scripts/agent-workflow.mjs note \
+  --project-dir /path/to/task --issue FESOL-123 --context-file /path/to/local-context.json
+```
+
+note 接受 JSON 部分更新：`objective` / `next` 为字符串，`acceptance` / `decisions` / `blockers` / `links` / `observations` 为字符串列表；未给字段保留原值，列表整体替换，空列表清除旧阻碍。只记录下一位 Agent 继续需要的当前信息，不保存聊天全文、秘密或推测性权限。来源观察注明实际 URL/ref、revision/updatedAt 和核验时间；工具不会代查 Linear 或保证观察仍新鲜。
+
+```json
+{
+  "objective": "Refresh affected Solana orders",
+  "decisions": ["Reuse the shared order data flow"],
+  "blockers": ["The required API change has not reached release"],
+  "next": "Check the cancellation path after the API dependency lands"
+}
+```
+
+可选 `verification` 对象必须包含 `worktree`、完整 `head`、实际 `command` 和 `result`（passed/failed/blocked/not-run）；设置为 null 清除。它是 Agent 对已运行验证的简记，工具不执行该命令、不生成验收证据。记录时核对实际权威工作区、HEAD 和干净状态；status 的 `verificationCurrent` 仅表示记录对应当前干净 checkout。提交变化、工作区变脏或切换交付目录后为 false；即使为 true，也不能据此断言外部服务、忽略产物或验证结果有效，应按具体输入和范围判断复用。
+
+status 返回实际开发/交付分支与 HEAD、dirty、未完成 Git 操作、分支是否匹配、权威工作位置、pending 目标现场与上下文是否需复核，以及个人基础位置/HEAD/知识变化路径。路径列表只是相关检索入口，不要求全部阅读；个人基础 dirty 会显式提示。远端 PR head、Linear 和部署仍按相关节点实时核验，不以本地记录替代。
+
 ## 开发与主动沉淀
 
 1. 新需求先实时读取[Linear 正文、关系和评论](linear-requirements.md)，核对关键依赖 PR 是否进入 release；只查本任务相关项。记录最少的验收条件、业务范围和依赖到任务说明或 PR，不默认创建工作表。
@@ -115,7 +141,19 @@ Linear: <actual Linear issue URL containing FESOL-123>
 
 ## 失败恢复与工具边界
 
-工具不执行 reset、stash、强推、依赖安装或自动冲突解决。提交选择或归属错误在转移前拒绝；cherry-pick/签名/钩子失败时保留工作区和 pending 记录，status 提供位置。Agent 核实后用原生 Git continue/abort；确认最终 SHA/剩余提交，再修正 Git 共享目录中的本地记录、移除已解决 pending，不能只删记录冒充操作完成。无关 worktree 不自动删除。普通 Git 操作、记录读写均应串行，避免多个 Agent 同时维护同一任务或个人基础。
+工具不执行 reset、stash、强推、依赖安装或自动冲突解决。提交选择或归属错误在转移前拒绝；cherry-pick/签名/钩子失败时保留工作区和 pending，status 提供位置。Agent 核实后用原生 Git continue/abort，再核验实际 diff、选中提交完整性和当前 HEAD：
+
+```sh
+node /path/to/base/scripts/agent-workflow.mjs recover --project-dir /path/to/task \
+  --issue FESOL-123 --outcome completed --head REVIEWED_CURRENT_SHA
+# Or after native Git recovery restored the original pending base:
+node /path/to/base/scripts/agent-workflow.mjs recover --project-dir /path/to/task \
+  --issue FESOL-123 --outcome aborted --head ORIGINAL_PENDING_BASE_SHA
+```
+
+recover 不代做 Git 恢复。completed 需要干净且分支匹配、历史由原基线延伸、普通提交数与计划一致、每个提交路径符合回流/交付边界；显式 head 表示 Agent 已审查当前结果，工具不能证明人工冲突解决的业务语义正确。aborted 必须恢复原 pending 基线，部分已落地提交不能只删记录冒充撤销。旧版 pending 也可按原提交清单核验。恢复成功记录 lastRecovery，并登记交付或回流结果；无关 worktree 不自动删除。工作区创建失败而未形成可用 checkout 时，先按原生 Git 核实/修复创建现场，再登记，不能伪造记录跳过检查。
+
+任务记录在共享 Git 目录用临时文件加原子 rename 替换；所有本工具写操作（包括 sync、不同任务的回流）共用 `agent-workflow/write.lock`，遇到占用立即报告，不轮询。status 可只读查看最后一份完整记录和当前 writer 锁信息；锁持有期间操作可能尚未完成，不将中间状态当最终结论。正常退出或异常返回会释放锁；进程被强杀/机器断电后可能留锁，先核对 lock 中 host/PID/operation、实际进程及 Git 现场，Agent 核实确认无维护者后移除，属于现场恢复，无需例行询问；脚本不凭锁年龄或本机 PID 自动抢占。互斥只覆盖本工具，原生 Git 和其他编辑操作仍需协作串行。
 
 ## 按需交付证据归档
 
@@ -128,5 +166,5 @@ Linear: <actual Linear issue URL containing FESOL-123>
 - 实际 fetch 并合入 `origin/release` 的 `24cd9b16d6`，维护 merge 为 `7b704a98fa`。采用上游交易开关实现，代理配置移到 tools；`src`、`sdk`、`landing` 相对该 release 无个人差异。Vite 的嵌套目录扫描限制继续作为环境配置保留。
 - 隔离真实 Git 仓库演练覆盖创建任务、基础设施回流、等价补丁跳过、上游前进后纯业务交付；同时验证混合/外来提交、脏基础、gitlink 拒绝，以及预合并冲突不污染现场、回流冲突保留 pending 和恢复位置。
 - 新增纯基础设施 pre-commit 快路，业务/共享配置/混合提交仍走原路径。当前机器没有安装 Husky hook（没有 core.hooksPath 或 hook 文件），因此原构建钩子并非已证实的本机耗时来源；修改用于安装/恢复 hook 后的工作流，不为本轮验收全局安装钩子。
-- `yarn test:agent-tools` 共 134 项全部通过，其中双路径与提交分流 5 项；相关脚本通过 Node 环境 ESLint 与 Prettier。ESLint 显式采用 Node 运行环境，允许 CLI 输出和 Node 已支持的 async iteration/top-level await；未改前端 lint 配置。两个更新的项目 skill 通过 quick_validate，改动 Markdown 的本地链接检查通过。
-- 本轮未运行完整前端类型检查、业务测试或构建，未做真实业务 PR 发布；工具演练不代表业务验收。原始工具回归日志保留在本机 `/tmp/gmx-agent-tools-20261112-final.log`，可被系统清理。
+- `yarn test:agent-tools` 共 137 项全部通过，其中双路径、上下文恢复、提交分流和并发/原子写入 8 项；相关脚本通过 Node 环境 ESLint 与 Prettier。ESLint 显式采用 Node 运行环境，允许 CLI 输出和 Node 已支持的 async iteration/top-level await；未改前端 lint 配置。两个更新的项目 skill 通过 quick_validate，改动 Markdown 的本地链接检查通过。
+- 本轮未运行完整前端类型检查、业务测试或构建，未做真实业务 PR 发布；工具演练不代表业务验收。原始工具回归日志保留在本机 `/tmp/gmx-learning-agent-tools.tap`，可被系统清理。
