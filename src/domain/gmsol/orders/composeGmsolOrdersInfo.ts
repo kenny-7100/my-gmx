@@ -9,12 +9,7 @@ import type { TokensData } from "sdk/utils/tokens/types";
 
 import { resolveGmsolAccountSnapshot } from "../resolveGmsolAccountSnapshot";
 
-type GmsolApiOrder = ApiOrderInfo & {
-  actionState?: string;
-  orderAccount?: string;
-  positionAccount?: string;
-  rentReceiver?: string;
-};
+type GmsolApiOrder = ApiOrderInfo;
 
 function toApiOrder(apiOrder: GmsolApiOrder): ApiOrderInfo {
   const order = { ...apiOrder };
