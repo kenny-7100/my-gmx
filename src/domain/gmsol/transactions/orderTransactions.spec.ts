@@ -1,0 +1,328 @@
+import type * as Sdk from "@gmsol-labs/gmsol-sdk";
+import * as wasm from "@gmsol-labs/gmsol-sdk/index_bg.js";
+import {
+  address,
+  blockhash,
+  compileTransaction,
+  getTransactionEncoder,
+  type Instruction,
+  createKeyPairFromBytes,
+  signTransaction,
+  getTransactionDecoder,
+  getBase64Encoder,
+  getSignatureFromTransaction,
+} from "@solana/kit";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { beforeAll, beforeEach, expect, it, vi } from "vitest";
+
+import { GMSOL_LOOKUP_TABLE_ADDRESSES } from "config/gmsol/lookupTables";
+import { GMSOL_MARKETS } from "config/gmsol/markets";
+import { GMSOL_STORE_PROGRAM_ID } from "config/gmsol/program";
+import { GMSOL_SDK_WASM_SHA256 } from "config/gmsol/sdk";
+import { copySolanaBytes } from "lib/solana/bytes";
+
+import { buildGmsolOrderTransactions } from "./buildOrderTransactions";
+import { toGmsolUpdateParams } from "./orderInputs";
+import { GmsolTransactionError, sendGmsolOrderTransactions } from "./sendOrderTransactions";
+import type { GmsolCreateOrder, GmsolTransactionPlan } from "./types";
+import { decodeGmsolTransaction, validateGmsolTransactionPlan } from "./validateTransaction";
+vi.mock("config/ab", () => ({ getIsSolanaNetworkEnabled: () => true }));
+const transport = vi.hoisted(() => ({
+  rpc: {} as Record<string, ReturnType<typeof vi.fn>>,
+  tables: {} as Record<string, string[]>,
+  flags: vi.fn(),
+}));
+vi.mock("lib/solana/rpc", () => ({ getSolanaRpc: () => transport.rpc }));
+vi.mock("lib/solana/lookupTables", () => ({ fetchGmsolLookupTables: async () => transport.tables }));
+vi.mock("../fetchSolanaTradingEnabled", () => ({ fetchSolanaTradingEnabled: () => transport.flags() }));
+
+const sdk = wasm as unknown as typeof Sdk;
+const market = GMSOL_MARKETS.find((m) => m.marketTokenAddress === "Dqq58gS1TgRMDouUbdvhhzc51XXTNHG921WLxH9X2eB8")!;
+let owner: string;
+let signingKey: CryptoKeyPair;
+let other: string;
+const lifetime = { recentBlockhash: "11111111111111111111111111111111", lastValidBlockHeight: 1n };
+function order(kind: GmsolCreateOrder["kind"] = "LimitIncrease", isLong = true): GmsolCreateOrder {
+  return {
+    kind,
+    market,
+    collateralToken: market.longTokenAddress,
+    indexTokenDecimals: 8,
+    isLong,
+    sizeDeltaUsd: 10n ** 31n,
+    collateralDeltaAmount: kind.includes("Increase") ? 1000000n : 0n,
+    minOutput: 0n,
+    acceptablePrice: 100000n * 10n ** 30n,
+    triggerPrice: kind.includes("Market") ? undefined : 90000n * 10n ** 30n,
+    payToken: undefined,
+    payWithNativeSol: false,
+    receiveToken: undefined,
+    swapPath: [],
+    unwrapNative: false,
+    validFromTs: undefined,
+    decreaseSwapType: undefined,
+  };
+}
+async function build(orders: GmsolCreateOrder[], atomic = false, lookupTables: Record<string, string[]> = {}) {
+  return buildGmsolOrderTransactions({
+    owner,
+    action: { type: "create", orders, atomic },
+    ...lifetime,
+    lookupTables,
+    sdk,
+  });
+}
+beforeAll(async () => {
+  const bytes = readFileSync("node_modules/@gmsol-labs/gmsol-sdk/index_bg.wasm");
+  expect(createHash("sha256").update(bytes).digest("hex")).toBe(GMSOL_SDK_WASM_SHA256);
+  const { instance } = await WebAssembly.instantiate(bytes, { "./index_bg.js": wasm });
+  wasm.__wbg_set_wasm(instance.exports);
+  const start = instance.exports.__wbindgen_start;
+  if (typeof start !== "function") throw new Error("Missing WASM start");
+  start();
+  const wallet = new sdk.Keypair();
+  owner = wallet.pubkey().toString();
+  signingKey = await createKeyPairFromBytes(wallet.toBytes());
+  wallet.free();
+  other = new sdk.Keypair().pubkey().toString();
+});
+it("validates pinned WASM create, update and cancel transactions for both sides FESOL-56", async () => {
+  for (const kind of [
+    "MarketIncrease",
+    "LimitIncrease",
+    "MarketDecrease",
+    "LimitDecrease",
+    "StopLossDecrease",
+  ] as const)
+    for (const isLong of [true, false]) {
+      const plan = await build([order(kind, isLong)]);
+      const result = await validateGmsolTransactionPlan(plan);
+      expect(result.orderAddresses).toHaveLength(1);
+      expect(result.keeperLamports).toBe(300000n);
+      const context = {
+        kind,
+        isLong,
+        address: result.orderAddresses[0],
+        marketToken: market.marketTokenAddress,
+        owner,
+        receiver: owner,
+        rentReceiver: owner,
+        referrer: undefined,
+        initialCollateralToken: kind.includes("Increase") ? market.longTokenAddress : undefined,
+        finalOutputToken: kind.includes("Increase") ? undefined : market.longTokenAddress,
+        longToken: market.longTokenAddress,
+        shortToken: market.shortTokenAddress,
+        unwrapNative: false,
+        callback: undefined,
+      };
+      for (const action of [
+        {
+          type: "update" as const,
+          order: context,
+          changes: {
+            kind,
+            indexTokenDecimals: 8,
+            isLong,
+            sizeDeltaUsd: 20n * 10n ** 30n,
+            acceptablePrice: 100001n * 10n ** 30n,
+            triggerPrice: 90001n * 10n ** 30n,
+            minOutput: undefined,
+            validFromTs: undefined,
+          },
+        },
+        { type: "cancel" as const, order: context },
+      ]) {
+        const edited = await buildGmsolOrderTransactions({ owner, action, ...lifetime, lookupTables: {}, sdk });
+        await expect(validateGmsolTransactionPlan(edited)).resolves.toBeDefined();
+      }
+    }
+});
+it("validates native SOL wrapping without allowing arbitrary token operations FESOL-56", async () => {
+  const solMarket = GMSOL_MARKETS.find((m) => m.marketTokenAddress === "BvC73rarCMrhEnk3JmqaLntpnrwfUCR5eTrf7HQu6ieg")!;
+  const native = {
+    ...order("MarketIncrease"),
+    market: solMarket,
+    collateralToken: solMarket.longTokenAddress,
+    payToken: solMarket.longTokenAddress,
+    payWithNativeSol: true,
+    collateralDeltaAmount: 10000000n,
+    indexTokenDecimals: 5,
+  };
+  const plan = await build([native]);
+  expect((await validateGmsolTransactionPlan(plan)).wrapLamports).toBe(10000000n);
+});
+it("keeps increase and TP/SL in one size-bounded v0 transaction with lookup tables FESOL-56", async () => {
+  const first = await build([order()]);
+  const keys = decodeGmsolTransaction(first.groups[0][0], first).compiled.staticAccounts.filter((k) => k !== owner);
+  const tables = { [GMSOL_LOOKUP_TABLE_ADDRESSES[0]]: keys };
+  const plan = await build([order("MarketIncrease"), order("LimitDecrease"), order("StopLossDecrease")], true, tables);
+  expect(plan.groups).toHaveLength(1);
+  expect(plan.groups[0]).toHaveLength(1);
+  expect(plan.groups[0][0].length).toBeLessThanOrEqual(1232);
+  expect(decodeGmsolTransaction(plan.groups[0][0], plan).compiled.addressTableLookups?.length).toBeGreaterThan(0);
+  expect((await validateGmsolTransactionPlan(plan)).orderAddresses).toHaveLength(3);
+});
+function mutateInstructions(plan: GmsolTransactionPlan, change: (ix: Instruction[]) => Instruction[]) {
+  const next = structuredClone(plan);
+  const decoded = decodeGmsolTransaction(next.groups[0][0], next);
+  const instructions = change([...decoded.message.instructions]);
+  next.groups = [
+    [
+      copySolanaBytes(
+        getTransactionEncoder().encode(
+          compileTransaction({
+            version: 0,
+            feePayer: { address: address(owner) },
+            lifetimeConstraint: { blockhash: blockhash(lifetime.recentBlockhash), lastValidBlockHeight: 1n },
+            instructions,
+          })
+        )
+      ),
+    ],
+  ];
+  return next;
+}
+it("rejects unexpected programs, gmsol instructions, receivers, amounts and truncated input FESOL-56", async () => {
+  const plan = await build([order()]);
+  for (const mutation of ["program", "gmsol", "receiver", "amount", "truncated"] as const) {
+    const malicious = mutateInstructions(plan, (ixs) =>
+      ixs.map((ix) => {
+        if (ix.programAddress !== GMSOL_STORE_PROGRAM_ID || ix.data?.[0] !== 200) return ix;
+        const data = copySolanaBytes(ix.data!);
+        const accounts = [...ix.accounts!];
+        if (mutation === "program") return { ...ix, programAddress: address(other) };
+        if (mutation === "gmsol") data[0] = 0;
+        if (mutation === "receiver") accounts[1] = { ...accounts[1], address: address(other) };
+        if (mutation === "amount") data[51] ^= 1;
+        return { ...ix, accounts, data: mutation === "truncated" ? data.slice(0, 45) : data };
+      })
+    );
+    await expect(validateGmsolTransactionPlan(malicious), mutation).rejects.toThrow();
+  }
+  const unresolved = await build([order()], false, {
+    [GMSOL_LOOKUP_TABLE_ADDRESSES[0]]: decodeGmsolTransaction(plan.groups[0][0], plan).compiled.staticAccounts.filter(
+      (k) => k !== owner
+    ),
+  });
+  unresolved.lookupTables = {};
+  await expect(validateGmsolTransactionPlan(unresolved)).rejects.toThrow(/lookup/i);
+});
+
+beforeEach(() => {
+  transport.flags.mockReset().mockResolvedValue(true);
+  const respond = (result: unknown) => vi.fn(() => ({ send: async () => result }));
+  transport.rpc = {
+    getBalance: respond({ value: 1000000000n }),
+    getFeeForMessage: respond({ value: 5000n }),
+    simulateTransaction: respond({ context: { slot: 1n }, value: { err: null, accounts: [{ lamports: 990000000n }] } }),
+    getBlockHeight: respond(1n),
+    getSignatureStatuses: respond({ value: [{ err: null, confirmationStatus: "confirmed", slot: 2n }] }),
+    sendTransaction: vi.fn((encoded: string) => ({
+      send: async () =>
+        getSignatureFromTransaction(
+          getTransactionDecoder().decode(copySolanaBytes(getBase64Encoder().encode(encoded)))
+        ),
+    })),
+  };
+});
+async function sendFixture() {
+  const plan = await build([order()]);
+  transport.tables = { [GMSOL_LOOKUP_TABLE_ADDRESSES[0]]: [], [GMSOL_LOOKUP_TABLE_ADDRESSES[1]]: [] };
+  plan.lookupTables = transport.tables;
+  const sign = vi.fn(async (bytes: Uint8Array) =>
+    copySolanaBytes(
+      getTransactionEncoder().encode(await signTransaction([signingKey], getTransactionDecoder().decode(bytes)))
+    )
+  );
+  return { plan, sign };
+}
+it("confirms a real Ed25519 signature and preserves confirmed success when refresh fails FESOL-56", async () => {
+  const { plan, sign } = await sendFixture();
+  const result = await sendGmsolOrderTransactions({
+    plan,
+    getWalletAddress: () => owner,
+    signTransaction: sign,
+    onConfirmed: async () => {
+      throw new Error("API indexing delayed");
+    },
+  });
+  expect(result.signatures).toHaveLength(1);
+  expect(result.slot).toBe(2n);
+  expect(result.refreshErrors).toHaveLength(1);
+  expect(sign).toHaveBeenCalledTimes(1);
+});
+it("blocks signing on preflight failure and blocks sending after the trading flag changes FESOL-56", async () => {
+  for (const failure of ["simulation", "funds", "flag-before", "flag-after", "wallet-message"] as const) {
+    const { plan, sign } = await sendFixture();
+    transport.flags.mockReset().mockResolvedValue(true);
+    transport.rpc.sendTransaction.mockClear();
+    transport.rpc.simulateTransaction.mockReturnValue({
+      send: async () => ({
+        context: { slot: 1n },
+        value: {
+          err: failure === "simulation" ? { InstructionError: [0, "Custom"] } : null,
+          accounts: [{ lamports: 990000000n }],
+        },
+      }),
+    });
+    transport.rpc.getBalance.mockReturnValue({ send: async () => ({ value: failure === "funds" ? 0n : 1000000000n }) });
+    if (failure === "flag-before") transport.flags.mockResolvedValue(false);
+    if (failure === "flag-after") transport.flags.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    if (failure === "wallet-message")
+      sign.mockImplementationOnce(async () => {
+        const changed = mutateInstructions(plan, (ix) => ix.slice(1));
+        return changed.groups[0][0];
+      });
+    await expect(
+      sendGmsolOrderTransactions({
+        plan,
+        getWalletAddress: () => owner,
+        signTransaction: sign,
+        onConfirmed: async () => undefined,
+      }),
+      failure
+    ).rejects.toThrow();
+    expect(transport.rpc.sendTransaction, failure).not.toHaveBeenCalled();
+    expect(sign.mock.calls.length, failure).toBe(failure === "flag-after" || failure === "wallet-message" ? 1 : 0);
+  }
+});
+
+it("retains an ambiguous broadcast signature for reconciliation FESOL-56", async () => {
+  const { plan, sign } = await sendFixture();
+  transport.rpc.sendTransaction.mockReturnValue({
+    send: async () => {
+      throw new Error("RPC timeout");
+    },
+  });
+  try {
+    await sendGmsolOrderTransactions({
+      plan,
+      getWalletAddress: () => owner,
+      signTransaction: sign,
+      onConfirmed: async () => undefined,
+    });
+    throw new Error("Expected an ambiguous send failure");
+  } catch (error) {
+    expect(error).toBeInstanceOf(GmsolTransactionError);
+    const failure = error as GmsolTransactionError;
+    expect(failure.pendingSignature).toMatch(/^[1-9A-HJ-NP-Za-km-z]{80,90}$/);
+    expect(failure.submittedSignatures).toEqual([]);
+    expect(failure.message).toContain("before retrying");
+  }
+});
+it("preserves token versus USD minimum-output units and rejects dust edits FESOL-56", () => {
+  const changes = {
+    kind: "LimitIncrease" as const,
+    indexTokenDecimals: 8,
+    isLong: true,
+    sizeDeltaUsd: undefined,
+    acceptablePrice: undefined,
+    triggerPrice: undefined,
+    minOutput: 1234567n,
+    validFromTs: undefined,
+  };
+  expect(toGmsolUpdateParams(changes).min_output).toBe(1234567n);
+  expect(toGmsolUpdateParams({ ...changes, kind: "LimitDecrease", minOutput: 10n ** 30n }).min_output).toBe(10n ** 20n);
+  expect(() => toGmsolUpdateParams({ ...changes, sizeDeltaUsd: 1n })).toThrow(/smallest gmsol unit/);
+});
