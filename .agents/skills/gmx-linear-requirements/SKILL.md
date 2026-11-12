@@ -14,7 +14,7 @@ description: 查询 FESOL 单条需求、同步需求快照或复盘 GMX Solana 
 - 查当前需求或为实施核对需求时，运行 `node scripts/linear-requirements.mjs show FESOL-编号 --live --json`，读取正文、父任务、双向关系及评论。用户明确查历史时，使用 `--snapshot PATH` 离线读取并标明时间。
 - 区分需求原文、当前状态、验收条件和待澄清事项；需要精确项目或标签判断时使用 JSON 字段，不仅看文本摘要。
 - 解释阻塞方向：`relations` 的 `blocks` 是当前任务阻塞 `relatedIssue`；`inverseRelations` 的 `blocks` 是 `issue` 阻塞当前任务。
-- 输出需求编号及线上链接、抓取时间、范围、关键验收条件与阻碍。查询请求不授权修改代码或 Linear。
+- 输出需求编号及线上链接、抓取时间、范围、关键验收条件与阻碍。查询请求不授权修改业务代码或 Linear；经手 issue 的调研活动、结论及重要信息按[issue 沉淀规则](../../../docs/documentation-maintenance.md#按-issue-沉淀)保存到本地版本化知识，包含他人负责的 issue，不为记录而建业务分支。
 
 ## 全量复盘与历史比较
 
