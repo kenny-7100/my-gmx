@@ -98,7 +98,7 @@ yarn frontend:test-offline --project-dir /path/to/feature-checkout --changed-sin
 
 普通、关联选择、Git 范围选择和调试模式共用这一步。出现此失败时，先确认并发工具编辑已结束，再用稳定版本重跑相关测试；不要复制旧指纹或修改报告状态。工具清单沿用各自既有计划，包含运行器、共享进程/网络工具、配置包装器、setup、发现保护器及基础设施锁文件；不扩展到全部安装包内容，也不是运行期间的文件锁、连续监控或系统沙箱。
 
-[交付检查](linear-development-workflow.md#前端测试证据绑定)同时要求 `toolingUnchanged=true`，并将前后指纹与当前工具比较。缺字段、false 或最终指纹不符均 blocked；缺少这项证据的历史报告需使用当前工具重跑，不能手补字段。
+[交付检查](agent-delivery-evidence.md#前端测试证据绑定)同时要求 `toolingUnchanged=true`，并将前后指纹与当前工具比较。缺字段、false 或最终指纹不符均 blocked；缺少这项证据的历史报告需使用当前工具重跑，不能手补字段。
 
 真实验收在隔离工具副本与独立 release checkout 中复现前端、SDK 两种旧误报；修复后原断言仍通过，但工具变化均正确失败，稳定工具的关联选择仍通过。交付 checkout 中，真实前端日期 5 项与 SDK BigMath 6 项报告共同绑定通过；两类报告各自缺检查标识、标识 false、缺最终指纹及最终指纹不符，共 8 种拒绝场景均正确 blocked。目标 HEAD/索引和实际业务源码未被修改，副本已清理。摘要与归档的原始日志/结果在本机忽略目录 `.local/acceptance/sdk-offline/tool-drift/` 的 `repro.json`、`fixed.json`、`delivery.json`，本次工具契约回归沿用既有交付检查测试。
 
@@ -129,9 +129,9 @@ node /path/to/infrastructure/scripts/frontend-offline-tests.mjs --project-dir /p
 
 所选测试、原 Vite 配置、setup/global setup、Lingui 配置、PWA HEAD 时间、node_modules 链接来源、Vitest 可执行文件和源码/Git 指纹均来自 `--project-dir`。配置编排与网络保护仍来自基础设施工具；报告和日志始终写入基础设施 checkout 的 `.local/acceptance/frontend-offline/`，记录规范化 `projectDir`、目标 commit/dirty、源码摘要和 `runtime` 版本。可同时使用 `--inspect-port`，断点应指向目标目录中的源码。不同 checkout 的原配置与依赖变化可能导致明确失败，不承诺任意历史版本兼容。
 
-跨 checkout 的 Vite 文件访问范围显式包含目标源码、目标依赖的真实目录及工具初始化目录，防止外部 Worker/setup 被拒绝。目标目录不会写入工具、报告或 Vite 缓存，隔离临时目录仍按既有流程清理。本能力只执行所选测试，不替代[交付隔离检查](linear-development-workflow.md#交付隔离自动检查)、最新上游核对或整项需求验收。
+跨 checkout 的 Vite 文件访问范围显式包含目标源码、目标依赖的真实目录及工具初始化目录，防止外部 Worker/setup 被拒绝。目标目录不会写入工具、报告或 Vite 缓存，隔离临时目录仍按既有流程清理。本能力只执行所选测试，不替代[交付隔离检查](agent-delivery-evidence.md#交付隔离自动检查)、最新上游核对或整项需求验收。
 
-需要将结果作为交付证据时，可按[前端测试证据绑定](linear-development-workflow.md#前端测试证据绑定)给 `agent:delivery-check` 传 `--require-clean --frontend-report PATH`，自动比较当前目标路径、commit、源码与工具指纹，并复核原生 Vitest 结果。前端测试本身允许 dirty checkout，交付绑定则要求测试前后及当前目标均干净；不要把开发现场报告当作已提交交付版本的证据。
+需要将结果作为交付证据时，可按[前端测试证据绑定](agent-delivery-evidence.md#前端测试证据绑定)给 `agent:delivery-check` 传 `--require-clean --frontend-report PATH`，自动比较当前目标路径、commit、源码与工具指纹，并复核原生 Vitest 结果。前端测试本身允许 dirty checkout，交付绑定则要求测试前后及当前目标均干净；不要把开发现场报告当作已提交交付版本的证据。
 
 ## 源码断点调试
 

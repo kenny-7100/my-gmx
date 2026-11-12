@@ -7,6 +7,8 @@ description: 查询 FESOL 单条需求、同步需求快照或复盘 GMX Solana 
 
 先遵守仓库根目录 [AGENTS.md](../../../AGENTS.md)，按当前请求选择下面的模式。脚本和命令均相对于仓库根目录；不受当前 shell 工作目录影响的调用方式见[工具说明](../../../docs/linear-requirements.md)。不要复制脚本实现或另建同步工具。
 
+任务实施中在开始/恢复、验收交付及相关 review/依赖变化节点主动重读单条需求，比较正文、关系和评论；不轮询、不每轮全量同步。CLI 凭据不可用时可复用已连接的 Linear MCP，不新增同步实现。
+
 ## 单条需求
 
 - 查当前需求或为实施核对需求时，运行 `node scripts/linear-requirements.mjs show FESOL-编号 --live --json`，读取正文、父任务、双向关系及评论。用户明确查历史时，使用 `--snapshot PATH` 离线读取并标明时间。

@@ -1,3 +1,7 @@
+# 当前使用边界（2026-11-12）
+
+代理配置独立放在 `config.json`，用于 Agent 只读/模拟。个人基础不再修改业务 RPC 入口或交易开关；前端是否使用代理取决于目标分支正式支持的配置，不能假定启动代理就已接入页面。以下旧页面验收按原日期追溯。
+
 # 本地 Solana RPC 代理
 
 用于本地前端开发与 Agent 只读验收。无需安装子项目依赖，使用仓库的 Node 22。上游固定为 Alchemy Solana Mainnet，默认复用现有 `fallback` key，转发时设置已验证的 `Origin: https://app.gmx.io`。不修改 Alchemy 权限。
@@ -20,27 +24,15 @@ curl --fail-with-body http://127.0.0.1:3030 \
 
 `GET /healthz` 仅确认代理进程存活，不检查上游权限或数据。使用上面的 RPC 请求核验真实连通性；HTTP 200 也可能携带 JSON-RPC error，调用方必须检查响应正文。
 
-## 前端入口
+## 前端与 Agent 入口
 
-`src/config/rpc.ts` 的 `getSolanaRpcUrl()` 在 Vite 开发模式默认返回代理地址。需要其他端口时，在根 `.env.development.local` 中配置：
+Agent 的只读余额脚本见[钱包说明](../../docs/agent-wallet.md)。前端使用上游业务配置，本工具不再提供 `getSolanaRpcUrl()` 或注入 `VITE_APP_SOLANA_RPC_URL`；旧配置不会自动让业务页面接入本代理。需要页面联调时先核实目标分支正式支持的配置，不在个人基础补业务入口。
 
-```dotenv
-VITE_APP_SOLANA_RPC_URL=http://127.0.0.1:3031
-```
-
-随后以相同端口手动启动代理，修改 Vite 环境变量后需重启前端：
-
-```sh
-SOLANA_RPC_PROXY_PORT=3031 yarn solana:rpc-proxy
-```
-
-构建后的预览/生产环境忽略该开发覆盖，使用现有 Alchemy fallback 上游。EVM RPC 的 key 选择与地址不变。不要用现有 `isDevelopment()` 判断是否访问本地代理，该函数也会将部分远程预览识别为开发环境。
-
-当前分支前端业务尚无 Solana RPC client 或余额读取调用；本地 Agent 的只读余额脚本见[钱包说明](../../docs/agent-wallet.md)。本次提供统一 URL 入口，后续 Solana 读取模块必须使用 `getSolanaRpcUrl()`；没有为证明代理可用而新增钱包读取、轮询或 UI。入口本身不执行网络请求，不会在 Solana flag 关闭时自动读链。
+代理端口可用 `SOLANA_RPC_PROXY_PORT` 指定；调用工具用 `SOLANA_RPC_PROXY_URL` 指向同一地址。
 
 ## 配置与边界
 
-- 默认 URL、上游和现有 fallback key 共用 `src/config/solanaRpc.json`，EVM fallback 也读取同一个 key，避免复制后漂移。该 key 原已存在于公开前端配置，本工具不将其变成秘密。
+- 代理的默认 URL、上游和现有 fallback key 保存在 `tools/solana-rpc-proxy/config.json`；与上游业务 RPC 配置分离。该 key 原已存在于公开前端配置，本工具不将其变成秘密。
 - 如需独立 key，仅给代理进程设置 `SOLANA_RPC_PROXY_KEY`，不使用 `VITE_` 前缀，也不写入版本控制。命令不会自动加载 `.env.local`。
 - 只监听 IPv4 loopback，允许无 Origin 的 CLI 请求，以及来自 localhost、127.0.0.1、IPv6 loopback 的 HTTP/HTTPS 页面；外部网页来源拒绝。浏览器预检允许 `Content-Type`，不转发浏览器的 Cookie、Authorization 或 Origin。
 - 只开放 `proxy.mjs` 中列出的读取方法与 `simulateTransaction`。拒绝 `sendTransaction`、空批次、超过 100 项的批次及大于 1 MiB 的请求。批次包含不允许的方法时整批拒绝，不部分执行。
@@ -57,7 +49,9 @@ yarn solana:rpc-proxy:verify
 
 该命令不启动服务或浏览器，不发送交易。验证 Mainnet genesis、slot、批次、100 账户读取、本地来源预检、外部来源/写方法拦截和上游 JSON-RPC 错误；任一断言失败或请求失败均以非零状态退出。100 账户检查重复读取同一个程序地址，验证批量容量，不代表不同业务账户布局全部正确。其他地址使用 `SOLANA_RPC_PROXY_URL` 指定，不使用前端 `VITE_` 配置。
 
-## 验证记录
+## 历史验证记录（2026-10-24）
+
+以下页面入口与对应测试已在 2026-11-12 移除；记录只供追溯，不代表当前分支配置。当前代理单元测试仍可执行。
 
 2026-10-24：执行 handler 单元测试（不监听端口、不访问上游），覆盖来源、写操作/混合批次拦截、转发、上游错误、精度和脱敏；前端环境路由另有 Vitest 检查。实际运行结果见任务交付及[实施清单](../../docs/agent-acceptance-infrastructure.md)。
 
