@@ -217,6 +217,7 @@ beforeEach(() => {
     getFeeForMessage: respond({ value: 5000n }),
     simulateTransaction: respond({ context: { slot: 1n }, value: { err: null, accounts: [{ lamports: 990000000n }] } }),
     getBlockHeight: respond(1n),
+    getTransaction: respond(null),
     getSignatureStatuses: respond({ value: [{ err: null, confirmationStatus: "confirmed", slot: 2n }] }),
     sendTransaction: vi.fn((encoded: string) => ({
       send: async () =>
@@ -237,7 +238,7 @@ async function sendFixture() {
   );
   return { plan, sign };
 }
-it("confirms a real Ed25519 signature and preserves confirmed success when refresh fails FESOL-56", async () => {
+it("preserves confirmed orders and retry identity when account or receipt indexing lags FESOL-20", async () => {
   const { plan, sign } = await sendFixture();
   const result = await sendGmsolOrderTransactions({
     plan,
@@ -250,6 +251,16 @@ it("confirms a real Ed25519 signature and preserves confirmed success when refre
   expect(result.signatures).toHaveLength(1);
   expect(result.slot).toBe(2n);
   expect(result.refreshErrors).toHaveLength(1);
+  expect(result.orders).toEqual([]);
+  expect(result.trackingErrors).toHaveLength(1);
+  expect(result.trackingRequests).toEqual([
+    {
+      signature: result.signatures[0],
+      slot: 2n,
+      owner,
+      orderAddresses: (await validateGmsolTransactionPlan(plan)).orderAddresses,
+    },
+  ]);
   expect(sign).toHaveBeenCalledTimes(1);
 });
 it("blocks signing on preflight failure and blocks sending after the trading flag changes FESOL-56", async () => {
@@ -325,4 +336,28 @@ it("preserves token versus USD minimum-output units and rejects dust edits FESOL
   expect(toGmsolUpdateParams(changes).min_output).toBe(1234567n);
   expect(toGmsolUpdateParams({ ...changes, kind: "LimitDecrease", minOutput: 10n ** 30n }).min_output).toBe(10n ** 20n);
   expect(() => toGmsolUpdateParams({ ...changes, sizeDeltaUsd: 1n })).toThrow(/smallest gmsol unit/);
+});
+
+it("distinguishes rejected on-chain submissions from ambiguous confirmation reads FESOL-20", async () => {
+  for (const outcome of ["failed", "unavailable"] as const) {
+    const { plan, sign } = await sendFixture();
+    transport.rpc.getSignatureStatuses = vi.fn(() => ({
+      send: async () => {
+        if (outcome === "unavailable") throw new Error("RPC confirmation read unavailable");
+        return { value: [{ err: { InstructionError: [0, "Custom"] }, confirmationStatus: "confirmed", slot: 2n }] };
+      },
+    }));
+    const failure = await sendGmsolOrderTransactions({
+      plan,
+      getWalletAddress: () => owner,
+      signTransaction: sign,
+      onConfirmed: async () => undefined,
+    }).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(GmsolTransactionError);
+    if (!(failure instanceof GmsolTransactionError)) throw failure;
+    expect(failure.submittedSignatures).toHaveLength(1);
+    expect(failure.confirmedSignatures).toEqual([]);
+    expect(failure.failedSignature).toBe(outcome === "failed" ? failure.submittedSignatures[0] : undefined);
+    expect(failure.pendingSignature).toBe(outcome === "unavailable" ? failure.submittedSignatures[0] : undefined);
+  }
 });
