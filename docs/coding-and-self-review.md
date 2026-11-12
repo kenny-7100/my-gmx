@@ -2,6 +2,8 @@
 
 核验日期：2026-10-25。编码与自我代码审查以本地 `gmx-prompts` 的相关规范为依据。本页提供入口和重点，不替代原文；后续工作应阅读当前版本及其引用资料。
 
+日常入口以[精简启动卡](agent-task-start.md)和[双路径流程](linear-development-workflow.md)为准。下方是按故障/任务选择的参考，不是每次必做清单；普通需求不默认执行全栈规划、工作表或证据打包。原生验证仍遵循相关上游规范。
+
 ## 执行前的环境检查与顺序
 
 失败原因尚未明确时，先按[Agent 失败诊断](agent-failure-diagnosis.md)从本次退出码、目标身份和失败阶段定位，再进入下方对应准备步骤；不为排障重复整套检查或修改业务预期。
@@ -18,7 +20,7 @@
 
 仅需一次组合验收、不保留调试服务时，按[一次性组合验收](solana-dev-workspace.md#一条命令运行组合验收并停服)使用 `yarn solana:dev:check --project-dir PATH --api-dir PATH`，显式选择空闲端口；需要真实源码断点时再加 `--api-inspect-port PORT`。它复用既有工具并自动停止所属工作区，不先手动 up，不以已有工作区替代本轮实例。结束后核对 status、阶段退出和 cleanup；取消后等待正常退出和最终报告，本入口已为 Chrome 清理保留 15 秒，不立即追加强杀。失败看该次日志，不将 sample 探测当业务验收。
 
-1. **先确定目标与范围。** 需求验收先按[验收映射流程](agent-acceptance-workflow.md)实时核对需求，逐项填写条件、预期、数据模式、方法和版本，再选择所需预检；不将环境工具通过当作业务需求全部通过。涉及现有线上行为或真实数据时，先按[线上核验顺序](agent-acceptance-workflow.md#线上行为与数据核验)查对应 GMX/GMTrade 服务表并核对目标页面当前请求，再做本地或 PR 版本验证，不用历史环境文件认定当前部署。确认命令的工作目录、目标仓库和检查范围，再启动批量检查。主仓库含嵌套参考仓库，不能把它们当作前端测试或 TypeScript 配置的自动发现目标。单文件格式检查使用 `yarn exec prettier --check PATH`（写入时用 `--write`）；`yarn prettier` 是仓库全量格式化脚本，追加文件参数不会缩小原有范围。
+1. **先确定目标与范围。** 需求验收先按[验收映射流程](agent-acceptance-workflow.md)实时核对需求，明确条件、预期、数据模式、方法和版本，再选择所需预检；复杂需求按需填写工作表；不将环境工具通过当作业务需求全部通过。涉及现有线上行为或真实数据时，先按[线上核验顺序](agent-acceptance-workflow.md#线上行为与数据核验)查对应 GMX/GMTrade 服务表并核对目标页面当前请求，再做本地或 PR 版本验证，不用历史环境文件认定当前部署。确认命令的工作目录、目标仓库和检查范围，再启动批量检查。主仓库含嵌套参考仓库，不能把它们当作前端测试或 TypeScript 配置的自动发现目标。单文件格式检查使用 `yarn exec prettier --check PATH`（写入时用 `--write`）；`yarn prettier` 是仓库全量格式化脚本，追加文件参数不会缩小原有范围。
 2. **根目录类型检查前，先确认 SDK 产物状态。** 先在根目录运行只读 `yarn sdk:artifacts verify`，按[SDK 产物准备说明](sdk-artifacts.md)核对来源、输入指纹及全部产物。缺收据、缺失、过期或损坏时，已获 SDK 构建授权则运行 `yarn sdk:artifacts build`，隔离预生成与编译、成功后替换忽略的产物，再 verify 和 `yarn tscheck`；未获授权时说明该前置条件，不自行构建。有效产物直接复用，不反复重建。旧 `yarn build-sdk` 仍可用于原发布流程，但会执行写入源码目录的 prebuild，且不生成该入口的来源收据。
 3. **完整前端构建前，先安排内存与执行顺序。** 已获完整构建授权且机器内存允许时，使用下方已验证的进程级内存配置；大型测试、类型检查和构建顺序执行，避免并发争用资源后再重跑。不修改全局 Node 配置，也不把提高内存当作处理所有构建失败的方法。独立交付 checkout 在 SDK 重建后运行完整测试前，先按[备份归档说明](sdk-artifacts.md#独立交付目录的测试发现)处理 `previous-build`，避免原 Vite 配置误收集编译后的测试；不以 Git 忽略状态推断 Vitest 会排除该目录。
 4. **失败后按已知特征诊断，再判断代码问题。** 对照下表核实原因，保留原始错误。处理前置条件后仍失败，应继续追踪真实代码或环境原因，不添加断言、虚假导出或兜底来压过错误。
@@ -80,13 +82,13 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 **前端关联测试：** 已知修改的 src/landing/sdk/src 源码而不确定所需前端 suite 时，按[关联测试说明](frontend-offline-tests.md#按源码依赖图选择关联测试)使用 `frontend:test-offline --related src/...ts` 或 `--related sdk/src/...ts`，独立目录显式加 `--project-dir PATH`。前端与 SDK 源码混合改动也可用 `--changed-since REF` 从明确的 Git 基线收集提交/索引/工作区/未跟踪源码；先确认 `changes.baseSha` 和完整路径范围，结束时要求 `changesUnchanged=true`，配置、删除或混合非代码改动必须人工评估并选测试。输出仍只有前端测试，SDK 自身测试另用 SDK 入口。先核对发现的精确清单、发现阶段网络审计与清理，再接受实际测试结果；零关联或图解析失败不代表无须测试，应按真实依赖/资源修复，或人工明确选择 `--suite`。配置、删除文件或动态导入影响仍须独立判断。发现与执行均在空 CWD，入口已通过临时绝对路径 Lingui catalog 配置和 loopback 主机处理资源定位。若出现 `.po` 的 `not matched to any of your catalogs paths`，先核对目标 JSON `.linguirc` 及本次临时配置的 rootDir/path/include/exclude；这是已复现的相对路径/CWD 问题，查看 discovery.log 或 vitest.log，不关闭翻译插件、读取目标 `.env` 或放宽网络保护。
 
-**交付目录与验收身份：** 独立交付 checkout 完成测试后，按[交付隔离检查](linear-development-workflow.md#交付隔离自动检查)显式传 `--project-dir PATH --require-clean`，核对实际 HEAD 与待交付 head 相同，且暂存、未暂存、未跟踪列表为空；比较测试报告的目标路径和 commit。需复用前端、SDK 或浏览器结果时显式加 `--frontend-report PATH` / `--sdk-report PATH` / `--browser-report PATH`（可同时选择），按同一流程自动绑定源码/工具指纹并复核原生结果；证据 blocked 时重跑正确目标的测试，不手改报告或省略检查。默认历史检查的 `worktree.status=not-checked` 不代表干净；blocked 不自动清理文件、切换分支或转移提交。只读 Git 工具使用 `GIT_OPTIONAL_LOCKS=0` 并对 diff 禁用 `diff.autoRefreshIndex`，不能仅凭命令名称推定不写索引；本工具已内置，无需修改全局配置。检查后源码变化时重新验收。
+**交付目录与验收身份：** 独立交付 checkout 完成测试后，按[交付隔离检查](agent-delivery-evidence.md#交付隔离自动检查)显式传 `--project-dir PATH --require-clean`，核对实际 HEAD 与待交付 head 相同，且暂存、未暂存、未跟踪列表为空；比较测试报告的目标路径和 commit。需复用前端、SDK 或浏览器结果时显式加 `--frontend-report PATH` / `--sdk-report PATH` / `--browser-report PATH`（可同时选择），按同一流程自动绑定源码/工具指纹并复核原生结果；证据 blocked 时重跑正确目标的测试，不手改报告或省略检查。默认历史检查的 `worktree.status=not-checked` 不代表干净；blocked 不自动清理文件、切换分支或转移提交。只读 Git 工具使用 `GIT_OPTIONAL_LOCKS=0` 并对 diff 禁用 `diff.autoRefreshIndex`，不能仅凭命令名称推定不写索引；本工具已内置，无需修改全局配置。检查后源码变化时重新验收。
 
 **前端局部离线测试：** 需要隔离本机配置并防止意外联网时，使用[前端离线入口](frontend-offline-tests.md) `yarn frontend:test-offline --suite src/...spec.ts`，可重复指定 src/landing 文件；验证独立交付 checkout 时显式加 `--project-dir PATH`，先按同一文档准备目标自己的依赖，再核对报告的 projectDir、commit 和测试路径，避免误测开发目录；保留原 Vite/happy-dom、初始化和时区。需要源码断点时选择单 suite 并加 `--inspect-port 9240`，按同一文档连接本次单 fork 调试目标，核对 source map 和真实断点；结束后恢复、断开并核对 `exit.cleanup`。原配置需要 Git/PWA、Lingui/Babel 及 Vitest CLI root 定位，入口已显式处理，不通过读取根 `.env` 或删除原 setup 绕过启动问题。失败先看本次日志，真实网络/浏览器需求使用对应验收入口，不关闭保护；完整前端回归仍用 `yarn test:ci`。
 
 **SDK 纯计算回归：** 根 `yarn test:ci` 不覆盖 `sdk/`。需要验证 SDK 数值、BigInt、费用或其他可离线测试时，使用[SDK 源码离线入口](sdk-offline-tests.md) `yarn sdk:test-offline` 或重复 `--suite src/...spec.ts` 指定范围，复用原配置和源码，无需先构建 SDK 或启动服务。独立交付目录显式加 `--sdk-dir PATH/sdk`，先准备目标自己的锁定依赖；核对报告的 `sdkDir`、commit、`runtime.executable` 和目标锁文件摘要。缺依赖或 Vitest 版本不兼容先处理目标环境，不链接开发目录依赖绕过；详见同一文档的独立目录说明。意外联网会明确失败，先核对所选测试的真实依赖，不关闭保护或修改业务预期；该入口通过不代表完整 SDK、Solana 协议或发布产物已通过。 需要断点时显式单选 suite 并加 `--inspect-port 9238`，按[SDK 调试说明](sdk-offline-tests.md#sdk-源码断点调试)连接单 worker、核对源码映射与实际参数；不以 inspector 启动或原测试通过代替目标断点证据。调试端口冲突先换空闲端口，不连接未知监听。SDK 入口已复用共享进程组管理，中断/超时后先核对 `exit.cleanup=passed` 和临时目录清理；清理失败不得复用已生成的成功测试结果，也不手动结束其他任务。
 
-**独立 API 测试目录：** 验证 API 功能分支时，按[独立 checkout 说明](solana-api-local.md#在独立-api-checkout-中运行测试)显式传 `--api-dir PATH --suite src/...test.ts`；先准备目标自己的锁定依赖，核对报告 `apiDir`、`source.commit/dirty` 和源码指纹。目标必须为 API Git 根目录；普通模块不再要求无关 Solana 样例，真实导入、Jest/DB setup 和生成路由前置仍须满足。不要将开发目录结果当作交付版本证据。 需要用于 API 交付时，按[API 证据绑定](linear-development-workflow.md#api-测试证据绑定)对该 API 仓库显式传 `--require-clean --api-report PATH`，并使用 API 自己的 release、开发基础和交付引用；保留报告、原生 Jest 结果及网络日志，源码/工具/版本变化后重跑。依赖生成路由时使用 `--require-routes` 生成报告，交付检查会只读复核三份路由来源证据；当前生成器、产物或收据失效时先按路由准备流程处理，再重跑测试。
+**独立 API 测试目录：** 验证 API 功能分支时，按[独立 checkout 说明](solana-api-local.md#在独立-api-checkout-中运行测试)显式传 `--api-dir PATH --suite src/...test.ts`；先准备目标自己的锁定依赖，核对报告 `apiDir`、`source.commit/dirty` 和源码指纹。目标必须为 API Git 根目录；普通模块不再要求无关 Solana 样例，真实导入、Jest/DB setup 和生成路由前置仍须满足。不要将开发目录结果当作交付版本证据。 需要用于 API 交付时，按[API 证据绑定](agent-delivery-evidence.md#api-测试证据绑定)对该 API 仓库显式传 `--require-clean --api-report PATH`，并使用 API 自己的 release、开发基础和交付引用；保留报告、原生 Jest 结果及网络日志，源码/工具/版本变化后重跑。依赖生成路由时使用 `--require-routes` 生成报告，交付检查会只读复核三份路由来源证据；当前生成器、产物或收据失效时先按路由准备流程处理，再重跑测试。
 
 **离线网络审计：** 前端、SDK 和 API 离线测试结束时，按[共享审计说明](frontend-offline-tests.md#结束时核对网络审计)核对 `network.status=passed`、安装数等于所选文件数、拒绝次数为 0；缺日志或捕获后的联网尝试不当作通过。出现失败先查本次事件/Jest/Vitest 日志和测试实际依赖，不关闭 guard 或修改汇总。交付检查会重新读取前端/SDK 的事件日志，保留日志和原生结果；普通与断点模式相同。
 
