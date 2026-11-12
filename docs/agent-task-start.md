@@ -2,7 +2,7 @@
 
 更新日期：2026-11-12。默认从[开发、回流与交付](linear-development-workflow.md)选择当前阶段；本卡只帮助选择运行和验证入口，不要求逐项执行。
 
-1. 恢复实际任务现场：分支、工作区、PR head；有登记用 `node scripts/agent-workflow.mjs status --issue FESOL-123`。确认任务相关 Linear/依赖变化，复用已有上下文，不从头全量调研。
+1. 恢复实际任务现场：分支、工作区、PR head；有登记用 `node scripts/agent-workflow.mjs status --issue FESOL-123`。确认任务相关 Linear/依赖变化；即将用到子仓库时按[按需更新规则](solana-reference-repositories.md#子仓库按需核验与更新)核验相关上游及版本，复用已有上下文，不从头全量调研。
 2. 先明确本次可观察结果，再选择最小有效检查。已知 suite 直接运行；范围未知再用发现/规划工具。普通需求不默认填工作表、做全栈计划或打证据包。
 3. 环境失败先查[诊断](agent-failure-diagnosis.md)，只处理当前缺项。编译前核对 SDK 产物，所需构建/服务按根授权；不要把环境问题改成业务兜底。
 
