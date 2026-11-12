@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, type ReactNode } from "react";
+import { createElement, useCallback, useEffect, useRef, type ReactNode } from "react";
 import { toast, type Id } from "react-toastify";
 
 import { getIsSolanaNetworkEnabled } from "config/ab";
@@ -54,13 +54,14 @@ export function useSolanaOrderNotifications() {
     let state: SolanaOrderNotificationState = {
       title,
       trackExecution,
+      isTracking: false,
       submission: "sending",
       signatures: [],
       execution: "unresolved",
       executionSignature: undefined,
       reason: undefined,
     };
-    const toastId = toast(<SolanaOrderStatusNotification state={state} />, {
+    const toastId = toast(createElement(SolanaOrderStatusNotification, { state }), {
       autoClose: false,
       closeOnClick: false,
       onClose: () => {
@@ -76,26 +77,34 @@ export function useSolanaOrderNotifications() {
       getIsSolanaNetworkEnabled() &&
       current.current.owner === scope.owner &&
       current.current.networkId === scope.networkId;
-    const update = (next: Partial<SolanaOrderNotificationState>, autoClose: number | false = false) => {
+    const update = (next: Partial<SolanaOrderNotificationState>, autoClose?: number | false) => {
       if (!valid()) return;
       state = { ...state, ...next };
       toast.update(toastId, {
-        render: <SolanaOrderStatusNotification state={state} />,
+        render: createElement(SolanaOrderStatusNotification, { state }),
         type: state.submission === "failed" || state.execution === "cancelled" ? "error" : "default",
-        autoClose,
+        ...(autoClose !== undefined ? { autoClose } : {}),
       });
     };
     let submitted = false;
     const onSubmitted = (result: SolanaSubmittedOrders) => {
       if (submitted || !valid()) return;
       submitted = true;
+      if (!result.signatures.length) {
+        update({ submission: "unknown" });
+        return;
+      }
       update(
-        { submission: "submitted", signatures: result.signatures },
+        { submission: "submitted", signatures: result.signatures, isTracking: trackExecution },
         trackExecution ? false : TOAST_AUTO_CLOSE_TIME
       );
       if (!trackExecution) return;
-      const orders = (result.orders ?? []).filter((action) => action.owner === scope.owner);
-      const requests = (result.trackingRequests ?? []).filter((request) => request.owner === scope.owner);
+      const orders = (result.orders ?? []).filter(
+        (action) => action.owner === scope.owner && result.signatures.includes(action.creationSignature)
+      );
+      const requests = (result.trackingRequests ?? []).filter(
+        (request) => request.owner === scope.owner && result.signatures.includes(request.signature)
+      );
 
       void import("domain/gmsol/orderTracking/watchSubmittedOrders")
         .then(({ watchSubmittedOrders }) => {
@@ -128,7 +137,8 @@ export function useSolanaOrderNotifications() {
             },
           });
         })
-        .catch(() => undefined);
+        .catch(() => undefined)
+        .finally(() => update({ isTracking: false }));
     };
     return {
       submitted: onSubmitted,

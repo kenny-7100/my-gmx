@@ -106,6 +106,41 @@ describe("tracked order lifecycle reads", () => {
     }
   });
 
+  it("orders same-slot observations from block signatures even when RPC address history puts creation first", async () => {
+    const source = reader([0, 1]);
+    const original = source.getTransaction;
+    const slot = BigInt(fixtures.cases[0].report.receipt.slot);
+    source.getSignatures = async () =>
+      [0, 1].map((i) => ({ signature: fixtures.cases[i].report.signature, slot, err: null }));
+    source.getTransaction = async (signature, signal) => {
+      const tx = (await original(signature, signal)) as ReturnType<typeof receipt>;
+      tx.slot = slot;
+      // Move the historical execute observation to the creation slot, including its event slot field.
+      if (signature === fixtures.cases[1].report.signature) {
+        const { getBase58Decoder, getBase58Encoder } = await import("@solana/kit");
+        const encoder = getBase58Encoder();
+        const decoder = getBase58Decoder();
+        for (const event of fixtures.cases[1].expectedEvents) {
+          const ix = tx.meta.innerInstructions.find((g: { index: number }) => g.index === Number(event.outerIndex))
+            .instructions[Number(event.innerIndex)];
+          const bytes = encoder.encode(ix.data).slice();
+          const offset = event.name === "TradeEvent" ? 16 + 8 + 8 + 32 * 7 + 8 : 16 + 8 + 8;
+          new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).setBigUint64(offset, slot, true);
+          ix.data = decoder.decode(bytes);
+        }
+      }
+      return tx;
+    };
+    source.getBlockSignatures = async () => [fixtures.cases[0].report.signature, fixtures.cases[1].report.signature];
+    expect(
+      (await readOrderLifecycle({ action: action(), reader: source, signal: new AbortController().signal })).execution
+    ).toBe("executed");
+    source.getBlockSignatures = async () => undefined;
+    expect(
+      (await readOrderLifecycle({ action: action(), reader: source, signal: new AbortController().signal })).execution
+    ).toBe("unresolved");
+  });
+
   it("paginates to the creation anchor and bounds a missing anchor without accepting failed keeper events", async () => {
     const source = reader([1, 0]);
     const getSignatures = source.getSignatures;
