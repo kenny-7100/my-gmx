@@ -1,114 +1,8 @@
 # 编码与自审规范
 
-核验日期：2026-10-25。编码与自我代码审查以本地 `gmx-prompts` 的相关规范为依据。本页提供入口和重点，不替代原文；后续工作应阅读当前版本及其引用资料。
+规则整理：2026-11-12；历史环境核验日期见对应专题。编码与自我代码审查以本地 `gmx-prompts` 的相关规范为依据。本页提供入口和重点，不替代原文；后续工作应阅读当前版本及其引用资料。
 
-日常入口以[精简启动卡](agent-task-start.md)和[双路径流程](linear-development-workflow.md)为准。下方是按故障/任务选择的参考，不是每次必做清单；普通需求不默认执行全栈规划、工作表或证据打包。原生验证仍遵循相关上游规范。
-
-## 执行前的环境检查与顺序
-
-失败原因尚未明确时，先按[Agent 失败诊断](agent-failure-diagnosis.md)从本次退出码、目标身份和失败阶段定位，再进入下方对应准备步骤；不为排障重复整套检查或修改业务预期。
-
-执行前先按[运行版本矩阵](agent-runtime-matrix.md)区分根 Node 20 声明、个人工具 Node 22 前置及 API patch 差异；进入目标目录后重新确认运行时，不自动修改配置或安装。Node patch 变化也可能使 SDK 来源收据失效：核验绑定实际 Node 完整版本，源码测试通过不能绕过产物 verify；具体实测与范围见版本矩阵。
-
-跨前端/API checkout 的任务先用[实际目标环境检查](agent-environment.md#实际目标目录检查)传入目标目录，按[全栈测试计划](agent-test-plan.md#全栈目标配置)分别选择基线和 API 离线/数据库 profile；配置、资源、迁移和删除等 uncovered 必须保留，不能用自动项通过代替。
-
-本机依赖状态未知时，可先按[本地环境清单](agent-environment.md)选择 `yarn agent:environment --checks node,yarn,frontend` 等必要项。该入口不启动服务或读取秘密，只盘点基础设施 checkout；已有有效准备可复用，不额外重复所有检查，独立交付目录仍验证目标自己的依赖。
-
-需要同时运行前端/API/RPC 时，按[全栈工作区说明](solana-dev-workspace.md)使用 `yarn solana:dev up/status/logs/stop`，核对所选服务及 borrowed/owned 归属。新启动持续工作区前，先按[组合预检](solana-dev-workspace.md#启动前的组合预检)用相同目录/服务/端口运行 `yarn solana:dev doctor`，一次处理依赖、Chrome 和占用缺项；已运行工作区的健康用 status，不为 doctor 自动停服。一次性 `solana:dev:check` 已内置同一预检，无需重复。持续调试独立前端 checkout 时，按同一说明显式传 `--project-dir PATH`，为目标选择空闲 Vite 端口；同时联调 API 功能分支时，up 显式加 `--api-dir PATH --api-port PORT`，先按同一说明确认 API 自身前置和服务启动授权，核对路径及 PID。status/logs/stop 和浏览器诊断也传同一前端目录，核对报告的目标身份，不误用基础设施目录的既有工作区。浏览器请求问题使用 `solana:dev:browser` 和 `solana:dev trace --id`；contracts 的 partial 不当作完整通过。当前前端未消费开发代理路径，不为环境验收补业务接入。仅需 API 时仍使用下文的独立 API 入口。
-
-本节用于安排当前任务已获授权的检查，不要求每次任务运行所有命令。用户已长期授权本地 Vite、Chrome 及已授权任务所需的本地页面验收；构建（含 SDK 构建）、其他服务及部署仍须遵循根 `AGENTS.md` 的授权边界；用户仅要求 `push` 时直接执行推送流程，不插入本节检查。纯文档修改只检查文档路径、链接及差异。
-
-仅需一次组合验收、不保留调试服务时，按[一次性组合验收](solana-dev-workspace.md#一条命令运行组合验收并停服)使用 `yarn solana:dev:check --project-dir PATH --api-dir PATH`，显式选择空闲端口；需要真实源码断点时再加 `--api-inspect-port PORT`。它复用既有工具并自动停止所属工作区，不先手动 up，不以已有工作区替代本轮实例。结束后核对 status、阶段退出和 cleanup；取消后等待正常退出和最终报告，本入口已为 Chrome 清理保留 15 秒，不立即追加强杀。失败看该次日志，不将 sample 探测当业务验收。
-
-1. **先确定目标与范围。** 需求验收先按[验收映射流程](agent-acceptance-workflow.md)实时核对需求，明确条件、预期、数据模式、方法和版本，再选择所需预检；复杂需求按需填写工作表；不将环境工具通过当作业务需求全部通过。涉及现有线上行为或真实数据时，先按[线上核验顺序](agent-acceptance-workflow.md#线上行为与数据核验)查对应 GMX/GMTrade 服务表并核对目标页面当前请求，再做本地或 PR 版本验证，不用历史环境文件认定当前部署。确认命令的工作目录、目标仓库和检查范围，再启动批量检查。主仓库含嵌套参考仓库，不能把它们当作前端测试或 TypeScript 配置的自动发现目标。单文件格式检查使用 `yarn exec prettier --check PATH`（写入时用 `--write`）；`yarn prettier` 是仓库全量格式化脚本，追加文件参数不会缩小原有范围。
-2. **根目录类型检查前，先确认 SDK 产物状态。** 先在根目录运行只读 `yarn sdk:artifacts verify`，按[SDK 产物准备说明](sdk-artifacts.md)核对来源、输入指纹及全部产物。缺收据、缺失、过期或损坏时，已获 SDK 构建授权则运行 `yarn sdk:artifacts build`，隔离预生成与编译、成功后替换忽略的产物，再 verify 和 `yarn tscheck`；未获授权时说明该前置条件，不自行构建。有效产物直接复用，不反复重建。旧 `yarn build-sdk` 仍可用于原发布流程，但会执行写入源码目录的 prebuild，且不生成该入口的来源收据。
-3. **完整前端构建前，先安排内存与执行顺序。** 已获完整构建授权且机器内存允许时，使用下方已验证的进程级内存配置；大型测试、类型检查和构建顺序执行，避免并发争用资源后再重跑。不修改全局 Node 配置，也不把提高内存当作处理所有构建失败的方法。独立交付 checkout 在 SDK 重建后运行完整测试前，先按[备份归档说明](sdk-artifacts.md#独立交付目录的测试发现)处理 `previous-build`，避免原 Vite 配置误收集编译后的测试；不以 Git 忽略状态推断 Vitest 会排除该目录。
-4. **失败后按已知特征诊断，再判断代码问题。** 对照下表核实原因，保留原始错误。处理前置条件后仍失败，应继续追踪真实代码或环境原因，不添加断言、虚假导出或兜底来压过错误。
-5. **keeper 相关验收先检查真实依赖。** 开展已授权的价格展示、价格计算或 Solana 交易验收前，先按[keeper 只读预检](keeper-preflight.md)运行 `yarn keeper:preflight`。默认请求头已处理确认过的 User-Agent 访问差异；查看逐项价格与 flags 结果。用户已批准本地开发用 `VITE_APP_SOLANA_TRADING_OVERRIDE=true/false` 模拟开关，使用时在报告中注明；预检仍检查真实接口，`blocked` 不作为真实交易前置通过，不能因真实开关缺失阻挡已授权 mock 范围的开发。
-
-6. **资金相关验收先核实网络和余额。** 在已获授权的 Solana 只读验收中，按[本地钱包说明](agent-wallet.md#mainnet-余额预检与执行顺序)先启动既有代理并运行 `yarn agent:wallet balances --network solana-mainnet`，涉及抵押代币或代币账户时再运行 `yarn agent:wallet tokens --network solana-mainnet`；成功后核对 mint、程序、状态与具体需求的资金条件，不将非零余额当成可花费额度。读取失败先诊断代理或上游，不把错误当零余额；Devnet 当前暂缓，不自动换公共 RPC。该预检不授予签名或发送权限。
-
-7. **样例 API 验收先使用现有 Solana launch mode。** 已获本地服务验收授权时，按[本地 Solana API 说明](solana-api-local.md#执行前准备与顺序)先运行 `yarn solana:api-local doctor` 汇总环境缺项；准备完成后，一次性验收优先运行 `yarn solana:api-local check`，自动限时启动、执行 14 项检查并清理所属服务。持续联调使用[持续服务入口](solana-api-local.md#持续运行的-solana-联调环境) `yarn solana:api-dev up` / `status` / `logs` / `stop`，需要断点时 up 显式加 `--inspect-port 9229`；简单前台运行仍可用 `start` / `verify`。先核实报告的 sample 模式和 apiDir，源码错误看日志，修正后由 watcher 重启；不为当前无数据库/RPC 依赖的 Solana 入口启动 EVM master 或旧后端。启动失败查看该次报告的 `logFile`，不反复猜测启动参数。仅修改或核对 API Solana 市场计算时，先运行 `yarn gmx-api:test-offline`，默认复用两个既有纯计算 suite，其他纯计算/离线模块可重复 `--suite src/...test.ts` 精确选择；先核实实际依赖，不要先启动无关数据库或因离线失败自动改用共享环境。离线测试若派生子进程，核对报告 `exit.cleanup=passed`；中断、超时或清理失败不得复用已写出的成功 Jest 结果。运行器只清理所属进程组，不手动结束其他本地服务。需要查看离线计算参数时，按[源码调试说明](solana-api-local.md#api-离线测试源码断点调试)选择单 suite 并加 `--inspect-port 9239`；先确认该次日志中的监听地址，再设置真实源码断点，结束后恢复并断开调试器。涉及 Solana pairs 数据库状态时，使用 `yarn gmx-api:test-integration`，先核实本地 Docker 与 postgres:15 镜像，再用独立临时容器运行原有数据库测试；其他 API 模块用重复 `--suite src/...test.ts` 指定实际范围。工具固定 Node/PostgreSQL 为 UTC；时间戳断言偏移时先核对报告时区与存取值，再判断代码错误，不直接改断言。不要把默认 Jest 指向共享数据库。 集成入口仅允许本次 PostgreSQL 及测试进程自建本地服务器；先核对 `network.installations` 等于 suite 数且 `blockedAttempts=0`。出现 `network-access-forbidden` 时检查真实依赖和日志，不关闭限制或吞掉异常；需要外部服务的测试按其完整环境验收。集成测试结束时同时核对 `exit.cleanup=passed`（测试进程组）和顶层 `cleanup=passed`（所属容器及临时目录）；仅容器已删除不能说明测试派生进程已清理。集成报告的 `sourceUnchanged` 同时核对原配置/迁移证据及全部 API 源码聚合指纹；若前后 `sourceInputs` 不同，先排查并发源码编辑并重跑，不能复用断言通过的结果。需要查看数据库测试中的实际参数时，按[集成调试说明](solana-api-local.md#数据库集成测试源码断点调试)选择单 suite 并加 `--inspect-port 9241`，保留原迁移/setup；先核对源码映射和真实模型断点，结束后恢复、断开并确认两类清理。需要 API 全项目类型检查时，使用 `yarn gmx-api:tscheck --api-dir PATH`，不要用根前端 `yarn tscheck` 代替；用于交付时在干净目标重跑，保留报告和日志，再用 `--require-clean --api-typecheck-report PATH` 绑定当前交付版本；它固定无输出、无增量缓存，并在编译前后验证路由来源，缺失/过期先显式 prepare，详见[API 类型检查](solana-api-local.md#独立-api-checkout-的类型检查)。测试导入 `src/app.ts` 或消费 TSOA 路由时，先运行 `yarn gmx-api:prepare --verify`；缺失/过期则对实际 API 根目录运行 `yarn gmx-api:prepare --api-dir PATH` 后再 verify；旧 schemaVersion 1、Node/实际生成器/TypeScript/工具脚本变化也要求重生成，先核对固定忽略输出约定，不复制或手改收据；出现 generation-in-progress 先查锁记录，不自动删锁，中断/失败后核对阶段 exit.cleanup 与 restoration，再 prepare/verify，随后对依赖生成路由的测试显式加 `--require-routes`，由运行器在建库前与测试后验证实际产物；缺失/过期时不自动生成，详见[路由准备说明](solana-api-local.md#gmx-api-路由生成准备与过期检查)。若出现 `ABI directory not found`，先核对隔离 CWD 的真实 `src/abi` 资源链接；运行器已自动提供，不改业务查找逻辑。HTTP、其他数据库场景及实时数据验收仍使用各自完整流程，所选回归通过不能代替。无需准备 EVM 数据库或 RPC；遇到 immutable 安装的 cacheKey 差异先核对文档中的压缩配置，不删除锁文件或升级依赖。样例通过不代表 reviewed contract 或真实链上数据通过。
-
-8. **组合验收先选择依赖检查项。** 同一任务依赖多个已有通道时，按[统一预检说明](agent-preflight.md)先准备已获授权的服务，再运行 `yarn agent:preflight --checks ...`，查看逐项状态后进入业务验收。钱包必须显式选择；keeper 的真实 blocked 不因本地 mock 被改为 passed，未选择项也不能当作通过。单一通道或需自定义端点时仍可直接使用原工具，不重复运行两套相同检查。
-
-9. **SDK 或部署版本相关验收先固定指纹。** 在已授权的 SDK/交易构建/程序升级影响验收中，按[版本证据预检](solana-runtime-preflight.md)先核对本地版本和已批准 WASM 摘要；需要链上证据时再通过现有代理读取 finalized 程序指纹。缺产物不自动构建，完整程序读取使用分段而不是整份 jsonParsed；遇到元数据变化或单段失败明确停止接受该摘要。钱包或样例 HTTP 等无关任务无需运行此项，指纹通过也不代表业务兼容。
-
-10. **依赖 ALT 的验收先核实表资源。** 在已获授权的交易构建/模拟相关工作中，按[ALT 预检说明](solana-alt-preflight.md)通过已启动代理运行 `yarn solana:alt-preflight`，先看生命周期、实际生效地址和 authority，再核对该笔交易的表成员与索引；blocked/failed 不能当作资源 ready。无 ALT 依赖的任务无需运行；不自动创建、替换或修改表。
-
-11. **已有 Solana 签名先核实链上回执。** 在已获授权的交易结果只读验收中，按[回执证据说明](solana-transaction-evidence.md)显式提供 Mainnet 和当前流程产生的签名，核对 finalized 状态、身份和 meta.err 后再进行订单/API 验证。blocked 不当作成功，transaction-failed 保留回执并排障；创建交易成功不代表 keeper 已执行。没有签名的单元/样例验收不运行此项，不自动签名或发送交易。
-
-12. **移交验收证据先固定包摘要。** 已完成检查并确认报告可归档后，按[证据包说明](agent-evidence.md)显式选取 JSON 产物打包；需移交工作表时先冻结并运行一致性检查，使用 `--worksheet` 与报告绑定；原生结果/日志等按需用 `--artifact name=PATH` 显式附加并记录原路径对应，不扫描目录、不推断附件语义。保存 manifestSha256 到包外可信交接记录，不写回已归档工作表；接收侧用 `verify --expected-manifest-sha256` 传入包外记录的摘要，确认 `manifestIdentity=matched` 后再消费报告；not-checked 仅代表未做这一步。打包不重跑检查、不更新观察时间、不授予上传权限，包 passed 不代表原报告或需求 passed。只需本地临时诊断时无需额外打包。
-
-13. **PR 页面验收先固定预览身份。** 已有页面验收授权时，按[本地预览说明](agent-preview.md)先执行 `yarn agent:preview --pr ... --expected-sha ...`，将 PR/head/不可变 URL/check 链接记入工作表，再打开该版本。解析失败不切换分支别名或旧成功部署；元数据 passed 不代表页面已验收，PR 更新后重新定位。单元/本地只读任务无需此项。
-
-14. **Solana 统计验收先核实索引依赖。** 目标数据确实来自现有 volumeRecords 时，按[索引预检说明](solana-index-preflight.md)先执行 `yarn solana:index-preflight`，核对配置默认来源与目标环境是否一致。GraphQL 错误不当空数据；旧/空/未来记录为 blocked，先核实活动范围和时钟，不将事件年龄直接当索引处理延迟。钱包/价格/样例验收不运行此项，不自动部署索引器或换源。
-
-15. **SDK 基础数值验收先执行真实 WASM 向量。** 按[基础向量说明](solana-sdk-vectors.md)运行 `yarn solana:sdk-vectors`，复用本地指纹前置并核对真实二进制结果，再进入该需求独立的复杂数学验收。缺产物不自动构建，失败不从 SDK 反向生成期望；基础 passed 不代表费用/PnL/清算或链上兼容。钱包/HTTP 等无关任务不额外执行。
-
-16. **远端 Solana API 验收先确认真实部署身份。** 先查[A03 资源协调与验收门槛](agent-acceptance-infrastructure.md#待协调资源与-a03-验收门槛)，取得实际部署地址、访问条件与版本/数据模式依据，再实施远端检查。公开域名的 pairs 正常、FESOL-62 Done 或本地 sample 通过均不能替代；新任务有新证据时再复核，入口仍缺失时协调负责人，不重复猜测 URL 或另建包装工具。
-
-17. **验收工作表交接前检查内部一致性。** 按[工作表检查说明](agent-acceptance-workflow.md#工作表自动一致性检查)运行 `yarn agent:acceptance --file PATH.md`，先修复占位符、无效证据引用及错误汇总，再报告结果。退出 2 表示所列条件尚未全部通过；一致性通过不证明需求完整覆盖或证据充分，不自动重跑历史检查或修改 Linear。仅做基础预检而未填写需求工作表时无需运行。
-
-18. **复用统一预检历史报告先比较相关源码。** 按[源码比较说明](agent-preflight.md#复用历史报告前比较源码指纹)执行 `yarn agent:preflight --compare-source REPORT.json`，变化时先核对影响范围，再选择需要复跑的项；不因无关 HEAD/文档变化机械重跑全部检查。比较通过不刷新历史数据有效期，也不把原 failed/blocked 改成通过；价格、余额、flags 和真实服务仍按当前验收要求检查。没有可复用报告时直接执行本次必要预检，无需先造基线。
-
-19. **Solana 开关页面验收先核实运行语义和依赖。** 按[本地只读冒烟说明](solana-browser-smoke.md)先运行 `yarn solana:browser-preflight`，按 Playwright/Chrome/SDK/discovery 逐项结果处理，再运行所需类型检查；需要恢复依赖时用 `yarn install --immutable --mode=skip-build`，普通安装会触发 SDK 构建钩子。现有 fixture 默认 `production-preview=true`，会使零投放的手动 AB 开关被清除；新入口显式关闭该选项且限定本地 development。准备通过后，当前已授权任务可直接启动本地 Vite/Chrome 并运行用例，无需再次确认；不将测试发现当页面通过。导航优先等待 `domcontentloaded` 后断言目标组件就绪；如 `load` 超时但主界面已显示，先查看 trace 与请求诊断，不靠加长超时或屏蔽外部请求通过。
-
-完整前端构建命令（工作目录：主仓库根目录；仅在已获构建授权、机器资源允许时执行）：
-
-```sh
-NODE_OPTIONS=--max-old-space-size=8192 yarn build
-```
-
-| 触发条件或错误特征 | 优先检查与处理 | 已确认的边界 |
-| --- | --- | --- |
-| 根测试日志出现嵌套参考仓库路径，或 Vite 扫描旧前端并提示缺少 `@docusaurus/tsconfig` | 先核对 `vite.config.ts` 的测试发现范围和 `tsconfigPaths.projects`，确认当前分支包含范围修复；不要先安装旧仓库依赖 | 当前主仓库测试已限定到 `src`、`landing`，TypeScript 配置发现已显式限定主项目、landing、SDK；正常使用会直接受益，无需每次另做扫描 |
-| 根类型检查出现 SDK 相关 `TS6305`、源代码中已有的导出却报 `TS2305`，或 SDK 类型字段与源码不一致 | 核对源码与 `sdk/build` 声明产物是否匹配；符合上述前置条件时先构建 SDK，再重跑类型检查 | 2026-10-24 验收中，更新忽略提交的 SDK 产物后完整类型检查通过；这些错误特征本身不等于已证明产物过期 |
-| 完整前端构建在 chunk rendering 阶段出现 `Reached heap limit` / `JavaScript heap out of memory` | 核实 Node 进程堆限制及主机可用资源；资源允许时采用上述 8 GiB 配置，并避免与其他大型检查并发 | 本机默认约 4 GiB 堆构建失败，8 GiB 配置成功；这是本项目已验证配置，不保证其他机器或未来构建同样适用。其他报错按原始错误排查，不持续盲目加内存 |
-
-同一任务中已完成且仍有效的准备工作应复用；源码、依赖、工具链或相关配置发生变化时，再判断哪些前置条件和检查失效。不要在每次小改动后重复整套准备。
-
-**API 源码调试验收：** 需要确认 Agent 能连接 inspector、命中当前 TypeScript 源码并读取变量时，使用[源码断点验收](solana-api-local.md#agent-可重复的源码断点验收) `yarn solana:api-debug`，默认独立端口并自动停服；仅在明确要复用已启用 inspector 的管理服务时加 `--attach --port PORT`，独立 checkout 同时指定 `--api-dir PATH`。组合联调按[工作区调试说明](solana-dev-workspace.md#工作区内的-api-源码断点调试)在 up 时显式加 `--api-inspect-port PORT`，先核对报告的调试地址和服务归属，再 attach；已有 API 未启用或端口不匹配时不自动重配。源码映射不一致或断点未命中应检查报告的失败阶段，不把 HTTP 健康检查当成调试通过；无断点需求的任务不增加此项。
-
-**Agent 工具回归：** 根 `yarn test:ci` 不覆盖个人基础设施脚本。修改跨工具公共能力或交接基础设施分支时，先按[统一离线回归](automation-tools.md#统一离线工具回归)运行 `yarn test:agent-tools`，一次覆盖脚本、RPC 代理及 CI 辅助测试；单工具小改仍可选原单项入口。确认原生结果后再安排本任务所需的类型、前端或真实服务验收，不把工具测试通过当作 RPC/keeper/API/页面 ready。新工具测试加入统一范围时，核实其保持离线且只使用临时资源，不把真实资金或外部服务检查放进默认回归。
-
-**按规划执行回归：** 已完成联合规划并核对测试依赖后，按[规划执行说明](agent-test-plan.md#按规划执行明确范围)显式运行 `yarn agent:test-run --plan PATH --scope sdk|frontend|both`。过期规划先重新生成，不手补摘要；执行后核对每侧原始结果、清理及整体状态，未选范围不当作通过。汇总不能用于单侧交付证据，干净交付版本仍按原规则绑定实际报告。
-
-**前端与 SDK 混合改动先联合规划：** 独立功能 checkout 只含源码变化时，按[联合规划说明](agent-test-plan.md)运行 `yarn agent:test-plan --project-dir PATH --changed-since REF`，一次核对两侧清单及完整 Git 范围。SDK 自身范围拆分后，前端消费者仍包含 SDK 输入；配置/删除/非源码变化需人工判断。规划不执行测试，不作为测试通过或交付证据；根据实际依赖再选择局部命令或完整环境。
-
-**SDK 关联范围预览：** BigMath 等共享 SDK 源码可能关联真实 RPC 测试，优先按[SDK 只发现说明](sdk-offline-tests.md#只发现关联测试)使用 `sdk:test-offline --discover-only --related src/...ts`，或配合 `--changed-since REF`。先核对清单和实际依赖再选择离线 suite 或完整环境；`sdk-source-discovery` 的 passed 仅表示发现通过，不用于交付测试证据，不代表所列测试可离线运行。核对发现网络/清理及前后源码、工具与 Git 范围；不执行测试、setup 或 global setup。
-
-**前端关联范围预览：** SDK 共享模块或未知影响范围优先按[只发现说明](frontend-offline-tests.md#只发现关联测试)加 `--discover-only`，与 `--related` 或 `--changed-since` 配合，先读取真实 suite 清单再决定局部或完整回归。不执行测试或 global setup；核对 `mode=frontend-source-discovery`、`testsExecuted=false`、发现网络/清理及前后源码/工具/Git 范围。发现 passed 不代表测试通过，不能用于交付测试证据；仍需实际执行所需回归。
-
-**前端关联测试：** 已知修改的 src/landing/sdk/src 源码而不确定所需前端 suite 时，按[关联测试说明](frontend-offline-tests.md#按源码依赖图选择关联测试)使用 `frontend:test-offline --related src/...ts` 或 `--related sdk/src/...ts`，独立目录显式加 `--project-dir PATH`。前端与 SDK 源码混合改动也可用 `--changed-since REF` 从明确的 Git 基线收集提交/索引/工作区/未跟踪源码；先确认 `changes.baseSha` 和完整路径范围，结束时要求 `changesUnchanged=true`，配置、删除或混合非代码改动必须人工评估并选测试。输出仍只有前端测试，SDK 自身测试另用 SDK 入口。先核对发现的精确清单、发现阶段网络审计与清理，再接受实际测试结果；零关联或图解析失败不代表无须测试，应按真实依赖/资源修复，或人工明确选择 `--suite`。配置、删除文件或动态导入影响仍须独立判断。发现与执行均在空 CWD，入口已通过临时绝对路径 Lingui catalog 配置和 loopback 主机处理资源定位。若出现 `.po` 的 `not matched to any of your catalogs paths`，先核对目标 JSON `.linguirc` 及本次临时配置的 rootDir/path/include/exclude；这是已复现的相对路径/CWD 问题，查看 discovery.log 或 vitest.log，不关闭翻译插件、读取目标 `.env` 或放宽网络保护。
-
-**交付目录与验收身份：** 独立交付 checkout 完成测试后，按[交付隔离检查](agent-delivery-evidence.md#交付隔离自动检查)显式传 `--project-dir PATH --require-clean`，核对实际 HEAD 与待交付 head 相同，且暂存、未暂存、未跟踪列表为空；比较测试报告的目标路径和 commit。需复用前端、SDK 或浏览器结果时显式加 `--frontend-report PATH` / `--sdk-report PATH` / `--browser-report PATH`（可同时选择），按同一流程自动绑定源码/工具指纹并复核原生结果；证据 blocked 时重跑正确目标的测试，不手改报告或省略检查。默认历史检查的 `worktree.status=not-checked` 不代表干净；blocked 不自动清理文件、切换分支或转移提交。只读 Git 工具使用 `GIT_OPTIONAL_LOCKS=0` 并对 diff 禁用 `diff.autoRefreshIndex`，不能仅凭命令名称推定不写索引；本工具已内置，无需修改全局配置。检查后源码变化时重新验收。
-
-**前端局部离线测试：** 需要隔离本机配置并防止意外联网时，使用[前端离线入口](frontend-offline-tests.md) `yarn frontend:test-offline --suite src/...spec.ts`，可重复指定 src/landing 文件；验证独立交付 checkout 时显式加 `--project-dir PATH`，先按同一文档准备目标自己的依赖，再核对报告的 projectDir、commit 和测试路径，避免误测开发目录；保留原 Vite/happy-dom、初始化和时区。需要源码断点时选择单 suite 并加 `--inspect-port 9240`，按同一文档连接本次单 fork 调试目标，核对 source map 和真实断点；结束后恢复、断开并核对 `exit.cleanup`。原配置需要 Git/PWA、Lingui/Babel 及 Vitest CLI root 定位，入口已显式处理，不通过读取根 `.env` 或删除原 setup 绕过启动问题。失败先看本次日志，真实网络/浏览器需求使用对应验收入口，不关闭保护；完整前端回归仍用 `yarn test:ci`。
-
-**SDK 纯计算回归：** 根 `yarn test:ci` 不覆盖 `sdk/`。需要验证 SDK 数值、BigInt、费用或其他可离线测试时，使用[SDK 源码离线入口](sdk-offline-tests.md) `yarn sdk:test-offline` 或重复 `--suite src/...spec.ts` 指定范围，复用原配置和源码，无需先构建 SDK 或启动服务。独立交付目录显式加 `--sdk-dir PATH/sdk`，先准备目标自己的锁定依赖；核对报告的 `sdkDir`、commit、`runtime.executable` 和目标锁文件摘要。缺依赖或 Vitest 版本不兼容先处理目标环境，不链接开发目录依赖绕过；详见同一文档的独立目录说明。意外联网会明确失败，先核对所选测试的真实依赖，不关闭保护或修改业务预期；该入口通过不代表完整 SDK、Solana 协议或发布产物已通过。 需要断点时显式单选 suite 并加 `--inspect-port 9238`，按[SDK 调试说明](sdk-offline-tests.md#sdk-源码断点调试)连接单 worker、核对源码映射与实际参数；不以 inspector 启动或原测试通过代替目标断点证据。调试端口冲突先换空闲端口，不连接未知监听。SDK 入口已复用共享进程组管理，中断/超时后先核对 `exit.cleanup=passed` 和临时目录清理；清理失败不得复用已生成的成功测试结果，也不手动结束其他任务。
-
-**独立 API 测试目录：** 验证 API 功能分支时，按[独立 checkout 说明](solana-api-local.md#在独立-api-checkout-中运行测试)显式传 `--api-dir PATH --suite src/...test.ts`；先准备目标自己的锁定依赖，核对报告 `apiDir`、`source.commit/dirty` 和源码指纹。目标必须为 API Git 根目录；普通模块不再要求无关 Solana 样例，真实导入、Jest/DB setup 和生成路由前置仍须满足。不要将开发目录结果当作交付版本证据。 需要用于 API 交付时，按[API 证据绑定](agent-delivery-evidence.md#api-测试证据绑定)对该 API 仓库显式传 `--require-clean --api-report PATH`，并使用 API 自己的 release、开发基础和交付引用；保留报告、原生 Jest 结果及网络日志，源码/工具/版本变化后重跑。依赖生成路由时使用 `--require-routes` 生成报告，交付检查会只读复核三份路由来源证据；当前生成器、产物或收据失效时先按路由准备流程处理，再重跑测试。
-
-**离线网络审计：** 前端、SDK 和 API 离线测试结束时，按[共享审计说明](frontend-offline-tests.md#结束时核对网络审计)核对 `network.status=passed`、安装数等于所选文件数、拒绝次数为 0；缺日志或捕获后的联网尝试不当作通过。出现失败先查本次事件/Jest/Vitest 日志和测试实际依赖，不关闭 guard 或修改汇总。交付检查会重新读取前端/SDK 的事件日志，保留日志和原生结果；普通与断点模式相同。
-
-**独立页面冒烟：** 已授权运行本地网络选择页面验收、且不需要保留开发服务时，优先执行[管理入口](solana-browser-smoke.md#一条命令执行并保存独立报告) `yarn solana:browser-check`，复用预检并由 Playwright 管理独立端口的 Vite，逐次保存原生报告并停服；无需先运行一遍相同预检。验证独立功能 checkout 时显式加 `--project-dir PATH`，先准备目标锁定依赖和相同已批准 SDK 资源，核对 `projectDir`、`targetBefore/targetAfter` 及 Playwright checkout 元数据；不把基础设施预检身份当成目标版本。端口占用时显式换未用端口，不接管既有服务。手动联调仍可使用原两终端入口，无页面验证需求的任务不增加此项。
-
-**中断 Playwright 管理的服务：** 需要停止当前锁定版本 Playwright CLI 的测试时，向 CLI 发 SIGINT，使 runner 执行 teardown；不要直接用 SIGTERM 假定其会清理 webServer。管理入口已将外部 SIGINT/SIGTERM 转为该行为。异常结束后先查端口和所属进程，不能因 CLI 已退出就认定 Vite 已停止；原因与实测见[浏览器冒烟说明](solana-browser-smoke.md#一条命令执行并保存独立报告)。
-
-以上经验来自 2026-10-24 的[本地 RPC 代理验收记录](agent-acceptance-infrastructure.md)；具体事实与验证边界保留在主题文档，本节维护影响后续执行顺序的通用步骤。
-
-**只读 Git 工作树范围：** `--changed-since` 已使用内容差异避免 stat 缓存误报。文件恢复原字节后仍被 `diff --name-only` 列为变化时，先核对 blob/numstat，按[范围说明](frontend-offline-tests.md#按-git-变更范围运行局部回归)处理，不为消除提示刷新用户索引；两个已提交树之间的比较不受此项影响。
-
-**API 局部回归范围：** 不清楚源码改动影响哪些 API 测试时，先按[原生测试发现](solana-api-local.md#按源码依赖发现-api-测试)执行 `yarn gmx-api:discover-tests --api-dir PATH --related src/...ts`，检查直接及间接 suite 的真实依赖，再明确传给已有离线或隔离数据库入口。发现不执行测试或建库，不自动判断 profile；零匹配需核对覆盖并人工选测试，不当作验收通过。
-
-**SDK 关联回归：** 已知改动源码而不确定 suite 时，按[SDK 依赖选择说明](sdk-offline-tests.md#按源码依赖选择回归)使用 `sdk:test-offline --related src/...ts`，独立目录加 `--sdk-dir PATH/sdk`。先检查 `discovery` 的清单、网络审计和清理，再核对顶层实际执行结果；零匹配或关联到真实服务的测试失败都不代表已验收。需要断点时明确单选 `--suite`，不把调试与自动发现混用。
-
-**API Git 回归范围：** 纯 API 源码功能分支可按[范围发现说明](solana-api-local.md#按-api-git-变更范围发现测试)用 `gmx-api:discover-tests --api-dir PATH --changed-since REF` 固定目标 API 基线，收集已提交/暂存/未暂存/未跟踪源码。先核对 `changes.baseSha` 和路径，再确认 `changesUnchanged=true`、原生清单及网络/清理结果；配置、迁移、删除或空范围需人工评估后使用 `--related`。发现之后仍显式选择测试环境，不将主仓库基线套用到嵌套 API。
-
-**SDK Git 回归范围：** SDK 纯源码功能分支按[范围说明](sdk-offline-tests.md#按-git-变更范围运行回归)使用 `sdk:test-offline --sdk-dir PATH/sdk --changed-since REF`。先核对目标 `changes.checkoutDir`、`sdkPrefix`、基线 SHA 和完整路径，再确认 `changesUnchanged=true`、原生清单、网络及清理结果；SDK 配置、前端或根配置混入、删除、空范围均需人工评估后显式选 `--suite`。不能把断言通过当成执行期间范围保持一致，调试仍使用单 suite。
-
-**离线工具变化：** 前端和 SDK 离线验收成功前，按[工具指纹说明](frontend-offline-tests.md#结束时核对工具指纹)确认 `toolingUnchanged=true` 及前后工具指纹相同。`tooling-evidence` 失败时，先结束并发工具编辑，再用稳定工具重跑；原生断言通过不能覆盖此失败。交付检查要求这项证据，旧报告缺字段需重跑，不手补状态或指纹。
+日常执行与复用见[任务启动卡](agent-task-start.md#执行与复用)；按当前开发、自审或测试场景读取下方相关规范。
 
 ## 查阅入口
 
@@ -148,3 +42,22 @@ NODE_OPTIONS=--max-old-space-size=8192 yarn build
 - 上游开发规范要求类型检查和单元测试；按改动执行适用检查并如实说明未运行项。本地 Vite/Chrome 与当前已授权任务所需的页面验收已有长期授权；构建、部署及其他服务仍按根 `AGENTS.md` 的独立授权执行。
 - 上游提到的自动 pull、分支切换、向官方仓库推送等流程不能覆盖本地授权范围；使用当前工作区实际路径，遵守个人 `my-` remote 和直接 push 约定，不在 push 时插入自审或检查。
 - 上游通用的回退建议不能覆盖 Solana 特定的数据来源约束，也不能成为添加推测性兜底的理由。
+
+## 执行前的环境检查与顺序
+
+先按[任务启动卡](agent-task-start.md#执行与复用)确定目标、范围和最短验证路径；已有有效准备直接复用，失败时按[诊断入口](agent-failure-diagnosis.md)定位。下表只在当前任务触发对应场景时查阅具体操作，不逐项执行。
+
+| 当前场景 | 操作与详细入口 |
+| --- | --- |
+| 目标运行时或依赖未知 | [版本矩阵](agent-runtime-matrix.md)、[目标环境](agent-environment.md#实际目标目录检查)；只检查需要的环境，独立 checkout 核对自身锁定依赖 |
+| 根类型检查或 SDK 产物消费者 | 先 `yarn sdk:artifacts verify`；缺失/过期且获授权才构建，再运行相关检查，见[SDK 产物](sdk-artifacts.md) |
+| 前端/SDK/API 局部测试 | 已知 suite 直接运行；未知范围才发现/规划，见[前端](frontend-offline-tests.md)、[SDK](sdk-offline-tests.md)、[API](solana-api-local.md)、[联合规划](agent-test-plan.md)；源码纯计算不先构建或启动无关服务 |
+| Agent 工具修改 | 独立工具选择单项回归；跨工具共享能力或整体验收用[统一回归](automation-tools.md#统一离线工具回归)；纯文档只检查链接与差异 |
+| 页面或前后端联调 | [浏览器](solana-browser-smoke.md)、[工作区](solana-dev-workspace.md)、[API](solana-api-local.md)；选择一次性验收或持续服务，管理入口已包含的预检不再单独执行；断点按需启用 |
+| 真实服务、价格或链上资源 | 按需求选择[线上核验](agent-acceptance-workflow.md#线上行为与数据核验)、[keeper](keeper-preflight.md)、[钱包](agent-wallet.md)、[ALT](solana-alt-preflight.md)、[回执](solana-transaction-evidence.md)、[索引](solana-index-preflight.md)；多通道可用[统一预检](agent-preflight.md)，不重复检查同一依赖 |
+| SDK/程序兼容或数学验收 | [版本指纹](solana-runtime-preflight.md)、[真实 WASM 向量](solana-sdk-vectors.md)；基础通过不等于复杂计算、链上兼容或业务通过 |
+| 远端 API 或 PR 页面验收 | 先核对[实际部署资源](agent-acceptance-infrastructure.md#待协调资源与-a03-验收门槛)或[不可变预览身份](agent-preview.md)，不以 sample、旧成功部署替代 |
+| 完整构建、报错或清理失败 | 按[失败诊断](agent-failure-diagnosis.md)与本次日志处理；大型构建/测试避免资源争用，只清理所属资源 |
+| 最终交付或原始证据移交 | 普通任务按[最短交付路径](linear-development-workflow.md#最短交付路径)；复杂任务或明确要求时使用[严格检查](agent-delivery-evidence.md)、[工作表](agent-acceptance-workflow.md)、[证据包](agent-evidence.md) |
+
+运行器的目标身份、源码/工具一致性、网络审计、退出与清理要求按所选专题执行；不能为提速跳过其有效性检查。构建、服务与外部操作沿用根授权。专项细节只维护在上述专题，新增经验按触发条件加入对应入口。
