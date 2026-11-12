@@ -24,7 +24,7 @@ start 会先同步个人基础再创建独立 worktree，不切换调用方分�
 ## 开发与主动沉淀
 
 1. 新需求先实时读取[Linear 正文、关系和评论](linear-requirements.md)，核对关键依赖 PR 是否进入 release；只查本任务相关项。记录最少的验收条件、业务范围和依赖到任务说明或 PR，不默认创建工作表。
-2. 业务与个人基础设施改动分开提交。已安装 Husky 时，纯 AGENTS/docs/.agents/scripts/tools（含本入口 pre-commit）提交只检查暂存差异，不触发 SDK/本地化生成；仍在提交前执行相关工具测试。业务、共享配置、gitlink 或混合提交走原上游钩子。共享文件混改时按 hunk 拆分；不能靠后缀或文件名单替代语义审查。commit 英文并附需求编号。
+2. 业务与个人基础设施改动分开提交。已安装 Husky 时，纯 AGENTS/docs/.agents/scripts/tools（含本入口 pre-commit）提交只检查暂存差异，不触发 SDK/本地化生成；仍在提交前执行相关工具测试。业务、共享配置、gitlink 或混合提交走原上游钩子。共享文件混改时按 hunk 拆分；不能靠后缀或文件名单替代语义审查。commit 英文，有关联需求时附真实编号；具体见[提交与 PR 规范](#commit分支与-pr-表达规范)。
 3. 已确认的环境经验、长期偏好、工具改进在可复用节点主动沉淀到已有主题/skill；回流时明确选择已审查的基础设施提交，保留业务开发现场。
 
 ```sh
@@ -47,7 +47,7 @@ node scripts/agent-workflow.mjs backflow --issue FESOL-123 \
 1. **准备**：完成当前基础设施回流，确认业务提交及未合并依赖。依赖不在 release 时明确等待，或按已确认的依赖 PR 顺序处理，不伪称可独立交付。
 2. **重建**：从 fetch 后的最新 release 创建交付 worktree，只选择本需求业务提交。工具按提交复制，不能自动理解混合补丁或丢弃前置实现。
 3. **复核与验证**：检查最终完整 diff 和提交历史，确认无个人基础、参考仓库和无关功能；在实际交付目录执行相关测试及上游要求的检查。记录命令、结果、目标 SHA 和未覆盖项，避免无变化重复执行。依赖安装按目标锁文件，SDK/WASM 或生成路由按对应环境入口准备。
-4. **PR**：推送正式 fork `my-gmx-pr`，向 `gmx-io/gmx-interface:release` 建 Draft PR，英文 Summary、Linear URL 和简短真实 Validation。普通 PR 无需额外证据包。适用时按 gmx-prompts 自审最终 diff，发现问题直接在交付工作区修复。
+4. **PR**：推送正式 fork `my-gmx-pr`，向 `gmx-io/gmx-interface:release` 建 Draft PR，标题、Summary、Linear、真实 Validation 和发布事项遵循[提交与 PR 规范](#commit分支与-pr-表达规范)。普通 PR 无需额外证据包。适用时按 gmx-prompts 自审最终 diff，发现问题直接在交付工作区修复。
 
 ```sh
 node scripts/agent-workflow.mjs deliver --issue FESOL-123 \
@@ -63,6 +63,49 @@ git -C /path/to/delivery push my-gmx-pr HEAD
 `my-gmx` 是个人镜像；`my-gmx-pr` 是正式 GitHub fork。独立镜像不能作为同一 fork 网络的 PR 来源。创建 PR 前用 gh 核实 fork 关系和远端 head，不向 origin 推送；正文用临时文件及 `--body-file` 传递。个人 fork 的报告发布可能受只读 token 限制，区分原生测试失败和报告发布失败。
 
 deliver 默认拒绝个人目录和 gitlinks，选中提交必须属于登记的任务分支；真实业务文档/脚本被路径规则拒绝时按原生 Git 精确转移并审查，不伪装路径。原生命令同样可用：`git worktree add -b DELIVERY PATH origin/release` 后选择性 cherry-pick；不为使用工具强行改提交结构。
+
+## Commit、分支与 PR 表达规范
+
+依据：[上游发布流程第 3 节](../gmx-prompts/docs/onboarding/release-process.md#3-pull-requests-and-ci)（2026-11-12 核对）。使用前按子仓库规则核验相关规范的新变化；下面明确区分上游要求和本地写作约定。
+
+### Commit 与分支
+
+- 本地约定：commit 英文，以动作说明实际结果，例如 `Fix stale Solana order status FESOL-123`；有明确关联需求时带真实编号，没有编号的基础设施维护不编造编号。当前已核对的上游规则未要求 Conventional Commits，不强制添加 `feat:` / `fix:`。
+- 一个提交表达一个可审查目的。业务与个人基础设施分开；避免 `update`、`fix stuff` 或把聊天过程当标题。只有改动动机/兼容性不明显时再补正文，不要求普通提交套模板。
+- 上游要求分支名使用 kebab-case；本地示例 `fix-solana-order-status-fesol-123`，交付分支可用 `fix-solana-order-status-release-fesol-123`。需求编号取实际 Linear，不硬编码本例。
+
+### PR 标题
+
+- 按根约定使用英文描述；**上游要求末尾是 Linear issue id**，例如 `Fix stale Solana order status FESOL-123`。编号之后不再追加标点、`Draft`、状态或其他标签；Draft 由 GitHub 状态表达。
+- 标题描述最终交付行为，范围变化时同步重写标题和正文；不写个人环境、整理分支或回流过程。普通需求目标为 release；`Release ...` / `Hotfix ...` 是发布/热修复流程的标题，不套用到一般需求。
+
+### PR 正文与 Summary
+
+- **上游要求包含**：Linear issue id；部署后事项（没有则 `None`）；breaking-change 分类（见上游发布流程第 5 节，没有则 `None`）；未完成工作所用 flag 及默认值。上游目前没有统一 PR 模板；下面是本地推荐的简短结构，不是新增的强制表单。
+- **Summary 写法**：先说具体问题或触发条件，再说改动后的行为和必要原因；按最终 diff 写给没看过聊天的 reviewer。简单 PR 一两句话即可，复杂变更才分项。范围、依赖或发布顺序影响理解时再补，不复述排障时间线、废弃方案或文件清单。
+- **Validation 写法**：只列实际执行的命令与结果，说明关键行为、未覆盖项或阻碍。在实际交付 checkout 验证；未执行不写 passed，工具演练不写成业务端到端验收。本机日志路径不能当作 reviewer 可访问的附件。
+- Linear 放真实完整 URL；跨仓库兼容性、未合并前置和 SDK/API 发布顺序有影响时明确说明。源码、范围或验证状态变化后更新正文，不能继续沿用旧结论。
+
+```markdown
+## Summary
+
+Fix stale Solana order status after an order update by refreshing the affected order data.
+
+Linear: <actual Linear issue URL containing FESOL-123>
+
+## Validation
+
+- <command actually run>: <observed result>
+- <material coverage gap, if any>
+
+## Release notes
+
+- Post-deploy chores: None.
+- Breaking changes: None.
+- Feature flag: <actual flag and default for unfinished work; otherwise omit>
+```
+
+示例只演示结构，不能复制为未实现/未验证的声明。有 breaking change 时替换 `None` 为实际分类、消费者影响和发布顺序；有部署后事项则写明具体操作。PR 正文通过临时文件与 `gh ... --body-file` 提交，保留真实换行。保持 Draft，发 PR、邀请 reviewer、转 Ready 和合并按根授权处理。
 
 ## PR 后的唯一工作现场
 
