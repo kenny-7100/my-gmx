@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const config = JSON.parse(readFileSync(new URL("../../src/config/solanaRpc.json", import.meta.url), "utf8"));
+const config = JSON.parse(readFileSync(new URL("./config.json", import.meta.url), "utf8"));
 const url = process.env.SOLANA_RPC_PROXY_URL || config.localUrl;
 const program = "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo";
 const rpc = (method, params = []) => ({ jsonrpc: "2.0", id: 1, method, params });
