@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { mutate } from "swr";
 
 import { SOLANA_NETWORK_ID, isSolanaNetwork } from "config/chains";
@@ -17,10 +17,18 @@ export function useGmsolOrderTransactions() {
   const { networkId } = useChainId();
   const current = useRef({ wallet, networkId });
   current.current = { wallet, networkId };
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const pending = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submit = useCallback(async (action: GmsolOrderAction) => {
+    requireGmsol(mounted.current, "Solana order flow is closed");
     requireGmsol(!pending.current, "A Solana order is already being submitted");
     const { wallet, networkId } = current.current;
     const owner = wallet.address;
@@ -32,13 +40,17 @@ export function useGmsolOrderTransactions() {
     setIsSubmitting(true);
     try {
       const plan = await prepareGmsolOrderTransactions({ owner, action });
+      requireGmsol(mounted.current, "Solana order flow closed before signing");
       return await sendGmsolOrderTransactions({
         plan,
         getWalletAddress: () =>
-          isSolanaNetwork(current.current.networkId) ? current.current.wallet.address : undefined,
+          mounted.current && isSolanaNetwork(current.current.networkId) ? current.current.wallet.address : undefined,
         signTransaction: async (bytes) => {
           const session = current.current.wallet;
-          requireGmsol(session.address === owner && session.signTransaction, "Connected Solana wallet changed");
+          requireGmsol(
+            mounted.current && session.address === owner && session.signTransaction,
+            "Connected Solana wallet changed"
+          );
           return session.signTransaction(bytes);
         },
         onConfirmed: async ({ slot }) => {
@@ -51,7 +63,7 @@ export function useGmsolOrderTransactions() {
       });
     } finally {
       pending.current = false;
-      setIsSubmitting(false);
+      if (mounted.current) setIsSubmitting(false);
     }
   }, []);
 
