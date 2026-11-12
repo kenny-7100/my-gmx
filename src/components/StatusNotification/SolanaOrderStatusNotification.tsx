@@ -12,6 +12,7 @@ export type SolanaOrderNotificationState = {
   submission: "sending" | "submitted" | "failed" | "unknown";
   signatures: readonly string[];
   trackExecution: boolean;
+  isTracking: boolean;
   execution: "unresolved" | "executed" | "cancelled";
   executionSignature: string | undefined;
   reason: string | undefined;
@@ -35,7 +36,7 @@ export function SolanaOrderStatusNotification({ state }: { state: SolanaOrderNot
       ? "success"
       : state.execution === "cancelled"
         ? "error"
-        : state.submission === "submitted"
+        : state.submission === "submitted" && state.isTracking
           ? "loading"
           : "muted";
   const signature = state.signatures[state.signatures.length - 1];
@@ -51,6 +52,8 @@ export function SolanaOrderStatusNotification({ state }: { state: SolanaOrderNot
               <Trans>Order filled</Trans>
             ) : state.execution === "cancelled" ? (
               <Trans>Order canceled</Trans>
+            ) : !state.isTracking && state.submission === "submitted" ? (
+              <Trans>Order outcome not confirmed. Check the transaction for updates.</Trans>
             ) : (
               <Trans>Fulfilling order request...</Trans>
             )
