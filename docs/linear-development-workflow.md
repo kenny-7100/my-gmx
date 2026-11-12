@@ -19,7 +19,7 @@ node scripts/agent-workflow.mjs start --issue FESOL-123 \
 node scripts/agent-workflow.mjs status --issue FESOL-123
 ```
 
-start 会先同步个人基础再创建独立 worktree，不切换调用方分支。按根规则已获开发授权时直接执行。Git 共享目录 `agent-workflow/FESOL-123.json` 保存开发目录/基线、回流提交及交付目录，不进入源码或 PR；新会话先读 status，不依赖旧聊天。已有任务使用下面的 register/rebind 登记，不为使用工具重建分支；没有 Linear 编号的本地任务用 `--task kebab-case-name`，与 `--issue` 二选一，本地文件名为 `local-NAME.json`，不编造需求编号。
+start 会先同步个人基础再创建独立 worktree，不切换调用方分支。按根规则已获开发授权时直接执行。Git 共享目录 `agent-workflow/FESOL-123.json` 保存开发目录/基线、回流提交及交付目录，不进入源码或 PR；新会话先读 status，并读取其 issueKnowledge 指向的[长期 issue 记录](issues/README.md)，不依赖旧聊天。已有任务使用下面的 register/rebind 登记，不为使用工具重建分支；没有 Linear 编号的本地任务用 `--task kebab-case-name`，与 `--issue` 二选一，本地文件名为 `local-NAME.json`，不编造需求编号。
 
 ## 接入已有分支或 PR
 
@@ -72,13 +72,15 @@ node /path/to/base/scripts/agent-workflow.mjs note \
 
 可选 `verification` 对象必须包含 `worktree`、完整 `head`、实际 `command` 和 `result`（passed/failed/blocked/not-run）；设置为 null 清除。它是 Agent 对已运行验证的简记，工具不执行该命令、不生成验收证据。记录时核对实际权威工作区、HEAD 和干净状态；status 的 `verificationCurrent` 仅表示记录对应当前干净 checkout。提交变化、工作区变脏或切换交付目录后为 false；即使为 true，也不能据此断言外部服务、忽略产物或验证结果有效，应按具体输入和范围判断复用。
 
+status 即使没有本地任务记录，也会在 issueKnowledge 中定位个人基础的 `docs/issues/ISSUE-ID.md`，区分记录存在/缺失、基础不可用和路径受阻；不会创建文档、登记任务或阻断交付。
+
 status 返回实际开发/交付分支与 HEAD、dirty、未完成 Git 操作、分支是否匹配、权威工作位置、pending 目标现场与上下文是否需复核，以及个人基础位置/HEAD/知识变化路径。路径列表只是相关检索入口，不要求全部阅读；个人基础 dirty 会显式提示。远端 PR head、Linear 和部署仍按相关节点实时核验，不以本地记录替代。
 
 ## 开发与主动沉淀
 
 1. 新需求先实时读取[Linear 正文、关系和评论](linear-requirements.md)，核对关键依赖 PR 是否进入 release；只查本任务相关项。记录最少的验收条件、业务范围和依赖到任务说明或 PR，不默认创建工作表。
 2. 业务与个人基础设施改动分开提交。已安装 Husky 时，纯 AGENTS/docs/.agents/scripts/tools（含本入口 pre-commit）提交只检查暂存差异，不触发 SDK/本地化生成；仍在提交前执行相关工具测试。业务、共享配置、gitlink 或混合提交走原上游钩子。共享文件混改时按 hunk 拆分；不能靠后缀或文件名单替代语义审查。commit 英文，有关联需求时附真实编号；具体见[提交与 PR 规范](#commit分支与-pr-表达规范)。
-3. 已确认的环境经验、长期偏好、工具改进在可复用节点主动沉淀到已有主题/skill；回流时明确选择已审查的基础设施提交，保留业务开发现场。
+3. 每个经手 issue 的工作/问题/处理/结果及时更新[issue 文档](issues/README.md)，包含调研他人任务的结论；暂停、交接和交付前检查遗漏与回流位置。通用经验、长期偏好、工具改进沉淀到已有主题/skill，并从 issue 链接过去；回流时明确选择已审查的基础设施提交，保留业务开发现场。
 
 ```sh
 # Transfer only reviewed, separate infrastructure commits, in dependency order.
@@ -193,5 +195,6 @@ recover 不代做 Git 恢复。completed 需要干净且分支匹配、历史由
 - 实际 fetch 并合入 `origin/release` 的 `24cd9b16d6`，维护 merge 为 `7b704a98fa`。采用上游交易开关实现，代理配置移到 tools；`src`、`sdk`、`landing` 相对该 release 无个人差异。Vite 的嵌套目录扫描限制继续作为环境配置保留。
 - 隔离真实 Git 仓库演练覆盖创建任务、基础设施回流、等价补丁跳过、上游前进后纯业务交付；同时验证混合/外来提交、脏基础、gitlink 拒绝，以及预合并冲突不污染现场、回流冲突保留 pending 和恢复位置。
 - 新增纯基础设施 pre-commit 快路，业务/共享配置/混合提交仍走原路径。当前机器没有安装 Husky hook（没有 core.hooksPath 或 hook 文件），因此原构建钩子并非已证实的本机耗时来源；修改用于安装/恢复 hook 后的工作流，不为本轮验收全局安装钩子。
-- `yarn test:agent-tools` 共 141 项全部通过，其中双路径、上下文恢复、已有任务绑定、协作整合和并发/原子写入 12 项；相关脚本通过 Node 环境 ESLint 与 Prettier。ESLint 显式采用 Node 运行环境，允许 CLI 输出和 Node 已支持的 async iteration/top-level await；未改前端 lint 配置。两个更新的项目 skill 通过 quick_validate，改动 Markdown 的本地链接检查通过。
-- 本轮未运行完整前端类型检查、业务测试或构建，未做真实业务 PR 发布；工具演练不代表业务验收。原始工具回归日志保留在本机 `/tmp/gmx-collaboration-agent-tools.tap`，可被系统清理。
+- `yarn test:agent-tools` 共 142 项全部通过，其中双路径、上下文恢复、已有任务绑定、协作整合、issue 知识定位和并发/原子写入 13 项；相关脚本通过 Node 环境 ESLint 与 Prettier。ESLint 显式采用 Node 运行环境，允许 CLI 输出和 Node 已支持的 async iteration/top-level await；未改前端 lint 配置。四个更新的项目 skill 通过 quick_validate，11 份改动 Markdown 的 137 个本地链接检查通过。
+- issue 定位演练覆盖未登记任务、旧开发 worktree 读取个人基础、未跟踪/已提交/待更新记录、符号链接受阻与个人基础不可用；真实 `FESOL-55` 入口只索引已有历史验收，不宣称重新完成业务验收。
+- 本轮未运行完整前端类型检查、业务测试或构建，未做真实业务 PR 发布；工具演练不代表业务验收。最新原始工具回归日志保留在本机 `/tmp/gmx-issue-knowledge-agent-tools.tap`，可被系统清理。
