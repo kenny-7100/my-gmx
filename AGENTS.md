@@ -14,7 +14,7 @@
 
 | 场景 | 入口 |
 | --- | --- |
-| 实施需求、回流沉淀、整理 PR | [交付 skill](.agents/skills/gmx-solana-task-delivery/SKILL.md)、[日常流程](docs/linear-development-workflow.md) |
+| 实施需求、回流沉淀、整理 PR | [交付 skill](.agents/skills/gmx-solana-task-delivery/SKILL.md)、[日常流程](docs/linear-development-workflow.md)、[分工与接收](docs/agent-collaboration.md) |
 | 开发与自审 | [编码规范](docs/coding-and-self-review.md)：按任务读取 gmx-prompts 开发、Solana、测试及 review 规范 |
 | 本地运行、测试和排障 | [任务启动卡](docs/agent-task-start.md)，仅选择本次需要的入口 |
 | Linear 单条/快照 | [查询 skill](.agents/skills/gmx-linear-requirements/SKILL.md)；GMTrade 标签属于旧项目，核对项目归属 |

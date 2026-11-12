@@ -19,7 +19,34 @@ node scripts/agent-workflow.mjs start --issue FESOL-123 \
 node scripts/agent-workflow.mjs status --issue FESOL-123
 ```
 
-start 会先同步个人基础再创建独立 worktree，不切换调用方分支。按根规则已获开发授权时直接执行。Git 共享目录 `agent-workflow/FESOL-123.json` 保存开发目录/基线、回流提交及交付目录，不进入源码或 PR；新会话先读 status，不依赖旧聊天。现有旧任务没有登记时先核对实际 PR head 和工作区，按下面原生命令处理；不要为登记而重建已存在的开发分支。
+start 会先同步个人基础再创建独立 worktree，不切换调用方分支。按根规则已获开发授权时直接执行。Git 共享目录 `agent-workflow/FESOL-123.json` 保存开发目录/基线、回流提交及交付目录，不进入源码或 PR；新会话先读 status，不依赖旧聊天。已有任务使用下面的 register/rebind 登记，不为使用工具重建分支；没有 Linear 编号的本地任务用 `--task kebab-case-name`，与 `--issue` 二选一，本地文件名为 `local-NAME.json`，不编造需求编号。
+
+## 接入已有分支或 PR
+
+register/rebind 只写本地任务记录，不 fetch、切分支、改源码或改历史。Agent 先核对实际 Git 根、任务基线、分支和完整 HEAD，再用显式参数登记；HEAD 确认由 Agent 完成，无需让用户抄 SHA。dirty 工作区可登记以保留未完工作；未完成 Git 操作需先处理。
+
+```sh
+# Register an existing development workspace, preserving its uncommitted changes.
+node /path/to/base/scripts/agent-workflow.mjs register --task agent-maintenance \
+  --project-dir /path/to/task --worktree /path/to/task \
+  --base REVIEWED_TASK_BASE --head ACTUAL_HEAD
+# After inspecting a moved or replaced workspace, rebind the recorded role.
+node /path/to/base/scripts/agent-workflow.mjs rebind --task agent-maintenance \
+  --project-dir /path/to/task --worktree /path/to/new-location --head ACTUAL_HEAD
+# For an existing business PR, first capture its current remote facts.
+gh pr view PR_URL --json url,headRefName,headRefOid,baseRefName > /path/to/local-pr.json
+node /path/to/base/scripts/agent-workflow.mjs register --issue FESOL-123 \
+  --project-dir /path/to/base --worktree /path/to/existing-delivery --role delivery \
+  --base REVIEWED_RELEASE_BASE --head ACTUAL_HEAD --pr-file /path/to/local-pr.json
+```
+
+初次 register 必须提供基线，rebind 默认保留该角色原基线；基线必须是目标 HEAD 的祖先，delivery 基线还须属于本地已获取的 origin/release 历史。已有 PR 时先 fetch 对应引用、核对远端事实；不是默认分支/当前 release SHA 就一定是该任务的正确起点。
+
+PR 快照仅用于 delivery，核对目标仓库 URL、release base、分支与 HEAD；脚本不在线查询，也不把快照记录时间当远端核验时间。登记前后仍要按任务节点实时查 PR。导入的 delivery 立即成为权威入口，但登记不证明其 diff 已剥离个人基础或测试通过，仍需完整审查。仅有 delivery 的旧任务可直接登记该角色，无需重建不存在的旧开发现场。
+
+rebind 不覆盖已有未解决 pending，也不会放弃另一个仍有未提交工作/未完操作的旧工作区；旧路径失效时允许按同仓库新现场恢复。每次绑定核对命名分支、实际 HEAD 和 Git 共享根，记录 lastBinding；变更 delivery 绑定会清除旧 PR 观察，未提供新快照时留空，旧验证声明也会清除。角色可用 `--role development|delivery` 明确选择；新的角色必须显式提供基线。旧版任务记录可继续使用，不批量迁移或接管其他任务现场。
+
+需要分工时按[Agent 协作约定](agent-collaboration.md)指定协调入口、修改范围和成果接收；默认不启用多 Agent。
 
 ## 任务上下文与恢复
 
@@ -32,7 +59,7 @@ node /path/to/base/scripts/agent-workflow.mjs note \
   --project-dir /path/to/task --issue FESOL-123 --context-file /path/to/local-context.json
 ```
 
-note 接受 JSON 部分更新：`objective` / `next` 为字符串，`acceptance` / `decisions` / `blockers` / `links` / `observations` 为字符串列表；未给字段保留原值，列表整体替换，空列表清除旧阻碍。只记录下一位 Agent 继续需要的当前信息，不保存聊天全文、秘密或推测性权限。来源观察注明实际 URL/ref、revision/updatedAt 和核验时间；工具不会代查 Linear 或保证观察仍新鲜。
+共享摘要由协调 Agent 维护；多个子任务不各自替换同一份列表。note 接受 JSON 部分更新：`objective` / `next` 为字符串，`acceptance` / `decisions` / `blockers` / `links` / `observations` 为字符串列表；未给字段保留原值，列表整体替换，空列表清除旧阻碍。只记录下一位 Agent 继续需要的当前信息，不保存聊天全文、秘密或推测性权限。需要时用 `coordinator` 和 `assignments` 保存[当前分工](agent-collaboration.md#最小子任务约定)，单 Agent 任务不必填写。来源观察注明实际 URL/ref、revision/updatedAt 和核验时间；工具不会代查 Linear 或保证观察仍新鲜。
 
 ```json
 {
@@ -166,5 +193,5 @@ recover 不代做 Git 恢复。completed 需要干净且分支匹配、历史由
 - 实际 fetch 并合入 `origin/release` 的 `24cd9b16d6`，维护 merge 为 `7b704a98fa`。采用上游交易开关实现，代理配置移到 tools；`src`、`sdk`、`landing` 相对该 release 无个人差异。Vite 的嵌套目录扫描限制继续作为环境配置保留。
 - 隔离真实 Git 仓库演练覆盖创建任务、基础设施回流、等价补丁跳过、上游前进后纯业务交付；同时验证混合/外来提交、脏基础、gitlink 拒绝，以及预合并冲突不污染现场、回流冲突保留 pending 和恢复位置。
 - 新增纯基础设施 pre-commit 快路，业务/共享配置/混合提交仍走原路径。当前机器没有安装 Husky hook（没有 core.hooksPath 或 hook 文件），因此原构建钩子并非已证实的本机耗时来源；修改用于安装/恢复 hook 后的工作流，不为本轮验收全局安装钩子。
-- `yarn test:agent-tools` 共 137 项全部通过，其中双路径、上下文恢复、提交分流和并发/原子写入 8 项；相关脚本通过 Node 环境 ESLint 与 Prettier。ESLint 显式采用 Node 运行环境，允许 CLI 输出和 Node 已支持的 async iteration/top-level await；未改前端 lint 配置。两个更新的项目 skill 通过 quick_validate，改动 Markdown 的本地链接检查通过。
-- 本轮未运行完整前端类型检查、业务测试或构建，未做真实业务 PR 发布；工具演练不代表业务验收。原始工具回归日志保留在本机 `/tmp/gmx-learning-agent-tools.tap`，可被系统清理。
+- `yarn test:agent-tools` 共 141 项全部通过，其中双路径、上下文恢复、已有任务绑定、协作整合和并发/原子写入 12 项；相关脚本通过 Node 环境 ESLint 与 Prettier。ESLint 显式采用 Node 运行环境，允许 CLI 输出和 Node 已支持的 async iteration/top-level await；未改前端 lint 配置。两个更新的项目 skill 通过 quick_validate，改动 Markdown 的本地链接检查通过。
+- 本轮未运行完整前端类型检查、业务测试或构建，未做真实业务 PR 发布；工具演练不代表业务验收。原始工具回归日志保留在本机 `/tmp/gmx-collaboration-agent-tools.tap`，可被系统清理。

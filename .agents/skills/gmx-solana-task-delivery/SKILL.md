@@ -5,7 +5,7 @@ description: 实施明确的 GMX Solana 需求、回流个人基础设施经验�
 
 # 需求开发、沉淀回流与交付
 
-遵守根 [AGENTS.md](../../../AGENTS.md)，具体操作只读[日常流程](../../../docs/linear-development-workflow.md)的当前阶段；不把整套测试和证据工具作为每次任务前置。
+遵守根 [AGENTS.md](../../../AGENTS.md)，具体操作只读[日常流程](../../../docs/linear-development-workflow.md)的当前阶段；已有分支用 register/rebind 接续，无需求编号用本地 task；已授权且需要多人分工时按[协作约定](../../../docs/agent-collaboration.md)统一接收成果；不把整套测试和证据工具作为每次任务前置。
 
 - 新任务先实时核对目标 Linear、关键依赖 PR 和当前代码。按任务节点更新，不轮询、不每轮全量复盘；语义变化影响当前实现时才调整或澄清。
 - 已授权开发包含适时同步 `origin/release` 到 `solana-integration`、创建需求 worktree 和普通提交。从个人基础调用最新版工具管理现场，status 恢复当前目标/决策/阻碍和权威目录、按需读取新知识；阶段变化时 note 简记，冲突经原生 Git 恢复后 recover 登记，见[上下文与恢复](../../../docs/linear-development-workflow.md#任务上下文与恢复)；保护未提交工作，冲突按语义处理，不自动 stash/reset/强推。

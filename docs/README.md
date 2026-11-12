@@ -18,6 +18,7 @@
 | [GMX 当前线上服务地址](gmx-live-services.md) | 从真实线上页面请求核实各链 API、价格 keeper/fallback、SQD、Goldsky、RPC 与其他依赖，区分线上调用和发布脚本配置 |
 | [Solana gmx-api 进度与联调协调](../solana-api-coordination.md)（[英文版](../solana-api-coordination.en.md)） | 待发送给负责人的沟通草稿：真实交易数据、联调节点、外部依赖及 FESOL-87 独立切片价值确认 |
 | [开发、知识回流与 PR 交付](linear-development-workflow.md) | 当前日常路径、主动上游/Linear 更新、基础设施选择性回流、最新 release 的纯业务交付及唯一修复现场 |
+| [Agent 分工与成果接收](agent-collaboration.md) | 按需协作的协调入口、工作区/路径归属、子任务返回约定和整合结果验证；默认单 Agent，无额外调度服务 |
 | [可选的严格交付证据](agent-delivery-evidence.md) | 复杂资金/交易或明确需要移交时使用；保留已有身份、结果与来源绑定接口和历史验收 |
 | [Linear 需求查阅与复盘](linear-requirements.md) | FESOL 实时查询、全量快照、项目筛选和进度差异工具的配置、命令与验收记录 |
 | [需求推荐与就绪核验](solana-next-task.md) | 综合 Linear、GitHub PR、最新上游代码和实际前置，推荐下一条迁移需求 |
@@ -35,13 +36,13 @@
 | [Solana 统计索引只读预检](solana-index-preflight.md) | A16：核实实际 volume 索引的 GraphQL 契约、高度和最新事件年龄；不推断处理延迟或历史完整性 |
 | [Solana 本地只读浏览器冒烟](solana-browser-smoke.md) | A09：`solana:browser-check` 一条命令完成预检、独立 Vite、真实 Chrome、独立报告和停服；支持独立功能 checkout 的目标 Vite 与源码/资源身份，复用网络选择/刷新持久化原有用例，保留手动运行和导航排障入口 |
 | [Agent 本地 PR 预览定位](agent-preview.md) | A09/A14：复用 CI 解析器，从实时 PR head 定位成功部署的不可变 URL；不打开页面或执行 UI 测试 |
-| [Agent 验收证据包](agent-evidence.md) | 默认交付归档、包外摘要、报告/工作表/显式附件；含前端/SDK/API 离线结果与真实浏览器结果的材料选择、诊断附件和接收复核，不替代业务验收或自动上传 |
+| [Agent 验收证据包](agent-evidence.md) | 按需交付归档、包外摘要、报告/工作表/显式附件；含前端/SDK/API 离线结果与真实浏览器结果的材料选择、诊断附件和接收复核，不替代业务验收或自动上传 |
 | [Agent 统一只读预检](agent-preflight.md) | 按任务选择 RPC/keeper/样例 API/可选钱包检查，统一状态、退出码和本地版本证据；不自动启动服务；支持历史报告源码指纹离线比较 |
 | [Solana SDK 与程序版本证据预检](solana-runtime-preflight.md) | A14：核对本地 SDK/WASM 完整性，记录 Mainnet 程序部署 slot、权限和完整程序区指纹；不构建或判断业务兼容 |
 | [Solana Mainnet 交易回执证据](solana-transaction-evidence.md) | A12：显式签名查询 finalized 状态与完整回执，核对身份/结果并绑定源码与摘要；不推断 keeper 订单执行 |
 | [Solana ALT 资源预检](solana-alt-preflight.md) | A05：现有 Mainnet 地址查找表的批量读取、生命周期、authority、完整地址与摘要；不创建或修改表 |
-| [本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md) | 手动启动、前端与 Agent 调用、fallback key/Origin 转发、方法限制及验证边界 |
-| [keeper 只读预检](keeper-preflight.md) | A02 真实价格、图表与开关预检；本地 `solanaTrading` 覆盖配置、环境边界及真实交易前置 |
+| [本地 Solana RPC 代理](../tools/solana-rpc-proxy/README.md) | 独立 Agent 只读/模拟代理、配置与业务 RPC 分离、key/Origin 转发、方法限制及验证边界 |
+| [keeper 只读预检](keeper-preflight.md) | 真实价格、图表与 keeper 前置核验；旧本地开关覆盖仅作历史，当前采用上游实现 |
 | [本地 Agent 验收钱包](agent-wallet.md) | 本地 Solana CLI 优先排查链上问题的约定、网络与账户核对、Origin 代理边界；A05 Node 钱包配置、固定 EVM/Solana 地址、Mainnet SOL 及代币账户盘点 |
 | [Agent Solana 全栈联调工具](solana-dev-workspace.md) | 双 checkout 启动前只读 doctor、个人开发专用 API 代理路径、API/Vite/RPC 工作区管理、一条命令运行 Chrome/可选断点验收并停服、显式 API inspector、目标身份诊断、浏览器 trace 关联及未评审样例结构回归；不新增业务消费、不随业务 PR 交付 |
 | [本地 Solana API 样例验收服务](solana-api-local.md) | A08 当前操作入口：按任务定位样例 HTTP、持续服务、源码断点、关联测试发现、离线回归、路由准备、API 类型与隔离 PostgreSQL 测试；保留独立 checkout、网络/源码身份及清理要求，历史执行结果另见归档 |
