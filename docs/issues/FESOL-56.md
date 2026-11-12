@@ -74,3 +74,29 @@ FESOL-56 范围含 market/limit increase、market decrease、TP/SL、原子 incr
 原始日志保留本机 `/tmp/fesol56-{sdk-tests-final,harness-combined,repro-final,sdk-build,wasm-build,frontend-tests,root-types,browser,browser-final}.log`；SDK 构建收据在目标 `.local/acceptance/sdk-artifacts/build-WjPJEi/`。这些是本机证据，非已提交可移植测试材料。未执行真实钱包/ALT 签名、模拟发送、广播、keeper 验收；FESOL-71/72 的条件与部署版本仍须单独核实。
 
 页面复验报告：目标 `.local/acceptance/solana-browser/managed-lzlRi8/report.json`；首轮失败：`managed-gn64M8/report.json`，均保留截图/trace 与日志。后续若复发，优先定位加载阶段，不能用这两项基础冒烟替代交易 UI 验收。
+
+## 2026-11-13 实施进行中
+
+业务现场仍为 `/Volumes/kenny/gmx/gmx-interface-fesol-56` 的 `solana-order-transactions-fesol-56`；基础目录维持 `solana-integration`，没有把业务改动写入基础。已实现但尚未提交：固定 WASM ABI 的 create/update/cancel、prepare position、原子增仓加 TP/SL 单笔重编译、完整指令/账户校验、模拟/签名/发送边界、Privy Solana 签名桥接及确认后刷新统一缓存。Order.solana 保留原 API 订单账户上下文，解决显示 mapper 丢失问题。
+
+固定外部 SDK 为 `@gmsol-labs/gmsol-sdk@0.9.0-test.2`，ABI 对照协议仓库 v0.9.0（c6778dc9）。该版本高级 create API 内部生成 nonce，默认 keeper fee 300000 lamports，不暴露显式 nonce/自定义 execution fee；禁止误称支持。回调、swap remaining accounts、Token-2022 尚未扩展 allowlist，明确拒绝并留 TODO。WASM TransactionGroup 不等于 atomic；原子组合只有在单笔 v0、1232 bytes/1.4M CU 限制内才接受。
+
+真实 WASM 正例已覆盖五种订单双向及 update/cancel、native wrapping、LUT 原子组合；恶意指令/接收人/金额/截断/LUT、实际 Ed25519 本地签名和发送边界的定向测试在补充中，尚不作为最终全量通过记录。SDK 新 Order 字段生成构建通过；root 类型检查曾通过，后续安全修正仍需最终复验。
+
+用户已解锁现有 kenny Chrome 的 Phantom；只操作该窗口，禁止 Chrome DevTools/Playwright 或新 automation profile。当前本任务 Vite 为目标目录 127.0.0.1:3016。主网四钱包/交易/keeper 验收尚未完成，不能用本地签名测试冒充。FESOL-19/20 负责完整下单 UI/回执，本需求提供可消费适配器，不新增平行产品页面。
+
+### 实施与实际验收结果（2026-11-13）
+
+- 固定 WASM 构建覆盖 market/limit increase、market decrease、TP/SL、update/cancel，prepare user/position/ATA、精确 SOL wrapping，最多一笔增仓加一 TP/一 SL。原子组合重编译为单笔 v0，去除完全相同的幂等准备指令，严格保持用户价格/金额意图。最多 1232 bytes、1.4M CU；超限明确拒绝，不降级成多笔伪原子。
+- 全部交易/指令/参数/账户/nonce-PDA/LUT 解析、payer/owner/receiver/rentReceiver、回调拒绝和具体 ABI 均做确定性校验；签名前真实 RPC 模拟、费用和余额检查；Privy Solana 只签字节，验证消息不变及真实 Ed25519 签名，签名前及每次广播前实时 flag/session/blockheight 再检。确认刷新统一余额、订单、仓位缓存，并传 minContextSlot；已确认链上成功与 API 刷新失败分开返回。
+- 多笔动作只检查当前交易的 keeper/wrap 预留，避免之前准备步骤花费后仍要求整计划预算。`GmsolTransactionError` 保存已接收的 signatures 和可能已广播的 pendingSignature；send RPC 超时也必须先查签名，不自动重试下单。
+- 订单 metadata 以可选 `Order.solana` 保留，update 校验原 order kind/side 与已知 market decimals；修正 update minOutput：增仓为 token 原始单位，减仓为 app USD。已有 57 dust 预览、统一余额与 discount/math rollout 缺口仍按上文归属，不能因 builder 完成而视为解决。
+- 现有 kenny Chrome/Phantom 连接成功，Solana 共享页行情/钱包头部正常；钱包选择弹窗列出 Phantom/Solflare/OKX/TokenPocket。联调发现 Privy useSignTransaction 每 render 返回新函数，已用 ref 避免会话发布 effect 循环，并有回归测试。共享 trade 按钮仍显示“连接钱包”是下游 FESOL-19 的消费/统一状态接入缺口，本次没有伪造完整下单 UI 已验收。
+- 真实 GMX RPC mainnet genesis 正确，实时 solanaTrading=true。两个配置 LUT 分别 73/155 个地址，authorityOption 均 1、active，**仍可变**；生产 prepare 明确拒绝“Trading requires frozen lookup tables”。FESOL-71 须提供冻结表/GMX 审查后的冻结副本，且核验内容对所需市场和原子组合的覆盖。
+- 为覆盖实际协议执行，仅在忽略的本地只读验收工具中用现有可变 LUT 的快照做诊断模拟；没有签名或广播，也未放宽生产入口。连接 Phantom 的公开 account 上，BTC/USDC limit increase 成功（807 bytes，网络费估算 45000 lamports）；increase+TP 成功（1044 bytes/55000）；increase+TP+SL 成功（1221 bytes/65000），最后确认模拟 slot=468611155。后两例 TP/SL 使用明确 unlimited acceptable price（协议 None），不是自动修改有限边界。
+- 相同 3 单均指定有限 acceptable price 时为 1255 bytes，超过 1232，安全拒绝。不能为追求塞进单笔而静默删用户边界；FESOL-71 还需更完善的 LUT 覆盖。冻结现有内容本身不证明所有输入能原子发送。
+- 全量 frontend 337 文件通过、1 既有文件跳过；3423 tests passed、1 既有 skipped。最后安全/会话修正后定向 4 文件/12 tests passed；root+landing typecheck、变更 ESLint 与 Prettier 通过（收尾仍核对进程退出码）。首次 production app build 在 render chunks 达默认 Node heap 上限，正在以命令级 8 GiB heap 复验；不是业务断言失败。
+
+当前业务说明及 TODO 在需求分支 `src/domain/gmsol/transactions/README.md`。未完成主网广播/keeper 和四钱包真实 LUT 签名验收；固定 SDK 高层 create 不暴露显式 nonce/自定义 execution fee；callback/swap/Token-2022 均拒绝而非推测性兜底；FESOL-19/20 消费 UI/回执与 FESOL-112 数学部署仍需继续。这些是明确范围/条件限制，不声称 FESOL-56 所有验收项已通过。
+
+本轮可复用日志：`/tmp/fesol56-implementation-full-tests.log`、`/tmp/fesol56-final-targeted.log`、`/tmp/fesol56-final-{root-types,landing-types,lint,format}.log`；首次 OOM `/tmp/fesol56-final-app-build.log`，8 GiB 重试 `/tmp/fesol56-final-app-build-8gb.log`。忽略的本地浏览器验收工具在目标 `.local/fesol56/`，使用 native CUA 操作原窗口；不可把诊断绕过冻结检查误当作生产准备通过。
