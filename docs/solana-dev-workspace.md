@@ -13,6 +13,12 @@
 
 本轮没有修改 `src/`、`sdk/`、`gmx-api/` 或原有 `vite.config.ts`。所有新行为仅通过显式工具命令启用，常规 Vite/构建不加载这套配置；不存在 URL 替换 EVM host、响应替代或新建平行业务数据流。
 
+## 验收目标与共享资源
+
+worktree 不隔离端口、数据库、缓存、钱包和生成产物。开始页面或集成验收时，先从管理工具现有 status/报告核对前端 projectDir、API apiDir、PID、访问地址与必要 API/RPC 目标，确认浏览器确实访问本次代码对应的服务。借用实例也须目录和归属匹配；来源未知不当作核验通过，不接管未知监听者。只清理本任务 owned 资源，详细归属规则见[协作约定](agent-collaboration.md#分工与工作区)。
+
+身份核验只证明目标对应；源码热更新、SDK/路由产物与部署契约仍按实际任务判断，不能以端口存活或健康接口代替业务验收。不另加固定表格，优先复用已有工具输出。
+
 ## 使用顺序
 
 工作目录为主仓库根目录。依赖 Node 22、已有锁定依赖、API checkout、POSIX 本地进程与 Unix socket；本机 macOS 已验证。Chrome 探测沿用已安装且锁定的 Playwright/Chrome，先按[环境顺序](coding-and-self-review.md#执行前的环境检查与顺序)处理已知前置条件。
