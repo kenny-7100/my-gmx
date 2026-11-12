@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { mutate } from "swr";
 
 import { SOLANA_NETWORK_ID } from "config/chains";
 import { FREQUENT_UPDATE_INTERVAL } from "lib/timeConstants";
@@ -80,6 +81,27 @@ function fetchOrders(owner: string, apiCacheKey: string) {
   return fetchGmsolOrders(sdk, owner).then((body) =>
     takeGmsolSnapshot(`${apiCacheKey}:gmsolOrders:${owner}`, body.slot, body.data)
   );
+}
+
+export async function refreshGmsolAccountDataAfterTransaction(owner: string, slot: number) {
+  const apiCacheKey = getGmsolApiCacheKey();
+  const sdk = getGmsolApiSdk(apiCacheKey);
+  await Promise.all([
+    mutate(
+      getGmsolAccountDataKey("gmsolPositions", apiCacheKey, owner),
+      fetchGmsolPositions(sdk, owner, slot).then((body) =>
+        takeGmsolSnapshot(`${apiCacheKey}:gmsolPositions:${owner}`, body.slot, body.data)
+      ),
+      { revalidate: false }
+    ),
+    mutate(
+      getGmsolAccountDataKey("gmsolOrders", apiCacheKey, owner),
+      fetchGmsolOrders(sdk, owner, slot).then((body) =>
+        takeGmsolSnapshot(`${apiCacheKey}:gmsolOrders:${owner}`, body.slot, body.data)
+      ),
+      { revalidate: false }
+    ),
+  ]);
 }
 
 // `owner` is the Solana wallet from GMX's connect flow; without one nothing is requested.
