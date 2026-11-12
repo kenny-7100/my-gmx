@@ -13,13 +13,12 @@
 
 ```sh
 # Run from the infrastructure checkout; these commands mutate local Git state.
-node scripts/agent-workflow.mjs sync
 node scripts/agent-workflow.mjs start --issue FESOL-123 \
   --branch feature-name-fesol-123 --worktree /path/to/feature
 node scripts/agent-workflow.mjs status --issue FESOL-123
 ```
 
-start 会先同步个人基础再创建独立 worktree，不切换调用方分支。按根规则已获开发授权时直接执行。Git 共享目录 `agent-workflow/FESOL-123.json` 保存开发目录/基线、回流提交及交付目录，不进入源码或 PR；新会话先读 status，并读取其 issueKnowledge 指向的[长期 issue 记录](issues/README.md)，不依赖旧聊天。已有任务使用下面的 register/rebind 登记，不为使用工具重建分支；没有 Linear 编号的本地任务用 `--task kebab-case-name`，与 `--issue` 二选一，本地文件名为 `local-NAME.json`，不编造需求编号。
+start 会先同步个人基础再创建独立 worktree，不切换调用方分支；新建任务无需先单独 sync。仅维护个人基础时才独立运行 `node scripts/agent-workflow.mjs sync`。按根规则已获开发授权时直接执行。Git 共享目录 `agent-workflow/FESOL-123.json` 保存开发目录/基线、回流提交及交付目录，不进入源码或 PR；新会话先读 status，并读取其 issueKnowledge 指向的[长期 issue 记录](issues/README.md)，不依赖旧聊天。已有任务使用下面的 register/rebind 登记，不为使用工具重建分支；没有 Linear 编号的本地任务用 `--task kebab-case-name`，与 `--issue` 二选一，本地文件名为 `local-NAME.json`，不编造需求编号。
 
 ## 接入已有分支或 PR
 
@@ -59,7 +58,7 @@ node /path/to/base/scripts/agent-workflow.mjs note \
   --project-dir /path/to/task --issue FESOL-123 --context-file /path/to/local-context.json
 ```
 
-共享摘要由协调 Agent 维护；多个子任务不各自替换同一份列表。note 接受 JSON 部分更新：`objective` / `next` 为字符串，`acceptance` / `decisions` / `blockers` / `links` / `observations` 为字符串列表；未给字段保留原值，列表整体替换，空列表清除旧阻碍。只记录下一位 Agent 继续需要的当前信息，不保存聊天全文、秘密或推测性权限。需要时用 `coordinator` 和 `assignments` 保存[当前分工](agent-collaboration.md#最小子任务约定)，单 Agent 任务不必填写。来源观察注明实际 URL/ref、revision/updatedAt 和核验时间；工具不会代查 Linear 或保证观察仍新鲜。
+共享摘要由协调 Agent 维护；多个子任务不各自替换同一份列表。note 接受 JSON 部分更新：`objective` / `next` 为字符串，`acceptance` / `decisions` / `blockers` / `links` / `observations` 为字符串列表；未给字段保留原值，列表整体替换，空列表清除旧阻碍。只记录下一位 Agent 继续需要的当前信息，不保存聊天全文、秘密或推测性权限。需要时用 `coordinator` 和 `assignments` 保存[当前分工](agent-collaboration.md#最小子任务约定)，单 Agent 任务不必填写。来源观察注明实际 URL/ref、revision/updatedAt 和核验时间；工具不会代查 Linear 或保证观察仍新鲜。note 只保留当前执行摘要与 issue/专题链接，不复制长期经历；同一观察按[执行与复用](agent-task-start.md#执行与复用)供多个阶段入口共用。
 
 ```json
 {
@@ -79,8 +78,8 @@ status 返回实际开发/交付分支与 HEAD、dirty、未完成 Git 操作、
 ## 开发与主动沉淀
 
 1. 新需求先实时读取[Linear 正文、关系和评论](linear-requirements.md)，核对关键依赖 PR 是否进入 release；只查本任务相关项。记录最少的验收条件、业务范围和依赖到任务说明或 PR，不默认创建工作表。
-2. 业务与个人基础设施改动分开提交。已安装 Husky 时，纯 AGENTS/docs/.agents/scripts/tools（含本入口 pre-commit）提交只检查暂存差异，不触发 SDK/本地化生成；仍在提交前执行相关工具测试。业务、共享配置、gitlink 或混合提交走原上游钩子。共享文件混改时按 hunk 拆分；不能靠后缀或文件名单替代语义审查。commit 英文，有关联需求时附真实编号；具体见[提交与 PR 规范](#commit分支与-pr-表达规范)。
-3. 每个经手 issue 的工作/问题/处理/结果及时更新[issue 文档](issues/README.md)，包含调研他人任务的结论；暂停、交接和交付前检查遗漏与回流位置。通用经验、长期偏好、工具改进沉淀到已有主题/skill，并从 issue 链接过去；回流时明确选择已审查的基础设施提交，保留业务开发现场。
+2. 业务与个人基础设施改动分开提交。已安装 Husky 时，纯 AGENTS/docs/.agents/scripts/tools（含本入口 pre-commit）提交只检查暂存差异，不触发 SDK/本地化生成；涉及工具源码时执行适用回归；纯文档只检查链接与差异。业务、共享配置、gitlink 或混合提交走原上游钩子。共享文件混改时按 hunk 拆分；不能靠后缀或文件名单替代语义审查。commit 英文，有关联需求时附真实编号；具体见[提交与 PR 规范](#commit分支与-pr-表达规范)。
+3. 每个经手 issue 的工作/问题/处理/结果在自然节点合并更新[issue 文档](issues/README.md)，包含调研他人任务的结论；暂停、交接和交付前检查遗漏与回流位置。通用经验、长期偏好、工具改进沉淀到已有主题/skill，并从 issue 链接过去；回流时明确选择已审查的基础设施提交，保留业务开发现场。
 
 ```sh
 # Transfer only reviewed, separate infrastructure commits, in dependency order.
@@ -92,12 +91,14 @@ node scripts/agent-workflow.mjs backflow --issue FESOL-123 \
 
 ## 需求与上游的更新时机
 
-- 开始、跨会话恢复且即将继续实现、进入验收/交付、收到新 review 或依赖变更提示时，静默重读目标 Linear 与相关 PR，比较 updatedAt、正文、验收条件、关系和最新评论。当前工作轮次没有相关变化时复用本次观察，不全量 sync。
+- 开始、跨会话恢复且即将继续实现、进入验收/交付、收到新 review 或依赖变更提示时，静默重读目标 Linear 与相关 PR，比较 updatedAt、正文、验收条件、关系和最新评论。当前工作轮次没有相关变化时复用本次观察，不全量 sync。启动、skill、自审命中同一核验节点只执行一次，具体复用边界见[启动卡](agent-task-start.md#执行与复用)。
 - 普通状态变化简短记录；验收、范围或契约改变时分析实际影响，更新方案与测试，存在产品歧义才询问。不自动改 Linear。
 - 使用配套仓库前按[子仓库更新规则](solana-reference-repositories.md#子仓库按需核验与更新)核验相关官方远端；干净未占用的非固定参考分支可主动快进，开发现场和 gitlink 固定版本以只读比较/独立 worktree 核对。
 - 新需求前同步个人基础；交付前 fetch release 固定 SHA。交付中上游再次前进时评估影响；确需重建或冲突修复时保留现有成果，不无限追赶变化或机械重跑所有测试。
 
 ## 最短交付路径
+
+开发中针对性验证；收到交付指令后集中执行以下路径，不在每个工作切片重建交付现场。
 
 1. **准备**：完成当前基础设施回流，确认业务提交及未合并依赖。依赖不在 release 时明确等待，或按已确认的依赖 PR 顺序处理，不伪称可独立交付。
 2. **重建**：从 fetch 后的最新 release 创建交付 worktree，只选择本需求业务提交。工具按提交复制，不能自动理解混合补丁或丢弃前置实现。
