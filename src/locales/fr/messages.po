@@ -1133,6 +1133,10 @@ msgstr "Seul GMX fournit de la liquidité à ce pool. Il sert aux échanges entr
 msgid "Funding decrease factor"
 msgstr "Facteur de diminution du financement"
 
+#: src/components/StatusNotification/SolanaOrderStatusNotification.tsx
+msgid "Order submission status unknown. Check the transaction before retrying."
+msgstr ""
+
 #: src/domain/synthetics/common/incentivesAirdropMessages.ts
 msgid "STIP.b retroactive bonus"
 msgstr "Bonus rétroactif STIP.b"
@@ -4741,6 +4745,7 @@ msgid "Net price impact / fees"
 msgstr "Impact net sur le prix / frais"
 
 #: src/components/StatusNotification/OrderStatusNotification.tsx
+#: src/components/StatusNotification/SolanaOrderStatusNotification.tsx
 msgid "Order canceled"
 msgstr "Ordre annulé"
 
@@ -4988,6 +4993,7 @@ msgid "Returned margin"
 msgstr "Marge restituée"
 
 #: src/components/StatusNotification/OrderStatusNotification.tsx
+#: src/components/StatusNotification/SolanaOrderStatusNotification.tsx
 msgid "Sending order request..."
 msgstr "Envoi de la demande d'ordre…"
 
@@ -9519,6 +9525,10 @@ msgstr "TAILLE"
 msgid "Book a 30-min call"
 msgstr "Réservez un appel de 30 min"
 
+#: src/components/StatusNotification/SolanaOrderStatusNotification.tsx
+msgid "Order outcome not confirmed. Check the transaction for updates."
+msgstr ""
+
 #: src/components/GmxAccountModal/TransferDetailsView.tsx
 #: src/components/TokenSelector/MultichainTokenSelector.tsx
 msgid "From"
@@ -9621,6 +9631,7 @@ msgid "Dolomite"
 msgstr "Dolomite"
 
 #: src/components/StatusNotification/OrderStatusNotification.tsx
+#: src/components/StatusNotification/SolanaOrderStatusNotification.tsx
 msgid "Order request sent"
 msgstr "Demande d'ordre envoyée"
 
@@ -10970,6 +10981,7 @@ msgid "Insufficient GM: {0} [{1}] liquidity in GLV. Choose a different pool, red
 msgstr "Liquidité GM: {0} [{1}] insuffisante dans GLV. Choisissez un autre pool, réduisez le montant à vendre ou répartissez le retrait entre plusieurs pools."
 
 #: src/components/StatusNotification/OrderStatusNotification.tsx
+#: src/components/StatusNotification/SolanaOrderStatusNotification.tsx
 msgid "Order filled"
 msgstr "Ordre exécuté"
 
@@ -11435,6 +11447,7 @@ msgid "Show assets with small value ({0})"
 msgstr "Afficher les actifs de faible valeur ({0})"
 
 #: src/components/StatusNotification/OrderStatusNotification.tsx
+#: src/components/StatusNotification/SolanaOrderStatusNotification.tsx
 msgid "Fulfilling order request..."
 msgstr "Exécution de la demande d'ordre…"
 
@@ -13548,6 +13561,10 @@ msgstr "Vendre"
 #: src/pages/SyntheticsStats/SyntheticsStats.tsx
 msgid "Lent position impact pool amount"
 msgstr "Montant prêté du pool d'impact sur le prix des positions"
+
+#: src/components/StatusNotification/SolanaOrderStatusNotification.tsx
+msgid "Order request failed"
+msgstr ""
 
 #: src/domain/synthetics/orders/utils.tsx
 msgid "short"
