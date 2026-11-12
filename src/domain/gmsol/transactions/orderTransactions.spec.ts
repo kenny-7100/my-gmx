@@ -217,7 +217,6 @@ beforeEach(() => {
     getFeeForMessage: respond({ value: 5000n }),
     simulateTransaction: respond({ context: { slot: 1n }, value: { err: null, accounts: [{ lamports: 990000000n }] } }),
     getBlockHeight: respond(1n),
-    getTransaction: respond(null),
     getSignatureStatuses: respond({ value: [{ err: null, confirmationStatus: "confirmed", slot: 2n }] }),
     sendTransaction: vi.fn((encoded: string) => ({
       send: async () =>
@@ -240,19 +239,25 @@ async function sendFixture() {
 }
 it("preserves confirmed orders and retry identity when account or receipt indexing lags FESOL-20", async () => {
   const { plan, sign } = await sendFixture();
+  let confirmedNotification = false;
   const result = await sendGmsolOrderTransactions({
     plan,
     getWalletAddress: () => owner,
     signTransaction: sign,
+    onSubmitted: (value) => {
+      confirmedNotification = value.signatures.length === 1 && value.trackingRequests.length === 1;
+    },
     onConfirmed: async () => {
+      expect(confirmedNotification).toBe(true);
       throw new Error("API indexing delayed");
     },
   });
+  expect(confirmedNotification).toBe(true);
   expect(result.signatures).toHaveLength(1);
   expect(result.slot).toBe(2n);
   expect(result.refreshErrors).toHaveLength(1);
   expect(result.orders).toEqual([]);
-  expect(result.trackingErrors).toHaveLength(1);
+  expect(result.trackingErrors).toHaveLength(0);
   expect(result.trackingRequests).toEqual([
     {
       signature: result.signatures[0],

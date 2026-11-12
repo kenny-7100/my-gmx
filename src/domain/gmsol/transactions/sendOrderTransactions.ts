@@ -1,6 +1,5 @@
 import {
   address,
-  signature as solanaSignature,
   getBase64Decoder,
   getBase64EncodedWireTransaction,
   getPublicKeyFromAddress,
@@ -22,7 +21,6 @@ import { buildGmsolOrderTransactions } from "./buildOrderTransactions";
 import { decodeGmsolInstruction } from "./decodeInstruction";
 import type { GmsolOrderAction, GmsolTransactionPlan } from "./types";
 import { decodeGmsolTransaction, requireGmsol, validateGmsolTransactionPlan } from "./validateTransaction";
-import { getCreatedOrderActions } from "../orderTracking/getCreatedOrderActions";
 import type { TrackedOrderAction } from "../orderTracking/reduceOrderLifecycle";
 
 const RPC_TIMEOUT_MS = 20_000;
@@ -137,11 +135,13 @@ export async function sendGmsolOrderTransactions({
   getWalletAddress,
   signTransaction,
   onConfirmed,
+  onSubmitted,
 }: {
   plan: GmsolTransactionPlan;
   getWalletAddress: () => string | undefined;
   signTransaction: (bytes: Uint8Array) => Promise<Uint8Array>;
   onConfirmed: (result: { signature: string; slot: bigint; owner: string }) => Promise<void>;
+  onSubmitted?: (result: GmsolSendResult) => void;
 }): Promise<GmsolSendResult> {
   const plan = structuredClone(input);
   const signatures: string[] = [];
@@ -244,19 +244,21 @@ export async function sendGmsolOrderTransactions({
               if (orderAddresses.length) {
                 const request = { signature: sent, slot, owner: plan.owner, orderAddresses };
                 trackingRequests.push(request);
-                try {
-                  const receipt = await rpc
-                    .getTransaction(solanaSignature(sent), {
-                      encoding: "json",
-                      commitment: "confirmed",
-                      maxSupportedTransactionVersion: 0,
-                    })
-                    .send(rpcOptions());
-                  orders.push(...getCreatedOrderActions({ ...request, receipt }));
-                } catch (error) {
-                  // RPC indexing may lag confirmation. Retain identity inputs for later tracking retries.
-                  trackingErrors.push(error);
-                }
+                // Receipt indexing belongs to the asynchronous tracker, not submission confirmation.
+              }
+            }
+            if (confirmedSignatures.length === plan.groups.flat().length) {
+              try {
+                onSubmitted?.({
+                  signatures: [...signatures],
+                  slot,
+                  refreshErrors,
+                  orders,
+                  trackingErrors,
+                  trackingRequests,
+                });
+              } catch (error) {
+                refreshErrors.push(error);
               }
             }
             try {

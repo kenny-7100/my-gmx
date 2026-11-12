@@ -7,7 +7,11 @@ import { useChainId } from "lib/chains";
 import { useSolanaWalletSession } from "lib/wallets/solanaWalletSession";
 
 import { refreshGmsolAccountDataAfterTransaction } from "../useGmsolAccountData";
-import { prepareGmsolOrderTransactions, sendGmsolOrderTransactions } from "./sendOrderTransactions";
+import {
+  prepareGmsolOrderTransactions,
+  sendGmsolOrderTransactions,
+  type GmsolSendResult,
+} from "./sendOrderTransactions";
 import type { GmsolOrderAction } from "./types";
 import { requireGmsol } from "./validateTransaction";
 
@@ -27,45 +31,57 @@ export function useGmsolOrderTransactions() {
   const pending = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submit = useCallback(async (action: GmsolOrderAction) => {
-    requireGmsol(mounted.current, "Solana order flow is closed");
-    requireGmsol(!pending.current, "A Solana order is already being submitted");
-    const { wallet, networkId } = current.current;
-    const owner = wallet.address;
-    requireGmsol(
-      isSolanaNetwork(networkId) && owner && wallet.signTransaction,
-      "Connect a Solana wallet before submitting an order"
-    );
-    pending.current = true;
-    setIsSubmitting(true);
-    try {
-      const plan = await prepareGmsolOrderTransactions({ owner, action });
-      requireGmsol(mounted.current, "Solana order flow closed before signing");
-      return await sendGmsolOrderTransactions({
-        plan,
-        getWalletAddress: () =>
-          mounted.current && isSolanaNetwork(current.current.networkId) ? current.current.wallet.address : undefined,
-        signTransaction: async (bytes) => {
-          const session = current.current.wallet;
-          requireGmsol(
-            mounted.current && session.address === owner && session.signTransaction,
-            "Connected Solana wallet changed"
-          );
-          return session.signTransaction(bytes);
-        },
-        onConfirmed: async ({ slot }) => {
-          requireGmsol(slot <= BigInt(Number.MAX_SAFE_INTEGER), "Confirmation slot exceeds API precision");
-          await Promise.all([
-            mutate(getSolanaBalancesKey(SOLANA_NETWORK_ID, owner)),
-            refreshGmsolAccountDataAfterTransaction(owner, Number(slot)),
-          ]);
-        },
-      });
-    } finally {
-      pending.current = false;
-      if (mounted.current) setIsSubmitting(false);
-    }
-  }, []);
+  const submit = useCallback(
+    async (action: GmsolOrderAction, options?: { onSubmitted: (result: GmsolSendResult) => void }) => {
+      requireGmsol(mounted.current, "Solana order flow is closed");
+      requireGmsol(!pending.current, "A Solana order is already being submitted");
+      const { wallet, networkId } = current.current;
+      const owner = wallet.address;
+      requireGmsol(
+        isSolanaNetwork(networkId) && owner && wallet.signTransaction,
+        "Connect a Solana wallet before submitting an order"
+      );
+      pending.current = true;
+      setIsSubmitting(true);
+      try {
+        const plan = await prepareGmsolOrderTransactions({ owner, action });
+        requireGmsol(mounted.current, "Solana order flow closed before signing");
+        return await sendGmsolOrderTransactions({
+          plan,
+          getWalletAddress: () =>
+            mounted.current && isSolanaNetwork(current.current.networkId) ? current.current.wallet.address : undefined,
+          signTransaction: async (bytes) => {
+            const session = current.current.wallet;
+            requireGmsol(
+              mounted.current && session.address === owner && session.signTransaction,
+              "Connected Solana wallet changed"
+            );
+            return session.signTransaction(bytes);
+          },
+          onSubmitted: (result) => {
+            if (
+              mounted.current &&
+              current.current.wallet.address === owner &&
+              isSolanaNetwork(current.current.networkId)
+            ) {
+              options?.onSubmitted(result);
+            }
+          },
+          onConfirmed: async ({ slot }) => {
+            requireGmsol(slot <= BigInt(Number.MAX_SAFE_INTEGER), "Confirmation slot exceeds API precision");
+            await Promise.all([
+              mutate(getSolanaBalancesKey(SOLANA_NETWORK_ID, owner)),
+              refreshGmsolAccountDataAfterTransaction(owner, Number(slot)),
+            ]);
+          },
+        });
+      } finally {
+        pending.current = false;
+        if (mounted.current) setIsSubmitting(false);
+      }
+    },
+    []
+  );
 
   return { submit, isSubmitting };
 }
