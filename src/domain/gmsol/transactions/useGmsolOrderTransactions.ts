@@ -8,12 +8,12 @@ import { useChainId } from "lib/chains";
 import { useSolanaWalletSession } from "lib/wallets/solanaWalletSession";
 
 import { refreshGmsolAccountDataAfterTransaction } from "../useGmsolAccountData";
+import { getPendingGmsolSubmission, reconcileGmsolSubmission, setPendingGmsolSubmission } from "./pendingSubmission";
 import {
   prepareGmsolOrderTransactions,
   sendGmsolOrderTransactions,
   type GmsolSendResult,
 } from "./sendOrderTransactions";
-import { getPendingGmsolSubmission, reconcileGmsolSubmission, setPendingGmsolSubmission } from "./pendingSubmission";
 import type { GmsolOrderAction } from "./types";
 import { requireGmsol } from "./validateTransaction";
 
