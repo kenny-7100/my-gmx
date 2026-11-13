@@ -29,13 +29,14 @@ const rpcOptions = () => ({ abortSignal: AbortSignal.timeout(RPC_TIMEOUT_MS) });
 
 export async function prepareGmsolOrderTransactions({ owner, action }: { owner: string; action: GmsolOrderAction }) {
   requireGmsol(getIsSolanaNetworkEnabled(), "Solana network is disabled");
+  const intent = structuredClone(action);
   const [lookupTables, { value: lifetime }] = await Promise.all([
     fetchGmsolLookupTables(),
     getSolanaRpc().getLatestBlockhash({ commitment: "confirmed" }).send(rpcOptions()),
   ]);
   return buildGmsolOrderTransactions({
     owner,
-    action,
+    action: intent,
     recentBlockhash: lifetime.blockhash,
     lastValidBlockHeight: lifetime.lastValidBlockHeight,
     lookupTables,
