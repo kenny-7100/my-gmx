@@ -193,3 +193,13 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 新增验证：相关现有测试 19 passed，scratch 新行为断言 1 failed（预期揭示上述缺陷）；仅 mock SDK 网络响应，使用实际 SWR、freshness hook、账户 hook。scratch 已移到 `/tmp/pr3258-review.spec.tsx`，日志 `/tmp/pr3258-review-tests.log`，业务 checkout 恢复 clean，未修改实现。相同 head 原全量 frontend 3434 passed/1 skip、SDK 952 passed、types/lint 结果复用，不宣称本次重跑全量。本次当前 head 的 production app/WASM build 实际重跑通过，日志 `/tmp/pr3258-review-build.log`。
 
 使用现有 kenny Chrome 原生窗口，在本轮自行启动的 3017 production preview 验证 Solana DOGE 行情/图表、flag off 回 Arbitrum及 reload 后 BTC 行情、flag on 恢复 Solana及 reload。结束恢复原 flag-on/Solana 状态、关闭本轮新 tab、停止本轮 preview，没有连接新浏览器/profile、签名或广播。未执行逐 host 请求计数、console/storage/第三方调用审计，不称完整 runtime 全部通过。FESOL-56 实时正文/评论已核对：unexpected-instruction/receiver 有自动化证据，四钱包实际 LUT 签名与主网 limit/edit/cancel/atomic landing 仍未验收；LUT trust 和有限价 atomic 1255-byte 限制已披露，不包装成新增发现。CI 本次最后读取 Audit/SDK build SUCCESS，root tests/type/lint 与 component checks 仍运行中。未发布 GitHub review/comment，未改 Linear。
+
+### 确认 slot 下限修复（2026-11-13）
+
+用户核实缺陷及前端独立实施条件后明确要求修复。沿用原 development → 既有 delivery 流程；Linear 56 正文/状态及 PR head/base 已刷新，无影响本修复的变化。新增 `GmsolAccountSlotTracker` 将 accepted snapshot slot 与 required confirmation slot 分开维护，按 API host、owner 和 positions/orders 隔离。在发起确认后刷新前即保存最高 required slot；强制刷新、普通轮询与重试统一带 `max(accepted, required)`，响应落地时再按最新 required slot 检查，防止飞行中的旧请求跨越更新后的确认下限。通过 `useSyncExternalStore` 在 required 尚未满足时经现有 error 通道保留旧数据和待追赶状态，追上后恢复；不改 SDK、交易编码、钱包签名或广播逻辑。
+
+原开发目录提交 `5ba8eaf32775df9378cd01b609a161c47a6d038c`（Retain confirmation slot floors across failed account refreshes FESOL-56）已备份 my-gmx，且现场 clean。只新增一条实际 SWR/hook 回归，覆盖首次刷新失败、较早确认不降低下限、普通轮询拒绝旧快照和最终追上恢复；修复前失败、修复后相关 3 suites/11 tests 通过。两个临时 tracker 检查验证跨 host/owner/request 隔离及更高确认到达时拒绝在途旧响应，已通过并移到 `/tmp/fesol56-slot-tracker.scratch.spec.ts`，不随 PR 交付。
+
+4 个文件精确转入 delivery，无冲突，与开发提交逐字节一致。两个实际目录各自全量 frontend 3435 passed/1 既有 skip（340 files passed/1 skipped）、app+landing tscheck、变更 ESLint/Prettier/diff 检查通过；delivery 生产 app/WASM build（命令级 8 GiB heap）也通过。SDK 未改，复用此前 SDK 952 passed，不声称本轮重跑。日志 `/tmp/fesol56-slot-{dev,delivery}-{tests,types,lint,format}.log`、`/tmp/fesol56-slot-dev-targeted.log`、`/tmp/fesol56-slot-delivery-build.log`。误用 package 的 `yarn prettier` 写入 5 个无关格式变化后已精确撤回，最终仅上述 4 文件；后续检查直接调用 Prettier 二进制。本轮无浏览器/钱包操作，不把 hook 和生产构建验证冒充四钱包主网验收。
+
+最终 delivery 的 `git commit -S` 失败：pinentry curses 显示 `not a tty`，GPG 报 `signing failed: No such file or directory`。本次没有复用前一次单次不签名例外、未关闭长期签名配置；4 文件已验证并保持暂存，delivery HEAD/远端 PR 仍为 `89c9fc73a5`，尚未更新 PR。英文 PR 正文已准备在 `/tmp/fesol56-slot-pr-body.md`，补充本修复、两目录实际全量验证和新生产构建结果。待本次命令级不签名例外或用户恢复签名后完成交付 commit/push、更新同一 Draft PR 并登记；知识沉淀独立保存到个人基础。LUT、四钱包主网落链及有限价 atomic 大小边界仍未解除。
