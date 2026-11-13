@@ -1,5 +1,19 @@
 # Solana 交易链路依赖审计
 
+## 五条内部同步结果（2026-11-13，用户限定不处理外部依赖）
+
+本节优先于下方16:16审计中的旧版本矩阵和建议。用户授权将五条内部需要跟进的依赖同步好；未扩展到52、51、71、112等外部需求，未修改57作者分支/PR、上游release或线上状态。
+
+- **72→56已补齐。** 在56原development精确消费72正式交付 `0f36780317` 的18文件产品补丁，提交 `a86cfdd54a`；package脚本列表的冲突保留本地工具和新增source-build命令。版本来源/历史模拟说明更新为 `bfda3ff947`。精确转入原delivery为 `3db0a203e0`、`0091a24556`；交付package冲突只保留产品命令，未夹带个人工具。已有Draft #3258已更新并核对head `0091a24556b42e49502e3d616d2838fec7d159b7`；#3259仍独立，不把56带回72正式PR。新head的GitHub检查已启动，尚未终态；旧head检查不代替它。
+- **57→56/20/19无遗漏。** 上游最新数学提交和20/19的两个cherry-pick，stable patch-id同为 `3a0d9c557d70a00b8011a20f4274b4f105da4362`。三分支SDK源码、WASM配置和transaction ABI一致；没有修改Rainer实现。SDK952项历史通过按未变源码/依赖复用，不称本轮重跑。
+- **56→20/19已核对。** 两个下游均保留订单意图快照、freshness envelope、确认slot floor和20 sender的identity/onSubmitted/trackingRequests/失败分类；两者共享transactions、orderTracking、notifications、账户hook、SDK/vendor的tree diff为空。未用56基础sender覆盖20扩展。
+- **19/20的现有代码依赖已明确保留。** 本轮没有把已实现两阶段反馈拆回提交阶段；20是当前19的代码交付前置，market trackExecution=true，limit/TP-SL创建false。共用README由20提交 `e2b6b354aa`，精确转到19为 `c6b20fd8d4`；仅文档变更，运行行为未改。若以后要求19脱离20单独交付，再独立处理该拆分，不能声称本次已解除依赖。
+- **统一产物。** 56 development/delivery、19、20与72 delivery均使用 `0.11.0-beta.1`、source `7fe4008292ffc09061f3a733ad9b5cd2e6235fa8`；WASM SHA-256 `e82184caacc60828f024743f88a0a92d97b9d3d55db6839e0d3fab8a9b46c840`，各目标全部8文件实际hash匹配。未重新运行Rust可复现构建，复用完全相同产物及72原GMX CI证据。
+
+验证：56 development和实际delivery各自完整frontend **3435 passed/1既有skip**，app/landing types、SDK重建、production app/WASM build、变更手写文件Prettier、app ESLint、Node脚本语法通过；development真实WASM/账户/钱包定向21项通过。19组合9 suites/41 tests、20组合8 suites/39 tests通过，分别核验SDK产物来源收据1200文件通过；两者运行源码未改，既有全量结果按原记录复用。delivery服务产物WASM hash相符，主app JS不含WASM binding/start。首次将Node构建脚本按浏览器ESLint环境检查报process未定义，改用Node环境后无error（2个既有console warning）；没有为此改72源码或共享lint配置。generated vendor字节不格式化。
+
+日志与版本矩阵存各实际目录 `.local/acceptance/internal-dependencies-20261113/`；56 development原构建收据在其SDK产物目录，delivery使用原生build-sdk。业务开发分支已推送my-gmx，56 delivery推送my-gmx-pr，task registry已重绑并更新接续信息。当前五条内部没有已确认遗漏的版本同步项；不等于产品范围完成、外部条件解除或真实钱包验收通过。本轮没有浏览器/钱包签名、广播、新主网模拟或外部评论。
+
 核验：2026-11-13 16:16（Asia/Shanghai）。角色：只读依赖分析。范围为 FESOL-56/57/19/20/72 及直接影响它们的 PR、API rollout 和验收条件；不是全量迁移进度评估。五条实时 Linear/评论与 CI 沿用本轮 16:08 已核实结果，19 assignee 已于 16:12 改为 kenny；本次新增核对远端 release、十个 PR head/base/mergeability、112/113 实时正文及实际分支代码。未改业务、合并分支、创建/更新 PR、发评论或执行交易。
 
 ## 结论与依赖方向
