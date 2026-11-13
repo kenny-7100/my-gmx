@@ -30,7 +30,13 @@ export function SolanaOrderStatusNotification({ state }: { state: SolanaOrderNot
       <Trans>Sending order request...</Trans>
     );
   const sendingStatus: TransactionStatusType =
-    state.submission === "submitted" ? "success" : state.submission === "failed" ? "error" : "loading";
+    state.submission === "submitted"
+      ? "success"
+      : state.submission === "failed"
+        ? "error"
+        : state.submission === "unknown"
+          ? "muted"
+          : "loading";
   const executionStatus: TransactionStatusType =
     state.execution === "executed"
       ? "success"
@@ -44,7 +50,7 @@ export function SolanaOrderStatusNotification({ state }: { state: SolanaOrderNot
   return (
     <StatusNotification title={state.title}>
       <TransactionStatus status={sendingStatus} text={sendingText} txnUrl={txUrl(signature)} />
-      {state.trackExecution && state.submission !== "failed" && (
+      {state.trackExecution && state.submission === "submitted" && (
         <TransactionStatus
           status={executionStatus}
           text={

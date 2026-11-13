@@ -158,6 +158,7 @@ export function useSolanaOrderNotifications() {
           error && typeof error === "object"
             ? (error as {
                 submittedSignatures?: unknown;
+                confirmedSignatures?: readonly string[];
                 pendingSignature?: unknown;
                 failedSignature?: unknown;
                 orders?: readonly TrackedOrderAction[];
@@ -169,7 +170,9 @@ export function useSolanaOrderNotifications() {
           : [];
         const pending = typeof detail?.pendingSignature === "string" ? detail.pendingSignature : undefined;
         const failed = typeof detail?.failedSignature === "string" ? detail.failedSignature : undefined;
-        const ambiguous = failed === undefined && (signatures.length > 0 || pending !== undefined);
+        const confirmed = detail?.confirmedSignatures ?? [];
+        const ambiguous =
+          failed === undefined && (pending !== undefined || signatures.some((value) => !confirmed.includes(value)));
         if (signatures.length && (detail?.orders?.length || detail?.trackingRequests?.length)) {
           onSubmitted({ signatures, orders: detail.orders, trackingRequests: detail.trackingRequests });
         }
