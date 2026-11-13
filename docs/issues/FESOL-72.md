@@ -92,3 +92,9 @@ Linux 实验发现 wasm-pack 0.15.1 的锁定 cargo-platform 依赖要求 Rust 1
 已在任务忽略目录 `.local/fesol72/delivery/` 生成 `fesol-72-release.patch` 与英文 `pr-body.md`。用独立 `GIT_INDEX_FILE` 从实际 release 构建索引，`git apply --cached --check` 及实际 apply 通过；18 文件，仅含 72 构建/产物/config/loader test、package 的 source-build 命令和文件依赖、对应 Yarn 锁。未带个人基础或 56 transactions 源码/文档，也未新建交付分支、推送业务或创建 PR。package 与 lock 的最终 diff 已逐项审阅；generated index_bg.js 的 upstream 末尾空行触发 whitespace 提示，保留生成字节以维持重建一致，不格式化生成绑定。
 
 该补丁只证明可应用到所查 release，尚未证明实际交付 checkout 的 install/build/tests 通过，正式交付仍需在目标目录完成适用验证。英文 PR 正文已明确这些边界和待补远端 CI/签名落链证据，未发布。剩余条件与上节相同；已有无签名主网成功记录不扩大为真实落链。
+
+### 正式 release 交付验证与签名回退（2026-11-13）
+
+用户已明确“已对齐，验证后创建 Draft PR”，确认产物位置对齐并授权交付。交付目录 `/Volumes/kenny/gmx/worktrees/FESOL-72-release`，分支 `build-gmx-gmsol-sdk-release-fesol-72`，基于实际 release `e471428074`，仅 18 个 72 文件，不带 56 未合并前置或个人工具。实际交付目录 immutable install 通过且锁未变；独立 Docker 重建全部 8 文件一致（2m52s）；app/landing tscheck 通过；production build 通过（2m45s），输出 WASM hash 一致，主 app JS 搜索无 WASM binding/start；Prettier/applicable ESLint 通过。完整 frontend 325 files passed/1 skipped，3341 tests passed/1 skipped，exit 0（375.65s）；测试 stderr 存在 happy-dom teardown AbortError，不影响终态结果，也不声称零 warning。日志 `/tmp/fesol-72-release-{install,reproduce,types,build,tests,format,lint}.log`。
+
+最终 `git commit -S` 因 pinentry curses 无 TTY 失败，未产生提交。随后用户明确长期规则：**任何时候 GPG 签名失败，都允许改为不签名，包括最终 PR 提交，无需再问**。已同步 AGENTS 与流程入口，用命令级 `git -c commit.gpgsign=false` 完成提交 `0f36780317`，未修改长期签名配置。正式 fork `my-gmx-pr` 分支 push 成功；Draft PR 创建/CI 实际结果待下文补充。用户这次明确规则替代历史最终提交需单次例外的约束，旧 issue 的历史等待记录不再构成当前阻碍。
