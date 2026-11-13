@@ -175,3 +175,6 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 用户明确修正长期流程：已有基于 solana-integration 的需求开发分支时，后续 review 修复先在原 development 实施并验收，再精确转入现有 delivery、复验并更新同一 PR。此前“delivery 是唯一业务修复现场”的约定被本次新指令替代，保留历史记录但不再据此阻止回原开发分支；AGENTS、日常流程、交付 skill 和索引均已同步。development 是实现验证现场，delivery 是 PR 发布版本，不在两处独立维护同一修复。
 
 本次先在原 `gmx-interface-fesol-56` / `solana-order-transactions-fesol-56` 修复确认后缓存 envelope：positions/orders 均写入 `{ value: 已校验 slot 的数据, fetchedAt: Date.now() }`，保留 minContextSlot、旧 slot 拒绝和请求失败抛出行为。新增真实 SWR/hook 回归覆盖成功、旧 slot、失败保留数据；修复前 2 failed/1 passed，修复后相关 3 suites/10 tests passed；完整 frontend 3434 passed/1 既有 skip，app+landing tscheck、变更 ESLint/Prettier/diff 通过。开发提交 `ccbde8e995ea6ca32972a626f4cc1b896d8edbef`。仅两个业务文件转入原 delivery，正在实际交付目录复验，尚不宣称 PR 已更新。日志 `/tmp/fesol56-cache-{before,dev-targeted,dev-tests,dev-types,dev-lint,dev-format}.log`。本次不涉及 UI 布局、交易编码或 SDK 改动，以真实 hook 的状态验收为直接证据，不以钱包操作或页面可加载冒充此缺陷验证。
+
+
+交付目录同样 frontend 3434 passed/1 既有 skip（340 files passed/1 skipped）、app+landing tscheck、变更 ESLint/Prettier/diff 通过；工具过时提示已改成 development 验证后转入既有 delivery，适用 agent-workflow 单项 13 tests passed。交付提交尝试 GPG 签名失败（pinentry curses 无可用 tty/界面，No such file or directory），未关闭长期配置。已准备 PR 英文正文增量与验证结果，等待本次签名例外或用户解锁后完成 commit/push；不将已验证/暂存冒充已更新 PR。日志 `/tmp/fesol56-cache-delivery-{tests,types,lint,format}.log`、`/tmp/fesol56-cache-workflow-tests.log`。

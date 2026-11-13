@@ -176,7 +176,7 @@ Linear: <actual Linear issue URL containing FESOL-123>
 3. 通过后精确 cherry-pick 修复提交到登记 delivery；不整支合入个人基础或 delivery。冲突按语义解决，尤其不能将开发侧个人基础差异带入 PR。
 4. 在实际 delivery 按源码、依赖和配置差异复验适用检查；开发侧通过不代替交付侧通过。通过后推送 `my-gmx-pr`，更新同一 Draft PR；开发分支备份用 `my-gmx`，保持两角色 HEAD/验证证据登记。
 
-不在 development 与 delivery 独立实现两份修复；delivery 保留 PR 发布版本的权威身份，development 是默认修复现场。仅有 delivery 的旧任务沿用已核实现场，不为套流程重建不存在的分支；有歧义再确认。新会话发现远端 head 与登记不同，先以远端事实核对差异再更新记录。普通修复不重新创建一套交付分支。
+不在 development 与 delivery 独立实现两份修复；delivery 保留 PR 发布版本的权威身份，development 是默认修复现场。工具 status 的 authority 和 note 的 verification 在已有 delivery 时指 PR 发布版本；开发验证单独记录 issue 与 context acceptance，不把开发 HEAD 填作交付 verification。仅有 delivery 的旧任务沿用已核实现场，不为套流程重建不存在的分支；有歧义再确认。新会话发现远端 head 与登记不同，先以远端事实核对差异再更新记录。普通修复不重新创建一套交付分支。
 
 此阶段发现的知识也可从 delivery 的独立基础设施提交选择性回流；回流后必须从 PR 历史剥离该个人提交，未经明确授权不 rebase/强推。更轻便的方法是在个人基础 worktree 直接记录并提交经验，业务 worktree 只保留业务改动。
 
