@@ -57,7 +57,7 @@
 | 真实服务、价格或链上资源 | 按需求选择[线上核验](agent-acceptance-workflow.md#线上行为与数据核验)、[keeper](keeper-preflight.md)、[钱包](agent-wallet.md)、[ALT](solana-alt-preflight.md)、[回执](solana-transaction-evidence.md)、[索引](solana-index-preflight.md)；多通道可用[统一预检](agent-preflight.md)，不重复检查同一依赖 |
 | SDK/程序兼容或数学验收 | [版本指纹](solana-runtime-preflight.md)、[真实 WASM 向量](solana-sdk-vectors.md)；基础通过不等于复杂计算、链上兼容或业务通过 |
 | 远端 API 或 PR 页面验收 | 先核对[实际部署资源](agent-acceptance-infrastructure.md#待协调资源与-a03-验收门槛)或[不可变预览身份](agent-preview.md)，不以 sample、旧成功部署替代 |
-| 完整构建、报错或清理失败 | 按[失败诊断](agent-failure-diagnosis.md)与本次日志处理；大型构建/测试避免资源争用，只清理所属资源 |
+| 构建、报错或清理失败 | Node/Vite 构建默认命令级 `NODE_OPTIONS=--max-old-space-size=8192`（用户于2026-11-13明确），大型构建串行；其他故障按[失败诊断](agent-failure-diagnosis.md)与本次日志处理，只清理所属资源 |
 | 最终交付或原始证据移交 | 普通任务按[最短交付路径](linear-development-workflow.md#最短交付路径)；复杂任务或明确要求时使用[严格检查](agent-delivery-evidence.md)、[工作表](agent-acceptance-workflow.md)、[证据包](agent-evidence.md) |
 
 运行器的目标身份、源码/工具一致性、网络审计、退出与清理要求按所选专题执行；不能为提速跳过其有效性检查。构建、服务与外部操作沿用根授权。专项细节只维护在上述专题，新增经验按触发条件加入对应入口。
