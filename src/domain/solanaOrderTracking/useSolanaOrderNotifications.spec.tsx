@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { setAbFlagEnabled } from "config/ab";
 import { SOLANA_NETWORK_ID } from "config/chains";
+import { GmxSdkProvider, useGmxSdk } from "context/GmxSdkContext/GmxSdkContext";
 import type { OrderLifecycleResult, TrackedOrderAction } from "domain/gmsol/orderTracking/reduceOrderLifecycle";
 
 import type { SolanaOrderNotificationState } from "components/StatusNotification/SolanaOrderStatusNotification";
@@ -11,6 +12,7 @@ import type { SolanaOrderNotificationState } from "components/StatusNotification
 import { useSolanaOrderNotifications } from "./useSolanaOrderNotifications";
 
 const fakes = vi.hoisted(() => ({
+  refresh: vi.fn(),
   owner: "wallet-A",
   networkId: -501,
   rendered: [] as { content: unknown; options: { autoClose?: number | false; onClose?: () => void } }[],
@@ -37,7 +39,9 @@ vi.mock("domain/gmsol/orderTracking/watchSubmittedOrders", () => ({
       fakes.watching = { signal, onUpdate, finish: resolve };
     }),
 }));
-vi.mock("domain/gmsol/useGmsolAccountData", () => ({ refreshGmsolAccountDataAfterTransaction: async () => undefined }));
+vi.mock("domain/gmsol/useGmsolAccountData", () => ({
+  refreshGmsolAccountDataAfterTransaction: (...args: unknown[]) => fakes.refresh(...args),
+}));
 
 beforeEach(() => {
   setAbFlagEnabled("solanaNetwork", true);
@@ -45,6 +49,7 @@ beforeEach(() => {
   fakes.networkId = SOLANA_NETWORK_ID;
   fakes.rendered.length = 0;
   fakes.watching = undefined;
+  fakes.refresh.mockClear();
 });
 afterEach(() => {
   fakes.watching?.finish();
@@ -54,18 +59,32 @@ afterEach(() => {
 });
 function mount() {
   let value!: ReturnType<typeof useSolanaOrderNotifications>;
+  let sdk: ReturnType<typeof useGmxSdk>;
   function Probe() {
+    sdk = useGmxSdk(SOLANA_NETWORK_ID);
     value = useSolanaOrderNotifications();
     return null;
   }
-  const view = render(<Probe />);
+  const view = render(
+    <GmxSdkProvider>
+      <Probe />
+    </GmxSdkProvider>
+  );
   return {
+    get sdk() {
+      return sdk;
+    },
     result: {
       get current() {
         return value;
       },
     },
-    rerender: () => view.rerender(<Probe />),
+    rerender: () =>
+      view.rerender(
+        <GmxSdkProvider>
+          <Probe />
+        </GmxSdkProvider>
+      ),
     unmount: view.unmount,
   };
 }
@@ -130,6 +149,18 @@ describe("Solana order notification lifecycle", () => {
     expect(terminalOptions.autoClose).toBeGreaterThan(0);
     await act(async () => fakes.watching!.finish());
     expect(fakes.rendered[fakes.rendered.length - 1].options.autoClose).toBeUndefined();
+  });
+
+  it("refreshes execution evidence with the shared Solana SDK and submitted owner", async () => {
+    const view = mount();
+    const notification = view.result.current.begin({ title: "Order", trackExecution: true });
+    notification.submitted({ signatures: ["creation"], orders: [order] });
+    await waitFor(() => expect(fakes.watching).toBeDefined());
+    fakes.watching!.onUpdate({
+      execution: "executed",
+      trade: { signature: "execution", event: { fields: { slot: 42n } } },
+    });
+    await waitFor(() => expect(fakes.refresh).toHaveBeenCalledWith(view.sdk, "wallet-A", 42));
   });
 
   it("aborts on wallet or network changes and prevents dismissed/unmounted flows from updating another session", async () => {
