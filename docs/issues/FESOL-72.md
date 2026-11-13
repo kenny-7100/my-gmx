@@ -140,3 +140,7 @@ GitHub 确认同一交付 head `0f36780317` 的 [Run Tests 43385852251](https://
 ## 2026-11-13 独立开发切片实施
 
 角色：关联消费：只在development同步56恢复能力，独立WASM交付保持原范围。实施、版本、行为证据与剩余边界见[统一记录](../solana-trading-dependencies.md#独立开发切片实施结果2026-11-13)。未进行真实钱包签名/广播，既有外部验收条件未解除。
+
+## gmx-prompts review 与修复（2026-11-13）
+
+角色：审查。按 gmx-prompts 审查独立 Draft #3259 全部手写构建、pin/hash/loader 与 CI 复现路径，未核实到新需修复问题，业务 head 保持 `0f36780317`。另在最新 release `83474e0e94` 创建 detached 实际合并 `0ea2e9395b`，immutable install、app/landing types、gmsol 5 files/19 tests、8GB WASM bundle build passed。固定 Rust/8 文件输入未变，复用既有真实 GMX CI/独立重建证据，不再重复 Rust 构建。PR 正文已补充审查覆盖与限制，仍 Draft；真实签名落链、71 可信 LUT、finite-bound atomic 大小及 0.11.0-beta.1 的 maintainer 确认仍待处理。方法和逐项矩阵见[统一记录](../solana-trading-dependencies.md#gmx-prompts-review-与修复2026-11-13)。

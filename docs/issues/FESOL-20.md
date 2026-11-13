@@ -72,3 +72,7 @@ Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新
 ## 2026-11-13 独立开发切片实施
 
 角色：实现：安全恢复消费、通知分类与真实组件验证。实施、版本、行为证据与剩余边界见[统一记录](../solana-trading-dependencies.md#独立开发切片实施结果2026-11-13)。未进行真实钱包签名/广播，既有外部验收条件未解除。
+
+## gmx-prompts review 与修复（2026-11-13）
+
+角色：实现与审查。按 gmx-prompts 对 Draft #3261 lifecycle/sender/真实通知组件及 release merge result 完成审查，包含四遍定向检查和异步终态。修复阻断 general CI 的 sender spec import/order（development `8a7ac5a454` → delivery `6087908e19`），均已推送并由 19 消费；delivery 零 warning lint 与 6 files/36 tests passed。未核实到其他需独立修改的重要问题。旧组件 CI 的用例通过、报告发布/评论 403 保留；新 head 的 CI 不冒充旧结果。真实订单执行/取消/toast 验收仍待 71/钱包/keeper 条件；保持 Draft。方法、逐项验收和人工检查重点见[统一记录](../solana-trading-dependencies.md#gmx-prompts-review-与修复2026-11-13)。

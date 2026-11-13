@@ -98,3 +98,7 @@ Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新
 ## 2026-11-13 独立开发切片实施
 
 角色：实现：输入/TP-SL修复及共享恢复入口。实施、版本、行为证据与剩余边界见[统一记录](../solana-trading-dependencies.md#独立开发切片实施结果2026-11-13)。未进行真实钱包签名/广播，既有外部验收条件未解除。
+
+## gmx-prompts review 与修复（2026-11-13）
+
+角色：实现与审查。按 gmx-prompts 对当前 Draft #3262 及 release merge result 完成代码、GMX/Solana、安全、状态收尾与运行检查。确认并修复共享 TradeBox 的 EVM account-type 与 incentive 请求泄漏；修复前回归实际失败，修复后跨网络隔离通过。另修复零 warning CI fixture 并消费 20 import 修复。development `e4cf921834`，delivery `69ba4dab7a`，均已推送；保持原 Draft。实际 delivery 严格 lint/types、完整 frontend 3469 passed/1 skipped、8GB production build passed。线上 67 市场均无 tradeMath；真实签名和 deferred scope 未解。审查/逐项验收矩阵、原生浏览器样本及限制见[统一记录](../solana-trading-dependencies.md#gmx-prompts-review-与修复2026-11-13)。
