@@ -148,3 +148,6 @@ FESOL-56 范围含 market/limit increase、market decrease、TP/SL、原子 incr
 实时上游 #3242/#3243/#3195/#3193/#3205/#3207 均 OPEN。#3193 当前 head `258e4da6abafc75c683983993544f4eb9c1a8abc` 比集成的 `732b4a1322` 新，本次保留已测试集成版本，PR 明列这一边界。56 Execution、71 Todo，正文及评论无新替代 LUT 地址。重建唯一冲突在 indexers/utils：保留最新 release 的 IndexerKey（不恢复已移除的 stats），同时保留依赖的 getConfiguredIndexerUrl；一处依赖格式修正。新目录 SDK 安装/构建完成，SDK 952 passed、前端 3431 passed/1既有skip、app+landing types、变更 ESLint/Prettier/diff 通过。生产 app/WASM build（8 GiB heap）也通过；最终发布结果待补。
 
 最终交付 GPG 签名实际失败（口令输入界面不可用），未禁用长期签名配置、未绕过最终 PR 签名规则。已向用户请求本次 Draft 命令级不签名例外或自行解锁；答复到达前不创建无签名交付提交、不推送。
+
+
+Draft 发布完成：用户明确允许本次最终 Draft PR 提交命令级不签名，提交 `76e9486b96cbfe9d6316996f786701181241f4de` 已推送 my-gmx-pr。[UI#3258](https://github.com/gmx-io/gmx-interface/pull/3258) 实际核验 OPEN、isDraft=true、base=release、head=solana-order-transactions-release-fesol-56，无 reviewRequests；创建后 GitHub CI 已启动、当时仍运行中，不宣称已通过。PR 正文包含所有依赖版本、交付目录实际测试、LUT/1255-byte/四钱包/preview 未完成边界。后续业务修复唯一现场为登记 delivery `gmx-interface-fesol-56-release`，旧开发分支保留作历史，不再双线修改。原整体实施/正式验收目标仍未完成。
