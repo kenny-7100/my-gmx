@@ -14,27 +14,35 @@ checksums are recorded in `build.json`.
 
 ## Rebuild and verify
 
-Install Rust 1.90.0 with the `wasm32-unknown-unknown` target and wasm-pack 0.15.1:
+Use Docker to run the canonical Linux arm64 build on development machines and CI:
 
 ```sh
-rustup toolchain install 1.90.0 --profile minimal --target wasm32-unknown-unknown
-cargo +1.90.0 install wasm-pack --version 0.15.1 --locked
-node scripts/build-gmsol-sdk.mjs
+docker build --platform linux/arm64 -t gmx-gmsol-sdk -f scripts/gmsol-sdk.Dockerfile scripts
+docker run --rm --platform linux/arm64 -v "$PWD:/app:ro" gmx-gmsol-sdk
 ```
 
-Run from the frontend repository root. The script fetches the pinned source into
+Run from the frontend repository root. The builder uses a digest-pinned Rust base
+image, Rust 1.90.0 and wasm-pack 0.15.1. Host-specific compiler output can change
+WASM bytes even with the same source and tool versions, so direct macOS or other-platform
+builds are not accepted as release artifacts. The script fetches the pinned source into
 a temporary directory, checks the source and Cargo.lock, builds the SDK with
 `--release --target bundler --out-name index --scope gmsol-labs --no-opt -- --locked --features js`,
 then compares all eight generated/distributed files with the committed bytes and
 checksums. Upstream Rust release LTO remains enabled; `--no-opt` skips wasm-pack's
 separately downloaded wasm-opt pass. wasm-bindgen 0.2.100 is fixed by Cargo.lock.
+Rust source, Cargo registry and toolchain paths are remapped to stable prefixes
+so panic locations do not embed the build host's directory names in the WASM.
 The script copies the upstream LICENSE and corrects its relative package path.
 No protocol source changes are applied.
 
-An existing clean checkout at the pinned revision can be reused:
+Rust 1.91.0 is used only to install wasm-pack, whose locked cargo-platform
+dependency requires it. The SDK itself is always compiled with Rust 1.90.0.
+
+An existing clean source checkout can be reused inside the canonical builder:
 
 ```sh
-node scripts/build-gmsol-sdk.mjs --source-dir /path/to/pinned/gmx-solana
+docker run --rm --platform linux/arm64 -v "$PWD:/app:ro" \
+  -v /path/to/pinned/gmx-solana:/source gmx-gmsol-sdk --source-dir /source
 ```
 
 The `Build gmsol WASM SDK` workflow runs the rebuild and comparison in GMX CI,
@@ -45,17 +53,22 @@ Rust or network access to the upstream protocol repository.
 ## Deliberate upgrades
 
 Update the source/version/toolchain inputs in `build.json`, then run the build
-script with `--write` to regenerate the files and checksums. Review the generated
+container with a writable app mount and `--write` to regenerate the files and
+checksums. Review the generated
 diff and upstream changes, update `GMSOL_SDK_WASM_SHA256` and increment
 `GMSOL_SDK_ASSET_PATH` in `src/config/gmsol/sdk.ts`, and run `yarn install` to
 refresh the file dependency checksum. Never format generated bindings.
+
+```sh
+docker run --rm --platform linux/arm64 -v "$PWD:/app" gmx-gmsol-sdk --write
+```
 
 `yarn build:gmsol-sdk` checks every installed file against `build.json` before
 bundling the lazy SDK entry. The configured WASM hash must also match the manifest.
 The app keeps its existing Solana flag gate and loads this artifact lazily.
 
 Initial GMX WASM SHA-256:
-`5dc8c8fe9d7172ed8987d6af94609e6c819fb27d82d6e5fc842279d9e58db396`.
+`e82184caacc60828f024743f88a0a92d97b9d3d55db6839e0d3fab8a9b46c840`.
 
 Rebuilding and checking hashes establishes artifact provenance and integrity. It
 does not establish mainnet program compatibility or replace FESOL-56's required
