@@ -250,7 +250,10 @@ export async function sendGmsolOrderTransactions({
           value: [status],
         } = await rpc.getSignatureStatuses([sent], { searchTransactionHistory: true }).send(rpcOptions());
         if (status) {
-          if (status.err !== null) {
+          if (
+            status.err !== null &&
+            (status.confirmationStatus === "confirmed" || status.confirmationStatus === "finalized")
+          ) {
             failedSignature = sent;
             pendingSignature = undefined;
             setPendingGmsolSubmission(plan.owner, undefined);
