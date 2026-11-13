@@ -1,5 +1,46 @@
 # Solana 交易链路依赖审计
 
+## gmx-prompts review 与修复（2026-11-13）
+
+用户目标：让 FESOL-19/20/72 当前 Draft 经 gmx-prompts review，修复已核实的重要且能独立解决的问题。本轮为单 Agent 人工审查；使用最新 gmx-prompts 的 `gmx-interface-review`、`gmx-solana`、开发/测试/项目规范。没有可调用的 `/code-review` 或 `/security-review` 命令，不能声称运行了原生命令；通用正确性与安全检查人工执行。没有发布 review 评论、请求 reviewer、转 Ready、合并、修改 Linear 或签名广播。
+
+审查范围以 GitHub 当前 head 和 release merge result 为准：19/20 已包含 release `83474e0e94`，另对 72 创建 detached 实际合并结果 `0ea2e9395b`（tree `92c615eeed87f7350f593f9cc226048d3ab37d8a`），不将该临时合并提交带进独立 PR。复用同阶段已核验来源，不以 development 相对 release 的全部个人差异冒充 PR 范围。PR 既有评论/review/inline 查询为空。除整体上下文阅读外，分别执行除法/分母、交易步骤、分支保护、单位语义四遍定向检查，以及 success/error/timeout/reject/unmount 的状态收尾检查；针对 SDK/IDL 与 API 接缝核对固定源码及可观测部署边界。
+
+| 需求 | 已核实问题与处理 | 当前交付 head | 本轮结论 |
+| --- | --- | --- | --- |
+| [19 / #3262](https://github.com/gmx-io/gmx-interface/pull/3262) | 中等：共享 TradeBox 在 Solana 可触发 EVM `eth_getCode` 账户类型读取及 `/incentives` 请求。禁用对应 SWR key，并隔离缓存 EVM 返回值；切回 EVM 恢复正常读取。新增跨网络回归在修复前实际失败、修复后通过。另修复零 warning CI 的 sender import 和 TP/SL fixture | `69ba4dab7a` | 本轮已核实、可独立修复的问题均处理；完整需求验收仍 BLOCKED/部分范围暂缓 |
+| [20 / #3261](https://github.com/gmx-io/gmx-interface/pull/3261) | 通用 CI 因 sender spec import/order warning 失败；原 development 修复 `8a7ac5a454`，精确转入 delivery `6087908e19` 并被 19 消费。不是新增业务缺陷，不向他人重复发布 lint finding | `6087908e19` | 未核实到其他需独立修改的重要问题；新订单/keeper/toast 整体验收仍 BLOCKED |
+| [72 / #3259](https://github.com/gmx-io/gmx-interface/pull/3259) | 手写构建/loader/CI/hash 链未核实到新缺陷；保持业务 head，无无依据修改 | `0f36780317` | 构建/hash 部分有证据；签名落链和版本确认仍 BLOCKED |
+
+所有修复先在原 development 验证，再 cherry-pick 到既有 delivery，同一 Draft PR 已推送更新；PR 正文补充审查方法、修复、证据、未验收项及仍未到正式 review 阶段、上游变化可能导致继续修改。19 development `e4cf921834`，20 development `8a7ac5a454`。未改 57 作者代码，未扩大 72 独立 WASM PR 范围。
+
+### 本轮机械与运行证据
+
+- 19 development：修复前回归确证 Solana 初始化仍调用 EVM account code reader；修复后跨网络读取隔离 + TP/SL 2 files/18 tests passed，变更文件严格 ESLint、app/landing types passed。delivery：`lint:ci` 零 warning、`tscheck:ci`、完整 frontend **347 files/3469 tests passed，1 file/test skipped**、production `build-app` passed。所有 Node/Vite 构建使用 `NODE_OPTIONS=--max-old-space-size=8192`。SDK 输入未变，沿用上一轮相同 SDK/锁/配置/vendor 的 954 passed 证据，不冒充新跑。
+- 20 delivery：`lint:ci` 零 warning；transactions/orderTracking/真实 notification component 回归 **6 files/36 tests passed**。本次只有 import 顺序变更，沿用原同目标完整 frontend 3459 passed/1 skipped、SDK 954 passed、types 与 production build 证据，未机械重跑所有未受影响检查。
+- 72 最新 release 合并目录：immutable install、app/landing types、gmsol **5 files/19 tests passed**、应用 WASM bundle/hash gate build passed。固定 Rust 输入与 8 vendor 文件未变，沿用已通过的独立 byte reproduction 与真实 GMX WASM CI `43385852331`，本次未再跑 Rust。独立交付目录和临时 merge result 证据分别标明。
+- 原生现有 Chrome 打开 19 实际 production merge result `127.0.0.1:3019/trade`，已检查 flag-off 的 EVM 基线、flag-on Solana、重载、EVM 切换、返回 Solana/重载，TradeBox 显示市场/限价及 TP/SL，Solana 不提供 swap。修复前主文档资源缓冲看到 17 条 `/incentives`；修复后 Solana 重载采样 90 条资源中 0 条 incentives。后者是有界主文档样本，不能证明所有 worker/EVM RPC 为零；账户读取隔离由可复现边界回归证明。Console 的 Privy localhost `frame-ancestors` CSP 拒绝、广告连接失败、TradingView unload policy 及 metrics 429 单独保留，不归因为本轮新增代码问题。没有绕过 CSP 或操作钱包签名。用户随后正在使用浏览器，停止争用原生窗口；测试 origin 的 Solana 本地 flag 保留开启，不误称恢复初态。
+- 19/20 远端 general 旧 head 的失败已读日志确认为上述 lint warning；旧组件 workflow 用例通过，失败在报告 Pages 发布/评论 HTTP 403（fork 权限），没有扩大权限。新 head 的远端 CI 是新的运行，不能用旧结果冒充新 run 全绿。
+- 收尾远端快照：19/20 新 head 及 72 既有 head 均确认 OPEN Draft、base release；19/20 的新 general 与部分 checks 仍运行中，72 因正文更新另起 general，既有同 head 成功不等于新 run 已结束。72/WASM 既有成功保留，20 新组件 run `43416516116` 已读完整日志：286 passed（4.1m），仅 Pages 部署和报告评论 403。临时 preview 3019 已停止；其他服务未接管/停止。
+- 部署定向复查：`https://solana.gmxapi.io/v1/markets/config` 返回 67 市场，`tradeMath` 存在 0/gmsol 0。新鲜 gmx-api origin/main `marketRecords.ts` 仍缺该标志；源码不替代部署。无版本确认、受信 LUT、真实 keeper 或签名落链的新证据。
+
+### 验收逐项边界与后续人工检查重点
+
+| 需求验收项 | 本轮状态及证据边界 |
+| --- | --- |
+| 19：共享 market/limit increase + 附加 TP/SL；已有仓位 TP/SL tab；不支持模式隐藏 | 代码/mapper/共享组件回归、未连接钱包页面已验证；成功开仓/加仓及 TP/SL 真实落链不可验，BLOCKED 于 71/112/钱包授权 |
+| 19：支付币转换、签名、pending/success/failure | 直接抵押币/native SOL 路径、确认不冒充 fill、异常恢复有测试；支付转换为用户暂缓项，真实签名未验 |
+| 19：输入/池/抵押币与杠杆交互、最大杠杆、k-token 价格 | 共享逻辑、杠杆改变保留支付量、visualMultiplier/ABI 单位代码与回归覆盖；最大杠杆标签和含费 buffer 一致性暂缓，完整界面数值验收未完成 |
+| 19：执行预览/acceptable price、Collateral Spread、GT VIP、GT Rewards | 共享布局与来源/禁用条件已审查；线上缺 gmsol math，simulate_order 同输入数值对照未建立；GT Rewards 暂缓；不把历史 spread 设计确认扩大为本轮验收 |
+| 19：TP/SL 目标价抵押品 %/$ 双向换算 | long/short、TP/SL、单位切换 17 组件测试通过；真实订单与协议数值一致性仍待联调 |
+| 19：发送 toast 不误报 fill，EVM 保留 | 与 20 集成的代码/真实组件回归已验证；19 旧正文的 sending-only 由关联 20 执行阶段覆盖，不能把组合行为描述成 19 单独 sending-only |
+| 20：两阶段、失败/取消、相关性、缺失/延迟、布局/链接/关闭 | parser/reducer/reader/真实组件的可复现测试通过；program/store/order/action、failed tx、复用生命周期、分离 execution/closure、same-slot 顺序均审查；新订单实时 keeper、取消 reason 和浏览器组合 toast 仍未验 |
+| 20：GMX RPC 跟踪与执行后 gmx-api refresh，无 Corvus | 源码/回归已验证；刷新 slot/freshness 不保证实际部署 keeper 业务验收；缺证据保持 unresolved；用户关闭、切钱包/网络、unmount 中断各自通知，不全局清空其他任务 |
+| 72：GMX CI 构建、app 加载 GMX build、hash 进入 PR | 构建、加载/隔离测试、固定 hash、实际 GMX CI 及此前原生浏览器证据成立；本轮最新 release 合并结果额外通过安装/types/tests/WASM bundle |
+| 72：新版 mainnet flows land；版本相对原始 0.10.0 | 未验：此前仅 unsigned simulation，不是签名落链；0.11.0-beta.1 为用户选择，maintainer 认可仍待确认；可信 LUT/原子交易大小边界保留 |
+
+人工接续优先：71 提供 LUT 后验证可信/冻结状态与有限 acceptable-price 三单 1232-byte 边界；112 上线后对照 raw-account simulate_order 并跑受授权真实链路；复核 20 部署事件 ABI 与新 lifecycle receipts；解决用户暂缓的 19 范围前不转 Ready。代码审查完成不等于这三个需求整体验收完成。
+
 ## 四条 release Draft（2026-11-13）
 
 用户已明确授权19/20交付，新增20 [#3261](https://github.com/gmx-io/gmx-interface/pull/3261)、19 [#3262](https://github.com/gmx-io/gmx-interface/pull/3262)；既有56 [#3258](https://github.com/gmx-io/gmx-interface/pull/3258)、72 [#3259](https://github.com/gmx-io/gmx-interface/pull/3259)本轮核实仍OPEN/Draft、base release。56 head `11da18dfb7`、72 `0f36780317`无需为本次交付改动。
