@@ -1,5 +1,14 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## release Draft 已交付（2026-11-13）
+
+用户明确授权整理20/19 Draft到release，已创建 [PR #3262](https://github.com/gmx-io/gmx-interface/pull/3262)，保持Draft、base release。交付head `2b7642e7e50f7fb1c9aaeef15f5bd9b27e5d3669`，分支 `solana-tradebox-entry-release-fesol-19`，目录 `/Volumes/kenny/gmx/gmx-interface-fesol-19-release`。本次仅交付现有成果，没有恢复下方暂缓开发项，也未修改Linear状态。
+
+基于最新release `83474e0e94c88c2b4a18cd436a564b97062f807f`，集成20 Draft #3261的纯产品delivery `41a6e9cba3`（集成commit `5eaf1486db`），精确转入19现有共享TradeBox、TP/SL目标价与恢复入口。20→56前置公开列在PR正文；三份trade-state/storage guard精确来自15/#3201 `056f8d689c`且与19 development一致，未整支带入15/25 selector/list UI、个人基础或参考gitlink。完整市场/仓位选择仍需15/#3201、25/#3238，不伪称独立可合并。
+
+实际交付目录完整frontend **3468 passed/1 skipped**（346 files passed/1 skipped）；完成immutable install（含独立SDK postinstall build）、Lingui、app/landing types、production app/WASM build及19变更TS的ESLint/Prettier/自身diff check；构建均使用8GiB。全部转入的19 TS源码和development `c708d8a634`一致。SDK source/lock/config/vendor与20 delivery完全相同，复用其65 files/954 passed结果，不冒充19重新跑过SDK suite。日志位于目标 `.local/acceptance/draft-delivery-20261113/`。生成WASM glue的继承EOF空行warning保留，不更改固定vendor。无新浏览器或真实交易验收；下方延期清单、71/112、版本确认等边界仍适用。PR后修复仍先回原development，再精确更新同一Draft。
+
+
 ## 当前决定：剩余问题暂缓（2026-11-13）
 
 用户明确认为FESOL-19剩余问题可以之后解决，本阶段停止主动推进这些剩余项，保留当前成果。此决定是实施优先级调整，不代表需求已完成、验收通过或范围豁免；不修改Linear状态，也不把原需求条件删去。

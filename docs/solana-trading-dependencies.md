@@ -1,5 +1,12 @@
 # Solana 交易链路依赖审计
 
+## 四条 release Draft（2026-11-13）
+
+用户已明确授权19/20交付，新增20 [#3261](https://github.com/gmx-io/gmx-interface/pull/3261)、19 [#3262](https://github.com/gmx-io/gmx-interface/pull/3262)；既有56 [#3258](https://github.com/gmx-io/gmx-interface/pull/3258)、72 [#3259](https://github.com/gmx-io/gmx-interface/pull/3259)本轮核实仍OPEN/Draft、base release。56 head `11da18dfb7`、72 `0f36780317`无需为本次交付改动。
+
+19/20从最新release `83474e0e94c88c2b4a18cd436a564b97062f807f`重建纯产品delivery；依赖关系56→20→19，72保持独立WASM范围。PR公开披露未合并前置、19的15/25市场/仓位入口依赖和暂缓范围。实际delivery验证、heads及后续原development修复入口见[20交付记录](issues/FESOL-20.md#release-draft-已交付2026-11-13)和[19交付记录](issues/FESOL-19.md#release-draft-已交付2026-11-13)。此节替代下方“19/20没有PR”的历史观察；Draft不等于Ready、可独立合并或真实落链验收完成。未改Linear、请求reviewer、合并或签名广播。
+
+
 ## 当前推进决定（2026-11-13）
 
 用户在独立开发切片完成后明确：**FESOL-19剩余问题暂缓，之后再处理**。当前不再自动推进最大杠杆一致性、兑换、WASM数值对照、GT Rewards及完整下单验收；保留缺口与外部条件，不计作已完成或需求豁免。恢复清单和原开发现场见[FESOL-19当前决定](issues/FESOL-19.md#当前决定剩余问题暂缓2026-11-13)。此决定优先于下方早期“优先继续19”的建议，不扩展成其他需求的暂停，也未修改Linear。

@@ -1,5 +1,14 @@
 # FESOL-20 — 订单发送与成交状态
 
+## release Draft 已交付（2026-11-13）
+
+用户明确授权整理20/19 Draft到release。已创建 [PR #3261](https://github.com/gmx-io/gmx-interface/pull/3261)，保持Draft、base release；交付head `41a6e9cba3eed60518b3fcc0a03b63983ed1f8f4`，分支 `solana-order-lifecycle-release-fesol-20`，目录 `/Volumes/kenny/gmx/gmx-interface-fesol-20-release`。本节替代下方历史“尚无20 PR”的观察，不修改Linear状态。
+
+从实时fetch的release `83474e0e94c88c2b4a18cd436a564b97062f807f`创建，先合入56已核验的纯产品delivery `11da18dfb7`（集成commit `9771426b15`），再精确转入20生命周期、通知和恢复源码，保留最新release翻译；没有带入个人基础、参考仓库gitlink或额外stats/indexer差异。PR已明确56前置及其SDK/math/WASM依赖；不是独立可合并状态。
+
+实际交付目录：immutable install、Lingui prepare、SDK build、app/landing types、production app/WASM build通过（所有构建使用8GiB）；完整frontend 3459 passed/1 skipped，SDK 65 files/954 passed；20变更TS的ESLint/Prettier及自身diff check通过。完整diff仅保留上游生成WASM glue的既有EOF空行warning，未改固定vendor产物。日志在目标 `.local/acceptance/draft-delivery-20261113/`。无新浏览器或钱包真实交易验收，71可信LUT/体积、112上线及新订单通知验收仍未解除。修复仍先在原development实施，再精确更新同一Draft。
+
+
 ## 五条内部依赖同步收尾（2026-11-13）
 
 共享契约说明作为唯一来源提交 `e2b6b354aa` 并精确同步19；组合39项通过，sender扩展和56安全修复均保留。 完整版本矩阵、验证边界和已保留的依赖顺序见[统一记录](../solana-trading-dependencies.md#五条内部同步结果2026-11-13用户限定不处理外部依赖)。用户本轮明确暂不处理五条之外的依赖；不将本次内部同步视为完整需求验收。
