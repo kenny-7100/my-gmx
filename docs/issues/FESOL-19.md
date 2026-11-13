@@ -1,5 +1,9 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## 负责人确认（2026-11-13 16:12，Asia/Shanghai）
+
+用户明确 FESOL-19 由 kenny 负责，并授权修改 assignee。已通过 Linear MCP 仅将 assignee 从空更新为 kenny（`3dfe9db7-5e43-4d28-8b57-eb40462dd679`），返回状态仍为 Execution。正文历史 Owner 标记未改；下方未分配观察保留为修改前记录。
+
 ## 当前状态复核（2026-11-13 16:08，Asia/Shanghai）
 
 角色：只读状态与依赖调研。实时查询正文、双向关系、评论、关联 PR checks，并对照既有实施记录；本节优先于下方历史状态。
