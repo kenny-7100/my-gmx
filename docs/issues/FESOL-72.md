@@ -52,3 +52,11 @@ Linux 实验发现 wasm-pack 0.15.1 的锁定 cargo-platform 依赖要求 Rust 1
 用户既有 Chrome 的独立本地标签页显示 Arbitrum/BTC；关闭 Solana flag 时无 SDK 请求。通过原生 DevTools 控制台临时开启 flag，调用实际 `loadGmsolSdk()` 并执行 `apply_factor(100n, 10n ** 20n)` 返回 `100`；finally 已恢复原 flag 和 localStorage，输出确认 disabled。首次浏览器性能计时未返回资源条目，随后对 undefined URL 的 hash 不构成 WASM 证据，已排除；通过明确实际 URL `/gmsol-sdk/0.11.0-beta.1-gmx.1/assets/index_bg-LFWuFgSD.wasm` 的 HTTP 响应逐字节比对 vendor，确认最终 SHA-256 为 `e82184caacc60828f024743f88a0a92d97b9d3d55db6839e0d3fab8a9b46c840`。没有使用独立浏览器/CDP，也未签名或广播交易。
 
 剩余验收：workflow 已实现且相同 Docker 命令在本机通过，但尚无 GMX 远端 CI 成功运行记录；需要用户明确交付指令后基于最新 release 精确整理 72 成果，不能整支带入 56 的未合并前置，并须在实际交付目录复验。需求原文要求 PR 前与 Divhead 对齐产物位置，用户已决定先仓库内文件，尚无与 Divhead 对齐的外部证据。FESOL-56 的受信 LUT/FESOL-71、四钱包签名落链和 finite-bound atomic 1232-byte 限制仍按 56 记录处理；旧版本主网模拟不能替代新产物复验。72 的主网流程尚未验收，因此目标仍 active；本地构建与测试通过不能标记整个需求完成。
+
+### 实时 Mainnet 前置诊断（2026-11-13 14:41，Asia/Shanghai）
+
+继续验收时复用 56 无签名诊断思路，为最终 hash 的 WASM 准备独立本地 scratch，读取实际配置的 Alchemy Mainnet RPC（genesis 已核验）。slot `468829814` 两张配置 LUT 的地址数仍为 73/155、authorityOption 均为 1；调用实际 production decoder 均报 `Trading requires frozen or reviewed GMX-owned lookup tables`。没有放宽生产信任策略。
+
+当前 CLI 账户与既有 Node 专用验收钱包为两个不同公开地址，实际 Mainnet 原生 SOL 均为 0。诊断在余额检查后停止，**没有调用 simulateTransaction**；scratch 的绿色结果仅代表源码/WASM hash、genesis、表元数据及实际 production decoder、账户余额等前置读取通过，不代表新版指令已在主网执行。已向用户询问可用的有 SOL 公开验收地址（可选择当前 Phantom 已连接账户），无需私钥/签名/转账；回答待定。
+
+忽略目录 `/Volumes/kenny/gmx/worktrees/FESOL-72/.local/fesol72/` 保存 `mainnet.json`、`mainnet.scratch.spec.ts` 与运行说明，业务分支仍 clean。第一轮测试 harness 在发送请求前遇到 happy-dom AbortSignal 与 Node fetch 不兼容；已改为 Node environment，保留原生 fetch/AbortSignal，仅为导入的 app 模块补充 DOM globals。最终诊断运行约 9.36s。此工具只允许读取与 sigVerify=false simulation，不包含签名或广播入口；仍不能替代 CI 实际运行或主网落链验收。
