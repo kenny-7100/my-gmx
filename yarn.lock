@@ -3271,8 +3271,8 @@ __metadata:
 
 "@gmsol-labs/gmsol-sdk@file:vendor/gmsol-sdk::locator=gmx-interface%40workspace%3A.":
   version: 0.11.0-beta.1
-  resolution: "@gmsol-labs/gmsol-sdk@file:vendor/gmsol-sdk#vendor/gmsol-sdk::hash=1490e3&locator=gmx-interface%40workspace%3A."
-  checksum: 10/bc2f6c7aab63d4c6ccd728b25b997be8ed143b420681af7f8602602c9261a19769ee9bdfaa71c7d2b9b3fc3df544e76df4f0f3b01220c0e0eac7b07f47fe2b46
+  resolution: "@gmsol-labs/gmsol-sdk@file:vendor/gmsol-sdk#vendor/gmsol-sdk::hash=fec802&locator=gmx-interface%40workspace%3A."
+  checksum: 10/21ab6ce7d40cc829a980fbef75859a9f5fbd342d4e48bfc921f35d04162f276f49e10af6a23bb9d1c50eba607eca2f0b12717208596cd3def11c5edecc45fd01
   languageName: node
   linkType: hard
 
