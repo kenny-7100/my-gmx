@@ -98,3 +98,13 @@ Linux 实验发现 wasm-pack 0.15.1 的锁定 cargo-platform 依赖要求 Rust 1
 用户已明确“已对齐，验证后创建 Draft PR”，确认产物位置对齐并授权交付。交付目录 `/Volumes/kenny/gmx/worktrees/FESOL-72-release`，分支 `build-gmx-gmsol-sdk-release-fesol-72`，基于实际 release `e471428074`，仅 18 个 72 文件，不带 56 未合并前置或个人工具。实际交付目录 immutable install 通过且锁未变；独立 Docker 重建全部 8 文件一致（2m52s）；app/landing tscheck 通过；production build 通过（2m45s），输出 WASM hash 一致，主 app JS 搜索无 WASM binding/start；Prettier/applicable ESLint 通过。完整 frontend 325 files passed/1 skipped，3341 tests passed/1 skipped，exit 0（375.65s）；测试 stderr 存在 happy-dom teardown AbortError，不影响终态结果，也不声称零 warning。日志 `/tmp/fesol-72-release-{install,reproduce,types,build,tests,format,lint}.log`。
 
 最终 `git commit -S` 因 pinentry curses 无 TTY 失败，未产生提交。随后用户明确长期规则：**任何时候 GPG 签名失败，都允许改为不签名，包括最终 PR 提交，无需再问**。已同步 AGENTS 与流程入口，用命令级 `git -c commit.gpgsign=false` 完成提交 `0f36780317`，未修改长期签名配置。正式 fork `my-gmx-pr` 分支 push 成功；Draft PR 创建/CI 实际结果待下文补充。用户这次明确规则替代历史最终提交需单次例外的约束，旧 issue 的历史等待记录不再构成当前阻碍。
+
+Draft PR 已实际创建为 [#3259](https://github.com/gmx-io/gmx-interface/pull/3259)，实时核对 OPEN、isDraft=true、base release `e471428074`、head `0f36780317e02bb51e62a7e225867594f99ee7c3`。任务 registry 已 rebind 登记该 delivery 与 PR；没有请求 reviewer、转 Ready 或合并。GMX `Build gmsol WASM SDK` workflow 实际 run [43385852331](https://github.com/gmx-io/gmx-interface/actions/runs/43385852331) 已启动，runner 初始化/checkout/Node/Corepack 成功，当前构建 Linux arm64 builder；等待真实结果，不把本机复现算作 CI 已通过。
+
+### GMX 远端 WASM CI 已验证（2026-11-13）
+
+真实 GMX run `43385852331` 成功（7m11s），日志明确 `GMX gmsol SDK 0.11.0-beta.1: verified` 及固定 WASM SHA-256 `e82184caacc60828f024743f88a0a92d97b9d3d55db6839e0d3fab8a9b46c840`；固定镜像构建、源码重建/全部文件比对、immutable install、app SDK/hash gate、上传均成功。CI artifact [14018473385](https://github.com/gmx-io/gmx-interface/actions/runs/43385852331/artifacts/14018473385)，名称 `gmx-gmsol-sdk-0.11.0-beta.1`，1265433 bytes，archive digest `sha256:e6a7d02d3d57a55845846c2cde2f563dfd721d357211a93bb66c2ffb15b552c1`（这是归档 digest，不是 WASM hash）。已实际下载到 `/tmp/fesol-72-gmx-ci-artifact`，全部 8 vendor 文件逐字节匹配 delivery，CI public app WASM hash 也匹配；不是只相信绿色 job 名称。CI 日志 `/tmp/fesol-72-gmx-ci.log`。
+
+PR 正文已补充实际交付目录验证、GMX CI 链接/结果与已对齐的产物位置。当前 PR 仍 OPEN Draft、head `0f36780317`；Audit 与 SDK standalone build 已通过，general lint/types/tests 和 Component Tests 在最后观察时仍运行，尚不声称全部 checks 全绿。钱包签名/落链、受信 LUT 与 finite-bound 原子大小边界未解除。
+
+组件 workflow `43385852288` 的实际用例 `286 passed (5.6m)`，job 失败仅在随后部署 GitHub Pages 报告和发报告链接（403、Resource not accessible by integration），与此前 56 的 fork 权限问题一致。保留该失败事实，不扩大 token 权限、不修改与本需求无关的共享 workflow。源码 head 未变；更新 PR 正文触发已有通用 workflow 重新运行，最新 general run `43386834825`，尚待终态；Audit/SDK standalone 已通过。完整组件日志 `/tmp/fesol-72-component-full.log`，失败步骤 `/tmp/fesol-72-component-failed.log`。
