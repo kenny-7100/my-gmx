@@ -19,3 +19,14 @@
 验证：相关 parser/reducer/RPC/notification/sender/hook suite 通过；FESOL-20 全量 `yarn test:ci` 为 343 test files、3445 passed、1 skipped；root/landing TypeScript、ESLint、Prettier、diff check、lingui prepare 和 `NODE_OPTIONS=--max-old-space-size=8192 yarn build-app` 均通过。使用现有 Solana RPC 做历史 trade/cancel 只读回放并正确归约；没有签名、广播或 public fallback。
 
 边界：历史 fixture/replay 不等于当前部署 ABI、新订单、keeper execution 或真实浏览器两阶段 toast 验收；FESOL-56 的 LUT trust gate 和部分组合 transaction size 仍是生产验收前置。并行期间发现 locale/ignored output 会跨 worktree 污染，已通过路径级清理和精确 cherry-pick 修复并记录在协作文档。
+
+
+## 2026-11-13 FESOL-56 PR 后依赖复核
+
+角色：下游依赖影响分析；本轮未修改业务分支。实时确认 [UI#3258](https://github.com/gmx-io/gmx-interface/pull/3258) OPEN/Draft，head `b2fdb4c74543c31523a845eae7ee1cd27356822a`，Linear 56 为 Review、无评论。19/20 仍分别为 `5ceb145308`/`1608901e2b`，均 clean，但未接入 56 后续修复：`722d1cdbaa`（等待 RPC 前克隆 action）、`ccbde8e995`（主动刷新使用 freshness envelope）、`5ba8eaf327`（确认 slot 下限在刷新失败后保留并约束后续读取）。后两项已在 56 修复发布，但在下游旧代码中仍存在，不能复用 56 修复后的验证结果冒充下游通过。
+
+建议先在 20 原 development 精确转入 56 业务修复、保留 20 sender identity/onSubmitted/trackingRequests/失败分类，再接入 19；共同基线只接受一份实现，避免两个现场独立解同一 sender 冲突。需在实际整合目录验证 SWR hook 确认刷新、失败后追赶、sender 和 lifecycle 组合。
+
+本次最新 head CI：Audit、SDK standalone build、Lint/Type Checking/Tests 均 SUCCESS；Component Tests job FAILURE 的失败步骤是报告 Pages 发布和评论 403，报告正文 All tests passed；不是用例失败，但总 CI 尚非全绿。无 GitHub reviews/inline comments。71 仍 Todo，无新评论或替代 LUT 地址；未重新查询链上表状态。既有 1255-byte 有限价 atomic 限制与四钱包真实落链未解除。
+
+72 本地进行中记录已按用户指定 stable 固定 `0.11.0-beta.1`，采用仓库内产物，并已集成 56 PR head；Linear 正文仍写 v0.10.0，不能拿旧正文覆盖用户明确目标。19/20 尚未接入该进行中产物，待其稳定后固定源码/哈希并验证 builder/validator/event ABI 组合。本轮公开 `/v1/markets/config` 返回 67 个市场，均未含 tradeMath；不能用本地数学通过证明线上 gmsol math rollout 完成。
