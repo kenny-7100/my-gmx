@@ -228,3 +228,7 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 ### FESOL-72 新版 WASM 的跨任务兼容验证（2026-11-13）
 
 72 开发分支已集成 56 delivery `b2fdb4c745`，将 SDK 接入目标更新为用户确认的 GMX 自建 `0.11.0-beta.1`。在 72 现场使用用户指定 Phantom 的公开账户，最终 WASM 的创建/修改/取消、显式 unlimited decrease bounds 的 BTC TP/SL 原子组合，以及缺失 user/position 准备，共八项真实 Mainnet 无签名模拟成功；详见 [FESOL-72](FESOL-72.md) 的源码 hash、slot、结果和边界。finite-bound 三单组合仍需 1255 bytes 被拒，两张表仍可变且未受信。此证据属于 72 的开发组合，不代表 56 原分支/PR 已升级 pin、已签名落链或已完成四钱包验收；未修改 56 业务现场。
+
+## FESOL-52 共享 Provider 关联接入（2026-11-13）
+
+用户授权的52依赖整合覆盖本需求。原始52 head `258e4da6ab`的消费、共享SDK传递、确认slot/freshness保护及通知组合统一记录于[依赖审计](../solana-trading-dependencies.md#fesol-52-最新依赖接入2026-11-13)。沿用原development现场，未另起并行实现或覆盖下游扩展。本次不补签名/广播证据，不解除已有外部验收条件。
