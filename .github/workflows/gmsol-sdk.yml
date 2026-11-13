@@ -1,0 +1,44 @@
+name: Build gmsol WASM SDK
+
+on:
+  pull_request:
+    branches: [master, release, "release-*"]
+    paths:
+      - "vendor/gmsol-sdk/**"
+      - "scripts/build-gmsol-sdk.mjs"
+      - "src/config/gmsol/sdk.ts"
+      - "src/domain/gmsol/sdk-entry.js"
+      - "vite.gmsol.config.ts"
+      - ".github/workflows/gmsol-sdk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Reproduce pinned gmsol WASM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned Rust and wasm-pack
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal --target wasm32-unknown-unknown
+          cargo +1.90.0 install wasm-pack --version 0.15.1 --locked
+      - name: Build from pinned source and compare every artifact
+        run: node scripts/build-gmsol-sdk.mjs
+      - name: Install application dependencies
+        run: yarn install --immutable
+      - name: Build application SDK artifact and verify its WASM hash
+        run: yarn build:gmsol-sdk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gmx-gmsol-sdk-0.11.0-beta.1
+          path: |
+            vendor/gmsol-sdk/
+            public/gmsol-sdk/
+          if-no-files-found: error

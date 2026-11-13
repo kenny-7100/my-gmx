@@ -3269,10 +3269,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gmsol-labs/gmsol-sdk@npm:0.9.0-test.2":
-  version: 0.9.0-test.2
-  resolution: "@gmsol-labs/gmsol-sdk@npm:0.9.0-test.2"
-  checksum: 10/ffc92eda21e1d50de3c5ade006ec8611471bff05cd340b58c0ba71959a45b0d15caef07575b81593bb05c66cc003cec49e1eac8747ffd61c9d4ae07146834d1f
+"@gmsol-labs/gmsol-sdk@file:vendor/gmsol-sdk::locator=gmx-interface%40workspace%3A.":
+  version: 0.11.0-beta.1
+  resolution: "@gmsol-labs/gmsol-sdk@file:vendor/gmsol-sdk#vendor/gmsol-sdk::hash=1490e3&locator=gmx-interface%40workspace%3A."
+  checksum: 10/bc2f6c7aab63d4c6ccd728b25b997be8ed143b420681af7f8602602c9261a19769ee9bdfaa71c7d2b9b3fc3df544e76df4f0f3b01220c0e0eac7b07f47fe2b46
   languageName: node
   linkType: hard
 
@@ -13034,7 +13034,7 @@ __metadata:
     "@davatar/react": "npm:1.8.1"
     "@floating-ui/dom": "npm:1.6.7"
     "@floating-ui/react": "npm:0.26.19"
-    "@gmsol-labs/gmsol-sdk": "npm:0.9.0-test.2"
+    "@gmsol-labs/gmsol-sdk": "file:vendor/gmsol-sdk"
     "@headlessui/react": "npm:1.7.19"
     "@intercom/messenger-js-sdk": "npm:0.0.18"
     "@layerzerolabs/lz-v2-utilities": "npm:3.0.85"
