@@ -23,3 +23,32 @@
 - npm 官方 registry 的该版本元数据返回 repository 为 `gmsol-labs/gmx-solana`、`gitHead` 为 `7fe4008292ffc09061f3a733ad9b5cd2e6235fa8`，tarball 为 `https://registry.npmjs.org/@gmsol-labs/gmsol-sdk/-/gmsol-sdk-0.11.0-beta.1.tgz`。gitHead 是包发布元数据，尚未独立复现构建或核实其与链上部署的对应关系。
 
 结论：按用户指定依据，FESOL-72 当前接入目标为 `0.11.0-beta.1`；stable 是前端分支名，不能将 npm 版本省略为 `0.11.0` 正式版。GMX 自建产物仍需固定实际源码和构建配置、记录 WASM SHA-256 并复验 56；产物存放方式尚未决定。未修改 Linear 或业务依赖，未构建、发布、签名或发送交易。
+
+## 实施现场（2026-11-13，进行中）
+
+用户已授权创建目标并实施，明确版本为 `0.11.0-beta.1`，产物先采用仓库内文件。开发分支 `build-gmx-gmsol-sdk-fesol-72`，目录 `/Volumes/kenny/gmx/worktrees/FESOL-72`；start 已同步个人基础到 release `e4714280`，合并提交因 GPG 非交互失败后按既有授权用命令级不签名完成，无业务冲突。
+
+源码在官方 `7fe4008292ffc09061f3a733ad9b5cd2e6235fa8` 独立 detached worktree 构建，workspace 与 SDK package 版本一致；Cargo.lock SHA-256 为 `112ddc6a6dabc3c932da7b072917b44efc5b99432d8b7fcc5ce179819085abed`。已实现 `vendor/gmsol-sdk` 文件依赖、源码重建/逐文件比对脚本及独立 CI workflow；默认 app 构建不需要 Rust。保留现有懒加载入口和 Solana flag，Vite 构建核验安装产物各文件 hash。首次 standalone app/landing 类型检查与前端单测通过（3341 passed，1 原有 skipped），加载器 6 项与真实 WASM BigInt 冒烟通过。最终 hash 和验证结果待下面收尾更新。
+
+Linux 实验发现 wasm-pack 0.15.1 的锁定 cargo-platform 依赖要求 Rust 1.91，因此工具安装使用 1.91.0，SDK 编译仍固定 1.90.0。首次 WASM 含本机 Cargo registry 路径；为跨环境重建一致，源码脚本增加 source/Cargo/Rustup 路径 remap，正在重新生成并在 Linux 容器验证。
+
+为核验新 WASM 与交易调用方，已实时确认 FESOL-56 的 Draft PR #3258 仍 OPEN、head `b2fdb4c74543c31523a845eae7ee1cd27356822a`，并将该已核验交付提交合入 72 开发分支，未改 56 原现场、未合上游，也不回流其业务到个人基础。该依赖包含 56 已登记的未合并前置，最终 72 独立交付仍须基于届时 release 精确整理；组合验收不代表这些依赖已合并。主网签名/广播尚未执行，未创建 72 PR。
+
+### 中断恢复与统一构建环境（2026-11-13）
+
+设备意外关闭后恢复时，分支与未提交改动均保留；Docker daemon 已恢复可用，未清理 Docker 数据、镜像或其他任务。固定镜像的 amd64 安装命令在普通容器成功、BuildKit 构建阶段报 `unsupported metadata version in existing installation`，属于本机跨架构构建路径问题，未认定 SDK 业务缺陷。为本地与 CI 使用相同原生平台，统一为 digest-pinned Rust 镜像的 Linux arm64（CI `ubuntu-24.04-arm`），不是继续接受 macOS 产物。脚本 remap source/Cargo/Rustup 路径，固定 Rust 1.90.0、wasm-pack 0.15.1 与 Cargo.lock；Rust 1.91.0 仅安装 wasm-pack 工具。
+
+已生成 Linux arm64 WASM SHA-256 `e82184caacc60828f024743f88a0a92d97b9d3d55db6839e0d3fab8a9b46c840`，与此前 Linux arm64 实验结果一致；全新临时源码目录的独立重建已通过，全部 8 个文件 hash 与字节一致（两轮分别为 1m24s、1m22s）。应用 hash、manifest、BUILD.md 和 Yarn file dependency checksum 均已更新。CI workflow 已改用同一 Docker 构建器，并对安装产物全部 8 个文件核验。
+
+合入 56 后、使用中间产物时的 app/landing 类型检查通过；前端全量测试为 340 files passed、1 file skipped，3435 tests passed、1 test skipped。逐项检查目标源码 IDL 的 5 条交易指令，其 discriminator 与账户顺序全部匹配现有 orderAbi；更新交易文档的版本来源，并明确旧 0.9.0-test.2 的主网模拟记录不能充当新产物主网验收。此前浏览器本地页面可显示 Arbitrum/BTC，Solana flag 关闭时 SDK 请求为空；最终 Linux 产物的浏览器/交易组合验证仍待执行。
+
+
+### 本地实施切片完成与验收边界（2026-11-13）
+
+业务提交 `6b3b5ec259`（首次构建接入）及 `ae7c2ad21a`（Linux 可复现构建、最终产物与交易来源更新），56 依赖合并为 `c5eca53105`。开发分支工作区干净；尚未整理 release 交付分支、推送业务分支或创建 PR。保留现有任务目录与本地 Vite 3072，恢复时使用任务管理器核对进程，不能把其他服务视为本任务资源。
+
+最终 Linux WASM 的真实交易/生命周期/加载器 4 suites、20 tests 全部通过；`NODE_OPTIONS=--max-old-space-size=8192 yarn build` 成功（1m03s），SDK 独立产物构建及 hash gate 通过。构建目录的 WASM 与 vendor hash 一致；主 app `build/assets` 中搜索未发现 `__wbg_set_wasm` 或 `__wbindgen_start`。源码文件 ESLint 无 error（Vite config 按既有 ignore 未参与 ESLint），手写改动的 Prettier 和 diff whitespace 检查通过。类型声明主体不变，WASM 导出声明只有排序变化；app/landing 类型检查和前述全量 3435 项结果可按受影响范围复用。首次格式命令误调用仓库的 write script，产生 4 个无关格式改动，已仅恢复本任务刚产生的改动，未纳入提交。
+
+用户既有 Chrome 的独立本地标签页显示 Arbitrum/BTC；关闭 Solana flag 时无 SDK 请求。通过原生 DevTools 控制台临时开启 flag，调用实际 `loadGmsolSdk()` 并执行 `apply_factor(100n, 10n ** 20n)` 返回 `100`；finally 已恢复原 flag 和 localStorage，输出确认 disabled。首次浏览器性能计时未返回资源条目，随后对 undefined URL 的 hash 不构成 WASM 证据，已排除；通过明确实际 URL `/gmsol-sdk/0.11.0-beta.1-gmx.1/assets/index_bg-LFWuFgSD.wasm` 的 HTTP 响应逐字节比对 vendor，确认最终 SHA-256 为 `e82184caacc60828f024743f88a0a92d97b9d3d55db6839e0d3fab8a9b46c840`。没有使用独立浏览器/CDP，也未签名或广播交易。
+
+剩余验收：workflow 已实现且相同 Docker 命令在本机通过，但尚无 GMX 远端 CI 成功运行记录；需要用户明确交付指令后基于最新 release 精确整理 72 成果，不能整支带入 56 的未合并前置，并须在实际交付目录复验。需求原文要求 PR 前与 Divhead 对齐产物位置，用户已决定先仓库内文件，尚无与 Divhead 对齐的外部证据。FESOL-56 的受信 LUT/FESOL-71、四钱包签名落链和 finite-bound atomic 1232-byte 限制仍按 56 记录处理；旧版本主网模拟不能替代新产物复验。72 的主网流程尚未验收，因此目标仍 active；本地构建与测试通过不能标记整个需求完成。
