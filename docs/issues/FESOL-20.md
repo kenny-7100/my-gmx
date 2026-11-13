@@ -1,5 +1,11 @@
 # FESOL-20 — 订单发送与成交状态
 
+## 当前状态复核（2026-11-13 16:08，Asia/Shanghai）
+
+角色：只读状态与依赖调研。实时查询正文、双向关系、评论、关联 PR checks，并对照既有实施记录；本节优先于下方历史状态。
+
+实时 Linear 为 Execution、kenny，无评论；开发 head `d677e174c1` 与 my-gmx 远端一致、工作区干净；GitHub 按五个编号搜索未发现专属 20 PR。56 三项安全修复、57 `f16deff8a7` 与 72 固定新版 WASM 均已接入，旧“下游未同步”段落仅保留历史。既有完整 frontend 3454 passed/1 skipped、types、目标检查/构建证据仍按下文范围，不重复声称本轮重跑。RPC parser/reducer/tracker 和共享通知已有实现及历史只读回放；新订单、实际 keeper 结果、取消原因和浏览器两阶段 toast 尚无完整验收证据。受信 LUT/71 仍限制真实生产流程；19 的提交阶段反馈与本任务成交跟踪仍区分。
+
 2026-11-13，角色：下一条任务就绪调研。任务：https://linear.app/gmx-io/issue/FESOL-20 。当前 Todo、kenny；已实时读取正文、评论和关系，未认领或实施。
 
 本轮建议作为首选。56 已提交 `a8733143f47230d996303d174b2ca9dcaf0b1c87`，可接续开发；`GmsolSendResult` 仅返回 signatures、slot、refreshErrors，尚缺 order/account/action id 的 typed correlation。先由经校验的 builder 或创建回执提供 program/store/order/action/creation signature，再连接 GMX RPC tracker，不能从签名确认推断成交。
