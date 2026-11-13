@@ -2,8 +2,9 @@ import { createElement, useCallback, useEffect, useRef, type ReactNode } from "r
 import { toast, type Id } from "react-toastify";
 
 import { getIsSolanaNetworkEnabled } from "config/ab";
-import { isSolanaNetwork } from "config/chains";
+import { SOLANA_NETWORK_ID, isSolanaNetwork } from "config/chains";
 import { TOAST_AUTO_CLOSE_TIME } from "config/ui";
+import { useGmxSdk } from "context/GmxSdkContext/GmxSdkContext";
 import type { TrackedOrderAction } from "domain/gmsol/orderTracking/reduceOrderLifecycle";
 import type { OrderTrackingRequest } from "domain/gmsol/orderTracking/watchSubmittedOrders";
 import { useChainId } from "lib/chains";
@@ -25,9 +26,10 @@ type Notification = { controller: AbortController; toastId: Id };
 /** Shared notification UI; only receipt parsing/tracking is loaded from the Solana chunk. */
 export function useSolanaOrderNotifications() {
   const { networkId } = useChainId();
+  const sdk = useGmxSdk(SOLANA_NETWORK_ID);
   const { address: owner } = useSolanaWalletSession();
-  const current = useRef({ owner, networkId });
-  current.current = { owner, networkId };
+  const current = useRef({ owner, networkId, sdk });
+  current.current = { owner, networkId, sdk };
   const notifications = useRef(new Set<Notification>());
   const mounted = useRef(true);
 
@@ -46,7 +48,13 @@ export function useSolanaOrderNotifications() {
 
   const begin = useCallback(({ title, trackExecution }: { title: ReactNode; trackExecution: boolean }) => {
     const scope = current.current;
-    if (!mounted.current || !getIsSolanaNetworkEnabled() || !isSolanaNetwork(scope.networkId) || !scope.owner) {
+    if (
+      !mounted.current ||
+      !getIsSolanaNetworkEnabled() ||
+      !isSolanaNetwork(scope.networkId) ||
+      !scope.owner ||
+      !scope.sdk
+    ) {
       throw new Error("Connect a Solana wallet before submitting an order");
     }
     const submittedOwner = scope.owner;
@@ -130,7 +138,9 @@ export function useSolanaOrderNotifications() {
               if (typeof slot === "bigint" && slot <= BigInt(Number.MAX_SAFE_INTEGER)) {
                 void import("domain/gmsol/useGmsolAccountData")
                   .then(({ refreshGmsolAccountDataAfterTransaction }) =>
-                    refreshGmsolAccountDataAfterTransaction(submittedOwner, Number(slot))
+                    valid()
+                      ? refreshGmsolAccountDataAfterTransaction(scope.sdk!, submittedOwner, Number(slot))
+                      : undefined
                   )
                   .catch(() => undefined);
               }
