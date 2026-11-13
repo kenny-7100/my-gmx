@@ -18,8 +18,8 @@ import { getSolanaRpc } from "lib/solana/rpc";
 
 import { fetchSolanaTradingEnabled } from "../fetchSolanaTradingEnabled";
 import { buildGmsolOrderTransactions } from "./buildOrderTransactions";
-import { getPendingGmsolSubmission, setPendingGmsolSubmission, GmsolPendingSubmissionError } from "./pendingSubmission";
 import { decodeGmsolInstruction } from "./decodeInstruction";
+import { getPendingGmsolSubmission, setPendingGmsolSubmission, GmsolPendingSubmissionError } from "./pendingSubmission";
 import type { GmsolOrderAction, GmsolTransactionPlan } from "./types";
 import { decodeGmsolTransaction, requireGmsol, validateGmsolTransactionPlan } from "./validateTransaction";
 import type { TrackedOrderAction } from "../orderTracking/reduceOrderLifecycle";
