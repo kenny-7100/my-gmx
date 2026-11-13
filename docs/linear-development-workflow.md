@@ -82,6 +82,7 @@ status 返回实际开发/交付分支与 HEAD、dirty、未完成 Git 操作、
 1. 新需求先实时读取[Linear 正文、关系和评论](linear-requirements.md)，核对关键依赖 PR 是否进入 release；只查本任务相关项。记录最少的验收条件、业务范围和依赖到任务说明或 PR，不默认创建工作表。
 2. 业务与个人基础设施改动分开提交。已安装 Husky 时，纯 AGENTS/docs/.agents/scripts/tools（含本入口 pre-commit）提交只检查暂存差异，不触发 SDK/本地化生成；涉及工具源码时执行适用回归；纯文档只检查链接与差异。业务、共享配置、gitlink 或混合提交走原上游钩子。共享文件混改时按 hunk 拆分；不能靠后缀或文件名单替代语义审查。commit 英文，有关联需求时附真实编号；具体见[提交与 PR 规范](#commit分支与-pr-表达规范)。
 3. 每个经手 issue 的工作/问题/处理/结果在自然节点合并更新[issue 文档](issues/README.md)，包含调研他人任务的结论；暂停、交接和交付前检查遗漏与回流位置。通用经验、长期偏好、工具改进沉淀到已有主题/skill，并从 issue 链接过去；回流时明确选择已审查的基础设施提交，保留业务开发现场。
+4. 本阶段个人沉淀在最终回复前完成提交、必要回流和 `my-gmx` 推送，无需等待用户提醒。按[沉淀收尾与自动推送](documentation-maintenance.md#沉淀收尾与自动推送)核对归属、暂存区及待推送历史；受阻则保留现场并说明实际完成状态与原因。
 
 ```sh
 # Transfer only reviewed, separate infrastructure commits, in dependency order.
@@ -89,7 +90,7 @@ node scripts/agent-workflow.mjs backflow --issue FESOL-123 \
   --commit INFRA_SHA_1 --commit INFRA_SHA_2
 ```
 
-工具只接受 docs、.agents、scripts、tools 或 AGENTS.md 的独立普通提交，拒绝 merge、gitlink、混合业务路径，跳过目标已有/等价补丁；路径通过不证明语义正确。package.json、Vite、.gitignore 等混合配置必须人工逐项拆分并用原生 Git 回流，不能扩大允许范围直接带入。回流只更新本地个人基础，不自动 push。已提交记录可用于恢复上下文。
+工具只接受 docs、.agents、scripts、tools 或 AGENTS.md 的独立普通提交，拒绝 merge、gitlink、混合业务路径，跳过目标已有/等价补丁；路径通过不证明语义正确。package.json、Vite、.gitignore 等混合配置必须人工逐项拆分并用原生 Git 回流，不能扩大允许范围直接带入。回流工具只更新本地个人基础，不代做 push；Agent 仍须按上述收尾步骤主动推送。已提交记录可用于恢复上下文。
 
 ## 需求与上游的更新时机
 
