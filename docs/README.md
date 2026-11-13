@@ -17,6 +17,7 @@
 | [GMTrade 四页完整功能与依赖](../gmtrade-pages-dependency-audit.md) | 根目录完整六列表：Stake、GT My/Global/Buyback、Stats、Referrals 共 72 个功能/依赖分组；含当前启用分支、源码证据、线上只读核验和推进条件 |
 | [GMX 当前线上服务地址](gmx-live-services.md) | 从真实线上页面请求核实各链 API、价格 keeper/fallback、SQD、Goldsky、RPC 与其他依赖，区分线上调用和发布脚本配置 |
 | [Solana gmx-api 进度与联调协调](../solana-api-coordination.md)（[英文版](../solana-api-coordination.en.md)） | 待发送给负责人的沟通草稿：真实交易数据、联调节点、外部依赖及 FESOL-87 独立切片价值确认 |
+| [Solana 交易链路依赖审计](solana-trading-dependencies.md) | FESOL-56/57/19/20/72 的开发集成、PR 堆叠、API rollout、真实验收依赖及协调顺序（2026-11-13 观察） |
 | [Issue 知识入口](issues/README.md) | 每个经手 issue 的工作、问题、处理与依据；开发、调研和 review 使用同一固定入口，与本机任务状态及通用经验互相链接 |
 | [开发、知识回流与 PR 交付](linear-development-workflow.md) | 当前日常路径、主动上游/Linear 更新、基础设施选择性回流、最新 release 的纯业务交付及 PR 后开发验证→交付流程 |
 | [Agent 分工与成果接收](agent-collaboration.md) | 按需协作的协调入口、工作区/路径归属、子任务返回约定和整合结果验证；默认单 Agent，无额外调度服务 |
