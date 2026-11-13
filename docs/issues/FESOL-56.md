@@ -181,3 +181,15 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 
 
 最终发布：用户明确允许本次修复交付提交命令级不签名，`89c9fc73a5df1d3717fcb49fa8a4dddabfc42f4b` 已推送 my-gmx-pr，原开发提交 `ccbde8e995` 已备份 my-gmx；PR #3258 正文已更新缓存修复与本轮真实验证结果，保持 Draft/release，无新增 reviewer 请求。开发→交付转入仅两个业务文件，无冲突，无个人基础设施。两处实际目录检查通过且已 clean；后续业务修复继续遵循本节新流程，旧“唯一 delivery 修复现场”不再适用。本轮缓存缺陷已关闭，不将其等同于 FESOL-56 全部真实钱包验收完成；FESOL-71、四钱包签名落链与已披露原子包边界仍保留。新 head 的 GitHub CI 刚启动，不宣称全部通过；生产构建复用缓存修复前结果，未重跑 SDK 或交易编码构建。
+
+### 当前 head 再审（2026-11-13）
+
+用户再次要求按 gmx-prompts 审查 #3258。核实 head `89c9fc73a5`、实时 release `e471428074`，后者已是 head 祖先，delivery 就是当前合并结果；173 文件、8892 additions/804 deletions。规范 `gmx-prompts@72041619ae` 已 fetch 确认最新。按 T3 执行交易/签名安全、除法、交易步骤、guard/值语义及异步生命周期检查；通用 `/code-review`、`/security-review` 命令不可调用，使用手工等价检查，不宣称运行过这些命令。GitHub inline comments/reviews 均为空。原 freshness envelope 缺陷已修复，本次不重复报告。
+
+**NEEDS CHANGES：新增 P2，确认 slot 下限在刷新失败后丢失。** `src/domain/gmsol/useGmsolAccountData.ts:86` 仅把确认 slot 传给一次强制请求；`acceptedGmsolSlots` 只在请求成功后更新，普通 `fetchOrders/fetchPositions` 不带下限。真实 SWR/hook scratch 复现：先接受 slot 1，slot 3 确认后强制刷新抛错，随后普通 revalidation 接受 slot 2 的订单/仓位并显示 `isLoading=false/error=undefined`。这是已知交易之后的过时快照被重新标成 fresh，可能遗漏刚建订单或显示刚取消订单。应在收到确认时独立保存 host/owner/request 的最高 required slot；所有后续读取携带并校验该下限，失败保留旧数据与过期/错误状态，直到至少追上确认 slot。新增用例应覆盖“确认后首次刷新失败→普通轮询较旧→追上后恢复”，不能只测试已经成功接受高 slot 后拒绝低 slot。
+
+当前 API main `cf9fe279ac` 源码确认该场景可达：`orderSnapshot.ts` 的带下限请求追不上时返回 503/SLOT_NOT_REACHED，不带下限则可返回当前较旧但未过期快照；不是假定后端违反 minContextSlot。本次安全快进干净的 gmx-api main 到该版本，主仓库 gitlink 差异未暂存/提交。gmx-solana 已 fetch，固定 v0.9.0/c6778dc9 的五个允许指令 discriminator/account order 与 PR ABI 逐项比较一致；未将本地源码等同于部署验收。公开 markets/config 实测 67 个市场、均有两个 minimum 字段，但没有 `tradeMath: gmsol`；数学 rollout 仍需单独核验。
+
+新增验证：相关现有测试 19 passed，scratch 新行为断言 1 failed（预期揭示上述缺陷）；仅 mock SDK 网络响应，使用实际 SWR、freshness hook、账户 hook。scratch 已移到 `/tmp/pr3258-review.spec.tsx`，日志 `/tmp/pr3258-review-tests.log`，业务 checkout 恢复 clean，未修改实现。相同 head 原全量 frontend 3434 passed/1 skip、SDK 952 passed、types/lint 结果复用，不宣称本次重跑全量。本次当前 head 的 production app/WASM build 实际重跑通过，日志 `/tmp/pr3258-review-build.log`。
+
+使用现有 kenny Chrome 原生窗口，在本轮自行启动的 3017 production preview 验证 Solana DOGE 行情/图表、flag off 回 Arbitrum及 reload 后 BTC 行情、flag on 恢复 Solana及 reload。结束恢复原 flag-on/Solana 状态、关闭本轮新 tab、停止本轮 preview，没有连接新浏览器/profile、签名或广播。未执行逐 host 请求计数、console/storage/第三方调用审计，不称完整 runtime 全部通过。FESOL-56 实时正文/评论已核对：unexpected-instruction/receiver 有自动化证据，四钱包实际 LUT 签名与主网 limit/edit/cancel/atomic landing 仍未验收；LUT trust 和有限价 atomic 1255-byte 限制已披露，不包装成新增发现。CI 本次最后读取 Audit/SDK build SUCCESS，root tests/type/lint 与 component checks 仍运行中。未发布 GitHub review/comment，未改 Linear。
