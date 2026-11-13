@@ -10,6 +10,8 @@
 
 ## 初次实施与审查记录
 
+2026-11-13 后续实施：用户授权同步后，已将上游 `f16deff8` 合入 FESOL-56，merge commit `b7ee2e27f1e98737db99d70e302eba79264bcfb3`，无冲突，保留 92 的 `export * from "./units"`。目标 SDK 全量 64 文件/952 tests passed；原始 BTC 8 位、价格 $100000、增仓 $0.0001、零 impact 的独立临时用例通过，acceptablePrice=0、不再除零，用例已清理。交易/钱包/LUT 定向 4 文件/12 tests passed；7 个变更文件 lint、format 通过，受管理 SDK types/CJS/ESM 产物重建通过。未重跑 Rust reference，不宣称新数学已完成当前部署程序对齐。收尾结果见 [FESOL-56](FESOL-56.md)。
+
 2026-11-13（Asia/Shanghai），角色：为 FESOL-56 核验依赖，未修改实现。
 [Linear](https://linear.app/gmx-io/issue/FESOL-57)：Review，Rainer。[UI#3242](https://github.com/gmx-io/gmx-interface/pull/3242) OPEN，head `6d3ed92ca64129cb4d5ab8d26a9c1baff6563802`，REVIEW_REQUIRED，未提交 review。
 
