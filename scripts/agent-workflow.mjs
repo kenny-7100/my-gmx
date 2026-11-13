@@ -567,7 +567,7 @@ async function runWorkflow({
   }
   assert.ok(record, "Start or register this task through the existing workflow first.");
   assert.ok(!record.pending, "Resolve the recorded pending operation first.");
-  assert.ok(command !== "deliver" || !record.delivery, "A delivery workspace already exists; continue repairs there.");
+  assert.ok(command !== "deliver" || !record.delivery, "A delivery workspace already exists; validate fixes in the original development workspace, then transfer them to the existing delivery.");
   assert.ok(commits.length, "Select reviewed commits explicitly with --commit.");
   const sources = [record.delivery, record.development].filter(Boolean);
   const selected = [];
