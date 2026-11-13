@@ -119,3 +119,23 @@ FESOL-56 范围含 market/limit increase、market decrease、TP/SL、原子 incr
 - 重新实时读取 FESOL-71：Todo，updatedAt 2026-11-03T15:43:51.287Z，无评论/替代地址。正文要求各开发者自有钱包、第三方表未冻结则用 GMX-owned copies，并没有要求 GMX-owned copies 必须冻结。前一阶段规则只允许 frozen 过严，已改为 frozen 或配置中逐表登记的已核实 GMX authority；`GMSOL_LOOKUP_TABLE_AUTHORITIES` 当前为空，不把现有第三方 authority 当作 GMX。再次在现有 Chrome 真实读取，仍拒绝当前表，错误为 Trading requires frozen or reviewed GMX-owned lookup tables。
 - 最后修正的 5 文件/14 tests 通过，root typecheck、变更 lint、format/diff 检查通过，生产 build（命令级 8 GiB heap）通过。复用上一阶段全量 3423 passed/1既有skip及 landing 类型检查，未宣称全量在新增修正后重跑。日志 `/tmp/fesol56-trust-{tests,types,lint,build}.log`、`/tmp/fesol56-continuation-format.log`。
 - 完整验收仍有未完成项：受信任 LUT provisioning、四钱包真实 LUT 签名与落链、keeper 执行；不绕过生产 trust gate，不擅自创建链上 LUT/消耗钱包余额。继续条件及产品限制仍在业务 README。基础目录同时出现其他 progress/AGENTS 文档改动，未纳入本任务提交。
+
+
+### 最后一轮独立完善（2026-11-13）
+
+本轮目标是在用户协调 FESOL-71 前，完成不依赖真实签名/广播的最后一轮实现、审查与验收。沿用既有 FESOL-56 目标；目标工具拒绝为未完成旧目标新建另一目标，原目标仍 blocked，不能把本轮完成冒充整个 issue 正式验收完成。
+
+- 实际修复：`prepareGmsolOrderTransactions` 在等待 LUT/blockhash RPC 前 `structuredClone` 原始 action，防止调用方在等待期间修改金额等输入，改变用户原本要求准备的订单。新增回归通过真实 WASM 构建和 validator 验证保持原金额。
+- 增补真实 SDK 数学→92 单位→WASM 指令解码测试：五种订单×双向、价格向更严格方向舍入、trigger 方向、token/USD minOutput、limit 无限哨兵；签名拒绝、签名后切钱包、签名前后过期、无效 Ed25519、无法估费均不广播；确认超时保留 accepted/pending signature；前置准备已确认但后续订单拒签时保留已确认结果。
+- 原子包大小独立诊断：现有表快照 slot 468760972，有限保护 increase+TP+SL 仍 1255 bytes，13 static accounts、仅一条 prepare_position、三条 create_order_v2。检查 store/marketToken/indexToken/longToken/shortToken/market PDA/eventAuthority/storeWallet 都已在表中；“缺少这些固定地址”与“重复 prepare_position”假设均不成立，实验去重修改及诊断错误输出已撤掉。复制/冻结相同表不会自动解决该例；这是 56 仍需优化或明确支持范围的限制，不能全部归给 71，也不能去掉价格保护或拆单掩盖。
+- 原生操作现有 kenny Chrome：生产 trust gate 在 2026-11-13T02:36:33Z 再次拒绝当前表；Phantom 连接可用，OKX 扩展在 onboarding、未配置钱包，Solflare/TokenPocket 未安装。未创建/导入钱包、接受条款、签名、广播或创建 LUT。本轮自行启动的 Vite 来自需求 worktree，127.0.0.1:3016；并未重启未知 API 服务。
+- 需求边界复核：最新 56 正文要求四钱包真实 LUT 签名落链、limit/edit/cancel/atomic，以及签名前校验；caller nonce/custom keeper fee/callback/routed swap/Token-2022 不是正文硬性未完成项，作为固定接口限制说明。19 页面、20 索引状态、59 操作 UI、112 数学部署属于各自需求；keeper 执行是另行集成验证，不混入 56 自身未实现项。业务 README 已改成验收矩阵、明确 TODO 与真实验收步骤。
+
+协调 FESOL-71 时需要：主网表地址、逐表 authority 及 GMX 归属核验依据、active/frozen 状态、市场覆盖；owned copy 不强制冻结。交付后 56 更新配置并验证，不以只拷贝表代替包大小检查。真实验收还需要各钱包已配置、选定账户及小额预算/交易授权，按 README 分别记录签名、slot、钱包版本、表身份与落链结果。
+
+
+最终稳定源码提交 `722d1cdbaa`（`Harden order intent preparation and verify transaction boundaries FESOL-56`），需求 worktree clean。实验 builder 修改全部撤回后重新跑完整前端：339 文件通过、1 文件跳过，3431 tests 通过、1 既有跳过；`yarn tscheck`（主应用+landing）、变更 ESLint/Prettier/diff 均通过；8 GiB 命令级 heap 的 `yarn build-app`（含 pinned WASM）通过。日志 `/tmp/fesol56-final-stable-{tests,types,lint,format,build}.log`。SDK 本轮未改，复用上一轮最新 57 集成后全量 952 passed，不声称本轮重跑 SDK/Rust。5 个新增行为测试纳入现有实际 WASM suite，属于原需求交易安全/数学组合验收切片，不是只给两行修复添加的分支镜像测试。
+
+将账户准备移到独立前置交易、仅让三个订单原子落链是后续可评估的包大小优化方向；当前 validator 要求 atomic plan 只有一笔交易，改变该策略还需重新证明账户准备、每次签名前校验、部分成功和费用/有效期边界。本轮不未经验证自动启用该策略。56 最新正文明确允许在支持限度外显式失败，因此保留明确限制与 TODO，仍尽量实现并验证支持范围。
+
+本轮没有真实钱包签名、广播、链上 LUT 写入、Linear 更新、外部评论或创建 PR。业务提交仅本地保存；个人知识按自动沉淀规则提交并推送 my-gmx。原 FESOL-56 全量目标保持未完成：等待受信任 LUT、四钱包实际签名落链和原子包限制收敛，不能将已通过的无签名模拟当作这些正式验收。
