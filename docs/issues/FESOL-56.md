@@ -206,3 +206,6 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 
 
 最终发布：用户本轮明确临时允许不使用 GPG 签名提交 PR，并要求后续重新规划更好的签名流程；本次仅使用命令级 `git -c commit.gpgsign=false`，未修改长期配置，也不将其解释为后续免签授权。交付提交 `b2fdb4c74543c31523a845eae7ee1cd27356822a` 已推送 `my-gmx-pr`，同一 PR #3258 英文正文已更新修复和真实验证结果；远端 head 已核对，仍为 Draft/release。delivery 工作区 clean，提交内容就是此前已通过全部检查的四文件暂存内容，未因提交重跑相同测试。新 head 的 GitHub CI 已启动（Audit/component/root tests 运行中，SDK build 排队），尚不宣称通过。本轮确认 slot 缺陷已修复并发布到 PR，既有前置依赖、LUT、四钱包真实签名落链及有限价 atomic 包大小边界不变。后续签名流程重新规划待单独展开，本次不自行更改安全或审批规则。
+
+
+参考仓库现场收尾：用户要求妥善处理 review 遗留的 `gmx-api` gitlink 差异。按参考仓库文档的固定 checkout 规则，核对其无本地文件改动、无其他 worktree，且未发现 cwd 位于该目录下的进程后，将该目录 detached 到父仓库已记录的 `b86956df00902e44e0295827d651b206a6153942`。已核验的 `cf9fe279ac1dd5a852783a1e7404e16f92378820` 继续保存在子仓库本地 `main` 分支，可用 `git show main:PATH` 查阅；没有 reset 分支、删除提交或提交父仓库指针升级。此前建议长期保留该未提交差异不符合已有固定 checkout 规则，以本次收尾为准。主仓库与子仓库均已恢复干净状态；本次只是参考源码现场整理，不变更已发布的前端 PR，也不涉及运行服务或消费者升级。
