@@ -12,6 +12,6 @@ description: 实施明确的 GMX Solana 需求、回流个人基础设施经验�
 - 编码按 [gmx-interface-dev](../../../gmx-prompts/skills/gmx-interface-dev/SKILL.md)、[gmx-solana](../../../gmx-prompts/skills/gmx-solana/SKILL.md)，测试及自审按相关规范。个人基础不新增业务能力，保持统一数据流及 EVM 行为。
 - 每个经手 issue 先检索既有知识，阶段性记录工作/问题/处理与结论，包含关联及他人 issue 的重要调研，按[固定 issue 入口](../../../docs/issues/README.md)更新并在暂停/交付/结束前检查遗漏与回流，不能只留在本机 note。业务与基础设施独立提交，通用知识更新已有 docs/skill，选择性 backflow 到个人基础；混合配置按内容拆分。禁止整支业务分支合入个人基础。
 - 获交付指令后，fetch 最新 release，只转入本需求业务提交；在实际目标验证最终 diff/历史及相关行为。缺未合并业务依赖时如实说明，不捎带其他需求。复杂证据绑定和归档见[可选严格检查](../../../docs/agent-delivery-evidence.md)，普通需求默认不打包。
-- 个人基础用 my-gmx，业务 PR 用正式 fork my-gmx-pr。PR 英文 Summary、Linear URL、真实 Validation，保持 Draft；未经同意不转 Ready 或请求 reviewer。PR 后只在登记的 delivery 工作区继续业务修复，经验优先在个人基础记录。
+- 个人基础用 my-gmx，业务 PR 用正式 fork my-gmx-pr。PR 英文 Summary、Linear URL、真实 Validation，保持 Draft；未经同意不转 Ready 或请求 reviewer。PR 后修复先在已有、基于 solana-integration 的需求 development 分支实施并验收，再将明确的业务修复提交选择性转入现有 delivery，按交付目录实际差异复验并推送同一 Draft PR；不将整个开发分支合入 delivery，不在两处独立修改同一修复。仅有 delivery 而无原开发现场时先核实现有任务结构，不为套流程重建分支。经验优先在个人基础记录。
 - 个人知识/工具切片收尾时，按[沉淀收尾与自动推送](../../../docs/documentation-maintenance.md#沉淀收尾与自动推送)完成提交、必要回流和 my-gmx 推送，不等用户提醒；backflow 成功不代表远端已保存，不因此扩大业务分支或 PR 发布授权。
 - 简短交接任务/分支/工作区、回流及推送状态、验证与 PR；受阻说明停在哪一步，不把本机历史状态当实时事实。只要求 push 时直接遵循根规则，不插入本流程。
