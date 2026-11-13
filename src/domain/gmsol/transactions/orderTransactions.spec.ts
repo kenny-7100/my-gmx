@@ -25,6 +25,7 @@ import { copySolanaBytes } from "lib/solana/bytes";
 import { mockMarginCheckMarketInfo, mockTokensData } from "sdk/test/mock";
 import { getAcceptablePriceInfo } from "sdk/utils/prices";
 
+import { getPendingGmsolSubmission, reconcileGmsolSubmission } from "./pendingSubmission";
 import { buildGmsolOrderTransactions } from "./buildOrderTransactions";
 import { decodeGmsolInstruction, readCreateOrderParams } from "./decodeInstruction";
 import { toGmsolOrderParams, toGmsolUpdateParams } from "./orderInputs";
@@ -220,6 +221,7 @@ it("rejects unexpected programs, gmsol instructions, receivers, amounts and trun
 });
 
 beforeEach(() => {
+  localStorage.removeItem("gmsol-pending-submissions");
   transport.loadSdk.mockResolvedValue(sdk);
   transport.flags.mockReset().mockResolvedValue(true);
   const respond = (result: unknown) => vi.fn(() => ({ send: async () => result }));
@@ -554,4 +556,37 @@ it("distinguishes rejected on-chain submissions from ambiguous confirmation read
     expect(failure.failedSignature).toBe(outcome === "failed" ? failure.submittedSignatures[0] : undefined);
     expect(failure.pendingSignature).toBe(outcome === "unavailable" ? failure.submittedSignatures[0] : undefined);
   }
+});
+
+it("reconciles a retained broadcast before another signature and never guesses from missing history FESOL-56", async () => {
+  const { plan, sign } = await sendFixture();
+  transport.rpc.sendTransaction.mockReturnValue({
+    send: async () => {
+      throw new Error("transport timeout");
+    },
+  });
+  const send = () =>
+    sendGmsolOrderTransactions({
+      plan,
+      getWalletAddress: () => owner,
+      signTransaction: sign,
+      onConfirmed: async () => undefined,
+    });
+  await expect(send()).rejects.toThrow("before retrying");
+  const retained = getPendingGmsolSubmission(owner)!;
+  expect(retained.orderAddresses).toHaveLength(1);
+  expect(getPendingGmsolSubmission(other)).toBeUndefined();
+  const signatures = sign.mock.calls.length;
+  await expect(send()).rejects.toThrow("before retrying");
+  expect(sign.mock.calls.length).toBe(signatures);
+  for (const status of [null, { err: null, confirmationStatus: "processed", slot: 2n }]) {
+    transport.rpc.getSignatureStatuses.mockReturnValue({ send: async () => ({ value: [status] }) });
+    await expect(reconcileGmsolSubmission(owner)).rejects.toThrow("not yet confirmed");
+    expect(getPendingGmsolSubmission(owner)).toEqual(retained);
+  }
+  transport.rpc.getSignatureStatuses.mockReturnValue({
+    send: async () => ({ value: [{ err: null, confirmationStatus: "confirmed", slot: 3n }] }),
+  });
+  expect(await reconcileGmsolSubmission(owner)).toEqual({ ...retained, failed: false, slot: 3n });
+  expect(getPendingGmsolSubmission(owner)).toEqual(retained);
 });
