@@ -1,8 +1,13 @@
 # Solana order outcome evidence
 
 The decoder accepts the Anchor CPI event envelope and IDL at
-`c6778dc9bf6444f9037c3b0d2dc219c857e1b45d` (the v0.9.0 ABI used by the
-pinned transaction builder). The envelope, discriminator and Borsh layouts are
+`c6778dc9bf6444f9037c3b0d2dc219c857e1b45d`. The four event discriminators
+and all 15 referenced Borsh type layouts were also compared with the SDK
+0.11.0-beta.1 source at `7fe4008292ffc09061f3a733ad9b5cd2e6235fa8`: they
+are structurally identical after excluding IDL documentation. The latter IDL
+SHA-256 is `fece132b79a631793ff86d9b2fd7ea29e31094a3afdcea9d72028f85b1838383`.
+This source comparison does not establish the deployed program identity or
+change the historical fixture provenance. The envelope, discriminator and Borsh layouts are
 stored in `orderEventLayout.json`. Unknown/truncated events and failed
 transaction metadata cannot supply successful execution evidence.
 
