@@ -58,3 +58,14 @@ Dismissing a toast, switching owner/network or unmounting the consumer cancels
 its tracking. A tracking deadline leaves a visible unconfirmed outcome, never a
 fabricated fill or failure. Live browser acceptance of newly submitted orders
 remains separate from historical RPC replay and offline fixture verification.
+
+## Shared entry integration
+
+FESOL-20 owns the sender identity, immediate submission callback, lifecycle
+tracking and notification contracts used here. The FESOL-19 TradeBox consumes
+this implementation with `trackExecution: true` for market orders and `false`
+for limit and TP/SL creation. Its current integrated delivery therefore includes
+the FESOL-20 contract as a code prerequisite, alongside the FESOL-56 sender.
+A submission-only consumer passes `false`: the notification completes on
+submission and does not load or run the lifecycle watcher. Submission
+confirmation and execution evidence remain separate in either mode.
