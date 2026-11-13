@@ -1,6 +1,12 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
-更新：2026-11-13（Asia/Shanghai）。角色：依赖调研、组合分支准备与源码审查；尚未实施 FESOL-56 交易功能。
+更新：2026-11-13（Asia/Shanghai）。角色：依赖调研、实现与验收。核心交易能力已实施，完整主网验收未完成；下方初始调研及各阶段结果按时间保留，不将旧观察视为当前状态。
+
+## 最新依赖同步：FESOL-57
+
+2026-11-13 已在 `solana-order-transactions-fesol-56` 合并 #3242 最新 head `f16deff8a71516bd987a17334f218ed08c1fa9bd`，merge commit `b7ee2e27f1e98737db99d70e302eba79264bcfb3`；无冲突，保留 FESOL-92 units 导出。SDK 全量 64 文件/952 tests passed，原始 BTC dust 输入独立复验通过（不再除零），FESOL-56 交易/钱包/LUT 定向 4 文件/12 tests passed；变更文件 lint/format、SDK types/CJS/ESM 产物重建、主应用与 landing 类型检查通过。日志 `/tmp/fesol56-sync57-{sdk-tests,dust,transactions,sdk-build,lint,format,types}.log`。未重新进行 UI、主网模拟、真实钱包签名/广播或 Rust reference 对比；受信任 LUT 与四钱包/keeper 验收仍待完成。完整同步证据见 [FESOL-57](FESOL-57.md)。
+
+## 初始需求与依赖调查
 需求：[FESOL-56](https://linear.app/gmx-io/issue/FESOL-56)。Linear 实时抓取自 2026-11-13 00:03 起；GitHub 同轮核验。个人基础 `solana-integration`；本轮已提交依赖知识并创建独立开发 worktree。
 
 ## 判断与执行边界
