@@ -14,6 +14,7 @@ import {
 } from "@solana/kit";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { maxUint256 } from "viem";
 import { beforeAll, beforeEach, expect, it, vi } from "vitest";
 
 import { GMSOL_LOOKUP_TABLE_ADDRESSES } from "config/gmsol/lookupTables";
@@ -21,10 +22,17 @@ import { GMSOL_MARKETS } from "config/gmsol/markets";
 import { GMSOL_STORE_PROGRAM_ID } from "config/gmsol/program";
 import { GMSOL_SDK_WASM_SHA256 } from "config/gmsol/sdk";
 import { copySolanaBytes } from "lib/solana/bytes";
+import { mockMarginCheckMarketInfo, mockTokensData } from "sdk/test/mock";
+import { getAcceptablePriceInfo } from "sdk/utils/prices";
 
 import { buildGmsolOrderTransactions } from "./buildOrderTransactions";
-import { toGmsolUpdateParams } from "./orderInputs";
-import { GmsolTransactionError, sendGmsolOrderTransactions } from "./sendOrderTransactions";
+import { decodeGmsolInstruction, readCreateOrderParams } from "./decodeInstruction";
+import { toGmsolOrderParams, toGmsolUpdateParams } from "./orderInputs";
+import {
+  GmsolTransactionError,
+  prepareGmsolOrderTransactions,
+  sendGmsolOrderTransactions,
+} from "./sendOrderTransactions";
 import type { GmsolCreateOrder, GmsolTransactionPlan } from "./types";
 import { decodeGmsolTransaction, validateGmsolTransactionPlan } from "./validateTransaction";
 vi.mock("config/ab", () => ({ getIsSolanaNetworkEnabled: () => true }));
@@ -32,7 +40,9 @@ const transport = vi.hoisted(() => ({
   rpc: {} as Record<string, ReturnType<typeof vi.fn>>,
   tables: {} as Record<string, string[]>,
   flags: vi.fn(),
+  loadSdk: vi.fn(),
 }));
+vi.mock("../loadGmsolSdk", () => ({ loadGmsolSdk: () => transport.loadSdk() }));
 vi.mock("lib/solana/rpc", () => ({ getSolanaRpc: () => transport.rpc }));
 vi.mock("lib/solana/lookupTables", () => ({ fetchGmsolLookupTables: async () => transport.tables }));
 vi.mock("../fetchSolanaTradingEnabled", () => ({ fetchSolanaTradingEnabled: () => transport.flags() }));
@@ -210,6 +220,7 @@ it("rejects unexpected programs, gmsol instructions, receivers, amounts and trun
 });
 
 beforeEach(() => {
+  transport.loadSdk.mockResolvedValue(sdk);
   transport.flags.mockReset().mockResolvedValue(true);
   const respond = (result: unknown) => vi.fn(() => ({ send: async () => result }));
   transport.rpc = {
@@ -217,6 +228,7 @@ beforeEach(() => {
     getFeeForMessage: respond({ value: 5000n }),
     simulateTransaction: respond({ context: { slot: 1n }, value: { err: null, accounts: [{ lamports: 990000000n }] } }),
     getBlockHeight: respond(1n),
+    getLatestBlockhash: respond({ value: { blockhash: lifetime.recentBlockhash, lastValidBlockHeight: 1n } }),
     getSignatureStatuses: respond({ value: [{ err: null, confirmationStatus: "confirmed", slot: 2n }] }),
     sendTransaction: vi.fn((encoded: string) => ({
       send: async () =>
@@ -237,35 +249,19 @@ async function sendFixture() {
   );
   return { plan, sign };
 }
-it("preserves confirmed orders and retry identity when account or receipt indexing lags FESOL-20", async () => {
+it("confirms a real Ed25519 signature and preserves confirmed success when refresh fails FESOL-56", async () => {
   const { plan, sign } = await sendFixture();
-  let confirmedNotification = false;
   const result = await sendGmsolOrderTransactions({
     plan,
     getWalletAddress: () => owner,
     signTransaction: sign,
-    onSubmitted: (value) => {
-      confirmedNotification = value.signatures.length === 1 && value.trackingRequests.length === 1;
-    },
     onConfirmed: async () => {
-      expect(confirmedNotification).toBe(true);
       throw new Error("API indexing delayed");
     },
   });
-  expect(confirmedNotification).toBe(true);
   expect(result.signatures).toHaveLength(1);
   expect(result.slot).toBe(2n);
   expect(result.refreshErrors).toHaveLength(1);
-  expect(result.orders).toEqual([]);
-  expect(result.trackingErrors).toHaveLength(0);
-  expect(result.trackingRequests).toEqual([
-    {
-      signature: result.signatures[0],
-      slot: 2n,
-      owner,
-      orderAddresses: (await validateGmsolTransactionPlan(plan)).orderAddresses,
-    },
-  ]);
   expect(sign).toHaveBeenCalledTimes(1);
 });
 it("blocks signing on preflight failure and blocks sending after the trading flag changes FESOL-56", async () => {
@@ -341,6 +337,183 @@ it("preserves token versus USD minimum-output units and rejects dust edits FESOL
   expect(toGmsolUpdateParams(changes).min_output).toBe(1234567n);
   expect(toGmsolUpdateParams({ ...changes, kind: "LimitDecrease", minOutput: 10n ** 30n }).min_output).toBe(10n ** 20n);
   expect(() => toGmsolUpdateParams({ ...changes, sizeDeltaUsd: 1n })).toThrow(/smallest gmsol unit/);
+});
+
+it("preserves gmsol price bounds through the real WASM for both sides and all order kinds FESOL-56", async () => {
+  const precision = 10n ** 30n;
+  const priceUnit = 10n ** 18n; // BTC has 8 decimals; gmsol USD has 20.
+  const indexPrice = 90_000n * precision + priceUnit / 2n;
+  const tokens = mockTokensData({ BTC: { decimals: 8, prices: { minPrice: indexPrice, maxPrice: indexPrice } } });
+  const mathMarket = { ...mockMarginCheckMarketInfo(tokens), tradeMath: "gmsol" as const };
+  for (const kind of [
+    "MarketIncrease",
+    "LimitIncrease",
+    "MarketDecrease",
+    "LimitDecrease",
+    "StopLossDecrease",
+  ] as const) {
+    for (const isLong of [true, false]) {
+      const input = order(kind, isLong);
+      const isIncrease = kind.includes("Increase");
+      const isMarket = kind.includes("Market");
+      const math = getAcceptablePriceInfo({
+        marketInfo: mathMarket,
+        isIncrease,
+        isLimit: !isMarket,
+        isLong,
+        indexPrice,
+        sizeDeltaUsd: input.sizeDeltaUsd,
+        maxNegativePriceImpactBps: undefined,
+      });
+      const plan = await build([
+        {
+          ...input,
+          acceptablePrice: math.acceptablePrice,
+          triggerPrice: isMarket ? undefined : indexPrice,
+          minOutput: isIncrease ? 1234567n : precision + 1n,
+        },
+      ]);
+      const instructions = plan.groups
+        .flat()
+        .flatMap((bytes) => decodeGmsolTransaction(bytes, plan).message.instructions);
+      const create = instructions
+        .map((ix) =>
+          ix.programAddress === GMSOL_STORE_PROGRAM_ID
+            ? decodeGmsolInstruction(
+                copySolanaBytes(ix.data!),
+                ix.accounts!.map((account) => account.address)
+              )
+            : undefined
+        )
+        .find((ix) => ix?.name === "create_order_v2")!;
+      create.reader.read(32);
+      const params = readCreateOrderParams(create.reader);
+      expect(params.size).toBe(10n ** 21n);
+      expect(params.minOutput).toBe(isIncrease ? 1234567n : 10n ** 20n + 1n);
+      const bound = params.acceptablePrice! * priceUnit;
+      const maximum = isLong === isIncrease;
+      expect(maximum ? bound <= math.acceptablePrice : bound >= math.acceptablePrice).toBe(true);
+      expect(maximum ? math.acceptablePrice - bound : bound - math.acceptablePrice).toBeLessThan(priceUnit);
+      if (!isMarket) {
+        const ceil = kind === "LimitDecrease" ? isLong : !isLong;
+        expect(params.triggerPrice).toBe(90_000n * 10n ** 12n + (ceil ? 1n : 0n));
+      }
+    }
+  }
+  for (const isLong of [true, false]) {
+    expect(
+      toGmsolOrderParams({ ...order("LimitIncrease", isLong), acceptablePrice: isLong ? maxUint256 : 0n })
+        .acceptable_price
+    ).toBeUndefined();
+    expect(() => toGmsolOrderParams({ ...order("MarketIncrease", isLong), acceptablePrice: 0n })).toThrow(
+      /finite positive/
+    );
+  }
+});
+
+it("snapshots order intent before asynchronous RPC preparation FESOL-56", async () => {
+  const input = order();
+  let resolveBlockhash!: (value: unknown) => void;
+  transport.tables = {};
+  transport.rpc.getLatestBlockhash.mockReturnValue({
+    send: () =>
+      new Promise((resolve) => {
+        resolveBlockhash = resolve;
+      }),
+  });
+  const preparing = prepareGmsolOrderTransactions({
+    owner,
+    action: { type: "create", orders: [input], atomic: false },
+  });
+  input.sizeDeltaUsd = 20n * 10n ** 30n;
+  resolveBlockhash({ value: { blockhash: lifetime.recentBlockhash, lastValidBlockHeight: 1n } });
+  const plan = await preparing;
+  expect(plan.action).toMatchObject({ type: "create", orders: [{ sizeDeltaUsd: 10n ** 31n }] });
+  await expect(validateGmsolTransactionPlan(plan)).resolves.toBeDefined();
+});
+
+it("does not broadcast after rejection, wallet changes, expiry or an invalid signature FESOL-56", async () => {
+  for (const failure of ["reject", "wallet", "expired-before", "expired-after", "signature", "fee"] as const) {
+    const { plan, sign } = await sendFixture();
+    transport.rpc.sendTransaction.mockClear();
+    transport.rpc.getBlockHeight.mockReturnValue({ send: async () => 1n });
+    transport.rpc.getFeeForMessage.mockReturnValue({ send: async () => ({ value: failure === "fee" ? null : 5000n }) });
+    let connected: string | undefined = owner;
+    if (failure === "reject") sign.mockRejectedValueOnce(new Error("User rejected signature"));
+    if (failure === "wallet")
+      sign.mockImplementationOnce(async (bytes) => {
+        connected = other;
+        return signTransactionBytes(bytes);
+      });
+    if (failure === "signature") sign.mockImplementationOnce(async (bytes) => bytes);
+    if (failure === "expired-before") transport.rpc.getBlockHeight.mockReturnValue({ send: async () => 2n });
+    if (failure === "expired-after")
+      transport.rpc.getBlockHeight
+        .mockReturnValueOnce({ send: async () => 1n })
+        .mockReturnValue({ send: async () => 2n });
+    await expect(
+      sendGmsolOrderTransactions({
+        plan,
+        getWalletAddress: () => connected,
+        signTransaction: sign,
+        onConfirmed: async () => undefined,
+      }),
+      failure
+    ).rejects.toBeInstanceOf(GmsolTransactionError);
+    expect(transport.rpc.sendTransaction, failure).not.toHaveBeenCalled();
+  }
+});
+
+async function signTransactionBytes(bytes: Uint8Array) {
+  return copySolanaBytes(
+    getTransactionEncoder().encode(await signTransaction([signingKey], getTransactionDecoder().decode(bytes)))
+  );
+}
+
+it("retains the accepted signature when confirmation times out FESOL-56", async () => {
+  const { plan, sign } = await sendFixture();
+  transport.rpc.getSignatureStatuses.mockReturnValue({ send: async () => ({ value: [null] }) });
+  const clock = vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValue(90_001);
+  try {
+    const error = await sendGmsolOrderTransactions({
+      plan,
+      getWalletAddress: () => owner,
+      signTransaction: sign,
+      onConfirmed: async () => undefined,
+    }).catch((error: unknown) => error);
+    expect(error).toBeInstanceOf(GmsolTransactionError);
+    const failure = error as GmsolTransactionError;
+    expect(failure.submittedSignatures).toHaveLength(1);
+    expect(failure.pendingSignature).toBe(failure.submittedSignatures[0]);
+    expect(failure.message).toContain("before retrying");
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it("preserves confirmed preparation when the later order signature is rejected FESOL-56", async () => {
+  const { plan, sign } = await sendFixture();
+  const isCreate = (ix: Instruction) => ix.programAddress === GMSOL_STORE_PROGRAM_ID && ix.data?.[0] === 200;
+  const preparation = mutateInstructions(plan, (ixs) => ixs.filter((ix) => !isCreate(ix)));
+  const creation = mutateInstructions(plan, (ixs) => ixs.filter((ix) => isCreate(ix) || ix.accounts?.length === 0));
+  plan.groups = [preparation.groups[0], creation.groups[0]];
+  await expect(validateGmsolTransactionPlan(plan)).resolves.toBeDefined();
+  sign.mockImplementationOnce(signTransactionBytes).mockRejectedValueOnce(new Error("User rejected order"));
+  const confirmed: string[] = [];
+  const error = await sendGmsolOrderTransactions({
+    plan,
+    getWalletAddress: () => owner,
+    signTransaction: sign,
+    onConfirmed: async ({ signature }) => {
+      confirmed.push(signature);
+    },
+  }).catch((error: unknown) => error);
+  expect(error).toBeInstanceOf(GmsolTransactionError);
+  const failure = error as GmsolTransactionError;
+  expect(failure.submittedSignatures).toEqual(confirmed);
+  expect(confirmed).toHaveLength(1);
+  expect(failure.pendingSignature).toBeUndefined();
+  expect(transport.rpc.sendTransaction).toHaveBeenCalledTimes(1);
 });
 
 it("distinguishes rejected on-chain submissions from ambiguous confirmation reads FESOL-20", async () => {
