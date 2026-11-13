@@ -139,3 +139,12 @@ FESOL-56 范围含 market/limit increase、market decrease、TP/SL、原子 incr
 将账户准备移到独立前置交易、仅让三个订单原子落链是后续可评估的包大小优化方向；当前 validator 要求 atomic plan 只有一笔交易，改变该策略还需重新证明账户准备、每次签名前校验、部分成功和费用/有效期边界。本轮不未经验证自动启用该策略。56 最新正文明确允许在支持限度外显式失败，因此保留明确限制与 TODO，仍尽量实现并验证支持范围。
 
 本轮没有真实钱包签名、广播、链上 LUT 写入、Linear 更新、外部评论或创建 PR。业务提交仅本地保存；个人知识按自动沉淀规则提交并推送 my-gmx。原 FESOL-56 全量目标保持未完成：等待受信任 LUT、四钱包实际签名落链和原子包限制收敛，不能将已通过的无签名模拟当作这些正式验收。
+
+
+### Draft PR 交付准备（2026-11-13）
+
+用户明确要求向 release 创建 Draft PR，并进一步授权本次 Draft 带必要的未合并前置代码、剥离个人基础设施、在正文列清依赖。交付目录 `gmx-interface-fesol-56-release`，分支 `solana-order-transactions-release-fesol-56`，从实时 release `e471428074` 重建。转入此前依赖 merge 的 first-parent 产品差异（92/57/51/52/113）、SDK constructor 测试修正、57 最新 f16deff8，以及 56 三个业务提交；未带 AGENTS/docs 知识、个人 scripts/tools、package 管理脚本或 Vite 个人测试配置。172 文件，包含前置范围，不能称为纯 56 独立可合并 PR。
+
+实时上游 #3242/#3243/#3195/#3193/#3205/#3207 均 OPEN。#3193 当前 head `258e4da6abafc75c683983993544f4eb9c1a8abc` 比集成的 `732b4a1322` 新，本次保留已测试集成版本，PR 明列这一边界。56 Execution、71 Todo，正文及评论无新替代 LUT 地址。重建唯一冲突在 indexers/utils：保留最新 release 的 IndexerKey（不恢复已移除的 stats），同时保留依赖的 getConfiguredIndexerUrl；一处依赖格式修正。新目录 SDK 安装/构建完成，SDK 952 passed、前端 3431 passed/1既有skip、app+landing types、变更 ESLint/Prettier/diff 通过。生产 app/WASM build（8 GiB heap）也通过；最终发布结果待补。
+
+最终交付 GPG 签名实际失败（口令输入界面不可用），未禁用长期签名配置、未绕过最终 PR 签名规则。已向用户请求本次 Draft 命令级不签名例外或自行解锁；答复到达前不创建无签名交付提交、不推送。
