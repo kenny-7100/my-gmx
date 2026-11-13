@@ -111,7 +111,8 @@
     "test:agent-tools": "node --import tsx --test --test-concurrency=2 scripts/*.test.mjs scripts/*.test.ts scripts/test-eslint-solana-imports.cjs tools/solana-rpc-proxy/proxy.test.mjs autotests/regression/ci/*.test.cjs autotests/regression/ci/*.test.ts",
     "frontend:test-offline": "node scripts/frontend-offline-tests.mjs",
     "agent:test-plan": "node scripts/agent-test-plan.mjs",
-    "agent:test-run": "node scripts/agent-test-run.mjs"
+    "agent:test-run": "node scripts/agent-test-run.mjs",
+    "build:gmsol-sdk:source": "node scripts/build-gmsol-sdk.mjs"
   },
   "dependencies": {
     "@apollo/client": "3.5.6",
@@ -119,7 +120,7 @@
     "@davatar/react": "1.8.1",
     "@floating-ui/dom": "1.6.7",
     "@floating-ui/react": "0.26.19",
-    "@gmsol-labs/gmsol-sdk": "0.9.0-test.2",
+    "@gmsol-labs/gmsol-sdk": "file:vendor/gmsol-sdk",
     "@headlessui/react": "1.7.19",
     "@intercom/messenger-js-sdk": "0.0.18",
     "@layerzerolabs/lz-v2-utilities": "3.0.85",
