@@ -178,3 +178,6 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 
 
 交付目录同样 frontend 3434 passed/1 既有 skip（340 files passed/1 skipped）、app+landing tscheck、变更 ESLint/Prettier/diff 通过；工具过时提示已改成 development 验证后转入既有 delivery，适用 agent-workflow 单项 13 tests passed。交付提交尝试 GPG 签名失败（pinentry curses 无可用 tty/界面，No such file or directory），未关闭长期配置。已准备 PR 英文正文增量与验证结果，等待本次签名例外或用户解锁后完成 commit/push；不将已验证/暂存冒充已更新 PR。日志 `/tmp/fesol56-cache-delivery-{tests,types,lint,format}.log`、`/tmp/fesol56-cache-workflow-tests.log`。
+
+
+最终发布：用户明确允许本次修复交付提交命令级不签名，`89c9fc73a5df1d3717fcb49fa8a4dddabfc42f4b` 已推送 my-gmx-pr，原开发提交 `ccbde8e995` 已备份 my-gmx；PR #3258 正文已更新缓存修复与本轮真实验证结果，保持 Draft/release，无新增 reviewer 请求。开发→交付转入仅两个业务文件，无冲突，无个人基础设施。两处实际目录检查通过且已 clean；后续业务修复继续遵循本节新流程，旧“唯一 delivery 修复现场”不再适用。本轮缓存缺陷已关闭，不将其等同于 FESOL-56 全部真实钱包验收完成；FESOL-71、四钱包签名落链与已披露原子包边界仍保留。新 head 的 GitHub CI 刚启动，不宣称全部通过；生产构建复用缓存修复前结果，未重跑 SDK 或交易编码构建。
