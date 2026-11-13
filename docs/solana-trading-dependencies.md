@@ -1,5 +1,21 @@
 # Solana 交易链路依赖审计
 
+## 独立开发切片实施结果（2026-11-13）
+
+用户明确创建目标并授权实施四个切片。沿用原56/19/20/72现场，没有修改57作者实现、Linear、线上配置或发送协作消息，也未做钱包签名/广播。下方“等待外部条件期间可继续推进”是实施前判断，本节为后续结果。
+
+- **19输入链路**：真实共享selectors→mapper→WASM参数单位核对覆盖全部visualMultiplier=1000的配置市场、多空、market/limit、2/5/100/101倍，支付额固定10、价格展示倍数往返和30→20decimals转换一致。测试专用固定价格/市场元数据没有进入生产。100倍名义上限并不保证费用后可用：样例100倍为min collateral for leverage，101倍为insufficient collateral usd，2/5倍可用，未绕过费用buffer。真实TP/SL组件复现并修复手输100%后切换美元改变触发价的问题：按目标触发价估算抵押品价值换算，四种多空TP/SL组合均保留原价格。没有直接修改57。`MarketGraph.simulate_order`仍需完整原始市场账户/supply/价格/仓位同输入快照；本轮未建立其数值parity，不用selectors测试冒充WASM数学对照或112上线证据。
+- **56→20→19安全恢复**：广播前持久化network/owner作用域的原签名、订单地址、操作及market执行跟踪意图；存储读回失败不广播。未知/processed/无历史/RPC失败保留检查点，阻止再次签名；confirmed/finalized后确认失败或prepare成功要求用户另行重试，原订单成功则返回原签名并刷新账户。跨异步钱包/网络/unmount检查保留原检查点。19共享按钮提供查询状态入口，可在新输入/数学数据暂不可用时检查原交易，恢复跟踪使用原订单类型而非当前表单模式。不是跨标签页原子锁，不因blockhash到期或空历史清除未明交易；没有新增取消订单产品UI或自动重发金融动作。
+- **20真实通知组件**：prepare确认后拒签被归为失败，保留已有交易链接；发送中/广播未知不会提前显示成交阶段，未知状态不显示持续loading。只在确认提交后进入执行跟踪，真实事件才判成交/取消；现有关闭/会话切换保护保留。已在现有hook harness中渲染真实组件核对文案、阶段和Solana explorer链接，未以mock组件代替实际展示。
+- **56 atomic归因**：只读获取现有两表快照slot468884236，重现有限价BTC/USDC三单1255 bytes。完全相同的准备指令已去重，剩一条prepare_user、一条prepare_position、四条不同ATA和三条131byte create_order_v2；wire=65 signatures+4 header/version+417 static keys+32 blockhash+662 instructions+75 lookup=1255。改表顺序仍1255；只用第一张1252，第二张1376，都不满足1232。**将相同地址内容合为一张表的离线诊断为1221 bytes**，节省一条34byte lookup descriptor，全部订单和价格边界保留。此合并表未部署/审批，生产配置和信任门禁未修改；71可考虑一次提供受信且合并覆盖的表来同时解决信任和该示例大小问题。两个独立副本或仅冻结原两表仍不足，其他输入需逐项测量。公开技术说明同步transactions README。
+
+产品提交：56 recovery `72167ff0b6`、意图/atomic说明`dfd20a5083`；20语义接入`46326e5c44`、通知修复`9f8c74d2f0`、意图`307cbeb595`；19共享TP/SL修复`e8914b0941`、消费20 recovery/通知`769043f`/`c942c11`、意图`10540d1d5c`、共享按钮及catalog`9c59791f45`。72 development精确消费56两提交为`a2445492b0`/`e6044ced38`；72 delivery/#3259仍为`0f36780317`，没有夹带56业务。
+
+日志、临时核验源码和只读原始快照保存在各实际目录`.local/acceptance/independent-20261113/`。scratch文件已移出src，不提交测试专用行情或临时诊断代码。最终版本：19 `c708d8a634`、20 `c9c895cdce`（最后仅按lint整理import，无行为变化）；56 dev `dfd20a5083`，56 delivery `11da18dfb7`，72 dev `e6044ced38`。四条development均已推送my-gmx；56实际delivery已推送my-gmx-pr，同一Draft #3258已更新恢复行为、atomic结果与真实验证。发布后核对head为`11da18dfb7`、OPEN/Draft；本轮未等待或宣称新head远端CI全部通过。
+
+验证：56 dev及实际delivery各完整frontend **3437 passed/1既有skip**；19 **3469 passed/1 skip**，20 **3458 passed/1 skip**，72 dev **3437 passed/1 skip**。19/20/72及56 delivery应用与landing类型检查通过；19最终定向5 suites/40 tests、20最终定向3 suites/21 tests、56真实WASM恢复2 suites/15 tests通过；输入链scratch有非空市场断言并覆盖80组合，另做真实TP/SL组件17项检查。变更ESLint无error（19测试fixture一条react-perf warning），56 Prettier和各目标diff check通过。56默认堆production build在chunk rendering报JavaScript heap out of memory，未当作代码失败；用户明确后续构建统一8 GiB，已沉淀根规则/编码入口/排障说明并推送`15dd1d720b`，原失败日志保留。56实际delivery与19整合目标的8 GiB production app/WASM build均通过（分别55.33s、52.03s）；大型构建串行执行。72独立PR/head已再次核对仍为`0f36780317`/Draft。开发/交付工作区均clean。
+
+
 ## FESOL-52 最新依赖接入（2026-11-13）
 
 用户随后明确优先处理52，范围含56、19、20、72；本节取代下方“外部暂不处理52”的旧阶段决定。实时确认 #3193 head 为 `258e4da6abafc75c683983993544f4eb9c1a8abc`，release仍为 `e4714280749c00a90468abdde3060aae619717e7`。只消费已发布成果，未修改52或57作者的分支、PR或Linear。
