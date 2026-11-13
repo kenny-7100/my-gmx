@@ -14,6 +14,20 @@
 
 验证：56 dev及实际delivery各自完整frontend **3436 passed/1既有skip**、app/landing types、production app/WASM build通过；20完整frontend **3456 passed/1既有skip**及types通过；19完整frontend **3466 passed/1既有skip**、types和production app/WASM build通过。19/20账户/provider/通知/tracking定向各9 suites/36 tests通过。72真实WASM/transaction/account/provider组合4 suites/19 tests、types通过；初次SDK verify因缺少 `.agent-build.json` 收据blocked，已在该目录实际重建prebuild/types/CJS/ESM并通过1200产物核验，tracked文件未变。19/20既有SDK来源收据也按当前源码核验1200文件通过；SDK源码/依赖未改，952单元测试沿用既有结果，不称本轮重跑。所有6目录（含72独立delivery）vendor全部8文件hash匹配，未重跑Rust。变更手写文件Prettier、ESLint及diff whitespace通过。四条development均已推送my-gmx，56 delivery推送my-gmx-pr，registry重新绑定实际完整SHA并更新后续入口。各实际目标日志位于 `.local/acceptance/fesol52-20261113/`。56同一Draft #3258已更新共享Provider来源与真实delivery验证，远端head `e7ac104ba5`、OPEN/Draft；新head的Audit/WASM reproduction/component/general/standalone checks已启动，观察时均IN_PROGRESS，未冒充远端CI已完成。外部review/release合并、71可信LUT、112线上数学字段及真实钱包落链的既有边界不由本次迁移解除。
 
+## 等待外部条件期间可继续推进的切片（2026-11-13）
+
+角色：限定56/19/20/72的就绪分析，未实施业务。沿用本轮四条实时Linear正文/关系/评论，重新核对实际开发源码、52整合后PR和release；release仍 `e471428074`。用户决定atomic、兑换和Rewards等需求内问题暂不追加问Divhead，留在开发/review内处理，不代表需求豁免。
+
+首选19共享输入到交易参数的行为核验：当前mapper spec仅2个聚合case，覆盖传入已计算amounts的映射/拒绝，没有独立证明完整UI输入计算链。可离线核对k-token visualMultiplier来回转换、TP/SL百分比与美元输入及抵押品目标价分母、杠杆改变保留支付额、最大杠杆与费用buffer，复用真实selectors/math/mapper、独立参考输入；发现差异只修前端消费，不直接改Rainer的57实现。WASM实际导出 `MarketGraph.simulate_order`，可先检查固定市场/仓位/价格输入是否足够，再做可复现同输入对照；本次只查导出，未证明完整离线对照现成可跑，不以伪造生产字段绕过112。
+
+19/20的第二切片为失败恢复和真实组件组合：sender已保留confirmed/pending signatures及trackingRequests，adapter只转发成功/失败通知，尚未证明满足19正文部分成功后的retry/cancel体验。先覆盖prepare已确认后钱包拒绝、发送超时状态未知、receipt/API延迟、跟踪超时及会话切换的组合；未知状态先reconcile，禁止直接重发整个金融动作。20 notification hook有现有测试，但未发现专属SolanaOrderStatusNotification组件story/spec；可验证真实文案/链接/取消原因/关闭行为，不重复堆parser单测，不把离线组件验收当新订单keeper验收。
+
+56可用固定WASM、真实已留存LUT快照/ABI做atomic静态大小归因；现有recompile已经去重ATA/prepare_user/prepare_position并合并Compute Budget，不能假设再去重即可解决1255 bytes。评估安全的布局/编码改进，保留价格边界、原子性与1232上限；是否能修复尚未确认。支付币兑换可先核对现有swap ABI与共享路由契约，但未确认路由输入来源前不列为可完整独立实施；GT Rewards仍缺契约，不猜测新增字段。
+
+72构建切片已完成，无需重复Rust/CI重建或换版本；等待版本确认与主网复验，沿用现有出处/hash/loader证据，仅在发生实际变化时更新。19/20交付边界和review材料可以整理，未授权本轮创建新PR。
+
+新CI事实：56 head `e7ac104ba5`的Audit、WASM reproduction、两轮general和standalone均成功；Component workflow `43399669597`失败日志明确用例All tests passed，失败是Pages发布403及报告评论Resource not accessible by integration。72 head未变，同样保留历史报告发布权限失败。没有为绿色状态扩大token权限或改共享workflow。两个PR均OPEN/Draft、reviews为空。
+
 ## 五条内部同步结果（2026-11-13，用户限定不处理外部依赖）
 
 本节优先于下方16:16审计中的旧版本矩阵和建议。用户授权将五条内部需要跟进的依赖同步好；未扩展到52、51、71、112等外部需求，未修改57作者分支/PR、上游release或线上状态。
