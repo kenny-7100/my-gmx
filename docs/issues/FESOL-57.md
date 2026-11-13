@@ -1,5 +1,11 @@
 # FESOL-57 — 共享 SDK 数学依赖调研
 
+## 当前状态复核（2026-11-13 16:08，Asia/Shanghai）
+
+角色：只读状态与依赖调研。实时查询正文、双向关系、评论、关联 PR checks，并对照既有实施记录；本节优先于下方历史状态。
+
+实时 Linear 仍 Review、Rainer；#3242 OPEN、非 Draft，head `f16deff8a7`，REVIEW_REQUIRED、reviews 为空。当前 Audit、组件、常规 lint/types/tests、SDK standalone 与预览检查全部 SUCCESS。PR 文件列表仍无完整 Rust generator/reference JSON，仅评论附件；参考生成器与输入输出版本化仍需按原验收核对。19/20 已同步该 head，SDK 952 项通过属于既有记录，本轮没有重跑 Rust 或测试。本轮公开 markets/config 67 个市场均无 tradeMath，不能将数学 PR/本地通过说成线上已启用。
+
 ## 2026-11-13 最新复查（优先于下方历史状态）
 
 实时读取 #3242：OPEN、REVIEW_REQUIRED、reviews 空；head 已从本地集成的 `6d3ed92c` 前进到 `f16deff8a71516bd987a17334f218ed08c1fa9bd`，新增一笔 `fix Solana trade calculations`。本次只读审查，未合入 FESOL-56。最新 Audit、常规 lint/type/tests、组件测试、SDK standalone build 和两个预览检查全部通过，旧 apt DNS 失败已不再是当前阻碍。

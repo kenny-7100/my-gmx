@@ -1,5 +1,11 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## 当前状态复核（2026-11-13 16:08，Asia/Shanghai）
+
+角色：只读状态与依赖调研。实时查询正文、双向关系、评论、关联 PR checks，并对照既有实施记录；本节优先于下方历史状态。
+
+实时 Linear 为 Review、kenny，无评论；GitHub #3258 仍 OPEN/Draft，head `b2fdb4c745`，无已提交 review。Audit、常规 lint/types/tests、SDK standalone 均 SUCCESS；组件 job FAILURE 沿用已核实的报告发布/评论 403 边界，不是新增用例失败。本轮没有重跑测试、查询 LUT 链上状态或签名广播。核心交易构建/校验/发送与 slot floor 修复已交付 PR，四钱包与主网落链仍未验收。71 实时仍 Todo、Divhead、无评论或新地址。19/20 已接入后续安全修复和 72 新 WASM，不能再沿用旧段落称下游未同步；56 原 PR 自身仍不因此视为升级新版 WASM。
+
 更新：2026-11-13（Asia/Shanghai）。角色：依赖调研、实现与验收。核心交易能力已实施，完整主网验收未完成；下方初始调研及各阶段结果按时间保留，不将旧观察视为当前状态。
 
 ## 最新依赖同步：FESOL-57

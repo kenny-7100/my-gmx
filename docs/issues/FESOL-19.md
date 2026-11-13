@@ -1,5 +1,13 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## 当前状态复核（2026-11-13 16:08，Asia/Shanghai）
+
+角色：只读状态与依赖调研。实时查询正文、双向关系、评论、关联 PR checks，并对照既有实施记录；本节优先于下方历史状态。
+
+实时 Linear 已为 Execution，assignee 仍为空（正文 Owner 为 chloe）；本地实现由既有任务承担，不据此修改线上分配。开发 head `0d7b4b49a7` 与 my-gmx 远端一致、工作区干净；GitHub 按五个编号搜索未发现专属 19 PR。已同步 56 的意图快照/freshness/确认 slot 修复、57 `f16deff8a7` 和 72 固定 `0.11.0-beta.1`。共享 GmsolTradeboxAdapter 确实消费 sender 与 notifications，旧“未接 sender”观察已过时。既有整合全量 3464 passed/1 skipped、types/build 和 SDK 952 passed 可按版本复用，本轮未重跑或操作浏览器。
+
+新增范围核对：正文要求 payment-to-collateral conversion，而当前 `transactions/buildOrderTransactions.ts` 明确拒绝非空 swapPath 或 payToken≠collateralToken（Native SOL→WSOL 另有支持）；不能把同币下单/SOL wrapping 当作完整兑换能力。GT Rewards 契约、simulate_order 对照、真实交易/TP/SL 与 keeper 验收仍未完成。线上 markets/config 67 个市场无 tradeMath；71 仍 Todo、无新地址。
+
 2026-11-13，角色：下一条任务就绪调研。任务：https://linear.app/gmx-io/issue/FESOL-19 。当前 Todo、未分配；已实时读取正文和双向关系，未认领或实施。
 
 本轮判断为未分配任务首选。56 已提交 a8733143f47230d996303d174b2ca9dcaf0b1c87，已提供 market/limit increase、TP/SL、发送与确认刷新；在该提交的共享 TradeBox 中未发现 `useGmsolOrderTransactions` 调用。56 现有实测记录指出 header 钱包已连接，但 TradeBox 仍显示 Connect Wallet；`useTradeButtonState` 仍依赖 account/signer，这使共享钱包/按钮/交易入口适配成为明确实施缺口。不得复制 nightly TradeBox。
