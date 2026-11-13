@@ -209,3 +209,8 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 
 
 参考仓库现场收尾：用户要求妥善处理 review 遗留的 `gmx-api` gitlink 差异。按参考仓库文档的固定 checkout 规则，核对其无本地文件改动、无其他 worktree，且未发现 cwd 位于该目录下的进程后，将该目录 detached 到父仓库已记录的 `b86956df00902e44e0295827d651b206a6153942`。已核验的 `cf9fe279ac1dd5a852783a1e7404e16f92378820` 继续保存在子仓库本地 `main` 分支，可用 `git show main:PATH` 查阅；没有 reset 分支、删除提交或提交父仓库指针升级。此前建议长期保留该未提交差异不符合已有固定 checkout 规则，以本次收尾为准。主仓库与子仓库均已恢复干净状态；本次只是参考源码现场整理，不变更已发布的前端 PR，也不涉及运行服务或消费者升级。
+
+
+### FESOL-72 新版 WASM 的跨任务兼容验证（2026-11-13）
+
+72 开发分支已集成 56 delivery `b2fdb4c745`，将 SDK 接入目标更新为用户确认的 GMX 自建 `0.11.0-beta.1`。在 72 现场使用用户指定 Phantom 的公开账户，最终 WASM 的创建/修改/取消、显式 unlimited decrease bounds 的 BTC TP/SL 原子组合，以及缺失 user/position 准备，共八项真实 Mainnet 无签名模拟成功；详见 [FESOL-72](FESOL-72.md) 的源码 hash、slot、结果和边界。finite-bound 三单组合仍需 1255 bytes 被拒，两张表仍可变且未受信。此证据属于 72 的开发组合，不代表 56 原分支/PR 已升级 pin、已签名落链或已完成四钱包验收；未修改 56 业务现场。
