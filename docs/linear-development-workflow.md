@@ -43,7 +43,7 @@ node /path/to/base/scripts/agent-workflow.mjs register --issue FESOL-123 \
 
 初次 register 必须提供基线，rebind 默认保留该角色原基线；基线必须是目标 HEAD 的祖先，delivery 基线还须属于本地已获取的 origin/release 历史。已有 PR 时先 fetch 对应引用、核对远端事实；不是默认分支/当前 release SHA 就一定是该任务的正确起点。
 
-PR 快照仅用于 delivery，核对目标仓库 URL、release base、分支与 HEAD；脚本不在线查询，也不把快照记录时间当远端核验时间。登记前后仍要按任务节点实时查 PR。导入的 delivery 立即成为权威入口，但登记不证明其 diff 已剥离个人基础或测试通过，仍需完整审查。仅有 delivery 的旧任务可直接登记该角色，无需重建不存在的旧开发现场。
+PR 快照仅用于 delivery，核对目标仓库 URL、release base、分支与 HEAD；脚本不在线查询，也不把快照记录时间当远端核验时间。登记前后仍要按任务节点实时查 PR。导入的 delivery 是 PR 发布版本的权威入口；有原 development 时，修复仍按下文的开发验证→交付流程。登记不证明其 diff 已剥离个人基础或测试通过，仍需完整审查。仅有 delivery 的旧任务可直接登记该角色，无需重建不存在的旧开发现场。
 
 rebind 不覆盖已有未解决 pending，也不会放弃另一个仍有未提交工作/未完操作的旧工作区；旧路径失效时允许按同仓库新现场恢复。每次绑定核对命名分支、实际 HEAD 和 Git 共享根，记录 lastBinding；变更 delivery 绑定会清除旧 PR 观察，未提供新快照时留空，旧验证声明也会清除。角色可用 `--role development|delivery` 明确选择；新的角色必须显式提供基线。旧版任务记录可继续使用，不批量迁移或接管其他任务现场。
 
@@ -107,7 +107,7 @@ node scripts/agent-workflow.mjs backflow --issue FESOL-123 \
 1. **准备**：完成当前基础设施回流，确认业务提交及未合并依赖。依赖不在 release 时明确等待，或按已确认的依赖 PR 顺序处理，不伪称可独立交付。
 2. **重建**：从 fetch 后的最新 release 创建交付 worktree，只选择本需求业务提交。工具按提交复制，不能自动理解混合补丁或丢弃前置实现。
 3. **复核与验证**：检查最终完整 diff 和提交历史，确认无个人基础、参考仓库和无关功能；在实际交付目录执行相关测试及上游要求的检查。记录命令、结果、目标 SHA 和未覆盖项，避免无变化重复执行。依赖安装按目标锁文件，SDK/WASM 或生成路由按对应环境入口准备。
-4. **PR**：推送正式 fork `my-gmx-pr`，向 `gmx-io/gmx-interface:release` 建 Draft PR，标题、Summary、Linear、真实 Validation 和发布事项遵循[提交与 PR 规范](#commit分支与-pr-表达规范)。普通 PR 无需额外证据包。适用时按 gmx-prompts 自审最终 diff，发现问题直接在交付工作区修复。
+4. **PR**：推送正式 fork `my-gmx-pr`，向 `gmx-io/gmx-interface:release` 建 Draft PR，标题、Summary、Linear、真实 Validation 和发布事项遵循[提交与 PR 规范](#commit分支与-pr-表达规范)。普通 PR 无需额外证据包。适用时按 gmx-prompts 自审最终 diff；发现问题按下文“PR 后的修复与交付现场”先回原开发分支验证，再转入交付目录复验。
 
 ```sh
 node scripts/agent-workflow.mjs deliver --issue FESOL-123 \
@@ -167,9 +167,16 @@ Linear: <actual Linear issue URL containing FESOL-123>
 
 示例只演示结构，不能复制为未实现/未验证的声明。有 breaking change 时替换 `None` 为实际分类、消费者影响和发布顺序；有部署后事项则写明具体操作。PR 正文通过临时文件与 `gh ... --body-file` 提交，保留真实换行。保持 Draft，发 PR、邀请 reviewer、转 Ready 和合并按根授权处理。
 
-## PR 后的唯一工作现场
+## PR 后的修复与交付现场
 
-交付创建后，登记的 delivery 工作区为业务修复唯一入口；旧开发分支保留但停止继续业务开发，不维护两份业务实现。新会话核对实际 PR head，若与登记不符以远端事实为准并更新本地记录。review 修复按影响复验，不重新创建一套交付分支。
+用户于 2026-11-13 明确：已有基于 `solana-integration` 的需求开发分支时，review 或后续发现的问题继续在原 development 分支修复、测试和验收，通过后再纳入现有 PR。这仍是同一 issue 的一条逻辑开发线，不创建另一条需求分支或 PR。
+
+1. 核对 development、delivery 的实际目录、分支、HEAD 与 dirty 状态，以及远端 PR head；检查两处相关源码/依赖差异，保护未提交现场。
+2. 在原 development 实施和验证修复，提交只包含该修复的业务代码及必要测试。个人知识在基础单独沉淀，不夹入业务提交。
+3. 通过后精确 cherry-pick 修复提交到登记 delivery；不整支合入个人基础或 delivery。冲突按语义解决，尤其不能将开发侧个人基础差异带入 PR。
+4. 在实际 delivery 按源码、依赖和配置差异复验适用检查；开发侧通过不代替交付侧通过。通过后推送 `my-gmx-pr`，更新同一 Draft PR；开发分支备份用 `my-gmx`，保持两角色 HEAD/验证证据登记。
+
+不在 development 与 delivery 独立实现两份修复；delivery 保留 PR 发布版本的权威身份，development 是默认修复现场。仅有 delivery 的旧任务沿用已核实现场，不为套流程重建不存在的分支；有歧义再确认。新会话发现远端 head 与登记不同，先以远端事实核对差异再更新记录。普通修复不重新创建一套交付分支。
 
 此阶段发现的知识也可从 delivery 的独立基础设施提交选择性回流；回流后必须从 PR 历史剥离该个人提交，未经明确授权不 rebase/强推。更轻便的方法是在个人基础 worktree 直接记录并提交经验，业务 worktree 只保留业务改动。
 

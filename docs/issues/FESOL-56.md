@@ -168,3 +168,10 @@ review 角色；目标 [UI#3258](https://github.com/gmx-io/gmx-interface/pull/32
 实时公开 `https://solana.gmxapi.io/v1/markets/config` 返回数组，未含 tradeMath；这是已知数学 rollout 边界，不能以本地数学测试证明线上已启用。正式验收：五种订单/方向/单位与价格舍入有自动化证据；create/update/cancel 与支持范围内 atomic 有既有无签名 mainnet 模拟证据；确认后共享缓存要求本次失败；受信任 LUT、四钱包真实 LUT 签名及落链仍不可完成验收，keeper 属后续集成检查。不能 APPROVE 或声称 issue 全部完成。
 
 GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Checking/Tests 仍 IN_PROGRESS；Component Tests job FAILURE，但失败日志是 Deploy report to GitHub Pages 与 Post report link 的403权限错误，报告正文明确 All tests passed。这是报告发布权限问题，不冒充组件用例失败，也不宣称总 CI 全绿。日志 `/tmp/fesol56-review-component-ci.log`。人工复核优先接缝：实际钱包→签名字节校验→广播/超时对账→slot快照→共享页面；同时复核 FESOL-57 math 字段部署与 feeDiscountFactor 下游接线、FESOL-71 表归属/覆盖与原子包大小。这些风险导航不等同于新增已证实缺陷。
+
+
+### PR 后缓存修复与开发验证流程调整（2026-11-13）
+
+用户明确修正长期流程：已有基于 solana-integration 的需求开发分支时，后续 review 修复先在原 development 实施并验收，再精确转入现有 delivery、复验并更新同一 PR。此前“delivery 是唯一业务修复现场”的约定被本次新指令替代，保留历史记录但不再据此阻止回原开发分支；AGENTS、日常流程、交付 skill 和索引均已同步。development 是实现验证现场，delivery 是 PR 发布版本，不在两处独立维护同一修复。
+
+本次先在原 `gmx-interface-fesol-56` / `solana-order-transactions-fesol-56` 修复确认后缓存 envelope：positions/orders 均写入 `{ value: 已校验 slot 的数据, fetchedAt: Date.now() }`，保留 minContextSlot、旧 slot 拒绝和请求失败抛出行为。新增真实 SWR/hook 回归覆盖成功、旧 slot、失败保留数据；修复前 2 failed/1 passed，修复后相关 3 suites/10 tests passed；完整 frontend 3434 passed/1 既有 skip，app+landing tscheck、变更 ESLint/Prettier/diff 通过。开发提交 `ccbde8e995ea6ca32972a626f4cc1b896d8edbef`。仅两个业务文件转入原 delivery，正在实际交付目录复验，尚不宣称 PR 已更新。日志 `/tmp/fesol56-cache-{before,dev-targeted,dev-tests,dev-types,dev-lint,dev-format}.log`。本次不涉及 UI 布局、交易编码或 SDK 改动，以真实 hook 的状态验收为直接证据，不以钱包操作或页面可加载冒充此缺陷验证。
