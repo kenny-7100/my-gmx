@@ -30,14 +30,14 @@
 
 ## 已确认的构建与扫描问题
 
-以下为 2026-10-24 本机验收经验，2026-11-12 从编码入口收敛到此处；本轮未重新构建。正常任务无需重现历史故障。
+以下问题最初来自2026-10-24本机验收，2026-11-12从编码入口收敛到此处；2026-11-13再次在FESOL-56实际交付构建的chunk rendering阶段遇到默认堆溢出。用户明确后续构建统一使用8 GiB，已提升为根规则及编码入口的默认执行方式，不再等待复现后重试。
 
 | 特征 | 最小诊断与处理 | 边界 |
 | --- | --- | --- |
 | 单文件格式检查意外扫描全仓库 | 使用 `yarn exec prettier --check PATH`（写入用 `--write`），确认目标路径 | 根 `yarn prettier` 是全量格式化脚本，追加文件参数不会缩小原有范围 |
 | 根测试扫描嵌套参考仓库、旧前端报缺少 `@docusaurus/tsconfig` | 核对目标 `vite.config.ts` 的测试发现范围与 `tsconfigPaths.projects` 是否包含既有范围修复，不先安装旧项目依赖 | 修复正常生效时无需额外扫描；目标分支配置仍需核对 |
 | SDK 相关 `TS6305`、已有导出报 `TS2305` 或字段与源码不符 | 比较源码与 `sdk/build`；按[产物准备](sdk-artifacts.md) verify，确认需构建且获授权后才 build，再重跑受影响检查 | 历史更新产物后类型检查通过，不代表这些错误一定由产物过期导致 |
-| 完整前端构建 chunk rendering 时 `Reached heap limit` / `JavaScript heap out of memory` | 核实 Node 堆限制及主机资源；已获构建授权且资源允许时，在根目录用 `NODE_OPTIONS=--max-old-space-size=8192 yarn build`，避免与大型检查并发 | 历史默认约 4 GiB 失败、8 GiB 成功；不修改全局配置，不对其他错误盲目加内存 |
+| Node/Vite 构建默认堆限制不足，完整前端 chunk rendering 曾反复报 `Reached heap limit` / `JavaScript heap out of memory` | **后续构建默认8 GiB**：在实际目标目录执行 `NODE_OPTIONS=--max-old-space-size=8192 yarn build`（`build-app`、`build-sdk`、Node/WASM打包等使用相同命令级环境变量）；串行安排大型构建及大型检查 | 用户于2026-11-13明确；不改全局Node/服务配置，不改变纯Rust编译器堆，也不为其他错误盲目继续提高内存。当前失败日志见56 delivery的`.local/acceptance/independent-20261113/build.log`；8 GiB结果另存，保留原失败证据 |
 
 ## 向后续 Agent 交接
 
