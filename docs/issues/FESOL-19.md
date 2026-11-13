@@ -67,3 +67,7 @@ Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新
 本轮新增修复：真实页面输入 TP/SL 时错误显示 EVM“最多 0 个自动取消订单”警告，已仅在非 Solana 渲染该提示，保留 EVM 行为。现有 Chrome 新 tab 验证 3017 指向 19 worktree：10 USDC 输入、市场/限价、多空切换、TP/SL 价格输入、执行价格/费用/抵押品价差展示；修复后错误警告消失。未解锁 Phantom、连接/签名/广播，没有把无钱包状态下的 PnL 占位和输入可见当作完整计算验收。已关闭自己新建的 tab 并停止 3017；未触碰另一个 72 的 3072 服务。19 新产物生产 build passed（15300 modules），SDK 64 suites/952 tests passed。
 
 最终 head `0d7b4b49a7`；完整 frontend 346 suites passed/1 skipped、3464 tests passed/1 skipped；app+landing tscheck（UI 修复后再次通过）、变更 ESLint、Prettier、diff check 均通过。生产 build 与 SDK 952 tests 结果见上；20 的独立目录检查不冒充本目录通过。开发分支已推送 my-gmx，尚未创建本需求 PR，未更新 Linear/外部评论。剩余真实交易、simulate_order 对照、GT Rewards 契约、线上数学 rollout 与前置 PR 交付边界保持明确。
+
+## FESOL-52 共享 Provider 关联接入（2026-11-13）
+
+用户授权的52依赖整合覆盖本需求。原始52 head `258e4da6ab`的消费、共享SDK传递、确认slot/freshness保护及通知组合统一记录于[依赖审计](../solana-trading-dependencies.md#fesol-52-最新依赖接入2026-11-13)。沿用原development现场，未另起并行实现或覆盖下游扩展。本次不补签名/广播证据，不解除已有外部验收条件。

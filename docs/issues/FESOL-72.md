@@ -132,3 +132,7 @@ GitHub 确认同一交付 head `0f36780317` 的 [Run Tests 43385852251](https://
 第二轮 [43386834825](https://github.com/gmx-io/gmx-interface/actions/runs/43386834825) 随后也已 completed/success，general job 12m27s、SDK standalone 1m51s；最新 PR checks 的 Audit、general、WASM reproduction 与 SDK standalone 均通过，仅组件 workflow 的报告发布/评论权限失败保留。当前无仍运行的必要 CI，不再重跑或修改 PR 正文触发重复任务。
 
 用户随后明确确认：Divhead 尚未提供可信 LUT 地址及核实依据，等待 FESOL-71。目标保留 blocked，Draft PR #3259 保持现状；待获得该前置后再核验表状态、可信归属与覆盖，并按独立授权继续签名/广播验收。不重复运行已通过的 SDK/CI 检查，不将现有模拟结果视为落链验收。
+
+## FESOL-52 共享 Provider 关联接入（2026-11-13）
+
+用户授权的52依赖整合覆盖本需求。原始52 head `258e4da6ab`的消费、共享SDK传递、确认slot/freshness保护及通知组合统一记录于[依赖审计](../solana-trading-dependencies.md#fesol-52-最新依赖接入2026-11-13)。本需求仅更新development组合，独立delivery/#3259保持WASM构建18文件范围，不引入52或56业务。本次不补签名/广播证据，不解除已有外部验收条件。

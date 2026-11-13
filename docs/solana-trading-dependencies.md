@@ -1,5 +1,19 @@
 # Solana 交易链路依赖审计
 
+## FESOL-52 最新依赖接入（2026-11-13）
+
+用户随后明确优先处理52，范围含56、19、20、72；本节取代下方“外部暂不处理52”的旧阶段决定。实时确认 #3193 head 为 `258e4da6abafc75c683983993544f4eb9c1a8abc`，release仍为 `e4714280749c00a90468abdde3060aae619717e7`。只消费已发布成果，未修改52或57作者的分支、PR或Linear。
+
+52从旧 `732b4a1322` 新增共享SDK Provider迁移，删除gmsol专用singleton和本地host override。56原development先接入，账户hook冲突按语义解决：读取使用 `useGmxSdk(SOLANA_NETWORK_ID)` 与统一host缓存key；交易开始时捕获该SDK，确认后显式传给账户刷新。保留required/accepted slot分离、最高确认下限、普通轮询minContextSlot、在途旧响应复核和freshness envelope，未退回上游较早的单纯accepted slot实现。
+
+20精确消费56同一补丁，sender冲突保留自身identity/onSubmitted/trackingRequests等扩展；执行通知捕获共享SDK和提交owner，通过lazy import调用刷新前再次检查当前会话有效性。19精确消费20的相同实现，继续保留20为当前19的代码交付前置。72 development消费56补丁用于组合验收，72 delivery/#3259保持原 `0f36780317`，不反向夹带52/56业务链。
+
+账户回归改为真实共享Provider和真实SWR/hooks，仅模拟SDK网络方法；继续覆盖失败保留最高slot、较旧轮询拒绝与追上恢复、立即展示确认数组、后续旧快照拒绝和失败保留数据。20新增真实Provider实例传递至执行刷新回归。没有新增SDK singleton或替代host。
+
+版本：56 dev `ea591a5533`、56 delivery `e7ac104ba5`；20 `afb96056c3`（52消费 `6632b31d7b`、测试 `4cf75c9572`、通知适配 `afb96056c3`）；19 `6da9f94679`（精确消费前三项）；72 dev `7dd74997e5`。56的实现来自52上游 `258e4da6ab`，本地语义集成提交 `9557351152`、测试提交 `ea591a5533`；其余分支均cherry-pick该实现，不独立重写。
+
+验证：56 dev及实际delivery各自完整frontend **3436 passed/1既有skip**、app/landing types、production app/WASM build通过；20完整frontend **3456 passed/1既有skip**及types通过；19完整frontend **3466 passed/1既有skip**、types和production app/WASM build通过。19/20账户/provider/通知/tracking定向各9 suites/36 tests通过。72真实WASM/transaction/account/provider组合4 suites/19 tests、types通过；初次SDK verify因缺少 `.agent-build.json` 收据blocked，已在该目录实际重建prebuild/types/CJS/ESM并通过1200产物核验，tracked文件未变。19/20既有SDK来源收据也按当前源码核验1200文件通过；SDK源码/依赖未改，952单元测试沿用既有结果，不称本轮重跑。所有6目录（含72独立delivery）vendor全部8文件hash匹配，未重跑Rust。变更手写文件Prettier、ESLint及diff whitespace通过。四条development均已推送my-gmx，56 delivery推送my-gmx-pr，registry重新绑定实际完整SHA并更新后续入口。各实际目标日志位于 `.local/acceptance/fesol52-20261113/`。56同一Draft #3258已更新共享Provider来源与真实delivery验证，远端head `e7ac104ba5`、OPEN/Draft；新head的Audit/WASM reproduction/component/general/standalone checks已启动，观察时均IN_PROGRESS，未冒充远端CI已完成。外部review/release合并、71可信LUT、112线上数学字段及真实钱包落链的既有边界不由本次迁移解除。
+
 ## 五条内部同步结果（2026-11-13，用户限定不处理外部依赖）
 
 本节优先于下方16:16审计中的旧版本矩阵和建议。用户授权将五条内部需要跟进的依赖同步好；未扩展到52、51、71、112等外部需求，未修改57作者分支/PR、上游release或线上状态。
