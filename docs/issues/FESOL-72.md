@@ -1,5 +1,11 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 当前状态复核（2026-11-13 16:08，Asia/Shanghai）
+
+角色：只读状态与依赖调研。实时查询正文、双向关系、评论、关联 PR checks，并对照既有实施记录；本节优先于下方历史状态。
+
+实时 Linear 仍 Execution、kenny，无评论，标题/正文仍写 v0.10.0；实际用户确认目标与交付为 `0.11.0-beta.1`，以用户明确决策和 PR 为准，本轮未改 Linear。#3259 OPEN/Draft，head `0f36780317`，reviews 为空；Audit、常规 lint/types/tests、SDK standalone、GMX WASM reproduction 均 SUCCESS。组件 job FAILURE 的已有日志为 286 passed 后报告发布/评论 403，保留非全绿边界。正式交付 worktree 成果与独立 CI 8 文件一致证据见下文；八项新版主网记录仅为无签名模拟。71 仍 Todo、无新地址，用户此前已确认等待可信 LUT，真实签名落链/四钱包与 finite-bound 1255-byte 限制未解除；不能标记整需求 Done。本轮未重新构建、模拟或链上查询。
+
 2026-11-13（Asia/Shanghai），角色：依赖与版本目标调研。[Linear](https://linear.app/gmx-io/issue/FESOL-72) 为 Execution，kenny；本轮 GitHub 按 FESOL-72 搜索没有专门 PR，不能据此断言没有任何相关开发。
 
 已读实时正文/关系：56 blocks 72，72 在替换 GMX CI 构建的 WASM 后复验 56 主网流程。72 是最终发布产物与流程复验条件，不能反解为 56 开工前必须先完成全部 72。正文仍称 deployed v0.10.0，而 57 当前参考为 8af1e70c/0.11.0；109 已要求协调目标与 artifact 位置。实际构建/指令 ABI 支持与当前部署兼容未在本轮验证。
