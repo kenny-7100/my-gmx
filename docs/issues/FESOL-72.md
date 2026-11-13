@@ -84,3 +84,11 @@ Linux 实验发现 wasm-pack 0.15.1 的锁定 cargo-platform 依赖要求 Rust 1
 最终日志 `/tmp/fesol-72-phantom-mainnet.log`（scratch 1 passed、10.32s），细项报告与公开账户来源保存在任务忽略目录 `.local/fesol72/`，之前零余额报告另存 `mainnet-before-phantom.json`。scratch 已移回忽略目录，未加入常规测试套件；业务仅更新 transaction README 的新版实际部署兼容证据，未改代码。此后无需因纯文档提交重复全量测试。
 
 当前边界：这证明所测指令组合可以在实际部署上无签名执行，不证明钱包签名、交易已落链、API 索引或 keeper 执行。在 slot 468836635，两张 LUT 仍保留 authority，实际 production decoder 均拒绝；受信 LUT/FESOL-71、四钱包签名落链、finite-bound atomic 限制及真实 GMX CI 运行/PR 前产物位置对齐仍待处理，FESOL-72 不标记完成。未创建 PR、修改 Linear 或发外部消息。
+
+### 独立 release 补丁准备（2026-11-13）
+
+继续审计时定向 fetch 确认 release 仍为 `e4714280749c00a90468abdde3060aae619717e7`，GitHub #3258 仍 OPEN Draft、head `b2fdb4c74543c31523a845eae7ee1cd27356822a`。release 已包含旧 SDK 的懒加载/构建入口，因此 72 的 SDK 构建与 pin 替换可以独立提取，不必将 56 未合并业务捎带进入交付。
+
+已在任务忽略目录 `.local/fesol72/delivery/` 生成 `fesol-72-release.patch` 与英文 `pr-body.md`。用独立 `GIT_INDEX_FILE` 从实际 release 构建索引，`git apply --cached --check` 及实际 apply 通过；18 文件，仅含 72 构建/产物/config/loader test、package 的 source-build 命令和文件依赖、对应 Yarn 锁。未带个人基础或 56 transactions 源码/文档，也未新建交付分支、推送业务或创建 PR。package 与 lock 的最终 diff 已逐项审阅；generated index_bg.js 的 upstream 末尾空行触发 whitespace 提示，保留生成字节以维持重建一致，不格式化生成绑定。
+
+该补丁只证明可应用到所查 release，尚未证明实际交付 checkout 的 install/build/tests 通过，正式交付仍需在目标目录完成适用验证。英文 PR 正文已明确这些边界和待补远端 CI/签名落链证据，未发布。剩余条件与上节相同；已有无签名主网成功记录不扩大为真实落链。
