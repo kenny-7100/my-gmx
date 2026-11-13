@@ -1,3 +1,5 @@
+import { i18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -44,6 +46,8 @@ vi.mock("domain/gmsol/useGmsolAccountData", () => ({
 }));
 
 beforeEach(() => {
+  i18n.load("en", {});
+  i18n.activate("en");
   setAbFlagEnabled("solanaNetwork", true);
   fakes.owner = "wallet-A";
   fakes.networkId = SOLANA_NETWORK_ID;
@@ -110,6 +114,7 @@ describe("Solana order notification lifecycle", () => {
     const view = mount();
     for (const [error, submission] of [
       [new Error("User rejected"), "failed"],
+      [{ submittedSignatures: ["preparation"], confirmedSignatures: ["preparation"] }, "failed"],
       [{ submittedSignatures: ["failed"], failedSignature: "failed" }, "failed"],
       [{ submittedSignatures: ["broadcast"], pendingSignature: "broadcast" }, "unknown"],
     ] as const) {
@@ -122,6 +127,28 @@ describe("Solana order notification lifecycle", () => {
     notification.submitted({ signatures: ["confirmed"] });
     expect(latest()).toMatchObject({ submission: "submitted", execution: "unresolved", trackExecution: false });
     expect(fakes.watching).toBeUndefined();
+  });
+
+  it("renders sending, uncertain submission and confirmed execution as distinct stages", () => {
+    const view = mount();
+    const notification = view.result.current.begin({ title: "Order", trackExecution: true });
+    const content = () => (
+      <I18nProvider i18n={i18n}>{fakes.rendered[fakes.rendered.length - 1].content as ReactElement}</I18nProvider>
+    );
+    const toastView = render(content());
+    expect(toastView.queryByText("Fulfilling order request...")).toBeNull();
+    notification.failed({ pendingSignature: "broadcast" });
+    toastView.rerender(content());
+    expect(toastView.getByText("Order submission status unknown. Check the transaction before retrying.")).toBeTruthy();
+    expect(toastView.queryByText("Fulfilling order request...")).toBeNull();
+    expect(toastView.container.querySelector(".spin")).toBeNull();
+    expect(toastView.getByRole("link").getAttribute("href")).toContain("tx/broadcast");
+    const confirmed = view.result.current.begin({ title: "Order", trackExecution: true });
+    confirmed.submitted({ signatures: ["creation"], orders: [order] });
+    toastView.rerender(content());
+    expect(toastView.getByText("Order request sent")).toBeTruthy();
+    expect(toastView.getByText("Fulfilling order request...")).toBeTruthy();
+    expect(toastView.queryByText("Order filled")).toBeNull();
   });
 
   it("requires outcome evidence, preserves cancellation reason and keeps settled toast expiry", async () => {
