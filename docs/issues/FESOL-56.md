@@ -151,3 +151,20 @@ FESOL-56 范围含 market/limit increase、market decrease、TP/SL、原子 incr
 
 
 Draft 发布完成：用户明确允许本次最终 Draft PR 提交命令级不签名，提交 `76e9486b96cbfe9d6316996f786701181241f4de` 已推送 my-gmx-pr。[UI#3258](https://github.com/gmx-io/gmx-interface/pull/3258) 实际核验 OPEN、isDraft=true、base=release、head=solana-order-transactions-release-fesol-56，无 reviewRequests；创建后 GitHub CI 已启动、当时仍运行中，不宣称已通过。PR 正文包含所有依赖版本、交付目录实际测试、LUT/1255-byte/四钱包/preview 未完成边界。后续业务修复唯一现场为登记 delivery `gmx-interface-fesol-56-release`，旧开发分支保留作历史，不再双线修改。原整体实施/正式验收目标仍未完成。
+
+
+### gmx-prompts 标准 PR Review（2026-11-13）
+
+review 角色；目标 [UI#3258](https://github.com/gmx-io/gmx-interface/pull/3258)，head `76e9486b96cbfe9d6316996f786701181241f4de`、最新 release/base `e4714280749c00a90468abdde3060aae619717e7`。采用 gmx-prompts `72041619ae` 的 gmx-interface-review、review-rules、runtime-checks 与 reviewer-map，按 T3 处理资金/签名改动。当前 HEAD 已包含最新 base，直接审查登记 delivery 即当前合并结果。手工执行通用正确性、安全、数值除法、交易步骤、guard、值语义及状态生命周期检查；没有可调用的 `/code-review`、`/security-review` 命令，不宣称调用过。未修改业务代码、未发布 GitHub review/comment、未修改 Linear。
+
+**结论 NEEDS CHANGES；确认一项 P2 缺陷：** `src/domain/gmsol/useGmsolAccountData.ts:90-102` 在确认交易后以全局 SWR mutate 写入普通 positions/orders 数组，但相同 key 的消费者 `useSWRWithFreshness` 实际缓存协议是 `{ value, fetchedAt }`，读出 `data?.value`。因此成功的 slot-aware 请求会令已挂载 hook 的数据变为 undefined，同时 isLoading=false、error=undefined；订单/仓位不能立即正确反映已确认结果，通常等下一次成功定时请求（orders 5s、positions 15s）恢复。不是 FESOL-71 的前置缺失，也不是 FESOL-57 数学问题。
+
+用真实 SWR、真实 useGmsolOrders 与实际 refresh 方法复现，仅 mock SDK 网络响应：slot1 的 before 列表正常，slot2 的 after 列表刷新后 data undefined/isLoading false/error undefined。scratch 1 test passed；日志 `/tmp/fesol56-review-repro.log`，测试源码已移至 `/tmp/fesol56-review-repro.spec.tsx`，delivery 恢复 clean。建议使主动 mutation 遵守 freshness envelope 或统一 freshness-aware 的刷新入口，保留 minContextSlot/旧 slot 拒绝机制，并补实际 hook 的确认后数据回归（不能只断言 mutate 被调用）。本次 review 未修复。
+
+核对 pinned Solana protocol v0.9.0/c6778dc9 的 order 指令及状态语义、当前 gmx-api main `cf9fe279ac1dd5a852783a1e7404e16f92378820` 的 order/snapshot 处理。原子 1255-byte 限制、LUT trust、四钱包实际落链是 PR 已披露边界，未包装成新发现。`toGmsolUpdateParams` 不支持恢复无限价的限制已明列；其“ABI 不能清空”解释需谨慎，协议 Some(0/u128MAX) 是数值，不因 Option 就证明协议本身无能力；本次不把已声明支持范围当新缺陷。#3193 最新 head 的差异为共享 SDK provider 迁移，PR 已披露集成旧版本，未确认新的阻断缺陷。
+
+验证复用相同 delivery 源码、依赖和配置的完整结果：SDK 952 passed，frontend 3431 passed/1 既有 skip，app+landing 类型检查、变更 lint/format、生产 build 通过；本次新增运行上述实际 SWR 复现。现有 kenny Chrome 原生操作本次 3017 生产构建预览：Solana DOGE 行情/图表加载，切 Arbitrum 后返回 Solana，再 reload 能恢复行情。未新增浏览器/profile，未签名广播；结束已关闭自己创建的预览 tab、停止自己启动的 preview，原3016现场未动。未完成 flag off/on 完整组合、逐 host 请求计数、console/storage 审计，不将页面可见正常等同于这些检查通过。
+
+实时公开 `https://solana.gmxapi.io/v1/markets/config` 返回数组，未含 tradeMath；这是已知数学 rollout 边界，不能以本地数学测试证明线上已启用。正式验收：五种订单/方向/单位与价格舍入有自动化证据；create/update/cancel 与支持范围内 atomic 有既有无签名 mainnet 模拟证据；确认后共享缓存要求本次失败；受信任 LUT、四钱包真实 LUT 签名及落链仍不可完成验收，keeper 属后续集成检查。不能 APPROVE 或声称 issue 全部完成。
+
+GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Checking/Tests 仍 IN_PROGRESS；Component Tests job FAILURE，但失败日志是 Deploy report to GitHub Pages 与 Post report link 的403权限错误，报告正文明确 All tests passed。这是报告发布权限问题，不冒充组件用例失败，也不宣称总 CI 全绿。日志 `/tmp/fesol56-review-component-ci.log`。人工复核优先接缝：实际钱包→签名字节校验→广播/超时对账→slot快照→共享页面；同时复核 FESOL-57 math 字段部署与 feeDiscountFactor 下游接线、FESOL-71 表归属/覆盖与原子包大小。这些风险导航不等同于新增已证实缺陷。
