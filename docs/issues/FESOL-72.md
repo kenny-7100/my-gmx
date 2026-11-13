@@ -108,3 +108,9 @@ Draft PR 已实际创建为 [#3259](https://github.com/gmx-io/gmx-interface/pull
 PR 正文已补充实际交付目录验证、GMX CI 链接/结果与已对齐的产物位置。当前 PR 仍 OPEN Draft、head `0f36780317`；Audit 与 SDK standalone build 已通过，general lint/types/tests 和 Component Tests 在最后观察时仍运行，尚不声称全部 checks 全绿。钱包签名/落链、受信 LUT 与 finite-bound 原子大小边界未解除。
 
 组件 workflow `43385852288` 的实际用例 `286 passed (5.6m)`，job 失败仅在随后部署 GitHub Pages 报告和发报告链接（403、Resource not accessible by integration），与此前 56 的 fork 权限问题一致。保留该失败事实，不扩大 token 权限、不修改与本需求无关的共享 workflow。源码 head 未变；更新 PR 正文触发已有通用 workflow 重新运行，最新 general run `43386834825`，尚待终态；Audit/SDK standalone 已通过。完整组件日志 `/tmp/fesol-72-component-full.log`，失败步骤 `/tmp/fesol-72-component-failed.log`。
+
+### 通用 CI 首轮成功（2026-11-13 15:44，Asia/Shanghai）
+
+GitHub 确认同一交付 head `0f36780317` 的 [Run Tests 43385852251](https://github.com/gmx-io/gmx-interface/actions/runs/43385852251) 已 completed/success。已读取完整日志：frontend 325 files/3341 tests passed、1 skipped；SDK 59 files/912 tests passed；multicall 6 files/14 tests passed、1 skipped；public e2e 4 files/50 tests passed、2 skipped。构建、lint、rule tests、app 与 SDK typecheck 及 SDK standalone 均成功。日志 `/tmp/fesol-72-general-ci-full.log`。同 head 因 PR 正文更新触发的第二轮 `43386834825` 在本次观察时仍在 Run tests，不把首轮成功冒充第二轮终态；组件报告发布权限失败仍保留。
+
+交付审计确认 `vendor/gmsol-sdk/build.json`、构建说明、CI workflow 与应用 pin 一致，产物位置已由用户确认对齐，Draft PR 已交付。原始需求的最终主网落链复验仍无证据：已有八项成功记录仅为无签名模拟；受信 LUT/FESOL-71、钱包签名落链及有限价格边界原子组合限制仍按既有验收边界处理，不标记整个需求完成。
