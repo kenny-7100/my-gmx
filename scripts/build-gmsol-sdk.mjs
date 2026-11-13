@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -11,11 +11,21 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const vendor = path.join(root, "vendor/gmsol-sdk");
 const manifestPath = path.join(vendor, "build.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+assert.equal(`${process.platform}-${process.arch}`, manifest.platform, "Use the pinned Linux arm64 builder image");
 const { values } = parseArgs({ options: { write: { type: "boolean" }, "source-dir": { type: "string" } } });
 const temporary = mkdtempSync(path.join(tmpdir(), "gmx-gmsol-sdk-"));
 const source = values["source-dir"] ? path.resolve(values["source-dir"]) : path.join(temporary, "source");
 const output = path.join(temporary, "pkg");
 const env = { ...process.env, RUSTUP_TOOLCHAIN: manifest.rust };
+const cargoHome = process.env.CARGO_HOME || path.join(homedir(), ".cargo");
+const rustupHome = process.env.RUSTUP_HOME || path.join(homedir(), ".rustup");
+// Panic locations otherwise embed host-specific registry/source paths in the WASM.
+env.CARGO_ENCODED_RUSTFLAGS = [
+  `--remap-path-prefix=${source}=/gmx-solana`,
+  `--remap-path-prefix=${cargoHome}=/cargo`,
+  `--remap-path-prefix=${rustupHome}=/rustup`,
+].join("\x1f");
+delete env.RUSTFLAGS;
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const run = (command, args, cwd = source) =>
   execFileSync(command, args, { cwd, env, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] }).trim();
