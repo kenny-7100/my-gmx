@@ -55,3 +55,7 @@
 Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新执行；此前 20 56-only 修复版本全量 3454 passed/1 skip、types passed，只作为该版本证据。19 SDK 被输入变化保护拒绝过一次，未替换旧产物；固定新依赖后重新构建 verify passed（1200 artifacts）。两个分支各自重建 SDK，未共享输出。日志最终复制到各自忽略目录 `.local/acceptance/followup-20261113/`，避免只保留易失 /tmp。
 
 最终 head `d677e174c1`；新 SDK 下完整 frontend 344 suites passed/1 skipped、3454 tests passed/1 skipped，app+landing tscheck、变更 ESLint、diff check、WASM build 与 SDK artifact verify 均通过。SDK 源码及构建输入与 19 相同（输入摘要 aaa5827f…），复用 19 SDK 全量 952 passed；组合页面/生产 app build 在 19 的整合目录实际完成，不冒充 20 目录单独做过完整生产 build 或真实 toast 验收。开发分支已推送 my-gmx，未创建 20 PR、修改 Linear 或发送外部评论。新订单与两阶段 toast 仍需可信 LUT 和明确钱包交易授权。
+
+## FESOL-52 共享 Provider 关联接入（2026-11-13）
+
+用户授权的52依赖整合覆盖本需求。原始52 head `258e4da6ab`的消费、共享SDK传递、确认slot/freshness保护及通知组合统一记录于[依赖审计](../solana-trading-dependencies.md#fesol-52-最新依赖接入2026-11-13)。沿用原development现场，未另起并行实现或覆盖下游扩展。本次不补签名/广播证据，不解除已有外部验收条件。
