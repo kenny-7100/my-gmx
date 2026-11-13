@@ -57,6 +57,30 @@ Linux 实验发现 wasm-pack 0.15.1 的锁定 cargo-platform 依赖要求 Rust 1
 
 继续验收时复用 56 无签名诊断思路，为最终 hash 的 WASM 准备独立本地 scratch，读取实际配置的 Alchemy Mainnet RPC（genesis 已核验）。slot `468829814` 两张配置 LUT 的地址数仍为 73/155、authorityOption 均为 1；调用实际 production decoder 均报 `Trading requires frozen or reviewed GMX-owned lookup tables`。没有放宽生产信任策略。
 
-当前 CLI 账户与既有 Node 专用验收钱包为两个不同公开地址，实际 Mainnet 原生 SOL 均为 0。诊断在余额检查后停止，**没有调用 simulateTransaction**；scratch 的绿色结果仅代表源码/WASM hash、genesis、表元数据及实际 production decoder、账户余额等前置读取通过，不代表新版指令已在主网执行。已向用户询问可用的有 SOL 公开验收地址（可选择当前 Phantom 已连接账户），无需私钥/签名/转账；回答待定。
+当前 CLI 账户与既有 Node 专用验收钱包为两个不同公开地址，实际 Mainnet 原生 SOL 均为 0。诊断在余额检查后停止，**没有调用 simulateTransaction**；scratch 的绿色结果仅代表源码/WASM hash、genesis、表元数据及实际 production decoder、账户余额等前置读取通过，不代表新版指令已在主网执行。已向用户询问可用的有 SOL 公开验收地址（可选择当前 Phantom 已连接账户），无需私钥/签名/转账；随后用户已选择当前 Phantom 账户，结果见下一节。
 
 忽略目录 `/Volumes/kenny/gmx/worktrees/FESOL-72/.local/fesol72/` 保存 `mainnet.json`、`mainnet.scratch.spec.ts` 与运行说明，业务分支仍 clean。第一轮测试 harness 在发送请求前遇到 happy-dom AbortSignal 与 Node fetch 不兼容；已改为 Node environment，保留原生 fetch/AbortSignal，仅为导入的 app 模块补充 DOM globals。最终诊断运行约 9.36s。此工具只允许读取与 sigVerify=false simulation，不包含签名或广播入口；仍不能替代 CI 实际运行或主网落链验收。
+
+
+### 用户选择 Phantom 后的最终 WASM 主网模拟（2026-11-13 15:06，Asia/Shanghai）
+
+用户明确选择“使用当前 Phantom 已连接账户的公开地址”。通过用户既有 Chrome 原生窗口、Phantom 当前 `bb1` 的 Solana 接收地址面板读取公开地址，未切换账户、请求签名或读取私钥；查看后恢复钱包原页面。配置 RPC Mainnet genesis 与最终 WASM SHA-256 `e82184caacc60828f024743f88a0a92d97b9d3d55db6839e0d3fab8a9b46c840` 均核验一致，该账户满足只读模拟余额条件，之前“无可用验收账户”的阻碍已解除。
+
+本轮调用实际 RPC `simulateTransaction`，全部为 sigVerify=false、replaceRecentBlockhash=false、confirmed。使用真实 WASM、产品 builder 与 validator 生成并校验交易，诊断只使用实际可变 LUT 快照；没有修改生产 LUT 信任策略。最终八项模拟均 err=null：
+
+| 无签名模拟 | 字节 | slot | 返回状态 |
+| --- | --- | --- | --- |
+| Native SOL limit increase | 891 | 468836637 | 2472-byte Order，size=10 USD × 10^20 |
+| Create + update | 981 | 468836637 | 2472-byte Order，size=20 USD × 10^20 |
+| Create + cancel | 953 | 468836638 | System Program、0 lamports、空数据 |
+| Create + update + cancel | 1043 | 468836639 | System Program、0 lamports、空数据 |
+| BTC/USDC limit increase | 807 | 468836640 | 2472-byte Order，size=10 USD × 10^20 |
+| BTC increase + TP | 1044 | 468836640 | 成功；decrease acceptable price 明确 unlimited |
+| BTC increase + TP + SL | 1221 | 468836641 | 成功；两个 decrease acceptable price 明确 unlimited |
+| 缺失 owner/user/position 准备 | 1004 | 468836643 | 预读均不存在；模拟返回协议拥有的 user 520 bytes、position 680 bytes |
+
+修改值与取消状态由脚本实际断言；Order size 按 pinned ABI offset 2184 读取。缺失账户诊断使用随机临时 owner（仅取公钥后释放 Keypair，不保存私钥），仅在被模拟的指令序列中由选定账户提供资金；没有真实转账，也未扩大生产 transfer allowlist。TP/SL 的 finite acceptable-price 三单组合重新构建仍需 1255 bytes，产品 builder 明确按 1232-byte 上限拒绝；未削弱价格保护或拆单。
+
+最终日志 `/tmp/fesol-72-phantom-mainnet.log`（scratch 1 passed、10.32s），细项报告与公开账户来源保存在任务忽略目录 `.local/fesol72/`，之前零余额报告另存 `mainnet-before-phantom.json`。scratch 已移回忽略目录，未加入常规测试套件；业务仅更新 transaction README 的新版实际部署兼容证据，未改代码。此后无需因纯文档提交重复全量测试。
+
+当前边界：这证明所测指令组合可以在实际部署上无签名执行，不证明钱包签名、交易已落链、API 索引或 keeper 执行。在 slot 468836635，两张 LUT 仍保留 authority，实际 production decoder 均拒绝；受信 LUT/FESOL-71、四钱包签名落链、finite-bound atomic 限制及真实 GMX CI 运行/PR 前产物位置对齐仍待处理，FESOL-72 不标记完成。未创建 PR、修改 Linear 或发外部消息。
