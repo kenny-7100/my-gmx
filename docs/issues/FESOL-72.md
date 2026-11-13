@@ -114,3 +114,5 @@ PR 正文已补充实际交付目录验证、GMX CI 链接/结果与已对齐的
 GitHub 确认同一交付 head `0f36780317` 的 [Run Tests 43385852251](https://github.com/gmx-io/gmx-interface/actions/runs/43385852251) 已 completed/success。已读取完整日志：frontend 325 files/3341 tests passed、1 skipped；SDK 59 files/912 tests passed；multicall 6 files/14 tests passed、1 skipped；public e2e 4 files/50 tests passed、2 skipped。构建、lint、rule tests、app 与 SDK typecheck 及 SDK standalone 均成功。日志 `/tmp/fesol-72-general-ci-full.log`。同 head 因 PR 正文更新触发的第二轮 `43386834825` 在本次观察时仍在 Run tests，不把首轮成功冒充第二轮终态；组件报告发布权限失败仍保留。
 
 交付审计确认 `vendor/gmsol-sdk/build.json`、构建说明、CI workflow 与应用 pin 一致，产物位置已由用户确认对齐，Draft PR 已交付。原始需求的最终主网落链复验仍无证据：已有八项成功记录仅为无签名模拟；受信 LUT/FESOL-71、钱包签名落链及有限价格边界原子组合限制仍按既有验收边界处理，不标记整个需求完成。
+
+第二轮 [43386834825](https://github.com/gmx-io/gmx-interface/actions/runs/43386834825) 随后也已 completed/success，general job 12m27s、SDK standalone 1m51s；最新 PR checks 的 Audit、general、WASM reproduction 与 SDK standalone 均通过，仅组件 workflow 的报告发布/评论权限失败保留。当前无仍运行的必要 CI，不再重跑或修改 PR 正文触发重复任务。
