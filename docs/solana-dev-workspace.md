@@ -2,6 +2,45 @@
 
 更新日期：2026-10-27。本文只建设个人开发配置、工具及测试辅助，不实现迁移业务。现有 API 持续服务见 [Solana API 说明](solana-api-local.md)。
 
+## my-mac 远端开发副本（2026-11-14～15）
+
+用户要求把开发、构建和测试负载分担到 SSH 主机 `my-mac`，迁移时敏感配置只复制/传输，不将内容读入 Agent 上下文。源目录保留；远端主项目位于 `/Users/yy/gmx/gmx-interface`，配套仓库与本地配置随目录复制。远端是独立副本，后续文件修改不会自动双向同步；同一需求继续前先确认选用哪台机器、哪个 checkout 和实际提交。
+
+主项目、10 个嵌套 Git 仓库、旧后端源码快照及 12 个实际存在的需求/审查 worktree 已复制；worktree 保持相对于 `gmx/` 的目录布局。主项目及 12 个 worktree 均完成逐文件内容校验，无内容差异（主目录仅有根目录时间戳差异）。复制使用独立文件副本，没有以硬链接共享可修改依赖。远端已修复 Git worktree 关联、6 份任务登记的活动路径、12 条原 Xcode Python 绝对链接；4 条源端已失效的冗余依赖链接原样保留，未新增失效链接。原机已有的 3 条 prunable worktree 元数据仍保留，不代表这些旧临时目录已恢复为可用 checkout。
+
+路径修复前的 Git worktree/任务元数据备份与内容校验报告保存在远端 `.local/acceptance/my-mac-migration/`。任务上下文中的原机验收位置保留原值，使旧验收不会因路径迁移自动变成远端当前验收；远端重新验证后再正常更新需求状态。SDK 生成产物在远端重建，迁移说明提交也同步到远端，其余源文件保持复制所得版本。
+
+通过 SSH 进入后显式加载项目工具链，不依赖远端默认 Node：
+
+```sh
+ssh my-mac
+source /Users/yy/gmx/env.sh
+cd /Users/yy/gmx/gmx-interface
+yarn tscheck:ci
+yarn test:ci
+yarn build
+```
+
+环境入口位于仓库外，选择 Node 22.17.0、Yarn 4.12.0、Rust/Cargo 1.90.0（包含 WASM target）、wasm-pack、Solana CLI 和 GitHub CLI，并设置 `NODE_OPTIONS=--max-old-space-size=8192`。不修改远端系统默认版本，不迁移系统钥匙串或全局认证。工具存在不证明 GitHub 认证、数据库、链上账户、外部 API 或特定业务验收资源已就绪；按具体任务核对，不能以旧机器的服务状态或历史报告代替远端现状。
+
+页面验收继续使用用户本机已有登录状态与钱包扩展的浏览器。可先在本机建立端口转发：
+
+```sh
+ssh -N -L 127.0.0.1:3010:127.0.0.1:3010 my-mac
+```
+
+再在远端的目标 checkout 启动 Vite，监听回环地址；确保本机与远端端口未被其他任务占用：
+
+```sh
+source /Users/yy/gmx/env.sh
+cd /Users/yy/gmx/gmx-interface
+VITE_APP_VERSION=$(git rev-parse HEAD) yarn vite --host 127.0.0.1 --port 3010 --strictPort
+```
+
+随后在已有浏览器访问 `http://127.0.0.1:3010`。联调 API/RPC 时仍使用下文管理工具，并选择远端真实路径；原机器上的 PID、端口、借用关系和验收报告不迁移为运行中服务。钱包签名、交易广播与部署仍需各自授权。
+
+本次远端验证：SDK 在远端重建并通过来源/产物校验；`yarn tscheck:ci`、`yarn test:ci`（325 个测试文件、3,342 项通过，1 项既有跳过）、`yarn build`、API 默认离线测试、Git 对象连通性检查均通过。Vite 在远端启动后 HTTP 返回 200，探测进程已清理。这些结果覆盖工程可用性，未执行真实业务页面、钱包、链上交易或数据库集成验收。原始日志保存在远端主项目 `.local/acceptance/my-mac-migration/`，不输出配置内容、不提交日志。
+
 ## 已完成的范围与当前边界
 
 | 项目 | 本轮交付 | 保留的业务缺口 |
