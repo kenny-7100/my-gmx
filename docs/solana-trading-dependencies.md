@@ -10,7 +10,7 @@
 - 51 #3195 `2495be234e`、92 #3243 `5e081e5ab1`、15 #3201 `056f8d689c`、25 #3238 `07117e1691`、fee #3205 `087a98fa37`、orders #3207 `c711f6ebe7` 本次未见新head；不重复集成等价提交。未合并前置仍须各自评审，56→20→19的交付依赖保留。19 development已集成15/25；delivery沿用既有边界，仅含15的trade-state/storage guards，不补带15 selector/token metadata和25 list UI；完整入口验收仍需这两项单独交付。
 - gmx-api origin/main 更新至 `5532701`，源码主SDK已2.8.0、sdk-next别名2.9.0（不再将历史2.2.1描述当当前源码）；固定子仓库checkout/gitlink保留。真实 `/v1/markets/config` 67市场均无tradeMath，FESOL-112上线条件仍未满足；SDK源码升级不能代替API启用。
 - 主网只读ALT于slot `469359341` 核验：两表active，73/155地址，均仍由 `FQNU5wn6fVdnPnSZyHL3PmCJsNLTi4Cf8dKU7f3MQjXj` 持有authority，当前预期authority map为空。ALT工具passed只证明active/layout；生产信任门槛仍未满足。`solanaTrading=true`、service disruption banner=false。未创建表、修改flag、签名或广播；1255/1232 byte有限边界组合仍是历史未解除风险，本轮未重跑模拟。
-- WASM仍固定 `0.11.0-beta.1`、source `7fe4008292ffc09061f3a733ad9b5cd2e6235fa8`，不因TypeScript SDK变化自动升级。与原文0.10.0不同的维护者确认仍无新证据；不能凭无法访问的Linear断言对方未回复。
+- WASM仍固定 `0.11.0-beta.1`、source `7fe4008292ffc09061f3a733ad9b5cd2e6235fa8`，不因TypeScript SDK变化自动升级。用户于本轮收尾后明确确认最终使用此版本，版本选择已解除待确认状态；不推断为维护者本人回复。下方历史版本待确认表述不再代表当前阻塞。
 
 
 | 需求 | Development HEAD | Delivery HEAD | 既有 Draft PR |
