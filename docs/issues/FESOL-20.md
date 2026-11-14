@@ -81,3 +81,8 @@ Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新
 ## gmx-prompts review 与修复（2026-11-13）
 
 角色：实现与审查。按 gmx-prompts 对 Draft #3261 lifecycle/sender/真实通知组件及 release merge result 完成审查，包含四遍定向检查和异步终态。修复阻断 general CI 的 sender spec import/order（development `8a7ac5a454` → delivery `6087908e19`），均已推送并由 19 消费；delivery 零 warning lint 与 6 files/36 tests passed。未核实到其他需独立修改的重要问题。旧组件 CI 的用例通过、报告发布/评论 403 保留；新 head 的 CI 不冒充旧结果。真实订单执行/取消/toast 验收仍待 71/钱包/keeper 条件；保持 Draft。方法、逐项验收和人工检查重点见[统一记录](../solana-trading-dependencies.md#gmx-prompts-review-与修复2026-11-13)。
+
+
+## 2026-11-14 独立推进收尾
+
+最终CI、19交付组合的原生Chrome未连接钱包回归与56固定WASM原子体积归因已完成，详见[三项收尾](../solana-trading-dependencies.md#独立推进三项收尾2026-11-14)。四PR关键代码检查通过；组件报告403，56另有1 flaky重试通过。未确认需新增业务修复的问题，HEAD未变。原子组合仍1255/1232 bytes，假设单表1221不代表真实LUT可用。71/112及真实钱包验收未解除；72版本已由用户确认。既有Draft正文已更新，未转正式review。
