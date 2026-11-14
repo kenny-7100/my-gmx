@@ -1,5 +1,34 @@
 # Solana 交易链路依赖审计
 
+## 四需求上游刷新（2026-11-14）
+
+本节优先于下方历史状态。角色：FESOL-56/19/20/72 原开发线的依赖集成与既有 Draft 交付更新。本轮 GitHub、远端源码和真实部署已重新核验；Linear viewer/team 查询正常，但目标 issue（标识及既有 UUID）返回 Entity not found，完整只读同步仅见40项、缺少本轮目标及关键依赖。因此无法核实当前 Linear 正文、关系和新评论，不把历史状态当作本轮事实。未修改 Linear、发布协作评论或合并上游。
+
+- FESOL-57 #3242 已 MERGED，head `1e4d3350bc79f15f53fdc1d3ac8d9544c6e20a86`。最新 release `84ab9293a8e25e1312f35a20893752df480e0e0b` 已含 SDK 2.9.2；消费官方新版数学、结算/触发舍入及数值工具，不保留旧集成实现覆盖新版。个人基础仅同步 release，不混入未合并业务。
+- FESOL-52 #3193 仍 OPEN，head `e712a1d342e994d85f77e52a748e081e48f559f3`，已含已合入release的57源码。56 先合入并保留确认 slot tracker、统一订单 metadata/parser、新鲜度和缺价拒绝；适配 walletTokens 到纯 `gmsolOracleUtils`。20 再消费56并保留通知/回执/恢复扩展，19消费20，72仅更新开发组合，独立PR仍为18文件。
+- 19 从旧 `proDiscountFactor` 读取交易折扣的兼容映射改为新版 `selectFeeDiscountFactor`；共享 selectors、价格影响及费用展示采用上游独立字段与净价格影响语义，保留19的 EVM 审批/提交隔离。19已延后的支付币兑换、max leverage一致性、完整raw-account数学对照及GT Rewards不扩大实施。
+- 51 #3195 `2495be234e`、92 #3243 `5e081e5ab1`、15 #3201 `056f8d689c`、25 #3238 `07117e1691`、fee #3205 `087a98fa37`、orders #3207 `c711f6ebe7` 本次未见新head；不重复集成等价提交。未合并前置仍须各自评审，56→20→19的交付依赖保留。19 development已集成15/25；delivery沿用既有边界，仅含15的trade-state/storage guards，不补带15 selector/token metadata和25 list UI；完整入口验收仍需这两项单独交付。
+- gmx-api origin/main 更新至 `5532701`，源码主SDK已2.8.0、sdk-next别名2.9.0（不再将历史2.2.1描述当当前源码）；固定子仓库checkout/gitlink保留。真实 `/v1/markets/config` 67市场均无tradeMath，FESOL-112上线条件仍未满足；SDK源码升级不能代替API启用。
+- 主网只读ALT于slot `469359341` 核验：两表active，73/155地址，均仍由 `FQNU5wn6fVdnPnSZyHL3PmCJsNLTi4Cf8dKU7f3MQjXj` 持有authority，当前预期authority map为空。ALT工具passed只证明active/layout；生产信任门槛仍未满足。`solanaTrading=true`、service disruption banner=false。未创建表、修改flag、签名或广播；1255/1232 byte有限边界组合仍是历史未解除风险，本轮未重跑模拟。
+- WASM仍固定 `0.11.0-beta.1`、source `7fe4008292ffc09061f3a733ad9b5cd2e6235fa8`，不因TypeScript SDK变化自动升级。与原文0.10.0不同的维护者确认仍无新证据；不能凭无法访问的Linear断言对方未回复。
+
+
+| 需求 | Development HEAD | Delivery HEAD | 既有 Draft PR |
+| --- | --- | --- | --- |
+| FESOL-56 | `d6e1b7ba05d8c75edf20a9f4b183c086300962e0` | `2ecfebba845108c068ff8364638909ff9375539e` | [#3258](https://github.com/gmx-io/gmx-interface/pull/3258) |
+| FESOL-19 | `1155c46f87d68a38806c2b9f2350bd83a16c8441` | `e4e9067a0fef8d02a84478c8344ea4a131b9c1e8` | [#3262](https://github.com/gmx-io/gmx-interface/pull/3262) |
+| FESOL-20 | `7c45d1e20dbf75cb77294591837f6f3c1b7045d6` | `613d33cf39b27675d96ac0f71ef6c6afff4b043b` | [#3261](https://github.com/gmx-io/gmx-interface/pull/3261) |
+| FESOL-72 | `7b26f6feec92e17166627731e79834c799165225` | `2f2ac8477192cdf07313db292bc11cbcd3bf9238` | [#3259](https://github.com/gmx-io/gmx-interface/pull/3259) |
+
+验证（仅本轮实际执行）：56 development 的app/landing types、19 files/105 tests与SDK 65 files/965 tests、SDK零warning lint通过；56 delivery immutable install、SDK build、零warning app lint、types、完整frontend **3446 passed/1既有skip**、最终Lingui和8GiB production/WASM build通过。20 development/delivery均在重新构建SDK后通过types及18 files/89定向tests，包含真实通知组件；delivery零warning lint、最终Lingui及8GiB production/WASM build通过。19 development types与完整frontend **3479 passed/1既有skip**，delivery完整frontend **3477 passed/1既有skip**；19 delivery的零warning lint、types、最终8GiB production/WASM build及当前配置bundle hash/glue隔离均通过。72 development完成fresh SDK build、types及3 files/17 tests；72独立delivery完成fresh SDK build、types、零warning app lint和loader 1 file/2 tests，仍为18文件。72 delivery最终8GiB production/WASM build及配置bundle hash/glue隔离通过。SDK/WASM source、锁定toolchain、Docker recipe与vendor字节未变，复用既有GMX CI/source reproduction，不称本轮重跑Rust。
+
+过程中修复19自动合并遗留的重复TP/SL feeDiscountFactor并移除其旧pro折扣映射；生成声明缓存旧内容导致的缺导出错误，在各目录重建实际SDK后复验，不改业务API掩盖。19/72 development重复的同名build script经Yarn规范化去重，保留现有有效命令。56/19原开发线提取新增费用、价格影响、funding payout和quote错误文案后精确转入对应交付。构建hash核验只使用当前配置指向的`0.11.0-beta.1-gmx.1`，旧版本public/build残留不作为当前hash失败或加载证据。原始本机证据在各目标 `.local/acceptance/upstream-20261114/`；只读快照保存于个人基础同目录。本轮CUA inventory未发现可用浏览器/native Chrome窗口，不能将本轮构建或旧浏览器记录称为新UI验收。
+
+
+正式release merge commit `84ab9293a8`与57 head `1e4d3350bc` 的完整tree同为 `4a6a6d5c2afd86cc3d31717dec8b3b749a906359`。52携带57 head而非release的merge记录；收尾为七个现场补合正式release记录，各现场合并前后完整tree均相同，72独立delivery此前已合入。此历史补齐不触发重复测试；source树身份及前后SHA在本机`release-history-sync.json`。
+
+四条development均已推送my-gmx，四条delivery均推送my-gmx-pr并核对远端完整HEAD与上表一致，全部OPEN/Draft、base release。PR正文已重写为当前实现/依赖/验证/验收边界，并明确还在自审与测试、未到正式review、上游仍可能变更。收尾快照的新HEAD远端Audit、general、SDK standalone、WASM reproduction和Component检查仍IN_PROGRESS，未宣称新run全绿，也未将历史403套用于当前run。各任务registry已重绑最新development/delivery与release基线、刷新notes；本轮只读RPC代理已停止，未接管或关闭其他既有服务。
+
 ## gmx-prompts review 与修复（2026-11-13）
 
 用户目标：让 FESOL-19/20/72 当前 Draft 经 gmx-prompts review，修复已核实的重要且能独立解决的问题。本轮为单 Agent 人工审查；使用最新 gmx-prompts 的 `gmx-interface-review`、`gmx-solana`、开发/测试/项目规范。没有可调用的 `/code-review` 或 `/security-review` 命令，不能声称运行了原生命令；通用正确性与安全检查人工执行。没有发布 review 评论、请求 reviewer、转 Ready、合并、修改 Linear 或签名广播。
