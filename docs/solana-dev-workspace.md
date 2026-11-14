@@ -29,7 +29,7 @@ yarn build
 
 远端 `~/.zshenv`、`~/.zshrc` 配置用户级工具 PATH，使新 SSH 会话直接找到 `code`、`codex` 和 Node 22.17.0；没有在 shell 启动文件设置全局 `NODE_OPTIONS`。Codex 使用与源机器相同的扩展内 CLI；Node REPL 和配套 Codex/CUA 资源位于 `/Users/yy/.local/gmx-toolchains/chatgpt-resources/`，程序入口在 `/Users/yy/.local/gmx-toolchains/bin/`。没有复制运行中的会话数据库、编辑器 workspace/global storage 或浏览器登录状态，保留两台机器各自的会话现场。macOS 的电脑控制等系统权限不能用配置文件复制代替，实际使用时在目标机确认。
 
-本次安装备份位于 `/Users/yy/.local/gmx-desktop-backup/20261115-vscode-codex/`，包括原 VS Code 应用、扩展、所修改的用户配置和 shell 启动文件；没有终止远端正在运行的 VS Code。原有窗口仍需退出后重新打开，才能加载更新后的应用及配置。可在远端运行 `code /Users/yy/gmx/gmx-interface` 打开项目。
+本次安装备份位于 `/Users/yy/.local/gmx-desktop-backup/20261115-vscode-codex/`，包括原 VS Code 应用、扩展、所修改的用户配置和 shell 启动文件；没有终止远端正在运行的 VS Code。原有窗口仍需退出后重新打开，才能加载更新后的应用及配置。可在远端运行 `code /Users/yy/gmx/gmx-interface` 打开项目。另核实当前 Mac 的 `/Applications/ChatGPT.app` bundle ID 为 `com.openai.codex`；远端该 Codex 桌面应用从 26.924.22138 更新为源机器同版本 26.1021.31345，保留原应用备份。首次启动新桌面版本前，通过 SQLite 在线备份保存远端既有状态/任务/记忆数据库，不读取记录内容到上下文，不复制源机器会话替换远端会话。
 
 已验证：新 SSH 会话中的 VS Code/Codex/Node 命令可用；VS Code 应用签名通过，21 个扩展版本全部匹配，界面 locale 同为 `zh-cn`；适配后的 Codex 配置与源配置匹配，认证检查和 MCP 配置解析通过。Codex 在空目录、只读沙箱、临时会话中实际连接既有模型配置，返回预期标记，执行记录未观察到工具调用。MCP 列表中的 Figma、Linear、Notion 等部分连接在两台机器的 CLI 均显示未登录，状态一致，不能据此声称所有外部连接已完成业务授权。验证证据在远端 `.local/acceptance/my-mac-migration/` 的 `editor-*`、`vscode-extension-verification.json`、`codex-*` 文件，证据不包含凭据正文。
 
