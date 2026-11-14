@@ -25,6 +25,14 @@ yarn build
 
 2026-11-15，用户单独授权补齐 GitHub 认证，并允许安全复制/传输凭据。已将本机现有 GitHub 凭据通过 SSH 标准输入直接交给远端 `gh auth login --with-token`，不创建传输临时文件，不将凭据输出到上下文或日志；随后用 `gh auth setup-git` 配置 HTTPS Git 认证。远端已登录，`origin`、`my-gmx` 和 `my-gmx-pr` 读取验证通过；两个个人 fork 的 GitHub `permissions.push` 与推送 dry-run 均通过。`origin` 继续按项目约定只读，技术认证不扩大上游推送、PR 或合并授权。认证证据只保存布尔结果，位于远端 `.local/acceptance/my-mac-migration/github-auth-verification.json`；凭据配置文件权限为 600，配置目录为 700，不复制或展示其中内容。
 
+2026-11-15，按用户要求继续对齐当前 Mac 的编辑器和 Codex 环境。远端 VS Code 从 1.135.0 更新为同版本 1.145.2；同步源机器的 21 个扩展及其精确版本，保留远端另外 9 个扩展。Codex 扩展版本为 26.51111.21308；同步 VS Code 设置、profiles、snippets、语言模型配置，以及 Codex 配置、认证、AGENTS、skills、rules 和插件缓存。个人配置中的机器路径已适配，两个原项目路径归并时合并重复的 TOML 项目表，保留实际项目的配置。配置和认证仅通过程序复制/转换，未将敏感值输出到上下文或日志，Codex 配置及认证文件权限为 600。
+
+远端 `~/.zshenv`、`~/.zshrc` 配置用户级工具 PATH，使新 SSH 会话直接找到 `code`、`codex` 和 Node 22.17.0；没有在 shell 启动文件设置全局 `NODE_OPTIONS`。Codex 使用与源机器相同的扩展内 CLI；Node REPL 和配套 Codex/CUA 资源位于 `/Users/yy/.local/gmx-toolchains/chatgpt-resources/`，程序入口在 `/Users/yy/.local/gmx-toolchains/bin/`。没有复制运行中的会话数据库、编辑器 workspace/global storage 或浏览器登录状态，保留两台机器各自的会话现场。macOS 的电脑控制等系统权限不能用配置文件复制代替，实际使用时在目标机确认。
+
+本次安装备份位于 `/Users/yy/.local/gmx-desktop-backup/20261115-vscode-codex/`，包括原 VS Code 应用、扩展、所修改的用户配置和 shell 启动文件；没有终止远端正在运行的 VS Code。原有窗口仍需退出后重新打开，才能加载更新后的应用及配置。可在远端运行 `code /Users/yy/gmx/gmx-interface` 打开项目。
+
+已验证：新 SSH 会话中的 VS Code/Codex/Node 命令可用；VS Code 应用签名通过，21 个扩展版本全部匹配，界面 locale 同为 `zh-cn`；适配后的 Codex 配置与源配置匹配，认证检查和 MCP 配置解析通过。Codex 在空目录、只读沙箱、临时会话中实际连接既有模型配置，返回预期标记，执行记录未观察到工具调用。MCP 列表中的 Figma、Linear、Notion 等部分连接在两台机器的 CLI 均显示未登录，状态一致，不能据此声称所有外部连接已完成业务授权。验证证据在远端 `.local/acceptance/my-mac-migration/` 的 `editor-*`、`vscode-extension-verification.json`、`codex-*` 文件，证据不包含凭据正文。
+
 页面验收继续使用用户本机已有登录状态与钱包扩展的浏览器。可先在本机建立端口转发：
 
 ```sh
