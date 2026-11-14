@@ -1,5 +1,10 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## 上游刷新与证据边界（2026-11-14）
+
+本轮新增事实、契约适配、交付及验收结果见[四需求统一记录](../solana-trading-dependencies.md#四需求上游刷新2026-11-14)，优先于下方历史状态。Linear目标访问返回Entity not found，不能据历史正文或评论判定本轮实时状态；GitHub、源码及部署按统一记录分别核验。
+
+
 ## release Draft 已交付（2026-11-13）
 
 用户明确授权整理20/19 Draft到release，已创建 [PR #3262](https://github.com/gmx-io/gmx-interface/pull/3262)，保持Draft、base release。交付head `2b7642e7e50f7fb1c9aaeef15f5bd9b27e5d3669`，分支 `solana-tradebox-entry-release-fesol-19`，目录 `/Volumes/kenny/gmx/gmx-interface-fesol-19-release`。本次仅交付现有成果，没有恢复下方暂缓开发项，也未修改Linear状态。

@@ -1,5 +1,10 @@
 # FESOL-20 — 订单发送与成交状态
 
+## 上游刷新与证据边界（2026-11-14）
+
+本轮新增事实、契约适配、交付及验收结果见[四需求统一记录](../solana-trading-dependencies.md#四需求上游刷新2026-11-14)，优先于下方历史状态。Linear目标访问返回Entity not found，不能据历史正文或评论判定本轮实时状态；GitHub、源码及部署按统一记录分别核验。
+
+
 ## release Draft 已交付（2026-11-13）
 
 用户明确授权整理20/19 Draft到release。已创建 [PR #3261](https://github.com/gmx-io/gmx-interface/pull/3261)，保持Draft、base release；交付head `41a6e9cba3eed60518b3fcc0a03b63983ed1f8f4`，分支 `solana-order-lifecycle-release-fesol-20`，目录 `/Volumes/kenny/gmx/gmx-interface-fesol-20-release`。本节替代下方历史“尚无20 PR”的观察，不修改Linear状态。

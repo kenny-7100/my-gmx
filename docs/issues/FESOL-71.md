@@ -1,5 +1,10 @@
 # FESOL-71 — FESOL-56 主网运行条件
 
+## 上游刷新与证据边界（2026-11-14）
+
+本轮新增事实、契约适配、交付及验收结果见[四需求统一记录](../solana-trading-dependencies.md#四需求上游刷新2026-11-14)，优先于下方历史状态。Linear目标访问返回Entity not found，不能据历史正文或评论判定本轮实时状态；GitHub、源码及部署按统一记录分别核验。
+
+
 2026-11-13（Asia/Shanghai），角色：依赖调研。[Linear](https://linear.app/gmx-io/issue/FESOL-71) 实时状态 Todo，Divhead，无评论。
 
 已读取最新正文：使用开发者自有钱包及小额 SOL/USDC，不再使用共享 GMX seed；参考钱包持有 TP/SL position 和 limit order；检查 ALT authority，未 frozen 则创建 GMX-owned 替代；keeper solanaTrading true，banner key 存在并关闭。FESOL-56 中共享测试钱包的旧说法需按本项更新执行。
