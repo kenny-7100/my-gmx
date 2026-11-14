@@ -154,3 +154,8 @@ GitHub 确认同一交付 head `0f36780317` 的 [Run Tests 43385852251](https://
 ## gmx-prompts review 与修复（2026-11-13）
 
 角色：审查。按 gmx-prompts 审查独立 Draft #3259 全部手写构建、pin/hash/loader 与 CI 复现路径，未核实到新需修复问题，业务 head 保持 `0f36780317`。另在最新 release `83474e0e94` 创建 detached 实际合并 `0ea2e9395b`，immutable install、app/landing types、gmsol 5 files/19 tests、8GB WASM bundle build passed。固定 Rust/8 文件输入未变，复用既有真实 GMX CI/独立重建证据，不再重复 Rust 构建。PR 正文已补充审查覆盖与限制，仍 Draft；真实签名落链、71 可信 LUT、finite-bound atomic 大小及 0.11.0-beta.1 的 maintainer 确认仍待处理。方法和逐项矩阵见[统一记录](../solana-trading-dependencies.md#gmx-prompts-review-与修复2026-11-13)。
+
+
+## 2026-11-14 独立推进收尾
+
+最终CI、19交付组合的原生Chrome未连接钱包回归与56固定WASM原子体积归因已完成，详见[三项收尾](../solana-trading-dependencies.md#独立推进三项收尾2026-11-14)。四PR关键代码检查通过；组件报告403，56另有1 flaky重试通过。未确认需新增业务修复的问题，HEAD未变。原子组合仍1255/1232 bytes，假设单表1221不代表真实LUT可用。71/112及真实钱包验收未解除；72版本已由用户确认。既有Draft正文已更新，未转正式review。

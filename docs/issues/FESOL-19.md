@@ -107,3 +107,8 @@ Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新
 ## gmx-prompts review 与修复（2026-11-13）
 
 角色：实现与审查。按 gmx-prompts 对当前 Draft #3262 及 release merge result 完成代码、GMX/Solana、安全、状态收尾与运行检查。确认并修复共享 TradeBox 的 EVM account-type 与 incentive 请求泄漏；修复前回归实际失败，修复后跨网络隔离通过。另修复零 warning CI fixture 并消费 20 import 修复。development `e4cf921834`，delivery `69ba4dab7a`，均已推送；保持原 Draft。实际 delivery 严格 lint/types、完整 frontend 3469 passed/1 skipped、8GB production build passed。线上 67 市场均无 tradeMath；真实签名和 deferred scope 未解。审查/逐项验收矩阵、原生浏览器样本及限制见[统一记录](../solana-trading-dependencies.md#gmx-prompts-review-与修复2026-11-13)。
+
+
+## 2026-11-14 独立推进收尾
+
+最终CI、19交付组合的原生Chrome未连接钱包回归与56固定WASM原子体积归因已完成，详见[三项收尾](../solana-trading-dependencies.md#独立推进三项收尾2026-11-14)。四PR关键代码检查通过；组件报告403，56另有1 flaky重试通过。未确认需新增业务修复的问题，HEAD未变。原子组合仍1255/1232 bytes，假设单表1221不代表真实LUT可用。71/112及真实钱包验收未解除；72版本已由用户确认。既有Draft正文已更新，未转正式review。

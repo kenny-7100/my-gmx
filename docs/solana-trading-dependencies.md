@@ -1,5 +1,17 @@
 # Solana 交易链路依赖审计
 
+## 独立推进三项收尾（2026-11-14）
+
+本节补充并更新下方同日上游刷新记录的 CI 与浏览器状态；八个开发/交付 HEAD 均未改变。本轮应用交付 skill，未新增业务修改、未改权限或他人前置分支。
+
+1. **最终 HEAD 的 CI 已收齐。** 四个 PR 的 Audit、general（lint/types/tests）、SDK standalone、GMX WASM reproduction 均 SUCCESS。Component workflow 均 FAILURE，日志确认 Pages deploy 403、报告评论 `Resource not accessible by integration`。19/20/72 各286 passed；56为285 passed/1 flaky，StandardTooltip 按钮内 trigger 的 Tab focus 断言首次失败、重试通过。该组件及用例相对release未改，不作为本次交易代码缺陷处理，也未扩大token权限。组件run依次为56 `43606703406`、19 `43606717930`、20 `43606711408`、72 `43606802412`。
+2. **本轮已完成未连接钱包的页面回归。** 使用已有kenny原生Chrome及其钱包扩展，19实际delivery `e4e9067a0fef8d02a84478c8344ea4a131b9c1e8` 的既有生产构建，任务自有preview `http://127.0.0.1:3019`。Solana DOGE/USDC保证金10、TP 0.08/SL 0.05输入、市价/限价0.06、多空切换及执行详情正常渲染；切Arbitrum显示BTC、兑换和更多模式。仅本地origin临时关闭solanaNetwork并reload，EVM页面仍显示，resource列表未见gmsol-sdk请求；恢复flag=true并切回Solana后市场/交易输入正常，未签名前仍未见WASM加载。未发现需业务修复的新异常；不据此证明金融数值、已连接账户、通知或钱包流程通过。Privy iframe的localhost CSP、第三方连接失败及EVM RPC/metrics 429是本轮可观察环境限制；没有绕过CSP。flag与网络选择已恢复，浏览器回到原空白页，自有preview已停止。
+3. **原子体积归因完成，生产限制未解除。** 用固定`0.11.0-beta.1`真实WASM、当前56开发源码和历史真实LUT快照（slot `468884236`）离线构造BTC/USDC long LimitIncrease + LimitDecrease TP + StopLossDecrease，保留有限trigger/acceptable价格边界。scratch suite 1 passed；没有新RPC模拟/签名/广播。两表1255 bytes、反序1255、只第一表1252、只第二表1376；第二表仅加载1个writable地址。将两表全部地址并入**假设**单表后1221 bytes，此表不存在且不构成可信资源/落链证据。仅省prepare_user仍1240；省prepare_position为1149，但缺仓位时不安全，未实施。静态13账户以wallet、order/escrow、user/position PDA、wallet ATA及program为主，不能假设再补通用地址即可解决。
+
+编码候选的证据边界：固定Rust source `7fe4008292ffc09061f3a733ad9b5cd2e6235fa8` 的 `programs/store/src/states/order.rs` 中position increase/decrease将min_output None与Some(0)均归零；但SDK `crates/sdk/src/builders/order/create.rs` 固定写Some(min_output)。前端简单省JS参数不能省字节；直接改指令会涉及ABI重编码与现有严格参数校验，改WASM则改变已确认的产物。此次只记录候选，不声称已测得其收益或已证明与主网部署兼容。安全下一步是由可信LUT提供方评估单表覆盖，或单独完成SDK编码方案的实现、完整等价校验及部署兼容证明；当前拒绝超限的保护保留。
+
+四个既有Draft正文已同步最终CI、页面范围及体积诊断，保持未到正式review、上游可能继续变化的声明。71信任门槛、112 API math、真实钱包/keeper与19已暂缓范围仍按下节，不因本轮回归解除。本机证据：个人基础 `.local/acceptance/independent-followup-20261114/`（PR快照、完整组件日志、CI摘要、UI记录）；56开发同目录（scratch spec/config、atomic-size.json/log），诊断文件不进入产品PR。
+
 ## 四需求上游刷新（2026-11-14）
 
 本节优先于下方历史状态。角色：FESOL-56/19/20/72 原开发线的依赖集成与既有 Draft 交付更新。本轮 GitHub、远端源码和真实部署已重新核验；Linear viewer/team 查询正常，但目标 issue（标识及既有 UUID）返回 Entity not found，完整只读同步仅见40项、缺少本轮目标及关键依赖。因此无法核实当前 Linear 正文、关系和新评论，不把历史状态当作本轮事实。未修改 Linear、发布协作评论或合并上游。

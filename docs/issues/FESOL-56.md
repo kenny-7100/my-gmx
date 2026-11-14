@@ -245,3 +245,8 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 ## 2026-11-13 Draft最新状态核对
 
 角色：交付就绪分析。已有Draft #3258仍为head `11da18dfb7`，恢复补丁已包含，无遗漏业务提交。最新Component workflow `43408278858`失败日志已核实为报告发布/评论403，报告All tests passed；其余检查及新release基线影响见[Draft核对](../solana-trading-dependencies.md#draft交付就绪核对2026-11-13)。未修改业务/PR，未将主网验收等待当作Draft提交前置。
+
+
+## 2026-11-14 独立推进收尾
+
+最终CI、19交付组合的原生Chrome未连接钱包回归与56固定WASM原子体积归因已完成，详见[三项收尾](../solana-trading-dependencies.md#独立推进三项收尾2026-11-14)。四PR关键代码检查通过；组件报告403，56另有1 flaky重试通过。未确认需新增业务修复的问题，HEAD未变。原子组合仍1255/1232 bytes，假设单表1221不代表真实LUT可用。71/112及真实钱包验收未解除；72版本已由用户确认。既有Draft正文已更新，未转正式review。
