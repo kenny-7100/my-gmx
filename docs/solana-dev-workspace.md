@@ -21,7 +21,9 @@ yarn test:ci
 yarn build
 ```
 
-环境入口位于仓库外，选择 Node 22.17.0、Yarn 4.12.0、Rust/Cargo 1.90.0（包含 WASM target）、wasm-pack、Solana CLI 和 GitHub CLI，并设置 `NODE_OPTIONS=--max-old-space-size=8192`。不修改远端系统默认版本，不迁移系统钥匙串或全局认证。工具存在不证明 GitHub 认证、数据库、链上账户、外部 API 或特定业务验收资源已就绪；按具体任务核对，不能以旧机器的服务状态或历史报告代替远端现状。
+环境入口位于仓库外，选择 Node 22.17.0、Yarn 4.12.0、Rust/Cargo 1.90.0（包含 WASM target）、wasm-pack、Solana CLI 和 GitHub CLI，并设置 `NODE_OPTIONS=--max-old-space-size=8192`。不修改远端系统默认版本，不迁移系统钥匙串。工具存在不证明数据库、链上账户、外部 API 或特定业务验收资源已就绪；按具体任务核对，不能以旧机器的服务状态或历史报告代替远端现状。
+
+2026-11-15，用户单独授权补齐 GitHub 认证，并允许安全复制/传输凭据。已将本机现有 GitHub 凭据通过 SSH 标准输入直接交给远端 `gh auth login --with-token`，不创建传输临时文件，不将凭据输出到上下文或日志；随后用 `gh auth setup-git` 配置 HTTPS Git 认证。远端已登录，`origin`、`my-gmx` 和 `my-gmx-pr` 读取验证通过；两个个人 fork 的 GitHub `permissions.push` 与推送 dry-run 均通过。`origin` 继续按项目约定只读，技术认证不扩大上游推送、PR 或合并授权。认证证据只保存布尔结果，位于远端 `.local/acceptance/my-mac-migration/github-auth-verification.json`；凭据配置文件权限为 600，配置目录为 700，不复制或展示其中内容。
 
 页面验收继续使用用户本机已有登录状态与钱包扩展的浏览器。可先在本机建立端口转发：
 
