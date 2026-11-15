@@ -152,7 +152,7 @@ describe("Solana API reads", () => {
   });
 
   it("reads Solana-only order fields strictly and leaves EVM orders as they were", async () => {
-    const sdk = new GmxApiSdk({ networkId: SOLANA_NETWORK_ID });
+    const sdk = new GmxApiSdk({ chainId: SOLANA_NETWORK_ID });
     const evm = { key: address, sizeDeltaUsd: amount };
     vi.mocked(fetch).mockResolvedValueOnce(
       response([order(), order({ positionAccount: referrer, referrer, callback: null }), evm])
