@@ -1,5 +1,15 @@
 # FESOL-112 — 金融集成验收依赖
 
+## API #340 固定源码与当前前端消费链验证（2026-11-15）
+
+用户授权按可推进清单实施。固定 gmx-api #340 `59e49c649d6dd5a331af5ef793f0292f47898907`，在 `/Volumes/kenny/gmx/gmx-api-pr340` 独立 checkout 安装其锁定依赖，不移动父仓库 gitlink 或旧 API checkout。使用现有隔离数据库测试入口，PostgreSQL 镜像在已迁移的外置 Docker 虚拟磁盘中，测试专属容器及临时数据库均已由工具清理，未启动常驻 API 或接管其他服务。
+
+以该 PR 的真实历史账户 fixtures、真实索引库及 Express/supertest 执行现有 SDK parser suite，11 项通过；诊断副本只增加响应捕获，包含市场 config/values、账户、折扣和失败响应，不改变 producer 业务实现。当前前端 FESOL-19 `2b52d15ec3` 使用其自己的 HttpClient/SDK/组合函数消费捕获的 HTTP body 与 headers；仅在传输边界回放响应，价格输入来自相同 fixture 与现有 token registry，包含 native SOL/WSOL 同 ticker 映射，不伪造未提供价格。
+
+3 项定向消费链测试通过：逐一验证 50 份成功账户/折扣响应及 slot 回调、minContextSlot 查询；市场配置/值合并与订单组合保留 orderAccount/escrow 等元数据，pending 无 callback 的仓位订单可建立交易 context；旧在途响应被确认 slot 下限拒绝，真实 503 保留下限，随后较新响应可接收。API nullable 元数据按既有 reader 归一为 undefined。另运行现有 refetchAtSlot 与 composeGmsolTradeData suites，11 项通过。本切片未发现需修改的前端业务不兼容，也未变更 SDK/WASM 版本。
+
+证据：个人基础 `.local/acceptance/upstream-followup-20261115/api340-{integration-report,frontend-report,http-responses}.json`；最终 API 原始报告目录以 integration-report 中 logFile 为准；前端最终报告 `.local/acceptance/frontend-offline/run-2g8Oke/report.json`，现有 11 项回归见 `run-Ocepj6`（该次包含早期尚未完善 fixture 的 scratch 失败，不当作整次通过）。诊断源码已归档到同一忽略目录，临时 src scratch 已清理。后端 fixture mock 的是 RPC/keeper 等输入，不是实时链上账户；固定 PR 与历史响应通过不代表已合并、部署、线上 math/readiness 或完整 simulate_order 验收，不需要据此向后端索要口头进度。
+
 ## 无需等待答复的契约切片（2026-11-15）
 
 按用户代码优先要求，继续读API#340固定head的真实fixtures、index/HTTP parser suite及56/19消费者。发布SDK parser测试不包含当前前端额外的严格metadata/referral reader、composition与slot tracker，适合补跨仓库组合核验；已有503/readiness/slot实现不重复开发。本机Docker可用，完整suite需隔离PostgreSQL及候选目录，当前旧样例checkout不能作#340验收。本轮未运行suite、启动服务或验证线上数值；细节见[可推进切片](../solana-next-task-2026-11-15.md)。
