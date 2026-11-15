@@ -1,5 +1,32 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 已执行 Trading cycle 关联（2026-11-15）
+
+用户明确授权根据 Divhead 的 TRD-101 规划更新 PM 关注的 Trading Cycles，要求避免误导。本轮通过已有 Chrome 登录态执行，参与角色为排期整理与协调，不代表接管整体集成/验收，也未发送消息或评论。
+
+- [Cycle 1](https://linear.app/gmx-io/team/TRD/cycle/1)（11 月 16–29 日）新增关联 19 条；页面总数从 29 增至 48 issues。
+- [Cycle 2](https://linear.app/gmx-io/team/TRD/cycle/2)（11 月 30 日至 12 月 13 日）新增关联 4 条；页面总数从 4 增至 8 issues。总数包含其他工作，不等于 Solana 范围。
+- 两个周期的 planning 均附上原始 [TRD-101](https://linear.app/gmx-io/issue/TRD-101/solana-trading-plan) 链接；分别新建 [Cycle 1 scope and handoff](https://linear.app/gmx-io/document/solana-cycle-1-scope-and-handoff-7282d8675025) 与 [Cycle 2 completion and acceptance](https://linear.app/gmx-io/document/solana-cycle-2-completion-and-acceptance-ea490bd24c0a)，并互相链接。重新打开确认正文、状态解释及跨周期边界已保存。
+
+| 周期 | 原编号 → Trading 编号 |
+| --- | --- |
+| Cycle 1：原定 11 月 16 日前的剩余交付/联调/验收 | FESOL-15 → TRD-63；29 → 85；51 → 98；25 → 80；57 → 75；92 → 100；56 → 72；61 → 102；113 → 99；52 → 65 |
+| Cycle 1：余额、隔离、交易状态与部署验证 | FESOL-89 → TRD-104；96 → 103；90 → 106；91 → 105；20 → 78；71 → 109；112 → 108；67 → 107；72 → 77 |
+| Cycle 2：完整范围收口 | FESOL-19 → TRD-70；59 → 84；28 → 83；18 → 119 |
+
+每条最终 cycle 属性在操作阶段均核验；最终另核验两周期总数和 planning 附件。TRD-70、84、83 按完整 issue 的收口周期放入 Cycle 2，文档明确其 Cycle 1 开始开发/联调及市场单 TP/SL、平仓、开仓→执行→刷新→平仓阶段目标仍有效；单个 issue 只能属于一个 cycle，不表示 11 月 30 日才开始。TRD-70 既有延期子范围仍需明确恢复决定，排期不自动恢复开发。没有重置已开发成果或把排期解释为完成验收。
+
+已观察的 Linear 自动行为及处理：给父 issue 分配 cycle 会带入部分尚无 cycle 的活动子项，已逐一核对；TRD-77 曾随 TRD-70 自动进 Cycle 2，已明确改回 Cycle 1 并核验。抽样已完成子项 TRD-64、86 保持 Done、无 cycle。Backlog issue 排入 cycle 自动转 Todo，改回 Backlog 会移出 cycle；TRD-83、119 因此保留系统生成的 Todo（原为 Backlog），文档明确这是排期而非已开工。没有将任务改成 In Progress/Done，未改负责人、估点、issue 到期日、周期日期或原计划正文。
+
+仍需人工决定的缺口已直接写在周期说明中：
+
+- TRD-104、103 无负责人；TRD-83、119 无负责人及估点，不能认为容量与责任已经确认。
+- [FESOL-114](https://linear.app/gmx-io/issue/FESOL-114) 仍在 Solana Frontend/Triage，负责人 Kenny，未迁移或强行排入 Trading。交易相关 SOL 检查属于计划 Cycle 2 范围，团队/triage 处理待确认；GM/GLV/pool 扩展范围不提前纳入。TRD-72 的部分 SOL 检查不证明整条需求完成。
+- FESOL-110 仍在旧团队、Release、无 project，未重开/迁移；Cycle 1 说明保留组合前端导航/support 验收核对。DES-65 保留 Design team，仅作验收参考。
+- 11 月 30 日交易闭环是两周期交接检查点；12 月 14 日观察边界保留在 Cycle 2 文档，未悄悄改成 13 日结束。12 月 10 日公开目标以验收和重估为条件。TradFi、history、Claims、Net rate、Swap/转账、Pools/Stats、Earn/Referrals/GT 等仍属后续范围。
+
+本轮验证限于 Linear 关系、页面和文档保存；未据此认证 PR、部署、真实钱包/keeper 测试、实际容量或发布日期。
+
 ## Trading 迁移后的当前入口（2026-11-15）
 
 用户提供 PM 对话确认 11 月 14 日已将 unification issues 移至 Trading team，并要求 Kenny 重新规划 Trading cycles。本轮通过用户现有 Chrome 原生窗口只读核验：旧 FESOL-109 URL 自动跳转至 [TRD-101 · Solana trading plan](https://linear.app/gmx-io/issue/TRD-101/solana-trading-plan)，不是已删除需求。Activity 显示 chloeee 于 11 月 14 日 10:33:42 将团队从 Solana Frontend 改为 Trading、状态由 Review 改为 In Progress，并移出旧 Cycle 3；当前属性为 Add to cycle，尚未分配新 cycle，assignee 为 Divhead。
