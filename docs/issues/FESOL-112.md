@@ -1,5 +1,9 @@
 # FESOL-112 — 金融集成验收依赖
 
+## API候选分支已有数学实现（2026-11-15）
+
+角色：上游依赖调研。补读API#340 head `59e49c649d`，确认已含published SDK 2.9.2（sdk-next alias）、marketRecords的tradeMath=gmsol、indexed reader/readiness兼容检查，以及parser/slot相关测试源码。该候选Open/Review required，未合并/部署证据仍缺，公开API依然无该字段；不能把main版本当作候选版本，也不能再笼统将112描述为未开始实现。后续向后端确认评审、部署SHA与参考值/minContextSlot验收，细节见[上游跟进](../solana-trading-dependencies.md#上游跟进核对2026-11-15)。本轮未复跑测试、验证同输入数值或修改线上状态。
+
 ## 部署契约定向复核（2026-11-15）
 
 角色：只读项目现状调研。本轮公开 markets/config 返回67市场，tradeMath字段存在数仍为0；API main `55327018c0` 的SDK为2.8.0、sdk-next为2.9.0，前端release已含数学#3242/SDK 2.9.2。不能将数学合并视为API启用或金融参考值通过。旧编号及历史稳定UUID查询均失败，未核实当前正文、关系、评论或状态；不推断需求已取消或迁移。证据、覆盖及后续入口见[现状核对](../solana-progress-2026-11-15.md)。

@@ -1,5 +1,19 @@
 # Solana 交易链路依赖审计
 
+## 上游跟进核对（2026-11-15）
+
+角色：只读依赖调研；不修改上游或四需求业务，不恢复19暂缓范围。复用同阶段已核实的release `84ab9293a8`、线上67市场无tradeMath及Linear关键issue不可访问的证据，新增读取九个依赖PR与ADR的实时review、最近评论、mergeability及关键源码。全部reviewThreads连接无后页；最近评论/reviews为有限窗口，不称全历史覆盖。原始结果在 `.local/acceptance/upstream-followup-20261115/`。
+
+本轮需要跟进的事项：
+
+1. **112的实现已在API索引PR，不宜再笼统说数学后端尚未开发。** [API#340](https://github.com/gmx-io/gmx-api/pull/340) 当前head `59e49c649d`，Open、Review required、Mergeable。包含 `0c5aaf5016`（integrate published Solana SDK 2.9.2），package将sdk-next固定2.9.2，`marketRecords.ts`明确生成 `tradeMath: "gmsol"`，indexed reader拒绝不兼容市场快照，readiness也检查兼容性；parser suite中已有字段与slot相关断言。未复跑这些测试或独立审计数值正确性。API main仍sdk-next 2.9.0、公开响应仍无tradeMath，故应向后端确认#340评审/部署、实际发布SHA、schema/worker准备、同输入参考值与minContextSlot验收安排；不能只问何时升级SDK，也不能把分支源码视作上线。hot standby仍按INF-4拆分，不额外设为#340合并门槛。
+2. **71仍缺可交付的信任配置证据。** release lookupTables文件历史仍只有10月20日初始配置；按FESOL-71搜索全状态前端PR无命中，56当前production authority map为空。这只说明未发现新交付证据，不能断言没有线下准备。本轮未新查链上表。需要提供方给出地址、冻结或独立可核验GMX authority归属、active状态与覆盖；56随后核验有限价格组合体积。历史1255/1232与假设单表1221的边界沿用11月14日诊断，不承诺复制/冻结自然解决。
+3. **五个前端前置PR有GitHub报告的合并冲突。** 市场[UI#3201](https://github.com/gmx-io/gmx-interface/pull/3201)、列表[UI#3238](https://github.com/gmx-io/gmx-interface/pull/3238)、单位转换[UI#3243](https://github.com/gmx-io/gmx-interface/pull/3243)对release均CONFLICTING/DIRTY；字段[UI#3205](https://github.com/gmx-io/gmx-interface/pull/3205)对FESOL-52、[UI#3207](https://github.com/gmx-io/gmx-interface/pull/3207)对fee-discount分支也如此。HEAD与既有集成版本相同，不是发现了新业务提交；本轮未生成merge result或判定具体语义冲突。应安排原负责人的冲突处理与复验，再收口review。3201已有用户此前“待3193合并后从release重建、去gitlinks并复验announcement”的回复，不提前自动重建。3243与已合并3242均新增gmsol入口，既有92记录已提示保留math/units双方导出；本轮仅确认DIRTY，不把所有冲突归因于该文件。3205/3207还需明确stacked PR合并/重定向顺序，保持feeDiscountFactor、GT/referral及order metadata契约。
+4. **52应跟review收口，不能按未resolved条数重复派修。** [UI#3193](https://github.com/gmx-io/gmx-interface/pull/3193) `e712a1d342`，Mergeable、Review required、当前checks成功。旧threads多数已有作者修复回复；gas三字段在当前源码存在。钱包输入hash与不支持auto-cancel两项历史归19范围；19当前selector已走buildTpSlPositionInfo，相关修复/验收边界沿既有19记录，不向52重复派修。需要reviewer核对回复与实际代码并关闭已处理线程，确认其独立范围可合并；四需求已消费该head，无新provider迁移需要再同步。
+5. **51应明确RpcDebug取舍并收口余下review。** [UI#3195](https://github.com/gmx-io/gmx-interface/pull/3195) `2495be234e`，Mergeable、Changes requested。reviewer于11月8日明确确认空System-owned ATA修复有效、个人key已从branch history移除；当前reader也将空System-owned账户计零，不能继续列为未修bug。当前MainRoutes仍把/rpc-debug列为EVM-only；作者11月9日询问应移哪些路由，最近评论窗口未见后续答复。应只确认该页要开放还是移除不可达Solana分支，不泛化删除全部EVM-only路由。PR正文现已补充，旧“描述为空”也不再成立，但Validation中旧key不可用说法与reviewer确认冲突，需整理；格式/冗余测试意见需作者确认处理及reviewer复核，本轮不冒充运行Prettier。
+
+优先协调71与API#340/112，同时推进52/51评审收口和其余前置的冲突处理。四需求当前已集成已知heads，故没有证据要求立即对四个业务现场再做一轮同步或重跑。API#336也为CONFLICTING，但其新钱包读取问题是否已被#340索引路径吸收本轮未核实，只作后端顺带确认项，不新增独立发布门槛。ADR#27仍Open/Proposed；与实际索引部署的决策收口一并确认。Linear当前不可访问，负责人以历史记录/PR作者身份区分，未声称核实当前assignee、承诺或排期。
+
 ## 独立推进三项收尾（2026-11-14）
 
 本节补充并更新下方同日上游刷新记录的 CI 与浏览器状态；八个开发/交付 HEAD 均未改变。本轮应用交付 skill，未新增业务修改、未改权限或他人前置分支。

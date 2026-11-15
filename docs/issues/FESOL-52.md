@@ -1,5 +1,9 @@
 # FESOL-52 — 统一数据层与 FESOL-56 集成审查
 
+## Review收口核对（2026-11-15）
+
+只读复核#3193 `e712a1d342`，GitHub为MERGEABLE、Review required，当前checks成功。读取全部reviewThreads（无后页），多数未resolved线程已有修复回复；源码确认gas三字段存在。历史钱包输入hash/auto-cancel意见归19处理，不因线程未关闭再次派给52。四需求已消费当前provider版本，无新代码需要重复同步；应确认独立范围review结论并关闭已处理线程。具体源码核验、下游边界与字段stack顺序见[上游跟进](../solana-trading-dependencies.md#上游跟进核对2026-11-15)。未发布评论或修改上游。
+
 ## 上游刷新与证据边界（2026-11-14）
 
 本轮新增事实、契约适配、交付及验收结果见[四需求统一记录](../solana-trading-dependencies.md#四需求上游刷新2026-11-14)，优先于下方历史状态。Linear目标访问返回Entity not found，不能据历史正文或评论判定本轮实时状态；GitHub、源码及部署按统一记录分别核验。

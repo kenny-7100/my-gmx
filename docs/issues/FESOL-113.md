@@ -1,5 +1,9 @@
 # FESOL-113 — fee discount / order 字段组合核验
 
+## Stacked交付跟进（2026-11-15）
+
+只读核对#3205 `087a98fa37`仍以FESOL-52为base，#3207 `c711f6ebe7`仍以fee-discount分支为base且Draft；两项GitHub均报告CONFLICTING/DIRTY。HEAD与既有组合相同，不需要因重复查询再次同步消费者。需明确52后字段PR合并/重定向顺序，原负责人处理冲突并复验；四需求已有的feeDiscountFactor与order metadata消费边界不能因去重丢失。本轮未实施冲突处理，细节见[上游跟进](../solana-trading-dependencies.md#上游跟进核对2026-11-15)。
+
 ## 交易链路依赖统一核验（2026-11-13 16:16）
 
 本轮参与跨需求依赖分析，核对实际集成版本、PR堆叠和merge-tree预检。新增结论、责任边界与跟进顺序统一见[交易链路依赖审计](../solana-trading-dependencies.md)，不将预检当作实际合并或组合测试通过。
