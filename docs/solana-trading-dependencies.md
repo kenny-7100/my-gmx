@@ -18,7 +18,7 @@
 
 当前独立候选逐项收口：19输入/列表/设置无钱包验收完成；19/20恢复组合检查完成；56安全编码实现、参数等价回归和主网unsigned模拟完成；72没有需重复修复/构建项。API#340真实HTTP契约消费沿用本日已通过结果（head59e49c649d），源码未变不重跑；它仍是待review/部署分支，线上tradeMath未启用不能由代码验收代替。剩余为71可信LUT、API rollout、实际钱包/keeper与评审合并；19最大杠杆、支付币兑换、完整simulate_order数学对照、GT Rewards仍按用户暂缓，不自动恢复。没有联系后端、改Linear、部署、签名、广播、转Ready、请求reviewer或合并上游。
 
-六条development/delivery均已推送对应个人远端，三条delivery更新原Draft PR，四条PR说明已修正旧体积限制并注明本轮证据，registry实际SHA和note已更新。收尾在线确认三个新head与72未变head均保持Draft；最新release仍84ab9293a8。新head远端CI已启动，尚在运行；旧head的成功/报告403不能冒充本轮新head终态。
+六条development/delivery均已推送对应个人远端，三条delivery更新原Draft PR，四条PR说明已修正旧体积限制并注明本轮证据，registry实际SHA和note已更新。收尾在线确认三个新head与72未变head均保持Draft；最新release仍84ab9293a8。最终核对：三个新head均已有至少一轮general全量lint/types/frontend/SDK检查SUCCESS，Audit、SDK standalone及WASM reproduction均SUCCESS；三个component新run各286 passed，无flaky，workflow失败仅Pages发布403与报告评论Resource not accessible by integration（完整日志已保存）。同SHA由PR说明更新触发的重复general检查仍有运行项，未将它们称为成功，也不重复等待已通过的同源码验证。72代码/head未变，既有成功产物证据及历史组件报告403保持适用，其说明更新触发的general仍在运行。
 
 本机证据：主目录 `.local/acceptance/four-pr-goal-20261115/`（浏览器启动/stop、PR快照）；56同目录（encoding-prototype/production、mainnet-compact、定向测试/类型/lint），19/20及三delivery同目录各自保存实际目标验证日志。scratch保留在忽略目录，不进入业务PR。
 
