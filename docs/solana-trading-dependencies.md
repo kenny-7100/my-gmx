@@ -1,5 +1,27 @@
 # Solana 交易链路依赖审计
 
+## 四 PR 目标执行结果（2026-11-15）
+
+用户明确创建目标：仅聚焦56/#3258、19/#3262、20/#3261、72/#3259，把当前可独立开发、验证和推进的事项完成。本节优先于下方历史候选、旧体积限制和旧浏览器条件。继续使用交付skill；他人PR仅核验依赖，不实施上游业务。Linear仍不可访问，沿用同阶段失败证据，不将历史关系当实时状态。
+
+**56有限价格原子体积已修复并通过当前主网无签名模拟。** 原development提交 `1b236e12da88c2144fb5331e823050d390b510c0`：在多交易合成单笔的路径中，仅将直接position订单的 `min_output Some(0)` 压为 `None`；复用ABI parser定位字段，不硬编码字节偏移。固定Rust `7fe4008292ffc09061f3a733ad9b5cd2e6235fa8` 的init_increase/init_decrease均将None归零，swap kind排除；正数minOutput仍须严格匹配。保留finite trigger/acceptable价格、全部账户和准备指令、原子性、计算量与1232-byte上限，未改72产物或pin。真实WASM与slot468884236的真实历史LUT快照对比为1255→1204 bytes，节省51（48字节payload及3字节短向量长度）。新增回归覆盖三类触发订单×多空×零/正下限、其他字段不变和正数意图拒绝缺省编码，原子实际构建测试也检查已使用紧凑编码。
+
+进一步使用既有用户指定公开验收账户与配置RPC做 `sigVerify=false`、无签名无广播模拟：Mainnet genesis匹配，实时LUT快照slot469599276；实际产品builder和validator生成1204-byte finite-bound BTC/USDC LimitIncrease+TP+SL，模拟slot469599277、err=null、220099 CU，三个返回order账户均2472 bytes。仅诊断使用当前表内容，两个表仍带authority，实际production decoder仍明确拒绝；没有改信任map、提供替代服务或开放生产签名。成功说明该组合编码被当前部署接受，不代表四钱包、真实落链或keeper执行通过。
+
+**19整合页面与19/20恢复组合已核验。** 原生现有kenny Chrome、自有Vite3029对应19 development `2b52d15ec34f43979e394a9754242f22ff7d50f3`。本地临时启用solanaNetwork，Solana真实市场加载；选择BTC后selector/TradeBox/chart一致，10USDC、限价60000、TP70000/SL50000及多空切换正常渲染；这些输入不作为金融数值或方向有效性验收。Solana设置只保留显示/调试；仓位排序可选择、订单空态安全；刷新仍为Solana/BTC及订单页。切回Arbitrum后BTC-USDC及更多/经典/Express/滑点/TWAP设置恢复。钱包未连接，不能验收真实仓位行、恢复入口或交易toast；不假造pending交易。静态复核adapter使用pendingTrackExecution并复用提交owner/session与既有通知hook，定向真实组件/交易测试覆盖unknown receipt、明确失败、确认、关闭及wallet/network/unmount隔离，未发现额外缺口，不重复实现已有恢复功能。任务标签已关闭，本地flag恢复false、网络Arbitrum，自有服务stop返回stopped/cleanup passed；未接管其他服务。
+
+**72独立构建切片无新缺陷。** 固定0.11.0-beta.1与8文件产物未变，复用同版本既有GMX CI可复现构建/loader/hash证据；本轮不重复Rust构建、不往独立18文件PR带入56业务。上述最新组合模拟使用72同一WASM，可作为消费侧新增兼容证据，不替代72整体落链验收。
+
+交付：同一56业务补丁精确转入20 development `5198fe5df7`、19 `43a3466b40`，保留20 sender扩展；三条既有delivery分别为56 `7a47de7b90`、20 `a6f155737a`、19 `50f45cfd57`。20 development另去除一次历史集成带入的重复package脚本键（`beeb108e49`），正式delivery本无重复，未将个人工具配置带入PR。72 delivery仍 `2f2ac8477192cdf07313db292bc11cbcd3bf9238`。
+
+验证：56 development与实际delivery各2 suites/16 tests passed；20 development/delivery各6 suites/37 tests passed；19 development/delivery各8 suites/40 tests passed。六目标app/landing types与变更交易文件零warning lint通过；56历史LUT生产构建诊断1项、当前主网无签名模拟1项通过。SDK源码、依赖、vendor未改，复用先前SDK/构建/复现证据，未称本轮全量重跑。
+
+当前独立候选逐项收口：19输入/列表/设置无钱包验收完成；19/20恢复组合检查完成；56安全编码实现、参数等价回归和主网unsigned模拟完成；72没有需重复修复/构建项。API#340真实HTTP契约消费沿用本日已通过结果（head59e49c649d），源码未变不重跑；它仍是待review/部署分支，线上tradeMath未启用不能由代码验收代替。剩余为71可信LUT、API rollout、实际钱包/keeper与评审合并；19最大杠杆、支付币兑换、完整simulate_order数学对照、GT Rewards仍按用户暂缓，不自动恢复。没有联系后端、改Linear、部署、签名、广播、转Ready、请求reviewer或合并上游。
+
+六条development/delivery均已推送对应个人远端，三条delivery更新原Draft PR，四条PR说明已修正旧体积限制并注明本轮证据，registry实际SHA和note已更新。收尾在线确认三个新head与72未变head均保持Draft；最新release仍84ab9293a8。新head远端CI已启动，尚在运行；旧head的成功/报告403不能冒充本轮新head终态。
+
+本机证据：主目录 `.local/acceptance/four-pr-goal-20261115/`（浏览器启动/stop、PR快照）；56同目录（encoding-prototype/production、mainnet-compact、定向测试/类型/lint），19/20及三delivery同目录各自保存实际目标验证日志。scratch保留在忽略目录，不进入业务PR。
+
 ## 代码优先的可推进事项（2026-11-15）
 
 用户本轮明确暂不向后端确认，先从可访问PR代码核验实际进度。本轮进一步定位19的base58预览仍进入EVM hash并完成函数级复现；merge-tree确认92仅一处导出冲突、25可与最新52干净组合；API#340已有真实fixtures/index/HTTP路径，可先验证当前前端扩展消费层。优先顺序、最小切片及证据边界见[可推进切片](solana-next-task-2026-11-15.md)。这取代下节“先向后端确认”的执行建议，也修正仅看到19改走新helper就认为旧hash问题已被覆盖的不足判断。未自动实施、恢复暂缓范围或修改PR/Linear。
