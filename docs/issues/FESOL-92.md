@@ -1,5 +1,9 @@
 # FESOL-92 — SDK 单位转换依赖核验
 
+## 上游合并状态（2026-11-15）
+
+只读核对#3243仍为原head `5e081e5ab1`、Open/Review required，GitHub现报告对release CONFLICTING/DIRTY。此前集成在56等组合中的math/units双导出不证明原PR可合并；应由原开发线处理与最新release的冲突并复验，保留转换语义和两套导出。本轮读取diff，未创建merge result或定位全部冲突，未重跑测试。依赖顺序见[上游跟进](../solana-trading-dependencies.md#上游跟进核对2026-11-15)。
+
 2026-11-13（Asia/Shanghai），角色：FESOL-56 前置调研。
 [Linear](https://linear.app/gmx-io/issue/FESOL-92) 为 Review，Sulliven；[UI#3243](https://github.com/gmx-io/gmx-interface/pull/3243) OPEN、非 Draft，head `5e081e5ab140ba41d8f816c317b8361bf5a8787c`，当前 checks 全成功，REVIEW_REQUIRED，无已提交 review。
 
