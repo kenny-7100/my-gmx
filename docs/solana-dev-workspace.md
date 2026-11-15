@@ -2,6 +2,12 @@
 
 更新日期：2026-10-27。本文只建设个人开发配置、工具及测试辅助，不实现迁移业务。现有 API 持续服务见 [Solana API 说明](solana-api-local.md)。
 
+## 本机 Docker 外置存储（2026-11-15）
+
+用户要求后续 Docker 镜像存放在 `~/kenny` 下，避免占用 Mac 系统盘。本机 `~/kenny` 是指向 `/Volumes/kenny` 的符号链接；已通过 Docker Desktop → Settings → Resources → Advanced → Disk image location 的官方迁移操作，将虚拟磁盘迁到 `~/kenny/docker/DockerDesktop`，实际文件为 `/Volumes/kenny/docker/DockerDesktop/Docker.raw`。迁移前没有镜像或容器，有一个约 143 MB 的既有匿名 volume，迁移后仍保留；未删除该 volume。引擎恢复 running，`docker info` 成功，设置 `DataFolder` 与目标一致，系统盘旧位置已无 `Docker.raw`。后续 `postgres:15` 已成功拉取到迁移后的引擎。
+
+镜像层、容器可写层、Docker volume 和构建缓存均随该虚拟磁盘使用外置卷；`docker info` 显示的 `/var/lib/docker` 是虚拟机内路径，不能据此判定 Mac 宿主机存储位置。应用本身和少量设置/日志仍在系统盘。拉取或构建镜像前确认外置卷挂载及 `DataFolder`，不只迁移 PostgreSQL bind mount。其他主机先核实其磁盘布局，不套用本机符号链接。
+
 ## my-mac 远端开发副本（2026-11-14～15）
 
 用户要求把开发、构建和测试负载分担到 SSH 主机 `my-mac`，迁移时敏感配置只复制/传输，不将内容读入 Agent 上下文。源目录保留；远端主项目位于 `/Users/yy/gmx/gmx-interface`，配套仓库与本地配置随目录复制。远端是独立副本，后续文件修改不会自动双向同步；同一需求继续前先确认选用哪台机器、哪个 checkout 和实际提交。
