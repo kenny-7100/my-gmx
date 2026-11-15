@@ -1,5 +1,9 @@
 # FESOL-57 — 共享 SDK 数学依赖调研
 
+## Review经验深挖（2026-11-15）
+
+角色：只读调查。实时#3242已MERGED，head `1e4d3350bc`，本轮fetch release `84ab9293a8`已包含；不再沿用旧Open状态。Divhead的直接提交包含context简化、native舍入及中间量化修复和定向边界测试，说明不能只从inline comments学习。本轮未重跑数学或Rust reference、未验证SDK发布/线上启用，原Linear不可读；具体提交与历史57契约对照见[深挖调查](../review-learning-investigation-2026-11-15.md#证据链六bigint不等于协议数值一致)。
+
 ## 上游刷新与证据边界（2026-11-14）
 
 本轮新增事实、契约适配、交付及验收结果见[四需求统一记录](../solana-trading-dependencies.md#四需求上游刷新2026-11-14)，优先于下方历史状态。Linear目标访问返回Entity not found，不能据历史正文或评论判定本轮实时状态；GitHub、源码及部署按统一记录分别核验。
