@@ -1,5 +1,70 @@
 # Solana 交易链路依赖审计
 
+## 基于 review 经验的四 PR 复审（2026-11-15）
+
+用户要求先确认四个 PR 包含最新本需求成果，再应用新建 review 经验基础设施重新审查。已读取个人基础 `d6965cf36b` 引入的七组 [review 经验](review-lessons.md)、当前 gmx-prompts frontend review/dev/Solana/testing 规范，按 72→56→20→19 核查共享契约；相同依赖只分析一次。本轮为代码及交付审查，不是整需求完成或批准上线。没有发布 review/comment、修改 Linear、转 Ready 或合并。
+
+### PR 最新性与成果归属
+
+实时 fetch 的 `origin/release` 为 `84ab9293a8e25e1312f35a20893752df480e0e0b`，已是四条 delivery 的祖先，当前 delivery 即与该 base 的合并结果。开始时八个开发/交付目录干净；远端 PR head 与登记的 delivery 一致。初始 GitHub inline comments/reviews 各为零，不将这点当作已获 review。
+
+| 需求 / Draft PR | 审查起始远端 head | 本轮收尾 development | 本轮收尾远端 PR head | 差异结论 |
+| --- | --- | --- | --- | --- |
+| 56 / [#3258](https://github.com/gmx-io/gmx-interface/pull/3258) | `7a47de7b90` | `9638be377d` | `a07d84427d` | development/delivery 产品源码一致；本轮只补产品 README |
+| 20 / [#3261](https://github.com/gmx-io/gmx-interface/pull/3261) | `a6f155737a` | `32f0b70428` | `c88e50533d` | development/delivery 产品源码一致；保留20 receipt/watcher扩展，补 README |
+| 19 / [#3262](https://github.com/gmx-io/gmx-interface/pull/3262) | `50f45cfd57` | `14d67c82d0` | `996a167e5c` | 本需求修复均已交付；development额外15/25 selector/list/settings等前置不整支带入PR |
+| 72 / [#3259](https://github.com/gmx-io/gmx-interface/pull/3259) | `2f2ac84771` | `7b26f6feec` | `2f2ac84771` | 独立artifact交付代码一致；development中的56等业务不属于72交付 |
+
+完整 release diff 分别为56 223、20 240、19 253、72 18个文件，含重叠的未合并前置，不能将 GitHub files API 的100项上限当作完整范围。优先复核自有实现与关键继承接缝；没有把全部继承业务重新逐行审完或认领为本人的修改。三个 README 修复已按原development→精确cherry-pick→原delivery推送，72无需改动。六处 README 内容最终一致，格式与 diff 检查通过。
+
+### 确认发现与处理
+
+**P3，交付文档与当前行为不一致，已修复。** 56/20/19 的 `src/domain/gmsol/transactions/README.md` 仍将有限价格三单1255-byte限制列为当前待办，并将“合并LUT解决体积”作为当前建议；20/19另有旧artifact“尚未复验”的过期概述。这会让 reviewer 误判已完成的修复、继续等待不必要的体积前置。已保留历史版本/slot，明确1255→1204、紧凑零输出编码语义和slot469599277的无签名模拟，移除旧体积TODO；可信LUT、四钱包签名及落链仍保留。原始修复 `9638be377d`，20原线provenance补充 `32f0b70428`，精确转入上表原PR。未更改交易源码、WASM、信任配置或价格保护。
+
+**非阻塞质量建议，保留给后续收敛，不计作执行缺陷。** 20 `sendOrderTransactions.ts` 中 `GmsolSendResult.orders`、`trackingErrors` 初始化为空且始终未填充；恢复分支也返回空值。实际生产跟踪走 `trackingRequests`→receipt→watcher；notification仍兼容预解析 `orders` 输入。这属于旧同步解码接口的残留维护面，不能据空数组断言“未跟踪订单”。后续若收敛返回契约，应同步移除没有真实生产者的分支，并让notification测试通过真实receipt请求路径证明行为；本轮不为低优先级删接口改动扩大资金链路修复范围。
+
+在下述已审范围内未确认新的P0/P1/P2代码缺陷；不据此宣称无缺陷或整需求可上线。
+
+### 审查导航与已核查重点
+
+| 优先级 / 范围 | 代码接缝与对应经验 | 本轮核查结果与边界 |
+| --- | --- | --- |
+| T3，56构建/签名/广播 | `orderInputs`→`buildOrderTransactions`→`validateTransaction`→`sendOrderTransactions`；RL-05/06/07 | create/update/cancel、双方价格舍入、token/USD minOutput、真实WASM、账户/指令白名单、SOL wrapping、单owner签名、模拟/费用检查、fresh flag与每次广播前eligibility；未用mock WASM代替真实编码 |
+| T3，56恢复与异步会话 | `pendingSubmission` / `useGmsolOrderTransactions` / account slot floor；RL-02/04 | 模糊广播保留signature，未知receipt不重签；storage失败阻止发送；超时/拒签/过期/owner变化/卸载均有保护。owner+network checkpoint不是跨tab原子锁，不扩大保证 |
+| T2/T3，20执行证据 | decoder→creation identity→bounded history→reducer→watcher→notification；RL-02/04/05 | confirmation与keeper execution分离；失败keeper交易不等于创建失败；同slot用block顺序，缺anchor/有歧义保持unknown；事件位置/owner/store/market/actionId隔离。固定Rust update_order_v2确实分配新actionId，故ID变更结束旧生命周期并非误报 |
+| T3，19共享入口 | shared selectors→headless adapter→mapper→56 sender→20通知；RL-01/04/06/07 | 不复制交易页；sessionId隔离旧按钮，原owner卸载禁发；不支持的swap/Token-2022/math缺失明确拒绝；reconcile优先于新表单。base58 TP/SL预览避免EVM hash，同时保留EVM默认identity路径 |
+| T2，72独立产物 | source/lock/toolchain→8文件hash→build gate→lazy loader；RL-01/05/07 | 固定Rust revision/lock/Linux arm64/toolchain；Vite核对全部manifest文件及WASM pin；加载失败可重试，绑定/start失败不重复初始化；无新artifact/pin变化，复用同SHA CI复现，不为本轮重新拉Docker镜像 |
+| 继承依赖风险 | 余额资格与资产展示；RL-03 | `!isSynthetic`余额过滤来自3195，与钱包可持有性review存在历史冲突。当前四项未引入此策略；不自行改他人PR或把抵押资格等同持币资格，后续资产视图验收需明确契约 |
+
+另按独立注意力扫描除法/数值转换、交易与授权步骤、create/update/cancel守卫和值语义。重点是USD30→GMSOL20/原生token单位、有限/无限价格边界、零/缺失区别、base58大小写与SOL/WSOL。新适配层未新增金额浮点除法；相关转换沿用固定92 helpers，TPSL percentage转换有零分母检查。Solana无ERC20 approve流程，资金支出受解码后账户/金额白名单及owner签名约束，EVM approval路径仍保留。不能将有限样例推广为所有金融数学等价；19完整simulate_order对照仍暂缓。
+
+### 实际验证与证据复用
+
+| 实际目标 | 本轮执行 | 结果 |
+| --- | --- | --- |
+| 56 delivery | 交易real-WASM/发送安全和卸载保护2 suites | 16 passed |
+| 20 delivery | 交易、3个lifecycle suites及notification，共6 suites | 37 passed |
+| 19 delivery | 交易/卸载、3个lifecycle、mapper、network reads、trade state、account freshness，9 suites；另TPSLInputRow及真实sidecar builder 2 suites | 47 + 29 passed |
+| 72 delivery | lazy loader及SDK entry初始化恢复2 suites | 6 passed |
+
+部分56/19 suite执行于本轮文档提交之前，同目标后续只有README差异；代码、依赖和工具链未变，结果仍适用。没有为文档补测全量业务或重跑构建。既有1204-byte无签名主网模拟和72构建复现沿用原slot/SHA；本轮未新做链上模拟、签名或广播。SDK-only改动未新增，使用既有同代码验证和GitHub checks，不把本轮frontend suites称作完整SDK数学对照。
+
+**本轮新增最终delivery的真实浏览器检查。** 以owned Vite `127.0.0.1:3031`运行19 delivery `996a167e5c`，启动报告绑定projectDir、HEAD、clean和源码/配置指纹；只选vite服务，没有启API或替换成样例响应。使用用户预开Chrome原生窗口，验证flag off的Arbitrum页、启用Solana后DOGE市场/图表/共享TradeBox、限价保证金输入、空头切换、TP/SL展开、Solana刷新和切回Arbitrum恢复；钱包未连接。原生Network在Solana刷新后的记录中实际输入筛选，`domain:solana.gmxapi.io`为38/3227 requests，随后`domain:arbitrum.gmxapi.io`为0/3254；`rpc`字面筛选另为0/3043。上述是不同采样时刻的指定域名/文本计数，不能证明所有EVM端点零请求、无重复请求或全面网络隔离。已有device toolbar状态未修改，Network原筛选`keep`恢复。未通过DevTools connector/自动化新profile启动浏览器。
+
+浏览器渲染与输入无异常不证明真实账户预览或金融数值正确。前一阶段在19 development（额外含15/25）的页面结果不再冒充本轮最终delivery证据；真实仓位/恢复/执行通知组合仍需适用资源和操作授权。
+
+### 仍需人工/外部条件的核查
+
+- **56**：可信生产LUT、四钱包签名、分别落链create/edit/cancel及atomic；不能把当前仍有authority的诊断表加入信任map。
+- **20**：真实市场单keeper成交/取消、长延迟/索引追赶、实际toast和刷新；目前receipt fixtures与异步回归不代表真实交易闭环。
+- **19**：真实连接账户和最终前置组合的预览/校验/恢复/UI；最大杠杆、兑换、完整simulate_order和GT Rewards仍按用户决定暂缓。
+- **72**：使用固定最终artifact完成56真实流程复验。源码/manifest/CI复现成立不代表钱包/部署兼容全部验收。
+- **PR体积**：56/20/19包含大段同一未合并前置，review注意力优先按上表接缝分配；前置进入release后再精确收口原PR，不为缩diff整支合并development或强推。
+
+Linear本轮实时只读查询56失败（GraphQL access/query compatibility），未把历史正文当作本轮需求刷新，也未修改状态。初始四PR的Audit/general/SDK standalone/WASM复现均SUCCESS；组件workflow仍FAILURE，沿用同head历史日志中的286断言通过、Pages/comment 403归因。三个文档更新后的head重新触发CI，最终状态以本轮收尾快照为准；旧head成功不冒充新head全绿。72 head未变。
+
+原始材料位于个人基础忽略目录 `.local/acceptance/review-learning-four-pr-20261115/`：初始/收尾GitHub快照、完整git diff、dev/delivery差异、各实际目标原生测试日志、runtime启动/停止报告。源码定位优先上表对应原delivery，机密/临时材料不进入PR。
+
 ## 四需求剩余事项与恢复条件（2026-11-15）
 
 本次仅整理上一阶段已经核验的剩余工作，未重新查询远端、Linear或链上；易变状态以[目标执行记录](#四-pr-目标执行结果2026-11-15)的版本和证据为准。各需求的具体待办维护在 [56](issues/FESOL-56.md#剩余事项与恢复条件2026-11-15)、[19](issues/FESOL-19.md#剩余事项与恢复条件2026-11-15)、[20](issues/FESOL-20.md#剩余事项与恢复条件2026-11-15)、[72](issues/FESOL-72.md#剩余事项与恢复条件2026-11-15)，恢复时先读对应入口，不把“当前独立切片完成”当作整需求Done。
