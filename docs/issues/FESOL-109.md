@@ -1,5 +1,16 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## Trading 迁移后的当前入口（2026-11-15）
+
+用户提供 PM 对话确认 11 月 14 日已将 unification issues 移至 Trading team，并要求 Kenny 重新规划 Trading cycles。本轮通过用户现有 Chrome 原生窗口只读核验：旧 FESOL-109 URL 自动跳转至 [TRD-101 · Solana trading plan](https://linear.app/gmx-io/issue/TRD-101/solana-trading-plan)，不是已删除需求。Activity 显示 chloeee 于 11 月 14 日 10:33:42 将团队从 Solana Frontend 改为 Trading、状态由 Review 改为 In Progress，并移出旧 Cycle 3；当前属性为 Add to cycle，尚未分配新 cycle，assignee 为 Divhead。
+
+- 旧周期列表：[Solana Frontend Cycles](https://linear.app/gmx-io/team/FESOL/cycles)。Cycle 1/2/3/4 起始日分别为 10 月 12 日、10 月 26 日、11 月 9 日、11 月 23 日；旧 Cycle 3 页面仍可访问，不作为新的 Trading 分配。
+- 新周期列表：[Trading Cycles](https://linear.app/gmx-io/team/TRD/cycles)。[Cycle 1](https://linear.app/gmx-io/team/TRD/cycle/1) UI 显示 11 月 16–29 日；[Cycle 2](https://linear.app/gmx-io/team/TRD/cycle/2) UI 显示 11 月 30 日至 12 月 13 日。计划正文写 11 月 16–30 日、11 月 30 日至 12 月 14 日，需区分正文周期边界与 UI 显示的末日，不擅自改期。
+- 当前 TRD-101 正文已简化为 Trading Cycle 1/2 计划：11 月 20 日 API/数学/负载验证、11 月 30 日交易闭环与目标重估、12 月 4 日实现收口、7–8 日验收、9 日修复与复验、10 日验收后公开、11–14 日观察。日期是计划目标，不是当前完成或上线承诺。
+- 项目入口仍为 [GMX and GMTrade Frontend Unification](https://linear.app/gmx-io/project/gmx-and-gmtrade-frontend-unification-0774804d1299)。本轮所见两个新 cycle 的 planning 区域只有 Add document or link，未见已附时间线文档；已确认的总计划入口是 TRD-101。
+
+现有 CLI API key 的 teams 查询只返回 FESOL，无法据此判断 TRD 不存在；浏览器登录态可访问 Trading 与迁移后的需求。后续查迁移需求应优先识别 TRD 新编号，不再将旧 FESOL 团队快照当完整范围。本轮未改 Linear、周期或正文；以下 11 月 13 日记录保留为迁移前历史。
+
 更新：2026-11-13。参与角色：需求查询与计划口径记录，未认领业务实现。
 来源：[FESOL-109](https://linear.app/gmx-io/issue/FESOL-109)；本次实时抓取时间为 2026-11-13 00:00（Asia/Shanghai），正文 updatedAt 为 2026-11-12T06:42:35.152Z，评论为空。
 
