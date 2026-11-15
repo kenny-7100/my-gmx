@@ -1,5 +1,10 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## 四 PR 目标执行（2026-11-15）
+
+消费56同一紧凑编码修复，完成原生Chrome整合输入/市场/列表空态/设置及切链回归；钱包未连接，恢复入口与真实仓位未冒充验收。 完整版本、验证与外部条件见[统一执行结果](../solana-trading-dependencies.md#四-pr-目标执行结果2026-11-15)。本节优先于下方历史1255-byte限制及候选。
+
+
 ## Base58 TP/SL 预览修复已交付（2026-11-15）
 
 用户授权按推荐顺序实施。本轮在原 development 修复并提交 `2b52d15ec3`，精确 cherry-pick 到原 delivery `40653d3026`，两路已分别推送 my-gmx/my-gmx-pr，[原 PR #3262](https://github.com/gmx-io/gmx-interface/pull/3262) 保持 Draft。未恢复下文暂缓项。
