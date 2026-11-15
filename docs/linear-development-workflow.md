@@ -60,7 +60,7 @@ node /path/to/base/scripts/agent-workflow.mjs note \
   --project-dir /path/to/task --issue FESOL-123 --context-file /path/to/local-context.json
 ```
 
-共享摘要由协调 Agent 维护；多个子任务不各自替换同一份列表。note 接受 JSON 部分更新：`objective` / `next` 为字符串，`acceptance` / `decisions` / `blockers` / `links` / `observations` 为字符串列表；未给字段保留原值，列表整体替换，空列表清除旧阻碍。只记录下一位 Agent 继续需要的当前信息，不保存聊天全文、秘密或推测性权限。需要时用 `coordinator` 和 `assignments` 保存[当前分工](agent-collaboration.md#最小子任务约定)，单 Agent 任务不必填写。来源观察注明实际 URL/ref、revision/updatedAt 和核验时间；工具不会代查 Linear 或保证观察仍新鲜。note 只保留当前执行摘要与 issue/专题链接，不复制长期经历；同一观察按[执行与复用](agent-task-start.md#执行与复用)供多个阶段入口共用。
+共享摘要由协调 Agent 维护；多个子任务不各自替换同一份列表。note 接受 JSON 部分更新：`objective` / `next` 为字符串，`acceptance` / `decisions` / `blockers` / `links` / `observations` 为字符串列表；未给字段保留原值，列表整体替换，空列表清除旧阻碍。只记录下一位 Agent 继续需要的当前信息，不保存聊天全文、秘密或推测性权限。需要时用 `coordinator` 和 `assignments` 保存[当前分工](agent-collaboration.md#最小子任务约定)，单 Agent 任务不必填写。来源观察注明实际 URL/ref、revision/updatedAt 和核验时间；工具不会代查 Linear 或保证观察仍新鲜。与历史 review 经验有关的重要取舍在 `decisions` 简记条件、在 `links` 指向[当前条目](review-lessons.md#按改动检索)及 issue；恢复时从个人基础读取相关最新条目，不为读取知识整支合并基础。note 只保留当前执行摘要与 issue/专题链接，不复制长期经历；同一观察按[执行与复用](agent-task-start.md#执行与复用)供多个阶段入口共用。
 
 ```json
 {
@@ -79,7 +79,7 @@ status 返回实际开发/交付分支与 HEAD、dirty、未完成 Git 操作、
 
 ## 开发与主动沉淀
 
-1. 新需求先实时读取[Linear 正文、关系和评论](linear-requirements.md)，核对关键依赖 PR 是否进入 release；只查本任务相关项。记录最少的验收条件、业务范围和依赖到任务说明或 PR，不默认创建工作表。
+1. 新需求先实时读取[Linear 正文、关系和评论](linear-requirements.md)，核对关键依赖 PR 是否进入 release；只查本任务相关项。记录最少的验收条件、业务范围和依赖到任务说明或 PR，不默认创建工作表。选方案前按[相关 review 经验](review-lessons.md#按改动检索)核对已有接缝、真实消费者及反例；编码中出现新判断按[日常维护](review-lessons.md#日常增量维护)更新，不等到最终 PR。
 2. 业务与个人基础设施改动分开提交。已安装 Husky 时，纯 AGENTS/docs/.agents/scripts/tools（含本入口 pre-commit）提交只检查暂存差异，不触发 SDK/本地化生成；涉及工具源码时执行适用回归；纯文档只检查链接与差异。业务、共享配置、gitlink 或混合提交走原上游钩子。共享文件混改时按 hunk 拆分；不能靠后缀或文件名单替代语义审查。commit 英文，有关联需求时附真实编号；具体见[提交与 PR 规范](#commit分支与-pr-表达规范)。
 3. 每个经手 issue 的工作/问题/处理/结果在自然节点合并更新[issue 文档](issues/README.md)，包含调研他人任务的结论；暂停、交接和交付前检查遗漏与回流位置。通用经验、长期偏好、工具改进沉淀到已有主题/skill，并从 issue 链接过去；回流时明确选择已审查的基础设施提交，保留业务开发现场。
 4. 本阶段个人沉淀在最终回复前完成提交、必要回流和 `my-gmx` 推送，无需等待用户提醒。按[沉淀收尾与自动推送](documentation-maintenance.md#沉淀收尾与自动推送)核对归属、暂存区及待推送历史；受阻则保留现场并说明实际完成状态与原因。
@@ -106,7 +106,7 @@ node scripts/agent-workflow.mjs backflow --issue FESOL-123 \
 
 1. **准备**：完成当前基础设施回流，确认业务提交及未合并依赖。依赖不在 release 时明确等待，或按已确认的依赖 PR 顺序处理，不伪称可独立交付。
 2. **重建**：从 fetch 后的最新 release 创建交付 worktree，只选择本需求业务提交。工具按提交复制，不能自动理解混合补丁或丢弃前置实现。
-3. **复核与验证**：检查最终完整 diff 和提交历史，确认无个人基础、参考仓库和无关功能；在实际交付目录执行相关测试及上游要求的检查。记录命令、结果、目标 SHA 和未覆盖项，避免无变化重复执行。依赖安装按目标锁文件，SDK/WASM 或生成路由按对应环境入口准备。
+3. **复核与验证**：检查最终完整 diff 和提交历史，确认无个人基础、参考仓库和无关功能；对照相关[经验条目](review-lessons.md)确认组合未撤销历史修复、关键反例覆盖实际消费者与共享/EVM 路径；在实际交付目录执行相关测试及上游要求的检查。记录命令、结果、目标 SHA 和未覆盖项，避免无变化重复执行。依赖安装按目标锁文件，SDK/WASM 或生成路由按对应环境入口准备。
 4. **PR**：推送正式 fork `my-gmx-pr`，向 `gmx-io/gmx-interface:release` 建 Draft PR，标题、Summary、Linear、真实 Validation 和发布事项遵循[提交与 PR 规范](#commit分支与-pr-表达规范)。普通 PR 无需额外证据包。适用时按 gmx-prompts 自审最终 diff；发现问题按下文“PR 后的修复与交付现场”先回原开发分支验证，再转入交付目录复验。
 
 ```sh
@@ -168,6 +168,8 @@ Linear: <actual Linear issue URL containing FESOL-123>
 示例只演示结构，不能复制为未实现/未验证的声明。有 breaking change 时替换 `None` 为实际分类、消费者影响和发布顺序；有部署后事项则写明具体操作。PR 正文通过临时文件与 `gh ... --body-file` 提交，保留真实换行。保持 Draft，发 PR、邀请 reviewer、转 Ready 和合并按根授权处理。
 
 ## PR 后的修复与交付现场
+
+收到 review 后先读原评论、后续回复、相关直接提交与最终要求，理解原问题全链；按[修复闭合](review-lessons.md#rl-07-最终取舍与修复闭合)核对相邻入口与共享调用方。修复切片收尾更新原 issue，并主动提炼或修正已有经验、适用条件与反例；作者声明、reviewer 确认和实际验证分开记录，不能只按 thread resolved 判断完成。
 
 用户于 2026-11-13 明确：已有基于 `solana-integration` 的需求开发分支时，review 或后续发现的问题继续在原 development 分支修复、测试和验收，通过后再纳入现有 PR。这仍是同一 issue 的一条逻辑开发线，不创建另一条需求分支或 PR。
 
