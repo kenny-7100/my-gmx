@@ -1,5 +1,9 @@
 # FESOL-112 — 金融集成验收依赖
 
+## 无需等待答复的契约切片（2026-11-15）
+
+按用户代码优先要求，继续读API#340固定head的真实fixtures、index/HTTP parser suite及56/19消费者。发布SDK parser测试不包含当前前端额外的严格metadata/referral reader、composition与slot tracker，适合补跨仓库组合核验；已有503/readiness/slot实现不重复开发。本机Docker可用，完整suite需隔离PostgreSQL及候选目录，当前旧样例checkout不能作#340验收。本轮未运行suite、启动服务或验证线上数值；细节见[可推进切片](../solana-next-task-2026-11-15.md)。
+
 ## API候选分支已有数学实现（2026-11-15）
 
 角色：上游依赖调研。补读API#340 head `59e49c649d`，确认已含published SDK 2.9.2（sdk-next alias）、marketRecords的tradeMath=gmsol、indexed reader/readiness兼容检查，以及parser/slot相关测试源码。该候选Open/Review required，未合并/部署证据仍缺，公开API依然无该字段；不能把main版本当作候选版本，也不能再笼统将112描述为未开始实现。后续向后端确认评审、部署SHA与参考值/minContextSlot验收，细节见[上游跟进](../solana-trading-dependencies.md#上游跟进核对2026-11-15)。本轮未复跑测试、验证同输入数值或修改线上状态。
