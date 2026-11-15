@@ -1,5 +1,13 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## Base58 TP/SL 预览修复已交付（2026-11-15）
+
+用户授权按推荐顺序实施。本轮在原 development 修复并提交 `2b52d15ec3`，精确 cherry-pick 到原 delivery `40653d3026`，两路已分别推送 my-gmx/my-gmx-pr，[原 PR #3262](https://github.com/gmx-io/gmx-interface/pull/3262) 保持 Draft。未恢复下文暂缓项。
+
+`buildTpSlPositionInfo` 对 `tradeMath: gmsol` 使用显式预览 identity override：已有 position 可保留其 API contractKey，新仓位尚无 position account 则为空；不再把 base58 owner/market/collateral 送入 EVM ABI 哈希。`getPendingMockPosition` 默认哈希行为保持，其他 EVM optimistic callers 不变。未伪造 Solana PDA，也未放宽 SDK 地址校验。
+
+先增加调用真实 builder 的回归，修复前 Solana 多空两项 InvalidAddressError、EVM 对照通过；修复后 development 与实际 delivery 各 3 suites / 25 项全通过，分别通过 app/landing types，改动文件 ESLint/Prettier 与 diff 检查通过。离线报告位于个人基础 `.local/acceptance/frontend-offline/run-96IhV7/`（red）、`run-FwJG8M/`（development green）、`run-47jWh6/`（delivery green）。没有新的已连接钱包 UI/链上签名、广播或完整 raw-account simulate_order 验收。该修复解除函数级异常，不代表 API/LUT 上线或完整需求验收。
+
 ## Base58预览异常定位（2026-11-15）
 
 角色：只读诊断/可推进性调研。development `1155c46f87`与delivery `e4e9067a0f`相关文件一致。SideOrderEntry消费的selector虽改走buildTpSlPositionInfo，仍调用getPendingMockPosition并以base58 owner/market/collateral执行EVM hashedPositionKey。提取当前四个原函数的最小执行诊断中，EVM对照正常返回，真实API fixture owner的Solana多空均抛InvalidAddressError。触发前提是已连接账户及有效计算预览数据；当前公开API缺math/旧未连接钱包页面回归不能排除该错误。本轮未作新的完整selector/UI运行，也未修复。将其列为首选独立正确性切片，不自动恢复兑换/最大杠杆/simulate_order/GT Rewards暂缓项；详情与最小验收见[可推进切片](../solana-next-task-2026-11-15.md)。
