@@ -53,6 +53,7 @@
 | [旧 Solana 后端参考说明](gmtrade-web-backend-reference.md) | 旧后端源码快照的数据流、接口和缺失依赖；当前线上地址另见独立服务文档 |
 | [文档维护约定](documentation-maintenance.md) | 主动沉淀协作知识，把环境排障经验提升为执行前置，维护索引及接手资料；`agent:docs-check` 显式检查本地文档路径/锚点并输出行号诊断 |
 | [编码与自审规范](coding-and-self-review.md) | 执行前核对检查范围、SDK 产物及构建内存；按任务查阅 gmx-prompts，执行编码、自审和跨仓库核验 |
+| [Solana review 经验深挖与待审方案](review-learning-investigation-2026-11-15.md) | 四人PR讨论、实际修复与当前源码的证据链，Linear可见性边界，以及尚未实施的开发/自审学习方案 |
 | [自动化工具沉淀约定](automation-tools.md) | `yarn test:agent-tools` 统一离线回归；识别重复任务，复用和实现脚本、检查器等工具，记录验证结果和使用入口 |
 
 ## 项目 skill

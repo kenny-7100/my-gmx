@@ -13,4 +13,6 @@
 
 ## 可复用结论与边界
 
+2026-11-15进一步静态核对#3201 `056f8d689c`的setter，early return现限定unsupported Swap，identity update继续fallback；未重跑行为测试。同一历史问题也在29/#3223出现，需要先追源提交，不能据两个PR直接认定两次独立犯错。原Linear不可读，历史要求与跨组经验见[深挖调查](../review-learning-investigation-2026-11-15.md)。
+
 反馈闭环调查结论和后续建议统一保存在[编码与自审规范](../coding-and-self-review.md#review-反馈吸收现状核验2026-11-15)。本记录补齐检索入口，不回填或编造早期 Agent 的执行经历，不宣称上述问题仍存在于当前 head。
