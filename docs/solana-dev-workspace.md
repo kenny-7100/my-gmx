@@ -33,6 +33,19 @@ yarn build
 
 已验证：新 SSH 会话中的 VS Code/Codex/Node 命令可用；VS Code 应用签名通过，21 个扩展版本全部匹配，界面 locale 同为 `zh-cn`；适配后的 Codex 配置与源配置匹配，认证检查和 MCP 配置解析通过。Codex 在空目录、只读沙箱、临时会话中实际连接既有模型配置，返回预期标记，执行记录未观察到工具调用。MCP 列表中的 Figma、Linear、Notion 等部分连接在两台机器的 CLI 均显示未登录，状态一致，不能据此声称所有外部连接已完成业务授权。验证证据在远端 `.local/acceptance/my-mac-migration/` 的 `editor-*`、`vscode-extension-verification.json`、`codex-*` 文件，证据不包含凭据正文。
 
+2026-11-15，按用户要求补齐 Docker。从 Docker 官方下载 Apple Silicon Docker Desktop 4.99.0，安装到 `/Applications/Docker.app` 并通过应用签名校验；Engine 为 29.9.3，Compose 5.7.0，Buildx 可用。CLI 通过用户级工具目录提供，context 为 `desktop-linux`，连接本机 Unix socket；不依赖 `/var/run/docker.sock` 系统链接、管理员辅助程序或外部 daemon。系统级安装器因无管理员权限未执行成功，最终用户级配置和实际引擎运行已验证，不需 sudo。
+
+首次启动时 Apple Virtualization Framework 模式持续停留在 starting，未形成可用引擎；切换 Docker 支持的 Docker VMM 后启动成功。当前明确配置 `EngineTypeMac=docker-vmm`、4 CPU、4096 MiB 内存、65536 MiB 虚拟磁盘上限，关闭 Rosetta、Kubernetes 和登录自动启动。设置位于远端 `~/Library/Group Containers/group.com.docker/settings-store.json`；只在本次自有 Docker 实例且无容器时调整，不把停止其他任务容器作为环境修复手段。Docker 当前保持可用；后续启动和停止使用：
+
+```sh
+docker desktop start --timeout 60
+docker info
+# Stop only after checking that no other task needs its containers.
+docker desktop stop --timeout 60
+```
+
+已拉取 ARM64 `postgres:15`。在远端主项目运行 `yarn gmx-api:test-integration --api-dir /Users/yy/gmx/gmx-interface/gmx-api`，默认 2 个 suite、5 项测试全部通过，无失败/跳过；数据库迁移、网络审计、进程清理、专属容器/临时目录清理均通过，源码和工具未变，结束后无带项目测试 owner label 的遗留容器。另完成 Docker Desktop 重启验证，引擎、资源配置和 PostgreSQL 镜像均正常恢复。原始报告为远端 `.local/acceptance/solana-api-local/integration-csboCu/report.json`，摘要为 `.local/acceptance/my-mac-migration/docker-integration-summary.json`。这验证现有隔离 PostgreSQL 测试入口，未覆盖完整 API suite、真实链上数据或业务页面验收。安装日志位于远端 `~/.local/gmx-docker-setup/`，不输出或提交凭据。
+
 页面验收继续使用用户本机已有登录状态与钱包扩展的浏览器。可先在本机建立端口转发：
 
 ```sh
