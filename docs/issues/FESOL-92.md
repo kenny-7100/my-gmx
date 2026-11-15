@@ -1,5 +1,13 @@
 # FESOL-92 — SDK 单位转换依赖核验
 
+## release 冲突解决候选已验证（2026-11-15）
+
+用户授权按顺序实施。原 #3243 位于上游 `gmx-io/gmx-interface:FESOL-92`，遵守 origin 只读，没有直接推送原作者分支或新建重复 PR。在隔离目录 `/Volumes/kenny/gmx/gmx-interface-fesol-92-resolution` 从原 head `5e081e5ab1` 合入当前 release `84ab9293a8`，只在 `sdk/src/utils/gmsol/index.ts` 出现预期 add/add。保留 release 全部数学函数及原 PR units 导出，解决文件与 56 已使用的组合逐字一致，未改 conversion 或舍入/范围校验语义。
+
+解决候选 commit `c35a5f04da`，分支 `fesol-92-release-resolution-20261115` 已推送个人 [my-gmx](https://github.com/kenny-7100/my-gmx/tree/fesol-92-release-resolution-20261115)。相对 release 仅原 units、原 28 项转换测试与 index 的 units 导出（3 文件）；merge-tree 验证对 release 干净，tree `4985552fbc4ff672418a515349b37f8133e13f22`。原作者可在自己的开发线应用该组合；本轮没有改变上游 PR head，因此不能宣称 GitHub 原 PR 已解除冲突。
+
+实际候选目录完成 immutable install/SDK 构建、app/landing types、改动 SDK 文件 ESLint（零 warning）/Prettier；原 gmsolUnits 与 release gmsolTradeMath 两套定向测试合计 41 项全通过。证据位于个人基础 `.local/acceptance/upstream-followup-20261115/fesol92-{install.log,types.log,sdk-report.json}`；未进行真实 API/钱包/链上验收。该切片不需要 RPC/API/LUT，也不改变原作者 PR 的 Review/Ready 状态。
+
 ## 冲突已精确定位（2026-11-15）
 
 本轮对release `84ab9293a8`与#3243 `5e081e5ab1`执行merge-tree，仅sdk/src/utils/gmsol/index.ts一处add/add：一侧为57数学实现，一侧为units导出。56当前文件已有双方保留的组合，可复用解决方式；不需RPC/API/LUT，也不重复写conversion。尚未修改92开发线、运行其最终检查或推送，不能称PR冲突已解除。与其他候选比较见[可推进切片](../solana-next-task-2026-11-15.md)。
