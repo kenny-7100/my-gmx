@@ -35,6 +35,21 @@
 
 审查结论在对用户的回复中用中文；提交到 PR 的标题、正文和审查评论用英文。自审不等于获准向外部 PR 发布评论。
 
+## Review 反馈吸收现状核验（2026-11-15）
+
+本次是流程调查，不是重新审查业务代码或实施改造。核对当前个人基础、开发/交付/知识入口，以及本人 9 个 PR（#3068、#3082、#3111、#3190、#3201、#3258、#3259、#3261、#3262）的实时 inline comments 和 reviews；未读取全部 issue comments、resolved thread 状态或历史 Agent 会话，不据此判断每次自审实际覆盖程度。
+
+- `gmx-prompts@72041619ae` 经 fetch 确认与当时 origin/main 一致。上游已有团队 review 实例、测试准入、合并结果、runtime 和跨仓库检查；不是没有规范。skill 引用的 `notes/work/review-scorecard.md` 在本地 checkout 不存在，其召回率只能作为上游自述，不能当作本项目实测指标。
+- 个人基础已有按 issue 记录和跨 issue 经验回流要求，但本次检索未找到面向本人 review 反馈的统一检索入口，也没有明确将已确认评论按适用条件送回下一次开发/自审的具体步骤。不能仅凭文档增长认定形成了反馈闭环。
+- FESOL-15/#3201 有明确修复回复和后续回归修复，但本次调查前没有 `docs/issues/FESOL-15.md`；FESOL-49/#3111、FESOL-70/#3068 也没有对应固定入口。其他专题已有部分架构经验和交付经验，不能说完全未吸收；旧任务也不能因后来新增的记录规则被追认为当时违规。
+- [#3068 worker 检查](https://github.com/gmx-io/gmx-interface/pull/3068#discussion_r4259921377)及 [bootstrap 缺失时静默缩小检查范围](https://github.com/gmx-io/gmx-interface/pull/3068#discussion_r4259921402)：审核保护机制要验证反例能失败，并覆盖实际构建入口。
+- [#3111 市场遗漏](https://github.com/gmx-io/gmx-interface/pull/3111#discussion_r4330399528)：参考项目列表不证明当前链上范围完整；[该次 review](https://github.com/gmx-io/gmx-interface/pull/3111#pullrequestreview-5591831439)同时明确区分四项修改要求与三项待 reviewer 决策，后续 twin-link 方案也发生修正。不能把全部评论计作作者缺陷或把最早方案固化成长期要求。
+- [#3201 图标](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355252)：沿用现有资源命名扩展机制；[无效测试](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355273)：没有目标 guard 也通过的测试不证明防护有效；[修复引入 EVM 回归](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4519631690)：共享 setter 的 Solana 限制必须保留 identity normalization 的其他用途。详见 [FESOL-15](issues/FESOL-15.md)。
+
+结论：存在“反馈已修复或留档，但跨任务检索、提炼和再次应用不足”的流程缺口；现有样本不足以证明同类问题发生率没有下降，也不能证明每个 PR 都收到很多意见。#3190 和四个较新 Draft 在本轮读取的两个 review 接口中均无记录，#3082 仅有空正文 review。没有重放初始 PR 或历史自审，不能断言某条具体评论本可被当时 Agent 发现。
+
+后续改造建议（尚未实施）：复用 issue 与本页入口，保存评论依据、最终处理和适用条件；把可复用判断接入开发及最终 diff 自审，区分已在上游覆盖的规则、待明确决策和新增经验；用后续同类改动是否再次漏掉来检验效果，不按评论条数评分。本次只保存调查结论，不新增强制门禁、监听服务或修改上游 skill。
+
 ## 测试与本地流程边界
 
 - 测试按行为筛选：组合或边界足够多，且涉及风险或共享契约时才随代码交付；已发生的生产问题保留针对性回归测试。避免只验证 mock 调用、实现镜像、快照和不必要测试框架。
