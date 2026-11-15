@@ -1,5 +1,9 @@
 # FESOL-51 — 余额与 RPC 前置调研
 
+## Review跟进修正（2026-11-15）
+
+只读复核#3195当前head `2495be234e`源码、review与最近评论：reviewer已于11月8日确认空System-owned ATA修复和branch history中个人key移除；reader源码也将该空账户计零，不再把它列为待修bug。PR正文已经补充，不再为空。仍为Changes requested，/rpc-debug在当前EVM-only路由中，作者11月9日询问取舍，最近窗口未见回复；应明确只针对该页开放或移除不可达Solana分支。正文Validation仍保留旧key不可用描述，与reviewer确认冲突；格式及冗余测试意见还需作者收口、reviewer复核，本轮未运行格式检查或浏览器。证据与边界见[上游跟进](../solana-trading-dependencies.md#上游跟进核对2026-11-15)。
+
 2026-11-13（Asia/Shanghai），角色：FESOL-56 依赖调研。[Linear](https://linear.app/gmx-io/issue/FESOL-51) 为 Review，Rainer。
 
 已读实时需求及 [UI#3195](https://github.com/gmx-io/gmx-interface/pull/3195) diff 文件列表、PR 描述、reviews 与 inline comments。PR OPEN，head `2495be234e5deb6d39171ef24e9499461b6cfd68`，当前 checks 成功但 CHANGES_REQUESTED。该 PR 承载 FESOL-89/96 reader/hook；与 Draft UI#3190 重叠，按 109 收敛已有成果。
