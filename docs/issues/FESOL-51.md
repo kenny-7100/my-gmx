@@ -1,5 +1,9 @@
 # FESOL-51 — 余额与 RPC 前置调研
 
+## Review经验深挖（2026-11-15）
+
+角色：只读调查。当前#3195 `2495be234e`虽保留empty System-owned ATA修复，但`2ad57a5c3b`重新引入`!isSynthetic`过滤，同时影响reader与wallet list；这与Divhead要求读取全部配置mint及11月6日真实余额确认不一致。已读线程未见新范围决定，本轮未跑页面，不直接改作者分支。具体提交、规范语境冲突与方案见[深挖证据链九](../review-learning-investigation-2026-11-15.md#证据链九已经验证的修复被重新引入是本轮最具体的学习缺口)。本轮原编号Linear不可读，需求使用11月12日历史快照，不能当实时验收。
+
 ## Review跟进修正（2026-11-15）
 
 只读复核#3195当前head `2495be234e`源码、review与最近评论：reviewer已于11月8日确认空System-owned ATA修复和branch history中个人key移除；reader源码也将该空账户计零，不再把它列为待修bug。PR正文已经补充，不再为空。仍为Changes requested，/rpc-debug在当前EVM-only路由中，作者11月9日询问取舍，最近窗口未见回复；应明确只针对该页开放或移除不可达Solana分支。正文Validation仍保留旧key不可用描述，与reviewer确认冲突；格式及冗余测试意见还需作者收口、reviewer复核，本轮未运行格式检查或浏览器。证据与边界见[上游跟进](../solana-trading-dependencies.md#上游跟进核对2026-11-15)。

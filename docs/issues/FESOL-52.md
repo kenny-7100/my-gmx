@@ -1,5 +1,9 @@
 # FESOL-52 — 统一数据层与 FESOL-56 集成审查
 
+## Review经验深挖（2026-11-15）
+
+角色：只读调查。复核#3193 `e712a1d342`的review完整线程、当前provider、account snapshot和mapper：availability与owner缓存隔离已有实现；order metadata仍在mapper前裁剪，应按交易消费者重新核对，不能把原显示阶段取舍永久化。未运行组合/页面，原编号Linear不可读，参考11月12日快照；87和110实时正文支持切片不豁免整体与遗留入口单独承接。历史建议演变、具体源码及待审方案见[深挖调查](../review-learning-investigation-2026-11-15.md)。
+
 ## Review收口核对（2026-11-15）
 
 只读复核#3193 `e712a1d342`，GitHub为MERGEABLE、Review required，当前checks成功。读取全部reviewThreads（无后页），多数未resolved线程已有修复回复；源码确认gas三字段存在。历史钱包输入hash/auto-cancel意见归19处理，不因线程未关闭再次派给52。四需求已消费当前provider版本，无新代码需要重复同步；应确认独立范围review结论并关闭已处理线程。具体源码核验、下游边界与字段stack顺序见[上游跟进](../solana-trading-dependencies.md#上游跟进核对2026-11-15)。未发布评论或修改上游。
