@@ -1,5 +1,9 @@
 # Solana 交易链路依赖审计
 
+## 代码优先的可推进事项（2026-11-15）
+
+用户本轮明确暂不向后端确认，先从可访问PR代码核验实际进度。本轮进一步定位19的base58预览仍进入EVM hash并完成函数级复现；merge-tree确认92仅一处导出冲突、25可与最新52干净组合；API#340已有真实fixtures/index/HTTP路径，可先验证当前前端扩展消费层。优先顺序、最小切片及证据边界见[可推进切片](solana-next-task-2026-11-15.md)。这取代下节“先向后端确认”的执行建议，也修正仅看到19改走新helper就认为旧hash问题已被覆盖的不足判断。未自动实施、恢复暂缓范围或修改PR/Linear。
+
 ## 上游跟进核对（2026-11-15）
 
 角色：只读依赖调研；不修改上游或四需求业务，不恢复19暂缓范围。复用同阶段已核实的release `84ab9293a8`、线上67市场无tradeMath及Linear关键issue不可访问的证据，新增读取九个依赖PR与ADR的实时review、最近评论、mergeability及关键源码。全部reviewThreads连接无后页；最近评论/reviews为有限窗口，不称全历史覆盖。原始结果在 `.local/acceptance/upstream-followup-20261115/`。

@@ -1,5 +1,9 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## Base58预览异常定位（2026-11-15）
+
+角色：只读诊断/可推进性调研。development `1155c46f87`与delivery `e4e9067a0f`相关文件一致。SideOrderEntry消费的selector虽改走buildTpSlPositionInfo，仍调用getPendingMockPosition并以base58 owner/market/collateral执行EVM hashedPositionKey。提取当前四个原函数的最小执行诊断中，EVM对照正常返回，真实API fixture owner的Solana多空均抛InvalidAddressError。触发前提是已连接账户及有效计算预览数据；当前公开API缺math/旧未连接钱包页面回归不能排除该错误。本轮未作新的完整selector/UI运行，也未修复。将其列为首选独立正确性切片，不自动恢复兑换/最大杠杆/simulate_order/GT Rewards暂缓项；详情与最小验收见[可推进切片](../solana-next-task-2026-11-15.md)。
+
 ## 上游刷新与证据边界（2026-11-14）
 
 本轮新增事实、契约适配、交付及验收结果见[四需求统一记录](../solana-trading-dependencies.md#四需求上游刷新2026-11-14)，优先于下方历史状态。Linear目标访问返回Entity not found，不能据历史正文或评论判定本轮实时状态；GitHub、源码及部署按统一记录分别核验。
