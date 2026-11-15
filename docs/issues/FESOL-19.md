@@ -8,6 +8,8 @@
 
 先增加调用真实 builder 的回归，修复前 Solana 多空两项 InvalidAddressError、EVM 对照通过；修复后 development 与实际 delivery 各 3 suites / 25 项全通过，分别通过 app/landing types，改动文件 ESLint/Prettier 与 diff 检查通过。离线报告位于个人基础 `.local/acceptance/frontend-offline/run-96IhV7/`（red）、`run-FwJG8M/`（development green）、`run-47jWh6/`（delivery green）。没有新的已连接钱包 UI/链上签名、广播或完整 raw-account simulate_order 验收。该修复解除函数级异常，不代表 API/LUT 上线或完整需求验收。
 
+最终 head `40653d3026` 的 GitHub 检查已核对：除组件 workflow 外其余已完成检查通过或按配置 skipped；组件 workflow 的 Run component tests 与上传 artifact 步骤成功，失败位于 Deploy report to GitHub Pages（bot push 403）和 Post report link（Resource not accessible by integration / 403）。未修改 workflow token 权限或发布评论。日志为个人基础 `.local/acceptance/upstream-followup-20261115/fesol19-final-ci-failure.log`，对应 [workflow](https://github.com/gmx-io/gmx-interface/actions/runs/43672575371)。
+
 ## Base58预览异常定位（2026-11-15）
 
 角色：只读诊断/可推进性调研。development `1155c46f87`与delivery `e4e9067a0f`相关文件一致。SideOrderEntry消费的selector虽改走buildTpSlPositionInfo，仍调用getPendingMockPosition并以base58 owner/market/collateral执行EVM hashedPositionKey。提取当前四个原函数的最小执行诊断中，EVM对照正常返回，真实API fixture owner的Solana多空均抛InvalidAddressError。触发前提是已连接账户及有效计算预览数据；当前公开API缺math/旧未连接钱包页面回归不能排除该错误。本轮未作新的完整selector/UI运行，也未修复。将其列为首选独立正确性切片，不自动恢复兑换/最大杠杆/simulate_order/GT Rewards暂缓项；详情与最小验收见[可推进切片](../solana-next-task-2026-11-15.md)。
