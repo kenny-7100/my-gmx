@@ -1,5 +1,6 @@
 import type { IHttp } from "utils/http/types";
 import { getApiFieldReaders } from "utils/http/validation";
+import { isRecord } from "utils/objects";
 
 import type { FeeDiscount } from "./types";
 
@@ -8,11 +9,11 @@ const FEE_DISCOUNT_ENDPOINT = "/v1/fee-discount";
 const { readBigInt, readBoolean, readNullableString, readString, readUint } = getApiFieldReaders(FEE_DISCOUNT_ENDPOINT);
 
 export function parseFeeDiscount(raw: unknown): FeeDiscount {
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+  if (!isRecord(raw)) {
     throw new Error(`${FEE_DISCOUNT_ENDPOINT}: expected an object`);
   }
 
-  const record = raw as Record<string, unknown>;
+  const record = raw;
 
   return {
     userReferralInfo: {
