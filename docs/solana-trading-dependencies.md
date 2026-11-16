@@ -1,5 +1,11 @@
 # Solana 交易链路依赖审计
 
+## 四条跟踪需求状态复核（2026-11-16）
+
+北京时间09:22，按用户要求简查56/72/20/19，复用下文11月15日实施与复审证据，实时刷新GitHub、Linear详情与公开市场API。四PR仍为Open/Draft、Review required，head依次为56/#3258 `a07d84427d`、72/#3259 `2f2ac84771`、20/#3261 `c88e50533d`、19/#3262 `996a167e5c`，与昨晚一致；release仍为`84ab9293a8`。四PR的Audit、常规lint/types/tests、SDK standalone、WASM reproduction成功，组件workflow仍Failure；本轮未重读日志，报告发布权限归因沿用同head既有证据，不称CI全绿。
+
+公开`/v1/markets/config`仍返回67个市场，tradeMath非空数为0。四条Linear实时详情均报access/query compatibility错误，无法确认当前线上状态、关系或评论，不能照搬历史Review/Execution。未新查LUT链上状态、浏览器、钱包、keeper或部署；可信LUT与真实交易待验收结论沿用既有记录。1204-byte修复、19 base58预览修复及72版本确认均已完成，不重新列作阻碍；19此前暂缓范围仍保留。本轮没有业务改动、构建测试或线上写入。
+
 ## 基于 review 经验的四 PR 复审（2026-11-15）
 
 用户要求先确认四个 PR 包含最新本需求成果，再应用新建 review 经验基础设施重新审查。已读取个人基础 `d6965cf36b` 引入的七组 [review 经验](review-lessons.md)、当前 gmx-prompts frontend review/dev/Solana/testing 规范，按 72→56→20→19 核查共享契约；相同依赖只分析一次。本轮为代码及交付审查，不是整需求完成或批准上线。没有发布 review/comment、修改 Linear、转 Ready 或合并。
