@@ -55,6 +55,8 @@
 
 **项目判断：** UI 可见性、请求启停、业务状态归属及在途任务存活分别决定。隐藏入口不等于关闭所有入口；CSS 隐藏或丢弃 Hook 返回值仍可能请求。暂停新读取不应无条件销毁在途交易 watcher，关闭整页也可能误伤网络中立设置。
 
+**GMTrade pending 退出入口（2026-11-16）：** Sulliven 的 [旧前端 #1095](https://github.com/gmsol-labs/gmx-solana-interface/pull/1095) 将价格不可用与关联市价单 pending 拆为独立条件：两者都锁定一般操作，但仅价格不可用禁用 Close，且表格/卡片保持一致。不要把所有状态合成整行 `pointer-events-none` 而误封退出入口；遍历订单时也不要让后遇到的普通订单覆盖先前发现的 pending。核验正常/pending/价格不可用/两者同时存在，逐一检查 Close、编辑抵押、TP/SL 与大小屏。此为旧项目前端设计证据，不自动作为新 GMX 产品规则，也不证明 Keeper 执行或交易已通过；[本次调查与证据边界](gmtrade-eur-pending-investigation.md#后续修复pr-1095)。
+
 **证据：** #3120 的[dropdown 外仍有铅笔入口](https://github.com/gmx-io/gmx-interface/pull/3120#discussion_r4336793693)、[设置页与 Hook](https://github.com/gmx-io/gmx-interface/pull/3120#discussion_r4336793730)，#3110 的[未使用结果仍启动 RPC](https://github.com/gmx-io/gmx-interface/pull/3110#discussion_r4358191016)。#3193 先修 [pending 状态归属](https://github.com/gmx-io/gmx-interface/pull/3193#discussion_r4466217380)，又修[旧 promise 引用已卸载 poller 回调](https://github.com/gmx-io/gmx-interface/pull/3193#discussion_r4469286763)。这些是历史 review，不证明当前所有分支已通过。
 
 **有区分力的核验：** 对受影响部分列明入口、请求、state owner、异步回调和销毁时机；按需验证 flag off/on、刷新/站内切换、单链/双钱包、在途成功/失败/超时与卸载。不要把所有组合变成每个任务的固定门禁。历史切片延期不等于永久免做，后续范围以当前 Linear 与最终决定为准。

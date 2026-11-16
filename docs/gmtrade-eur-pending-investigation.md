@@ -8,6 +8,16 @@
 
 原生浏览器当前桌面 EUR 仓位不再显示 spinner，金额仍为 `$105,072.77`，Orders 从 5 降为 4，Phantom 显示 `1007.81748 USDC`。因此变化原因是关联加仓单已被取消、订单账户关闭，前端不再满足原先的 pending 禁用条件；不是该单成交，也不是原持仓已平仓。以下章节保留取消前的调查快照，均按当时观察理解。此次 Agent 仍只读，未代签或取消。
 
+## 后续修复：PR #1095
+
+用户指出 [Sulliven 的 PR #1095](https://github.com/gmsol-labs/gmx-solana-interface/pull/1095) 专门处理本问题。实时读取 diff、评论与检查信息：head `d50788e3ab4f4f78d7dcfcdbc0ee69276d73fc30`，北京时间 2026-11-16 14:09:59 合入 main，merge SHA `6e4661fa24c265c646267ee0f7ca9e671a3ab252`。PR 无正文、review 或评论，GitHub 未报告该分支 checks；不能据此声称经过运行验收或已部署正式站。
+
+该 PR 明确将 `shouldDisablePosition` 保留为价格不可用的禁用条件，将关联 pending 市价单拆为 `hasPendingMarketOrder`；RPC 和 Marin 两条 buildEntry 均更新。PositionItem 的表格/卡片统一显示 spinner、锁定其他操作，但 Close 仅由价格不可用条件禁用，pending 本身不再阻断 Close。移除遍历中回写 `shouldDisablePosition=priceUnavailable` 的 else 分支，也避免另一笔关联限价单清除此前市价单造成的锁定。价格不可用保护被保留。
+
+这提供了“pending 时仍允许对已有仓位发起 Close”的明确前端设计依据；它修复的是退出入口与响应式布局一致性，不处理 Keeper 调度、过期收尾，也不自动取消旧加仓单或保证平仓成交。应验证正常/pending/价格不可用/pending+价格不可用在两种布局的行为，及 pending 加仓与平仓先后执行的实际结果。本轮只读评估代码，未运行这些用例。
+
+用户随后要求暂停页面修改：此前为查看旧效果，Agent 仅向一个现有 GMTrade 标签注入临时 CSS（`codex-eur-pending-preview`），模拟旧桌面置灰和 spinner；控制台确认目标行与 style 存在，但屏幕截图出现空白，未完成视觉验收。该模拟不修改业务状态，刷新即移除；用户要求停止后未再操作页面。不能用这段旧样式验收 #1095，因为它会额外禁用 Close，与 PR 目标相反。
+
 ## 已确认结论
 
 钱包 `25atW95AGV61h7oDwfW5HtFjUB4q2ctAP6s5z4NcUjbU` 的 EUR/USD $105,072.77 持仓本身已存在。导致桌面转圈与整行禁用的是另一笔关联此仓位、仍处于 Created 的市价加仓订单。不是按仓位金额设置的禁用门槛，也不是仅浏览器缓存：RPC 与 Keeper 均返回相同订单。
