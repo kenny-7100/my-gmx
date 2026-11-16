@@ -59,6 +59,8 @@ NODE_OPTIONS=--max-old-space-size=8192 node tools/local-solana-trades/web.mjs \
   --api-url http://127.0.0.1:3046 --port 3016
 ```
 
+启动器先使用项目既有 vite.gmsol.config.ts 校验固定SDK文件哈希并构建浏览器entry/WASM，再启动页面，避免只有Node诊断可用而浏览器SDK产物缺失。
+
 本地 Vite 的限定配置转换将 Solana SDK API host 指向明确的 loopback API，并给 builder/validator/sender 同一份空 LUT 配置；其余 EVM API、生产源码、AB flag 和 solanaTrading 检查不变。API 不可用就显示原有错误，不回退公网或 mock。HTTP 已核验首页和两个配置模块；现有原生 Chrome 已连接用户切换后的 Phantom 账户，核对 BTC/USDC 市场、共享余额、多空输入和最低保证金校验。实测发现余额未进入共享 TokensData，已在 TRD-70 原开发线修复并集成，未知余额仍保留 undefined，真实零余额仍为0。浏览器3 USDC/6 USD多空输入通过校验，1 USDC输入因扣费后最低保证金不足被阻止。没有点击订单提交按钮，浏览器 SDK loader/签名前完整流程未验；诊断输入已清空。Ctrl-C 停止该服务。不要在真实数据尚未 ready、退出路径未验证时尝试开仓。
 
 ## 重现离线无 LUT 体积测量
