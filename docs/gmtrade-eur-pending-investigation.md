@@ -2,6 +2,12 @@
 
 核验日期：2026-11-16。范围为 GMTrade 旧项目线上 v2.18.0；只读浏览器、公开部署脚本、Mainnet RPC、Keeper GraphQL 与源码，没有签名、取消、平仓、改业务代码或修改 Linear。
 
+## 后续状态：已取消并退款
+
+同日用户反馈页面不再转圈，重新核验确认：北京时间 **2026-11-16 14:43:38**，该钱包作为签名者成功执行 `CloseOrderV2`，[交易 2AABXarSw3Ds33Eshm3GKHSULSEBAnAVkZVgR4FMTttm79y2yT8st194nBng12JPpw5Us8DDdMQrmUMWNU4Crh55](https://solscan.io/tx/2AABXarSw3Ds33Eshm3GKHSULSEBAnAVkZVgR4FMTttm79y2yT8st194nBng12JPpw5Us8DDdMQrmUMWNU4Crh55)。交易前钱包 USDC 为 `7.817478`，交易后为 `1007.817478`，订单托管的 **1,000 USDC 已退回**。订单账户最新 `getAccountInfo` 返回 null（context slot 470077728）。只能确认钱包地址签名，不能由此识别实际操作人。
+
+原生浏览器当前桌面 EUR 仓位不再显示 spinner，金额仍为 `$105,072.77`，Orders 从 5 降为 4，Phantom 显示 `1007.81748 USDC`。因此变化原因是关联加仓单已被取消、订单账户关闭，前端不再满足原先的 pending 禁用条件；不是该单成交，也不是原持仓已平仓。以下章节保留取消前的调查快照，均按当时观察理解。此次 Agent 仍只读，未代签或取消。
+
 ## 已确认结论
 
 钱包 `25atW95AGV61h7oDwfW5HtFjUB4q2ctAP6s5z4NcUjbU` 的 EUR/USD $105,072.77 持仓本身已存在。导致桌面转圈与整行禁用的是另一笔关联此仓位、仍处于 Created 的市价加仓订单。不是按仓位金额设置的禁用门槛，也不是仅浏览器缓存：RPC 与 Keeper 均返回相同订单。
