@@ -1,5 +1,53 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## TRD-101 正文全部 FESOL 引用映射（2026-11-16）
+
+实时读取 TRD-101 正文并去重提取 41 个 FESOL 引用，逐条用官方 Linear MCP get_issue 解析旧编号，核验返回的当前编号、标题、团队和 URL。其中 38 个已迁移到 Trading；FESOL-79、110、114 仍在 Solana Frontend，没有对应的迁移后 TRD 编号。此次只查询，不修改正文、团队或任何任务。范围不限前述 UI/负责人/状态筛选，未递归提取被引用需求正文内的其他编号。
+
+| 原引用 | 当前编号 | 当前需求标题 |
+| --- | --- | --- |
+| FESOL-15 | [TRD-63](https://linear.app/gmx-io/issue/TRD-63/display-solana-markets-in-the-gmx-market-dropdown-and-primary-header) | Display Solana markets in the GMX market dropdown and primary header |
+| FESOL-29 | [TRD-85](https://linear.app/gmx-io/issue/TRD-85/support-solana-price-and-depth-charts-in-gmx) | Support Solana Price and Depth Charts in GMX |
+| FESOL-51 | [TRD-98](https://linear.app/gmx-io/issue/TRD-98/show-solana-balances-from-the-gmx-rpc) | Show Solana balances from the GMX RPC |
+| FESOL-25 | [TRD-80](https://linear.app/gmx-io/issue/TRD-80/display-solana-positions-and-open-orders) | Display Solana Positions and Open Orders |
+| FESOL-57 | [TRD-75](https://linear.app/gmx-io/issue/TRD-75/add-gmsol-variants-to-the-sdk-trade-math) | Add gmsol variants to the SDK trade math |
+| FESOL-92 | [TRD-100](https://linear.app/gmx-io/issue/TRD-100/add-sdk-unit-conversions-for-solana-order-inputs) | Add SDK unit conversions for Solana order inputs |
+| FESOL-56 | [TRD-72](https://linear.app/gmx-io/issue/TRD-72/build-check-and-send-solana-order-transactions-with-the-gmsol-sdk) | Build, check and send Solana order transactions with the gmsol SDK |
+| FESOL-61 | [TRD-102](https://linear.app/gmx-io/issue/TRD-102/write-the-solana-api-spec-and-sample-responses) | Write the Solana API spec and sample responses |
+| FESOL-113 | [TRD-99](https://linear.app/gmx-io/issue/TRD-99/call-the-solana-api-through-the-sdk-client) | Call the Solana API through the SDK client |
+| FESOL-52 | [TRD-65](https://linear.app/gmx-io/issue/TRD-65/feed-the-solana-trade-state-from-gmx-api) | Feed the Solana trade state from gmx-api |
+| FESOL-112 | [TRD-108](https://linear.app/gmx-io/issue/TRD-108/switch-solana-positions-to-the-gmsol-variants-of-the-sdk-trade-math) | Switch Solana positions to the gmsol variants of the SDK trade math |
+| FESOL-67 | [TRD-107](https://linear.app/gmx-io/issue/TRD-107/load-check-the-solana-service) | Load-check the Solana service |
+| FESOL-89 | [TRD-104](https://linear.app/gmx-io/issue/TRD-104/read-raw-solana-wallet-balances-through-the-gmx-rpc) | Read raw Solana wallet balances through the GMX RPC |
+| FESOL-96 | [TRD-103](https://linear.app/gmx-io/issue/TRD-103/add-a-lazy-solana-balance-hook-with-network-scoped-caching) | Add a lazy Solana balance hook with network-scoped caching |
+| FESOL-90 | [TRD-106](https://linear.app/gmx-io/issue/TRD-106/isolate-solana-trade-cache-and-storage-keys-by-network) | Isolate Solana trade cache and storage keys by network |
+| FESOL-91 | [TRD-105](https://linear.app/gmx-io/issue/TRD-105/add-network-aware-token-lookup-for-solana-mints) | Add network-aware token lookup for Solana mints |
+| FESOL-19 | [TRD-70](https://linear.app/gmx-io/issue/TRD-70/adapt-perp-order-entry) | Adapt Perp Order Entry |
+| FESOL-20 | [TRD-78](https://linear.app/gmx-io/issue/TRD-78/show-solana-market-order-sending-and-filling-status) | Show Solana Market Order Sending and Filling Status |
+| FESOL-59 | [TRD-84](https://linear.app/gmx-io/issue/TRD-84/close-positions-edit-and-cancel-orders-on-solana) | Close positions, edit and cancel orders on Solana |
+| FESOL-71 | [TRD-109](https://linear.app/gmx-io/issue/TRD-109/prepare-mainnet-testing-lookup-tables-and-ui-flags) | Prepare mainnet testing: lookup tables and UI flags |
+| FESOL-72 | [TRD-77](https://linear.app/gmx-io/issue/TRD-77/build-the-gmsol-sdk-from-v0100-in-gmx-ci-and-replace-the-pinned-build) | Build the gmsol SDK from v0.10.0 in GMX CI and replace the pinned build |
+| FESOL-110 | [FESOL-110](https://linear.app/gmx-io/issue/FESOL-110/follow-up-the-solana-pages-tradebox-entries-and-chat-gaps-left-by)（仍在旧团队） | Follow up the Solana pages, TradeBox entries, and chat gaps left by FESOL-48 |
+| FESOL-28 | [TRD-83](https://linear.app/gmx-io/issue/TRD-83/adapt-solana-position-and-order-actions-to-gmx) | Adapt Solana Position and Order Actions to GMX |
+| FESOL-114 | [FESOL-114](https://linear.app/gmx-io/issue/FESOL-114/block-solana-actions-in-gmx-when-the-wallet-lacks-sol-for-gas)（仍在旧团队） | Block Solana actions in GMX when the wallet lacks SOL for gas |
+| FESOL-18 | [TRD-119](https://linear.app/gmx-io/issue/TRD-119/technical-side-multilingual-alignment) | [Technical side] Multilingual alignment |
+| FESOL-86 | [TRD-117](https://linear.app/gmx-io/issue/TRD-117/support-solana-tradfi-markets-stocks-fx-and-commodities) | Support Solana TradFi markets: stocks, FX and commodities |
+| FESOL-30 | [TRD-89](https://linear.app/gmx-io/issue/TRD-89/support-solana-trades-in-gmx) | Support Solana Trades in GMX |
+| FESOL-31 | [TRD-90](https://linear.app/gmx-io/issue/TRD-90/support-solana-claims-in-gmx) | Support Solana Claims in GMX |
+| FESOL-32 | [TRD-91](https://linear.app/gmx-io/issue/TRD-91/support-the-solana-net-rate-chart-in-gmx) | Support the Solana Net Rate Chart in GMX |
+| FESOL-33 | [TRD-110](https://linear.app/gmx-io/issue/TRD-110/support-solana-swap-in-gmx) | Support Solana Swap in GMX |
+| FESOL-8 | [TRD-111](https://linear.app/gmx-io/issue/TRD-111/support-receiving-and-sending-assets-on-solana) | Support receiving and sending assets on Solana |
+| FESOL-6 | [TRD-92](https://linear.app/gmx-io/issue/TRD-92/support-solana-wallet-connections-and-asset-visibility) | Support Solana wallet connections and asset visibility |
+| FESOL-3 | [TRD-116](https://linear.app/gmx-io/issue/TRD-116/integrate-solana-pools-and-liquidity-actions-into-gmx) | Integrate Solana Pools and liquidity actions into GMX |
+| FESOL-79 | [FESOL-79](https://linear.app/gmx-io/issue/FESOL-79/adapt-the-stats-page-for-solana)（仍在旧团队） | Adapt the Stats Page for Solana |
+| FESOL-102 | [TRD-115](https://linear.app/gmx-io/issue/TRD-115/support-the-solana-earn-page-in-gmx) | Support the Solana Earn Page in GMX |
+| FESOL-104 | [TRD-114](https://linear.app/gmx-io/issue/TRD-114/support-the-solana-referrals-page-in-gmx) | Support the Solana Referrals Page in GMX |
+| FESOL-105 | [TRD-113](https://linear.app/gmx-io/issue/TRD-113/support-the-solana-gt-points-page-in-gmx) | Support the Solana GT Points Page in GMX |
+| FESOL-106 | [TRD-112](https://linear.app/gmx-io/issue/TRD-112/support-staking-in-gmx-solana-gt-points) | Support Staking in GMX Solana GT Points |
+| FESOL-26 | [TRD-118](https://linear.app/gmx-io/issue/TRD-118/ask-gmtrade-for-notice-before-program-upgrades) | Ask GMTrade for notice before program upgrades |
+| FESOL-116 | [TRD-69](https://linear.app/gmx-io/issue/TRD-69/confirm-solana-market-listing-dates-for-new-and-recently-listed) | Confirm Solana market listing dates for New and Recently Listed |
+| FESOL-5 | [TRD-62](https://linear.app/gmx-io/issue/TRD-62/unify-the-solana-trade-page-with-the-gmx-standard) | Unify the Solana Trade page with the GMX standard |
+
 ## 旧 Cycle 2/3 编号对照（2026-11-16）
 
 用户要求列旧周期 issue 与新编号对照。本轮用官方 Linear MCP 全页读取 Trading（135 条，hasNextPage=false），与 2026-11-12T17:47:06.125Z 的迁移前 FESOL 快照按 issue UUID 匹配，下面 30 个不同 issue 中 29 个已迁移、FESOL-110 仍在旧团队。只查询，未改 Linear。
