@@ -8,7 +8,7 @@ Solana 前端需求迁移到 Trading 团队后，我根据 Divhead 的计划，�
 
 ## 任务对照表
 
-仅包含尚未标记 Done 的 10 条任务。“原周期”沿用旧计划文档的 UI 清单分组；状态和新周期为 2026 年 11 月 16 日已核验的信息。
+仅包含尚未标记 Done 的 11 条任务。“原周期”沿用旧计划文档的 UI 清单分组；状态和新周期为 2026 年 11 月 16 日已核验的信息。
 
 | 原周期 | 负责人 | 旧 issue | 新 issue | 工作内容 | 当前状态 | 当前新周期 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -18,6 +18,7 @@ Solana 前端需求迁移到 Trading 团队后，我根据 Divhead 的计划，�
 | Solana Frontend Cycle 2 | Sulliven | FESOL-52 | [TRD-65](https://linear.app/gmx-io/issue/TRD-65) | 从 gmx-api 接入 Solana 交易状态 | In Progress | Trading Cycle 1 |
 | Solana Frontend Cycle 3 | Kenny | FESOL-19 | [TRD-70](https://linear.app/gmx-io/issue/TRD-70) | 市场单与 TP/SL 下单入口 | In Progress | Trading Cycle 2 |
 | Solana Frontend Cycle 3 | Kenny | FESOL-56 | [TRD-72](https://linear.app/gmx-io/issue/TRD-72) | 构建、检查和发送 Solana 订单交易 | In Progress | Trading Cycle 1 |
+| Solana Frontend Cycle 3（补充前端依赖） | Kenny | FESOL-72 | [TRD-77](https://linear.app/gmx-io/issue/TRD-77) | GMX CI 构建 gmsol SDK 并替换固定构建产物 | In Progress | Trading Cycle 1 |
 | Solana Frontend Cycle 3 | Kenny | FESOL-20 | [TRD-78](https://linear.app/gmx-io/issue/TRD-78) | 市场单发送与成交状态 | In Progress | Trading Cycle 1 |
 | Solana Frontend Cycle 3 | Rainer | FESOL-57 | [TRD-75](https://linear.app/gmx-io/issue/TRD-75) | SDK 交易数学增加 gmsol 实现 | In Progress | Trading Cycle 1 |
 | Solana Frontend Cycle 3 | Sulliven | FESOL-25 | [TRD-80](https://linear.app/gmx-io/issue/TRD-80) | 展示 Solana 仓位与未完成订单 | In Progress | Trading Cycle 1 |
@@ -32,4 +33,6 @@ TRD-70 和 TRD-84 按完整 issue 的收口周期放在 Trading Cycle 2；它们
 
 排期依据：[Divhead 的 Solana trading plan（TRD-101）](https://linear.app/gmx-io/issue/TRD-101/solana-trading-plan)。本表用于核对任务和排期，不表示任务已通过验收。
 
-本文件根据此前核验结果整理，未重新查询或修改 Linear；原周期分组来自计划正文，不是迁移前实际 cycle 字段的完整备份。
+原有 10 行沿用此前核验结果，本次补入 TRD-77 时重新查询了该任务，未修改 Linear；原周期分组来自计划正文，不是迁移前实际 cycle 字段的完整备份。
+
+FESOL-72 → TRD-77 原列于旧 Cycle 3 的“补充前端工作与测试依赖”，现补入本表。它与 FESOL-56 → TRD-72 是两条不同任务。2026 年 11 月 16 日再次核验了 TRD-77 的编号、负责人、状态与新周期。

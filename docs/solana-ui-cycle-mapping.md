@@ -2,7 +2,7 @@
 
 Verified on November 16, 2026.
 
-Scope: 10 issues from the UI lists in the previous Solana Frontend Cycle 2 and Cycle 3 planning document, assigned to Kenny, Rainer or Sulliven, excluding issues currently marked Done.
+Scope: 11 issues from the UI lists in the previous Solana Frontend Cycle 2 and Cycle 3 planning document, assigned to Kenny, Rainer or Sulliven, excluding issues currently marked Done.
 
 “Previous cycle” follows the grouping in the previous planning document; it is not a complete backup of cycle assignments before migration. “Current status” and “Current cycle” reflect Linear at the time of verification.
 
@@ -14,6 +14,7 @@ Scope: 10 issues from the UI lists in the previous Solana Frontend Cycle 2 and C
 | Solana Frontend Cycle 2 | Sulliven | FESOL-52 | [TRD-65](https://linear.app/gmx-io/issue/TRD-65) | Feed the Solana trade state from gmx-api | In Progress | Trading Cycle 1 |
 | Solana Frontend Cycle 3 | Kenny | FESOL-19 | [TRD-70](https://linear.app/gmx-io/issue/TRD-70) | Market order entry with TP/SL | In Progress | Trading Cycle 2 |
 | Solana Frontend Cycle 3 | Kenny | FESOL-56 | [TRD-72](https://linear.app/gmx-io/issue/TRD-72) | Build, check and send Solana order transactions | In Progress | Trading Cycle 1 |
+| Solana Frontend Cycle 3 (additional frontend dependency) | Kenny | FESOL-72 | [TRD-77](https://linear.app/gmx-io/issue/TRD-77) | Build the gmsol SDK in GMX CI and replace the pinned build | In Progress | Trading Cycle 1 |
 | Solana Frontend Cycle 3 | Kenny | FESOL-20 | [TRD-78](https://linear.app/gmx-io/issue/TRD-78) | Show market order sending and filling status | In Progress | Trading Cycle 1 |
 | Solana Frontend Cycle 3 | Rainer | FESOL-57 | [TRD-75](https://linear.app/gmx-io/issue/TRD-75) | Add gmsol variants to the SDK trade math | In Progress | Trading Cycle 1 |
 | Solana Frontend Cycle 3 | Sulliven | FESOL-25 | [TRD-80](https://linear.app/gmx-io/issue/TRD-80) | Display Solana positions and open orders | In Progress | Trading Cycle 1 |
@@ -26,4 +27,6 @@ Scope: 10 issues from the UI lists in the previous Solana Frontend Cycle 2 and C
 
 TRD-70 and TRD-84 are assigned to Trading Cycle 2 for completion of their full issue scope. Their Cycle 1 milestones for market orders, TP/SL, closing and integration still apply; the Cycle 2 assignment does not mean work starts in Cycle 2.
 
-Source and identifier verification record: [Solana trading scope and timeline](issues/FESOL-109.md). This document presents previously verified results; Linear was not queried again or modified when preparing this file.
+Source and identifier verification record: [Solana trading scope and timeline](issues/FESOL-109.md). This document presents previously verified results; The original 10 rows retain their previously verified values; TRD-77 was queried again for this correction. Linear was not modified.
+
+FESOL-72 → TRD-77 was included under “Additional frontend work and testing dependencies” in the previous Cycle 3 plan and is included here. It is distinct from FESOL-56 → TRD-72. The mapping, assignee, status and current cycle of TRD-77 were checked again on November 16, 2026.
