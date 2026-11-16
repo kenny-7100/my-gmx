@@ -8,3 +8,10 @@
 
 
 2026-11-16 本地真实API与四类unsigned模拟通过后，退出路径仍未因此接通。已询问用户是否授权仅本地最小平仓/撤单接线，或提供负责人已有成果；尚待答复，未改本需求业务、未真实开仓。TRD-136不接管正式归属，不将底层decrease/cancel能力当共用UI验收。
+
+
+## 最小接线契约核查（2026-11-16，TRD-136 集成 `335a9cd5f3`）
+
+只读分析，尚未获本地接线范围答复，未实现本需求。撤单可以复用 `getGmsolOrderContext(order)`→`useGmsolOrderTransactions.submit({type:"cancel",order:context})`，不另写签名/广播：composeGmsolOrdersInfo 已将 API 的 orderAccount、rentReceiver、actionState、referrer、callback、escrowTokens 保存在 OrderInfo.solana。转换要求 pending、元数据完整且无 callback；builder/validator 继续要求 owner/receiver/rentReceiver匹配钱包，不能为了本地测试清空 callback 或从错误IDL推导referrer。需要实际订单后核对这些真实字段，当前空订单列表不能证明撤单可行。
+
+平仓应从共享 PositionSeller 的现有计算结果映射 MarketDecrease，经过同一 submit，而非绕过共享计算自建命令行退出工具。该 Hook 已提供钱包/网络变化与卸载保护、重复提交锁、未知receipt reconcile、确认后按slot刷新账户及余额。UI仍需正确接入isSubmitting/待确认反馈、原通知生命周期，并隔离EVM allowance/express提交分支；低层已有create/update/cancel测试只验证生成交易，不证明这组UI接线或真实退出。当前不重跑已由同版本全量覆盖的低层测试，后续修改需在实际组合目标做定向与页面验证。
