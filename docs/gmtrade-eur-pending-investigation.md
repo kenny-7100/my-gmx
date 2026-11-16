@@ -16,6 +16,8 @@
 
 这提供了“pending 时仍允许对已有仓位发起 Close”的明确前端设计依据；它修复的是退出入口与响应式布局一致性，不处理 Keeper 调度、过期收尾，也不自动取消旧加仓单或保证平仓成交。应验证正常/pending/价格不可用/pending+价格不可用在两种布局的行为，及 pending 加仓与平仓先后执行的实际结果。本轮只读评估代码，未运行这些用例。
 
+后续 CR（同一 head）：发现一项 P2 交互缺口。`PositionItem.tsx` 仅以 `pointer-events-none` 禁用 H5 TP/SL、Edit Collateral 和价格不可用时的 Close，没有传 `disabled` 或在 handler 校验状态；桌面 Close 也仅在父单元格应用 CSS。该 head 的 Common/Button 是原生 button，只有传入 `disabled` 才阻断 handler。Tab 聚焦后 Enter/Space 仍可触发这些灰色按钮打开对应弹窗，因此 CSS 不能实现宣称的统一禁用语义。H5 新增禁用逻辑引入此缺口，桌面部分已有类似写法；修复应给按钮传真实 disabled，保留 pending-only 时 Close 可用，其他非按钮入口按需要加 guard。此为代码与标准浏览器事件语义判断，未在用户页面执行键盘复现，也不声称已绕过交易最终校验。重复平仓单及旧加仓单与平仓的执行先后仍是验证项，不凭本次 diff 认定额外 P1 缺陷。
+
 用户随后要求暂停页面修改：此前为查看旧效果，Agent 仅向一个现有 GMTrade 标签注入临时 CSS（`codex-eur-pending-preview`），模拟旧桌面置灰和 spinner；控制台确认目标行与 style 存在，但屏幕截图出现空白，未完成视觉验收。该模拟不修改业务状态，刷新即移除；用户要求停止后未再操作页面。不能用这段旧样式验收 #1095，因为它会额外禁用 Close，与 PR 目标相反。
 
 ## 已确认结论
