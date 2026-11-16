@@ -156,3 +156,12 @@ Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新
 ## 2026-11-14 独立推进收尾
 
 最终CI、19交付组合的原生Chrome未连接钱包回归与56固定WASM原子体积归因已完成，详见[三项收尾](../solana-trading-dependencies.md#独立推进三项收尾2026-11-14)。四PR关键代码检查通过；组件报告403，56另有1 flaky重试通过。未确认需新增业务修复的问题，HEAD未变。原子组合仍1255/1232 bytes，假设单表1221不代表真实LUT可用。71/112及真实钱包验收未解除；72版本已由用户确认。既有Draft正文已更新，未转正式review。
+
+
+## TRD-136 真实钱包联调发现的余额接线修复（2026-11-16）
+
+当前编号 TRD-70，沿用原任务及 Draft #3262。真实 Phantom 连接后，既有 owner/network scoped useSolanaBalances 已返回实际余额，但 useGmsolTokensData 只有价格，balance/walletBalance 未赋值，loaded flags为false，共用TradeBox因此误报USDC不足。修复在原 development `9a3342837b`：Provider复用既有余额Hook，错误时不提供余额；TokensData按mint合并真实balance/walletBalance并设置loaded flags，未知/切换/错误保留undefined，真实零保持0，GMX-account余额标记仍false。没有增加重复RPC层或本地数值覆盖。
+
+新增消费者回归覆盖 pending→funded→scope/error unknown→真实零；原开发目录相关3 suites/12 tests与TypeScript通过，全量352 suites passed/1 skipped、3484 tests passed/1 skipped。本任务精确cherry-pick `3cee91eb7e`，该目录TypeScript与相关12tests通过；原release delivery精确转入 `d0726f09d9`，该目录TypeScript与相关12tests通过。交付提交仍仅本地，未推送更新PR；不把开发全量结果冒充delivery全量。
+
+现有原生Chrome在TRD-136集成页验证真实余额展示，3 USDC/6 USD多空输入通过；1 USDC被最低保证金校验阻止。没有订单提交、签名或广播。复用判断更新 [RL-02](../review-lessons.md#rl-02-数据含义与完整性)：RPC读取成功仍需追踪共享消费者，不能只看Hook就确认余额业务可用。
