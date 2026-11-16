@@ -1,5 +1,11 @@
 # Solana 交易链路依赖审计
 
+## 上游前置增量核对（2026-11-16）
+
+用户要求检查可新跟进合并的前置。实时核对前端#3193/#3195/#3201/#3205/#3207/#3238/#3242/#3243、API#340及11月15日起Solana相关PR搜索：相关head与11月15日记录一致，release仍`84ab9293a8`；搜索仅前端四条自身Draft有更新、API无命中，不声称覆盖所有未标记Solana的PR或远端分支。原生Git ancestry确认四条development均已含当前release及52 `e712a1d342`、51 `2495be234e`、92 `5e081e5ab1`、113 fee `087a98fa37`/orders `c711f6ebe7`，无需重复集成。15/25原PR head不是四线祖先，不能仅据此判定能力缺失；19既有选择性集成及delivery边界沿下文记录，本轮未重审其文件等价性。
+
+合并协调优先52/#3193：MERGEABLE、Review required，返回checks成功；API#340 `59e49c649d`同为MERGEABLE、Review required，test/plan成功、Apply skipped，不证明部署。51/#3195仍MERGEABLE但Changes requested。15/#3201、25/#3238、92/#3243对release及113/#3205/#3207对各自stacked base仍CONFLICTING；应先处理原PR冲突与review，不把历史CI绿等同当前可合并。57/#3242已于11月14日合并，无需新集成。按FESOL-71搜索仅返回正文关联的旧#3120，未发现专属可信LUT交付PR；未重查链上资源。无新的业务合并、测试、评论或上游写入；当前Linear访问失败沿用同阶段证据。
+
 ## 四条跟踪需求状态复核（2026-11-16）
 
 北京时间09:22，按用户要求简查56/72/20/19，复用下文11月15日实施与复审证据，实时刷新GitHub、Linear详情与公开市场API。四PR仍为Open/Draft、Review required，head依次为56/#3258 `a07d84427d`、72/#3259 `2f2ac84771`、20/#3261 `c88e50533d`、19/#3262 `996a167e5c`，与昨晚一致；release仍为`84ab9293a8`。四PR的Audit、常规lint/types/tests、SDK standalone、WASM reproduction成功，组件workflow仍Failure；本轮未重读日志，报告发布权限归因沿用同head既有证据，不称CI全绿。
