@@ -1,5 +1,57 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 旧 Cycle 2/3 编号对照（2026-11-16）
+
+用户要求列旧周期 issue 与新编号对照。本轮用官方 Linear MCP 全页读取 Trading（135 条，hasNextPage=false），与 2026-11-12T17:47:06.125Z 的迁移前 FESOL 快照按 issue UUID 匹配，下面 30 个不同 issue 中 29 个已迁移、FESOL-110 仍在旧团队。只查询，未改 Linear。
+
+范围依据为历史 FESOL-109 计划正文；这是计划清单及后续补充依赖，不冒充迁移前实际 cycle 字段的完整备份（旧快照没有 cycle 字段）。旧 Cycle 2 为 10 月 26 日至 11 月 9 日边界，Cycle 3 为 11 月 9 日至 23 日边界。主清单按早期计划分组，后续 11 月 12 日 Cycle 3 扩展依赖单列；FESOL-65 跨周期重复展示。FESOL-112 在旧 Cycle 3 正文中明确仍分配旧 Cycle 4，仅为 Cycle 3 财务验收前置，不能误列成旧 Cycle 2/3 实际成员。旧周期现存列表主要为未迁移的 GMTrade 任务，不能以此反推完整迁移清单。
+
+旧 Cycle 2 计划主清单
+
+| 旧编号 | 当前编号 | 当前标题 | 当前 Trading cycle |
+| --- | --- | --- | --- |
+| FESOL-7 | [TRD-120](https://linear.app/gmx-io/issue/TRD-120/integrate-solana-network-selection-and-app-navigation-inside-gmx) | Integrate Solana network selection and app navigation inside GMX | 未分配 |
+| FESOL-42 | [TRD-97](https://linear.app/gmx-io/issue/TRD-97/connect-external-solana-wallets-through-privy) | Connect external Solana wallets through Privy | 未分配 |
+| FESOL-51 | [TRD-98](https://linear.app/gmx-io/issue/TRD-98/show-solana-balances-from-the-gmx-rpc) | Show Solana balances from the GMX RPC | Cycle 1 |
+| FESOL-48 | [TRD-122](https://linear.app/gmx-io/issue/TRD-122/hide-evm-only-features-on-solana) | Hide EVM-only features on Solana | 未分配 |
+| FESOL-15 | [TRD-63](https://linear.app/gmx-io/issue/TRD-63/display-solana-markets-in-the-gmx-market-dropdown-and-primary-header) | Display Solana markets in the GMX market dropdown and primary header | Cycle 1 |
+| FESOL-52 | [TRD-65](https://linear.app/gmx-io/issue/TRD-65/feed-the-solana-trade-state-from-gmx-api) | Feed the Solana trade state from gmx-api | Cycle 1 |
+| FESOL-29 | [TRD-85](https://linear.app/gmx-io/issue/TRD-85/support-solana-price-and-depth-charts-in-gmx) | Support Solana Price and Depth Charts in GMX | Cycle 1 |
+| FESOL-50 | [TRD-86](https://linear.app/gmx-io/issue/TRD-86/add-solana-prices-candles-and-the-24h-change-from-gmxs-oracle-keeper) | Add Solana prices, candles and the 24h change from GMX's oracle keeper | 未分配 |
+| FESOL-63 | [TRD-131](https://linear.app/gmx-io/issue/TRD-131/map-solana-mints-to-the-arbitrum-oracle-keeper-prices) | Map Solana mints to the Arbitrum oracle keeper prices | 未分配 |
+| FESOL-64 | [TRD-130](https://linear.app/gmx-io/issue/TRD-130/serve-solana-market-config-and-values-from-the-chain) | Serve Solana market config and values from the chain | 未分配 |
+| FESOL-65 | [TRD-129](https://linear.app/gmx-io/issue/TRD-129/serve-solana-positions-and-orders-from-the-chain) | Serve Solana positions and orders from the chain | 未分配 |
+| FESOL-66 | [TRD-125](https://linear.app/gmx-io/issue/TRD-125/route-solanagmxapiio-to-api-solana-and-add-monitors) | Route solana.gmxapi.io to api-solana and add monitors | 未分配 |
+
+旧 Cycle 3 计划主清单
+
+| 旧编号 | 当前编号 | 当前标题 | 当前 Trading cycle |
+| --- | --- | --- | --- |
+| FESOL-25 | [TRD-80](https://linear.app/gmx-io/issue/TRD-80/display-solana-positions-and-open-orders) | Display Solana Positions and Open Orders | Cycle 1 |
+| FESOL-19 | [TRD-70](https://linear.app/gmx-io/issue/TRD-70/adapt-perp-order-entry) | Adapt Perp Order Entry | Cycle 2 |
+| FESOL-56 | [TRD-72](https://linear.app/gmx-io/issue/TRD-72/build-check-and-send-solana-order-transactions-with-the-gmsol-sdk) | Build, check and send Solana order transactions with the gmsol SDK | Cycle 1 |
+| FESOL-57 | [TRD-75](https://linear.app/gmx-io/issue/TRD-75/add-gmsol-variants-to-the-sdk-trade-math) | Add gmsol variants to the SDK trade math | Cycle 1 |
+| FESOL-20 | [TRD-78](https://linear.app/gmx-io/issue/TRD-78/show-solana-market-order-sending-and-filling-status) | Show Solana Market Order Sending and Filling Status | Cycle 1 |
+| FESOL-59 | [TRD-84](https://linear.app/gmx-io/issue/TRD-84/close-positions-edit-and-cancel-orders-on-solana) | Close positions, edit and cancel orders on Solana | Cycle 2 |
+| FESOL-65 | [TRD-129](https://linear.app/gmx-io/issue/TRD-129/serve-solana-positions-and-orders-from-the-chain) | Serve Solana positions and orders from the chain | 未分配 |
+| FESOL-67 | [TRD-107](https://linear.app/gmx-io/issue/TRD-107/load-check-the-solana-service) | Load-check the Solana service | Cycle 1 |
+| FESOL-71 | [TRD-109](https://linear.app/gmx-io/issue/TRD-109/prepare-mainnet-testing-lookup-tables-and-ui-flags) | Prepare mainnet testing: lookup tables and UI flags | Cycle 1 |
+
+旧 Cycle 3 补充前置/联调依赖
+
+| 旧编号 | 当前编号 | 当前标题 | 当前 Trading cycle |
+| --- | --- | --- | --- |
+| FESOL-61 | [TRD-102](https://linear.app/gmx-io/issue/TRD-102/write-the-solana-api-spec-and-sample-responses) | Write the Solana API spec and sample responses | Cycle 1 |
+| FESOL-72 | [TRD-77](https://linear.app/gmx-io/issue/TRD-77/build-the-gmsol-sdk-from-v0100-in-gmx-ci-and-replace-the-pinned-build) | Build the gmsol SDK from v0.10.0 in GMX CI and replace the pinned build | Cycle 1 |
+| FESOL-89 | [TRD-104](https://linear.app/gmx-io/issue/TRD-104/read-raw-solana-wallet-balances-through-the-gmx-rpc) | Read raw Solana wallet balances through the GMX RPC | Cycle 1 |
+| FESOL-90 | [TRD-106](https://linear.app/gmx-io/issue/TRD-106/isolate-solana-trade-cache-and-storage-keys-by-network) | Isolate Solana trade cache and storage keys by network | Cycle 1 |
+| FESOL-91 | [TRD-105](https://linear.app/gmx-io/issue/TRD-105/add-network-aware-token-lookup-for-solana-mints) | Add network-aware token lookup for Solana mints | Cycle 1 |
+| FESOL-92 | [TRD-100](https://linear.app/gmx-io/issue/TRD-100/add-sdk-unit-conversions-for-solana-order-inputs) | Add SDK unit conversions for Solana order inputs | Cycle 1 |
+| FESOL-96 | [TRD-103](https://linear.app/gmx-io/issue/TRD-103/add-a-lazy-solana-balance-hook-with-network-scoped-caching) | Add a lazy Solana balance hook with network-scoped caching | Cycle 1 |
+| FESOL-110 | [FESOL-110](https://linear.app/gmx-io/issue/FESOL-110) | Follow up the Solana pages, TradeBox entries, and chat gaps left by FESOL-48 | 仍在旧团队 |
+| FESOL-112 | [TRD-108](https://linear.app/gmx-io/issue/TRD-108/switch-solana-positions-to-the-gmsol-variants-of-the-sdk-trade-math) | Switch Solana positions to the gmsol variants of the SDK trade math | Cycle 1 |
+| FESOL-113 | [TRD-99](https://linear.app/gmx-io/issue/TRD-99/call-the-solana-api-through-the-sdk-client) | Call the Solana API through the SDK client | Cycle 1 |
+
 ## 已执行 Trading cycle 关联（2026-11-15）
 
 用户明确授权根据 Divhead 的 TRD-101 规划更新 PM 关注的 Trading Cycles，要求避免误导。本轮通过已有 Chrome 登录态执行，参与角色为排期整理与协调，不代表接管整体集成/验收，也未发送消息或评论。
