@@ -63,7 +63,7 @@
 
 | Skill | 适用场景 | 详细资料 |
 | --- | --- | --- |
-| [gmx-linear-requirements](../.agents/skills/gmx-linear-requirements/SKILL.md) | 查询 FESOL、同步快照、复盘迁移进度，核对 GMTrade 标签 | [工具说明](linear-requirements.md) |
+| [gmx-linear-requirements](../.agents/skills/gmx-linear-requirements/SKILL.md) | 查询 TRD（兼容历史 FESOL）、同步快照、复盘迁移进度，核对 GMTrade 标签 | [工具说明](linear-requirements.md) |
 | [gmx-solana-next-task](../.agents/skills/gmx-solana-next-task/SKILL.md) | 核验需求、PR 和代码，比较并推荐下一条迁移需求 | [推荐流程](solana-next-task.md) |
 | [gmx-solana-progress](../.agents/skills/gmx-solana-progress/SKILL.md) | 核验跨仓库实际成果，估算需求范围及完整迁移进度，输出中英文简述 | [评估方法](solana-progress.md) |
 | [gmx-solana-task-delivery](../.agents/skills/gmx-solana-task-delivery/SKILL.md) | 按授权阶段开发需求、隔离交付改动、创建及审查 Draft PR | [交付流程](linear-development-workflow.md) |

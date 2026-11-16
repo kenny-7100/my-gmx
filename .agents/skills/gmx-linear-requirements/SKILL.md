@@ -1,17 +1,17 @@
 ---
 name: gmx-linear-requirements
-description: 查询 FESOL 单条需求、同步需求快照或复盘 GMX Solana 迁移进度时使用，复用本仓库只读 Linear 工具并区分 GMTrade 旧项目需求。不用于修改 Linear 或执行开发交付。
+description: 查询 TRD 单条需求、同步需求快照或复盘 GMX Solana 迁移进度时使用，复用本仓库只读 Linear 工具并区分 GMTrade 旧项目需求。不用于修改 Linear 或执行开发交付。
 ---
 
-# FESOL 需求查询与复盘
+# TRD 需求查询与复盘
 
 先遵守仓库根目录 [AGENTS.md](../../../AGENTS.md)，按当前请求选择下面的模式。脚本和命令均相对于仓库根目录；不受当前 shell 工作目录影响的调用方式见[工具说明](../../../docs/linear-requirements.md)。不要复制脚本实现或另建同步工具。
 
-查询前先检索固定 issue 记录及关联的重要结论；本地 task 未登记也可用最新版 agent-workflow status 定位。任务实施中在开始/恢复、验收交付及相关 review/依赖变化节点主动重读单条需求，比较正文、关系和评论；不轮询、不每轮全量同步。CLI 凭据不可用时可复用已连接的 Linear MCP，不新增同步实现。
+查询前先检索固定 issue 记录及关联的重要结论；本地 task 未登记也可用最新版 agent-workflow status 定位。任务实施中在开始/恢复、验收交付及相关 review/依赖变化节点主动重读单条需求，比较正文、关系和评论；不轮询、不每轮全量同步。当前团队为 Trading（TRD）；历史 FESOL 编号可用于实时查询（由 Linear 解析），历史快照通过显式 `--snapshot PATH` 或 `--directory .local/linear/FESOL` 读取，不把旧缓存当当前结果。旧任务的分支/登记/知识沿用已有入口，编号映射需核实，不能仅替换前缀。CLI 凭据不可用时可复用已连接的 Linear MCP，不新增同步实现。2026-11-16 已核实本机旧 API key 仅可见 FESOL，官方 MCP 可见 TRD；权限未变时直接用 MCP，单条读 issue/关系和评论，全量查询明确 Trading 团队、项目和分页范围，不声称已生成 CLI 快照。详见[当前权限与验证边界](../../../docs/linear-requirements.md#trd-迁移核验2026-11-16)。
 
 ## 单条需求
 
-- 查当前需求或为实施核对需求时，运行 `node scripts/linear-requirements.mjs show FESOL-编号 --live --json`，读取正文、父任务、双向关系及评论。用户明确查历史时，使用 `--snapshot PATH` 离线读取并标明时间。
+- 查当前需求或为实施核对需求时，运行 `node scripts/linear-requirements.mjs show TRD-编号 --live --json`，读取正文、父任务、双向关系及评论。用户明确查历史时，使用 `--snapshot PATH` 离线读取并标明时间。
 - 区分需求原文、当前状态、验收条件和待澄清事项；需要精确项目或标签判断时使用 JSON 字段，不仅看文本摘要。
 - 解释阻塞方向：`relations` 的 `blocks` 是当前任务阻塞 `relatedIssue`；`inverseRelations` 的 `blocks` 是 `issue` 阻塞当前任务。
 - 输出需求编号及线上链接、抓取时间、范围、关键验收条件与阻碍。查询请求不授权修改业务代码或 Linear；经手 issue 的调研活动、结论及重要信息按[issue 知识入口](../../../docs/issues/README.md)更新 `docs/issues/编号.md`，包含他人负责的 issue，不为记录而建业务分支。
@@ -19,7 +19,7 @@ description: 查询 FESOL 单条需求、同步需求快照或复盘 GMX Solana 
 ## 全量复盘与历史比较
 
 - 当前整体进度先运行 `node scripts/linear-requirements.mjs sync`；用户要求历史分析时不必刷新，以指定快照为准。
-- 从 `.local/linear/FESOL/latest.json` 找到最新快照及同目录中文摘要。用 `list --project migration --json` 获取迁移项目范围，必要时添加 `--status` 或 `--search`。筛选参数含义和输出结构见工具说明。
+- 从 `.local/linear/TRD/latest.json` 找到最新快照及同目录中文摘要。用 `list --project migration --json` 获取迁移项目范围，必要时添加 `--status` 或 `--search`。筛选参数含义和输出结构见工具说明。
 - 同时检查 `labels.nodes` 和项目归属。`GMTrade` 标签属于仍在迭代的旧 `gmx-solana-interface`，只供参考，不计入迁移需求与进度。项目与标签冲突时先澄清；不能直接照抄按项目统计的摘要作为最终迁移统计。工具目前没有标签筛选参数，不编造 `--label` 参数。
 - 比较两次快照用 `node scripts/linear-requirements.mjs diff BEFORE.json AFTER.json --project migration --json`，解释新增、离开范围及字段变化；若存在标签导致的范围变化，结合两份快照核对后再报告。
 - 报告抓取时间、范围及排除依据、状态分布和关键变化，给出快照/摘要路径。团队总数不是迁移完成率分母，Done 也不是代码已合入或已部署的证明；评估实际完成情况另核对提交、PR 和部署证据。

@@ -1,8 +1,8 @@
-# FESOL 需求快照
+# {{teamKey}} 需求快照
 
 抓取时间（UTC）：{{fetchedAt}}。
 
-这是只读本地快照，最新需求以 [Linear](https://linear.app/gmx-io/team/FESOL/all) 为准。已遍历包含归档项的团队列表，保存正文和元数据；未同步评论、阻塞关系、附件内容或关联文档。原始需求标题及状态保留原文。
+这是只读本地快照，最新需求以 [Linear](https://linear.app/gmx-io/team/{{teamKey}}/all) 为准。已遍历包含归档项的团队列表，保存正文和元数据；未同步评论、阻塞关系、附件内容或关联文档。原始需求标题及状态保留原文。
 
 ## 团队概览
 
