@@ -507,25 +507,25 @@ test("independent worktree contributions are integrated into one delivery with f
 
 test("issue knowledge is discoverable without task registration and distinguishes durable, pending and unsafe paths", async () => {
   await fixture(async ({ dir, root, dev }) => {
-    const options = { projectDir: dev, issue: "FESOL-321", command: "status" };
+    const options = { projectDir: dev, issue: "TRD-321", command: "status" };
     const initial = await workflow(options);
     assert.equal(initial.record, null);
     assert.equal(initial.issueKnowledge.state, "missing");
     assert.equal(await realpath(initial.issueKnowledge.worktree), await realpath(root));
     await assert.rejects(readFile(initial.recordFile), { code: "ENOENT" });
-    const file = path.join(root, "docs/issues/FESOL-321.md");
+    const file = path.join(root, "docs/issues/TRD-321.md");
     await mkdir(path.dirname(file), { recursive: true });
     await writeFile(file, "Research by another issue's reviewer; no business ownership claimed.\n");
     const pending = (await workflow(options)).issueKnowledge;
     assert.equal(pending.state, "available");
     assert.equal(pending.tracked, false);
     assert.equal(pending.changed, true);
-    await git(root, "add", "docs/issues/FESOL-321.md");
+    await git(root, "add", "docs/issues/TRD-321.md");
     await git(root, "commit", "-m", "Record reviewed issue findings");
     const saved = (await workflow(options)).issueKnowledge;
     assert.equal(saved.tracked, true);
     assert.equal(saved.changed, false);
-    await assert.rejects(readFile(path.join(dev, "docs/issues/FESOL-321.md")), { code: "ENOENT" });
+    await assert.rejects(readFile(path.join(dev, "docs/issues/TRD-321.md")), { code: "ENOENT" });
     await writeFile(file, "Additional verified finding\n");
     assert.equal((await workflow(options)).issueKnowledge.changed, true);
     const outside = path.join(dir, "outside.md");
@@ -536,11 +536,11 @@ test("issue knowledge is discoverable without task registration and distinguishe
     await rm(path.dirname(file), { recursive: true });
     const externalDirectory = path.join(dir, "external-notes");
     await mkdir(externalDirectory);
-    await writeFile(path.join(externalDirectory, "FESOL-321.md"), "External content\n");
+    await writeFile(path.join(externalDirectory, "TRD-321.md"), "External content\n");
     await symlink(externalDirectory, path.dirname(file));
     assert.equal((await workflow(options)).issueKnowledge.state, "blocked");
     await rm(path.dirname(file));
-    await git(root, "restore", "--worktree", "--", "docs/issues/FESOL-321.md");
+    await git(root, "restore", "--worktree", "--", "docs/issues/TRD-321.md");
     await git(root, "switch", "release");
     assert.equal((await workflow(options)).issueKnowledge.state, "base-unavailable");
     assert.equal(

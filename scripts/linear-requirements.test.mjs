@@ -9,6 +9,8 @@ import {
   compareSnapshots,
   createClient,
   fetchSnapshot,
+  fetchLiveIssue,
+  validateSnapshot,
   loadSnapshot,
   publishSnapshot,
   readApiKey,
@@ -16,6 +18,7 @@ import {
 } from "./linear-requirements.mjs";
 
 const TEAM_ID = "64f06d97-6f54-4d0a-a064-fe7e5f342719";
+const TRD_TEAM_ID = "69d3f8b2-52f1-4464-af52-aa684f966de4";
 const PROJECT_ID = "7de89d39-ee4e-46d4-9d70-48ef42c87886";
 
 function issue(number, overrides = {}) {
@@ -70,7 +73,14 @@ test("snapshot publication retains the previous latest after a later page fails"
   let calls = 0;
   const client = async () => {
     if (++calls === 2) throw new Error("Upstream unavailable");
-    return { team: { id: TEAM_ID, key: "FESOL", name: "Solana Frontend", issues: page([issue(2)], true, "next") } };
+    return {
+      team: {
+        id: TRD_TEAM_ID,
+        key: "TRD",
+        name: "Trading",
+        issues: page([issue(2, { identifier: "TRD-2" })], true, "next"),
+      },
+    };
   };
   await assert.rejects(async () => publishSnapshot(directory, await fetchSnapshot(client)), /Upstream/);
   assert.equal(await fs.readFile(path.join(directory, "latest.json"), "utf8"), before);
@@ -164,4 +174,56 @@ test("env parsing accepts quoted tokens without executing values and rejects amb
   }
   process.env.LINEAR_API_KEY = "environment-token";
   assert.equal(await readApiKey(envFile), "environment-token");
+});
+
+test("Trading migration preserves UUID identity and historical snapshots while rejecting unrelated teams", async (t) => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "gmx-linear-trd-"));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const team = { id: TRD_TEAM_ID, key: "TRD", name: "Trading" };
+  const current = issue(19, { identifier: "TRD-70", url: "https://linear.app/gmx-io/issue/TRD-70" });
+  const fresh = await fetchSnapshot(async (query) => {
+    assert.ok(query.includes(TRD_TEAM_ID));
+    return { team: { ...team, issues: page([current]) } };
+  });
+  const filename = await publishSnapshot(directory, fresh);
+  assert.equal((await loadSnapshot(directory)).issues[0].identifier, "TRD-70");
+  assert.match(await fs.readFile(path.join(path.dirname(filename), "summary.md"), "utf8"), /team\/TRD\/all/);
+  const historical = snapshot([issue(19)]);
+  await publishSnapshot(directory, historical);
+  assert.equal((await loadSnapshot(directory)).issues[0].identifier, "FESOL-19");
+  const diff = compareSnapshots(historical, fresh);
+  assert.equal(diff.added.length, 0);
+  assert.equal(diff.removed.length, 0);
+  assert.equal(diff.changed[0].after.identifier, "TRD-70");
+  for (const invalid of [
+    { ...fresh, team: { id: TEAM_ID, key: "TRD" } },
+    { ...fresh, team: { id: "unrelated", key: "TRD" } },
+    { ...fresh, issues: [issue(19)] },
+  ])
+    assert.throws(() => validateSnapshot(invalid));
+  await assert.rejects(
+    fetchSnapshot(async () => ({ team: { ...team, id: TEAM_ID } })),
+    /expected Trading/
+  );
+
+  for (const identifier of ["TRD-70", "FESOL-19"]) {
+    const result = await fetchLiveIssue(async (query, variables) => {
+      if (query.includes("query Issue(")) {
+        assert.equal(variables.id, identifier);
+        return { issue: { ...current, team } };
+      }
+      assert.equal(variables.id, current.id);
+      return { issue: { relations: page([]), inverseRelations: page([]), comments: page([]) } };
+    }, identifier);
+    assert.equal(result.issue.identifier, "TRD-70");
+    assert.deepEqual(result.issue.comments, []);
+  }
+  await assert.rejects(
+    fetchLiveIssue(async () => ({ issue: { ...current, team: { id: "unrelated", key: "TRD" } } }), "TRD-70"),
+    /outside/
+  );
+  await assert.rejects(
+    fetchLiveIssue(async () => assert.fail("Invalid ID must not reach Linear"), "OTHER-70"),
+    /Expected a TRD/
+  );
 });

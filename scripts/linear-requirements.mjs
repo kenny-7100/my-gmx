@@ -5,12 +5,17 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
-const TEAM_ID = "64f06d97-6f54-4d0a-a064-fe7e5f342719";
+const TEAM_ID = "69d3f8b2-52f1-4464-af52-aa684f966de4";
+const LEGACY_TEAM_ID = "64f06d97-6f54-4d0a-a064-fe7e5f342719";
 const PROJECT_ID = "7de89d39-ee4e-46d4-9d70-48ef42c87886";
 const API_URL = "https://api.linear.app/graphql";
 const ISSUE_FIELDS = `id identifier title description url createdAt updatedAt archivedAt completedAt
   priority dueDate state { id name type } assignee { id name }
   project { id name } parent { id identifier } labels { nodes { name } }`;
+
+function isSupportedTeam(team) {
+  return (team?.id === TEAM_ID && team.key === "TRD") || (team?.id === LEGACY_TEAM_ID && team.key === "FESOL");
+}
 
 function fail(message) {
   throw new Error(message);
@@ -104,8 +109,8 @@ export async function fetchSnapshot(client) {
     }`,
       { after }
     );
-    if (data.team?.id !== TEAM_ID || data.team.key !== "FESOL")
-      fail("The API key cannot access the expected FESOL team.");
+    if (data.team?.id !== TEAM_ID || data.team.key !== "TRD")
+      fail("The API key cannot access the expected Trading (TRD) team.");
     team = { id: data.team.id, key: data.team.key, name: data.team.name };
     return data.team.issues;
   });
@@ -132,17 +137,18 @@ export async function fetchSnapshot(client) {
 export function validateSnapshot(snapshot) {
   if (
     snapshot?.schemaVersion !== 1 ||
-    snapshot.team?.id !== TEAM_ID ||
+    !isSupportedTeam(snapshot.team) ||
     !snapshot.coverage?.allPages ||
     !snapshot.coverage.includeArchived ||
     !Array.isArray(snapshot.issues) ||
     !Number.isFinite(Date.parse(snapshot.fetchedAt))
   ) {
-    fail("Invalid or incomplete FESOL snapshot.");
+    fail("Invalid or incomplete TRD/FESOL snapshot.");
   }
   const ids = new Set();
+  const identifierPattern = new RegExp(`^${snapshot.team.key}-\\d+$`);
   for (const issue of snapshot.issues) {
-    if (!issue.id || !/^FESOL-\d+$/.test(issue.identifier) || !issue.state?.type || ids.has(issue.id)) {
+    if (!issue.id || !identifierPattern.test(issue.identifier) || !issue.state?.type || ids.has(issue.id)) {
       fail("Snapshot contains invalid or duplicate issues.");
     }
     ids.add(issue.id);
@@ -179,6 +185,7 @@ export async function renderSummary(snapshot) {
   const escape = (value) => value.replace(/\|/g, "\\|").replace(/[\r\n]/g, " ");
   const values = {
     fetchedAt: snapshot.fetchedAt,
+    teamKey: snapshot.team.key,
     total: snapshot.issues.length,
     migrationTotal: migration.length,
     allStates: counts(snapshot.issues),
@@ -247,14 +254,15 @@ export function compareSnapshots(before, after, options = {}) {
 }
 
 export async function fetchLiveIssue(client, identifier) {
-  if (!/^FESOL-\d+$/.test(identifier)) fail("Expected a FESOL issue identifier, such as FESOL-97.");
+  if (!/^(TRD|FESOL)-\d+$/.test(identifier))
+    fail("Expected a TRD issue identifier (legacy FESOL identifiers are also accepted).");
   const { issue } = await client(
     `query Issue($id: String!) {
     issue(id: $id) { ${ISSUE_FIELDS} team { id key } }
   }`,
     { id: identifier }
   );
-  if (issue?.team?.id !== TEAM_ID) fail("The issue is unavailable or outside FESOL.");
+  if (!isSupportedTeam(issue?.team)) fail("The issue is unavailable or outside the supported TRD/FESOL teams.");
   const selections = {
     relations: "id type relatedIssue { identifier title url state { name type } }",
     inverseRelations: "id type issue { identifier title url state { name type } }",
@@ -282,20 +290,21 @@ export async function fetchLiveIssue(client, identifier) {
   };
 }
 
-const HELP = `Read-only FESOL requirements tool (Node.js >=20).
+const HELP = `Read-only Trading (TRD) requirements tool (Node.js >=20).
 Usage:
   node scripts/linear-requirements.mjs sync
   node scripts/linear-requirements.mjs list [--project migration] [--status Todo] [--search text] [--json]
-  node scripts/linear-requirements.mjs show FESOL-97 [--live] [--json]
+  node scripts/linear-requirements.mjs show TRD-136 [--live] [--json]
   node scripts/linear-requirements.mjs diff BEFORE.json AFTER.json [--project migration] [--json]
 Options:
-  --directory PATH   Snapshot directory (default: .local/linear/FESOL under the repository)
+  --directory PATH   Snapshot directory (default: .local/linear/TRD under the repository)
   --snapshot PATH    Snapshot file for offline list/show (default: latest)
   --env-file PATH    Env file for online reads (default: repository .env.local)
   --help             Show this help
 Online commands use LINEAR_API_KEY from the environment, then the env file.
 Sync saves descriptions and metadata, not comments, relations, or attachment contents.
 Show --live reads the current issue, all relation pages, and all comment pages.
+Legacy FESOL identifiers and explicit historical snapshots remain supported.
 Local data is a dated cache, not proof of implementation or deployment.
 Diff 'removed' means absent from the selected scope, not necessarily deleted in Linear.`;
 
@@ -329,13 +338,13 @@ export async function main(args = process.argv.slice(2)) {
   const expected = { sync: 0, list: 0, show: 1, diff: 2 }[command];
   if (operands.length !== expected) fail(`${command} expects ${expected} positional arguments. Use --help.`);
   if (values.live && values.snapshot) fail("--live and --snapshot cannot be combined.");
-  const directory = path.resolve(values.directory ?? path.join(ROOT, ".local/linear/FESOL"));
+  const directory = path.resolve(values.directory ?? path.join(ROOT, ".local/linear/TRD"));
   const online = async () => createClient(await readApiKey(values["env-file"]));
   if (command === "sync") {
     const snapshot = await fetchSnapshot(await online());
     const filename = await publishSnapshot(directory, snapshot);
     console.log(
-      `Synced ${snapshot.issues.length} FESOL issues (${selectIssues(snapshot, { project: "migration" }).length} in the migration project).\nSnapshot: ${filename}\nSummary: ${path.join(path.dirname(filename), "summary.md")}\nFetched at: ${snapshot.fetchedAt}`
+      `Synced ${snapshot.issues.length} TRD issues (${selectIssues(snapshot, { project: "migration" }).length} in the migration project).\nSnapshot: ${filename}\nSummary: ${path.join(path.dirname(filename), "summary.md")}\nFetched at: ${snapshot.fetchedAt}`
     );
   } else if (command === "list") {
     const snapshot = await loadSnapshot(directory, values.snapshot);

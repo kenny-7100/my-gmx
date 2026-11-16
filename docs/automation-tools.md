@@ -101,6 +101,8 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 
 工具创建与执行分别遵守授权：沉淀自动化能力不代表获准自动运行 UI 测试、构建、部署、打开浏览器或启动服务器，也不扩大 Git 操作和外部写入权限。收到 `push` 时直接执行原定流程，不插入工具建设。
 
+局部脚本格式检查使用 `yarn exec prettier --check scripts/FILE.mjs`，需要格式化时用 `yarn exec prettier --write scripts/FILE.mjs`。2026-11-16 核实：`yarn prettier` 命中 package 同名脚本，会对整个 `src`/`landing` 执行 `--write`；追加文件或 `--check` 不会撤销脚本内的全量写入范围。本次误触的四处无关格式变化已核对并撤销，最终差异只保留目标文件。
+
 ## 如何交接
 
 每个正式沉淀的工具都应在对应主题文档中记录，并通过 `docs/README.md` 或相关文档提供可发现的入口：
@@ -112,7 +114,7 @@ yarn test:agent-tools > .local/acceptance/agent-tools/latest.tap 2>&1
 
 优先更新已有工具和文档，避免同一任务出现多套近似脚本。遇到接口或项目结构变化时，同步修正当前任务涉及的工具及说明，不让旧检查产生错误信心。
 
-已沉淀 [Linear 需求工具](linear-requirements.md)：复用同一入口完成 FESOL 实时查询、全量快照、筛选和差异比较，避免每次由 Agent 手工翻页、统计及比对。脚本为 `scripts/linear-requirements.mjs`，验证入口为 `yarn test:linear-tools`。
+已沉淀 [Linear 需求工具](linear-requirements.md)：复用同一入口完成 TRD 实时查询（兼容历史 FESOL）、全量快照、筛选和差异比较，避免每次由 Agent 手工翻页、统计及比对。脚本为 `scripts/linear-requirements.mjs`，验证入口为 `yarn test:linear-tools`。
 
 已实现[本地 Agent 验收钱包](agent-wallet.md)的入口：`yarn agent:wallet addresses` 从根 `.env.local` 的 `AGENT_TEST_WALLET_MNEMONIC` 派生固定路径 EVM/Solana 公开地址，不访问网络、不签名或发送交易。公开向量与失败路径测试入口为 `yarn test:agent-wallet`；2026-10-24 用户配置并授权后，三组测试及实际地址派生、重复性检查通过。Mainnet 原生 SOL 余额预检命令为 `yarn agent:wallet balances --network solana-mainnet`，先启动既有 RPC 代理；先校验完整网络 genesis，再输出精确余额、slot 和时间。另有 `yarn agent:wallet tokens --network solana-mainnet` 查询 SPL Token/Token-2022 全账户与精确金额/状态，不能将其当作可花费额度。当前共九组钱包测试及真实 Mainnet 对照验收通过；Devnet 暂缓，尚无签名或发送功能。资金相关验收先重新运行预检，不依赖历史余额。
 
