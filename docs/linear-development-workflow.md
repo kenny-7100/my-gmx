@@ -15,12 +15,14 @@
 
 ```sh
 # Run from the infrastructure checkout; these commands mutate local Git state.
-node scripts/agent-workflow.mjs start --issue FESOL-123 \
-  --branch feature-name-fesol-123 --worktree /path/to/feature
-node scripts/agent-workflow.mjs status --issue FESOL-123
+node scripts/agent-workflow.mjs start --issue TRD-123 \
+  --branch feature-name-trd-123 --worktree /path/to/feature
+node scripts/agent-workflow.mjs status --issue TRD-123
 ```
 
-start 会先同步个人基础再创建独立 worktree，不切换调用方分支；新建任务无需先单独 sync。仅维护个人基础时才独立运行 `node scripts/agent-workflow.mjs sync`。按根规则已获开发授权时直接执行。Git 共享目录 `agent-workflow/FESOL-123.json` 保存开发目录/基线、回流提交及交付目录，不进入源码或 PR；新会话先读 status，并读取其 issueKnowledge 指向的[长期 issue 记录](issues/README.md)，不依赖旧聊天。已有任务使用下面的 register/rebind 登记，不为使用工具重建分支；没有 Linear 编号的本地任务用 `--task kebab-case-name`，与 `--issue` 二选一，本地文件名为 `local-NAME.json`，不编造需求编号。
+新需求使用当前 `TRD-*` 编号；历史 `FESOL-*` 任务、分支和记录保持原入口，按核实的对应关系恢复，不按数字替换前缀或重复登记。
+
+start 会先同步个人基础再创建独立 worktree，不切换调用方分支；新建任务无需先单独 sync。仅维护个人基础时才独立运行 `node scripts/agent-workflow.mjs sync`。按根规则已获开发授权时直接执行。Git 共享目录 `agent-workflow/TRD-123.json` 保存开发目录/基线、回流提交及交付目录，不进入源码或 PR；新会话先读 status，并读取其 issueKnowledge 指向的[长期 issue 记录](issues/README.md)，不依赖旧聊天。已有任务使用下面的 register/rebind 登记，不为使用工具重建分支；没有 Linear 编号的本地任务用 `--task kebab-case-name`，与 `--issue` 二选一，本地文件名为 `local-NAME.json`，不编造需求编号。
 
 ## 接入已有分支或 PR
 
@@ -36,7 +38,7 @@ node /path/to/base/scripts/agent-workflow.mjs rebind --task agent-maintenance \
   --project-dir /path/to/task --worktree /path/to/new-location --head ACTUAL_HEAD
 # For an existing business PR, first capture its current remote facts.
 gh pr view PR_URL --json url,headRefName,headRefOid,baseRefName > /path/to/local-pr.json
-node /path/to/base/scripts/agent-workflow.mjs register --issue FESOL-123 \
+node /path/to/base/scripts/agent-workflow.mjs register --issue TRD-123 \
   --project-dir /path/to/base --worktree /path/to/existing-delivery --role delivery \
   --base REVIEWED_RELEASE_BASE --head ACTUAL_HEAD --pr-file /path/to/local-pr.json
 ```
@@ -55,9 +57,9 @@ rebind 不覆盖已有未解决 pending，也不会放弃另一个仍有未提�
 
 ```sh
 node /path/to/base/scripts/agent-workflow.mjs status \
-  --project-dir /path/to/task --issue FESOL-123
+  --project-dir /path/to/task --issue TRD-123
 node /path/to/base/scripts/agent-workflow.mjs note \
-  --project-dir /path/to/task --issue FESOL-123 --context-file /path/to/local-context.json
+  --project-dir /path/to/task --issue TRD-123 --context-file /path/to/local-context.json
 ```
 
 共享摘要由协调 Agent 维护；多个子任务不各自替换同一份列表。note 接受 JSON 部分更新：`objective` / `next` 为字符串，`acceptance` / `decisions` / `blockers` / `links` / `observations` 为字符串列表；未给字段保留原值，列表整体替换，空列表清除旧阻碍。只记录下一位 Agent 继续需要的当前信息，不保存聊天全文、秘密或推测性权限。需要时用 `coordinator` 和 `assignments` 保存[当前分工](agent-collaboration.md#最小子任务约定)，单 Agent 任务不必填写。来源观察注明实际 URL/ref、revision/updatedAt 和核验时间；工具不会代查 Linear 或保证观察仍新鲜。与历史 review 经验有关的重要取舍在 `decisions` 简记条件、在 `links` 指向[当前条目](review-lessons.md#按改动检索)及 issue；恢复时从个人基础读取相关最新条目，不为读取知识整支合并基础。note 只保留当前执行摘要与 issue/专题链接，不复制长期经历；同一观察按[执行与复用](agent-task-start.md#执行与复用)供多个阶段入口共用。
@@ -86,7 +88,7 @@ status 返回实际开发/交付分支与 HEAD、dirty、未完成 Git 操作、
 
 ```sh
 # Transfer only reviewed, separate infrastructure commits, in dependency order.
-node scripts/agent-workflow.mjs backflow --issue FESOL-123 \
+node scripts/agent-workflow.mjs backflow --issue TRD-123 \
   --commit INFRA_SHA_1 --commit INFRA_SHA_2
 ```
 
@@ -110,8 +112,8 @@ node scripts/agent-workflow.mjs backflow --issue FESOL-123 \
 4. **PR**：推送正式 fork `my-gmx-pr`，向 `gmx-io/gmx-interface:release` 建 Draft PR，标题、Summary、Linear、真实 Validation 和发布事项遵循[提交与 PR 规范](#commit分支与-pr-表达规范)。普通 PR 无需额外证据包。适用时按 gmx-prompts 自审最终 diff；发现问题按下文“PR 后的修复与交付现场”先回原开发分支验证，再转入交付目录复验。
 
 ```sh
-node scripts/agent-workflow.mjs deliver --issue FESOL-123 \
-  --branch feature-name-release-fesol-123 --worktree /path/to/delivery \
+node scripts/agent-workflow.mjs deliver --issue TRD-123 \
+  --branch feature-name-release-trd-123 --worktree /path/to/delivery \
   --commit BUSINESS_SHA_1 --commit BUSINESS_SHA_2
 # Inspect and validate the resulting checkout before publishing.
 git -C /path/to/delivery diff origin/release...HEAD
@@ -130,13 +132,13 @@ deliver 默认拒绝个人目录和 gitlinks，选中提交必须属于登记的
 
 ### Commit 与分支
 
-- 本地约定：commit 英文，以动作说明实际结果，例如 `Fix stale Solana order status FESOL-123`；有明确关联需求时带真实编号，没有编号的基础设施维护不编造编号。当前已核对的上游规则未要求 Conventional Commits，不强制添加 `feat:` / `fix:`。
+- 本地约定：commit 英文，以动作说明实际结果，例如 `Fix stale Solana order status TRD-123`；有明确关联需求时带真实编号，没有编号的基础设施维护不编造编号。当前已核对的上游规则未要求 Conventional Commits，不强制添加 `feat:` / `fix:`。
 - 一个提交表达一个可审查目的。业务与个人基础设施分开；避免 `update`、`fix stuff` 或把聊天过程当标题。只有改动动机/兼容性不明显时再补正文，不要求普通提交套模板。
-- 上游要求分支名使用 kebab-case；本地示例 `fix-solana-order-status-fesol-123`，交付分支可用 `fix-solana-order-status-release-fesol-123`。需求编号取实际 Linear，不硬编码本例。
+- 上游要求分支名使用 kebab-case；本地示例 `fix-solana-order-status-trd-123`，交付分支可用 `fix-solana-order-status-release-trd-123`。需求编号取实际 Linear，不硬编码本例。
 
 ### PR 标题
 
-- 按根约定使用英文描述；**上游要求末尾是 Linear issue id**，例如 `Fix stale Solana order status FESOL-123`。编号之后不再追加标点、`Draft`、状态或其他标签；Draft 由 GitHub 状态表达。
+- 按根约定使用英文描述；**上游要求末尾是 Linear issue id**，例如 `Fix stale Solana order status TRD-123`。编号之后不再追加标点、`Draft`、状态或其他标签；Draft 由 GitHub 状态表达。
 - 标题描述最终交付行为，范围变化时同步重写标题和正文；不写个人环境、整理分支或回流过程。普通需求目标为 release；`Release ...` / `Hotfix ...` 是发布/热修复流程的标题，不套用到一般需求。
 
 ### PR 正文与 Summary
@@ -151,7 +153,7 @@ deliver 默认拒绝个人目录和 gitlinks，选中提交必须属于登记的
 
 Fix stale Solana order status after an order update by refreshing the affected order data.
 
-Linear: <actual Linear issue URL containing FESOL-123>
+Linear: <actual Linear issue URL containing TRD-123>
 
 ## Validation
 
@@ -188,10 +190,10 @@ Linear: <actual Linear issue URL containing FESOL-123>
 
 ```sh
 node /path/to/base/scripts/agent-workflow.mjs recover --project-dir /path/to/task \
-  --issue FESOL-123 --outcome completed --head REVIEWED_CURRENT_SHA
+  --issue TRD-123 --outcome completed --head REVIEWED_CURRENT_SHA
 # Or after native Git recovery restored the original pending base:
 node /path/to/base/scripts/agent-workflow.mjs recover --project-dir /path/to/task \
-  --issue FESOL-123 --outcome aborted --head ORIGINAL_PENDING_BASE_SHA
+  --issue TRD-123 --outcome aborted --head ORIGINAL_PENDING_BASE_SHA
 ```
 
 recover 不代做 Git 恢复。completed 需要干净且分支匹配、历史由原基线延伸、普通提交数与计划一致、每个提交路径符合回流/交付边界；显式 head 表示 Agent 已审查当前结果，工具不能证明人工冲突解决的业务语义正确。aborted 必须恢复原 pending 基线，部分已落地提交不能只删记录冒充撤销。旧版 pending 也可按原提交清单核验。恢复成功记录 lastRecovery，并登记交付或回流结果；无关 worktree 不自动删除。工作区创建失败而未形成可用 checkout 时，先按原生 Git 核实/修复创建现场，再登记，不能伪造记录跳过检查。

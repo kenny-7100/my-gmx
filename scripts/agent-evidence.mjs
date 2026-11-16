@@ -275,7 +275,7 @@ export async function runCli({ args = process.argv.slice(2), stdout = process.st
     });
     if (values.help) {
       stdout.write(
-        "Usage: yarn agent:evidence collect-run --run PATH.json [--issue FESOL-123 --out PATH]\nLists known execution materials by default; --out explicitly packages them with original-to-package mapping. No recursive scan or upload.\n       yarn agent:evidence pack --issue FESOL-123 --report name=report.json [--report other=other.json] [--worksheet PATH.md] [--artifact name=PATH ...] --out PATH\n       yarn agent:evidence verify --dir PATH [--expected-manifest-sha256 SHA256]\nOffline integrity and optional worksheet consistency only. Explicit opaque artifacts: .json/.log/.txt/.png/.zip, up to 20 files, 16 MiB each, 64 MiB total. Does not discover files, execute contents, infer acceptance coverage, or upload files.\n"
+        "Usage: yarn agent:evidence collect-run --run PATH.json [--issue TRD-123 --out PATH]\nLists known execution materials by default; --out explicitly packages them with original-to-package mapping. No recursive scan or upload.\n       yarn agent:evidence pack --issue TRD-123 --report name=report.json [--report other=other.json] [--worksheet PATH.md] [--artifact name=PATH ...] --out PATH\n       yarn agent:evidence verify --dir PATH [--expected-manifest-sha256 SHA256]\nOffline integrity and optional worksheet consistency only. Explicit opaque artifacts: .json/.log/.txt/.png/.zip, up to 20 files, 16 MiB each, 64 MiB total. Does not discover files, execute contents, infer acceptance coverage, or upload files.\n"
       );
       return 0;
     }
