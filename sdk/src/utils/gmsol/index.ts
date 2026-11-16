@@ -4,6 +4,8 @@ import type { TokenData } from "utils/tokens/types";
 
 import { GMSOL_PRECISION_SCALE } from "./constants";
 
+export * from "./units";
+
 export { GMSOL_PRECISION_SCALE } from "./constants";
 export { getGmsolFractionalPower } from "./numbers";
 export type { GmsolMarketConfig } from "./types";
