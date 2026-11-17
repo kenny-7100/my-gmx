@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 四条批次状态复核（2026-11-17）
+
+只读核对当前 Linear、原 Draft PR 和最终 head CI；最新 release 冲突与 CI 收尾结果见[统一复核](../solana-trading-dependencies.md#四条批次状态复核2026-11-17)。本轮未改业务或执行交易，既有验收边界保留。
+
 ## 上游跟进实施（2026-11-17）
 
 TRD-77 原 development/delivery 已同步 release `7868f48f3e`；development组合精确接续 #3243 等值常量复用，独立delivery未带入该交易源码。原 Draft #3259 仍18文件，固定source/toolchain/vendor/WASM hash未变，不重复Rust构建或恢复已确定的版本选择。最终head与检查见统一实施表。 统一来源、交付版本、验证和外部剩余项见[五需求跟进实施](../solana-trading-dependencies.md#五需求跟进实施2026-11-17)。

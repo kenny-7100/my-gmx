@@ -1,5 +1,13 @@
 # Solana 交易链路依赖审计
 
+## 四条批次状态复核（2026-11-17）
+
+用户所指近期四条为 TRD-72/70/78/77（原 FESOL-56/19/20/72），均由 Kenny 负责。本轮只读刷新官方 Linear 正文/关系/评论及 GitHub 原 PR，四条评论均为空；未改业务、同步分支或执行交易。Linear 分别为 In Review / In Progress / In Progress / In Progress。
+
+release 已到 `22e1eda78ec0d51eae8104548744fb846f40d542`。原 PR head 与本日实施表一致，但 #3258/#3262/#3261 当前均 CONFLICTING，#3259 MERGEABLE；全部 OPEN/Draft、REVIEW_REQUIRED。不能沿用此前基线同步结果声称当前无冲突，本轮未分析具体冲突文件。
+
+四条当前 head 的 Audit、常规 lint/types/tests、SDK standalone、WASM reproduction 均已 SUCCESS，无待运行项；组件 workflow 仍 FAILURE。除 #3262 外的三条已有本日同 head 组件通过及发布403证据；本轮新增读取 #3262 最终 head `00d5d7b138` 的 run `44033459503` 失败日志，确认“All tests passed”，失败在 Pages push 和评论 `Resource not accessible by integration` 403。四条均不能称 CI 全绿。原主网验收及暂缓范围继续保留，TRD-136 本地实验不能替代全部正式需求验收。
+
 ## TRD-63 AC2 阻塞判断收敛（2026-11-17）
 
 独立调查需求/review、GMX已合入公式PR2407、旧TradeHeader/Go后端及当前API映射后，确认255x与294x来自不同UI定义；reviewer已知采用GMX公式，只要求补字段表，现已存在。撤销此前“需另行选择金融口径”的独立外部阻塞；保留正常AC2验收/review批准，不将作者调查当成approve。当前公式与最新ETH参数吻合，无证据要求业务改为294x。详细来源及线上版本边界见[AC2调查](issues/FESOL-15.md#ac2-口径调查结论2026-11-17)。
