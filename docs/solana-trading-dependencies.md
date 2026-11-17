@@ -22,7 +22,7 @@ TRD136原development文档提交 `b600fc9189` 已说明最终API复现入口/证
 - #3259 head `e164801e28`，保持Draft，MERGEABLE；CI快照：{'FAILURE': 1, 'IN_PROGRESS': 2, 'SUCCESS': 5}。
 - #3288 head `0718470deb`，保持Draft，MERGEABLE；CI快照：{'SUCCESS': 8}。
 
-上述为本次查询快照，不是持续订阅。#3258 run44097198937、#3261 run44097906867、#3259 run44099319179的新head组件日志均明确“All tests passed”，失败在Pages/评论发布403。#3262 run44098627827首次在依赖安装ECONNRESET未执行测试，重跑一次后依赖与组件测试步骤均success；报告发布权限单独处理，不以旧head归因套用新网络错误，也不为发布报告改业务PR或升级token。
+上述为本次查询快照，不是持续订阅。#3258 run44097198937、#3261 run44097906867、#3259 run44099319179的新head组件日志均明确“All tests passed”，失败在Pages/评论发布403。#3262 run44098627827首次在依赖安装ECONNRESET未执行测试，重跑一次后依赖与组件测试步骤均success，最终日志明确“All tests passed”，workflow仍因报告发布403而failure；报告发布权限单独处理，不以旧head归因套用新网络错误，也不为发布报告改业务PR或升级token。
 
 本轮实施目标收尾，不代表五需求全部AC完成。后续外部项：TRD100/#3287冲突与review；TRD98/#3190→#3195；字段#3205/#3207；TRD109可信LUT authority；正式API部署/金融reference；完整钱包/atomic/keeper矩阵。TRD84退出最小接线及70 swaps/max leverage/full simulate_order/GT Rewards继续按用户决定暂缓。API仍仅本地，无新增签名广播或部署。
 
