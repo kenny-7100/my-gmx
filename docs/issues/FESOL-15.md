@@ -1,5 +1,37 @@
 # FESOL-15 — Solana 市场选择器与 header
 
+## 自动验收补齐（2026-11-17）
+
+用户要求创建目标并完成可独立执行的验收。本轮以原 PR #3201 的公开 head `786dcaadc7e2ab3399c5d2f934f18430a6c0e116`、delivery 实际目录及其 SDK 产物进行验证；没有新增业务修改，上一阶段该 head 的 SDK build、types、lint、3374 项前端测试、生产 build、46 项原生数学结果仍有效。
+
+**原生 Chrome 页面验收通过。** 使用用户现有登录/profile/扩展的同一浏览器，本任务 owned Vite `127.0.0.1:3035`，无测试 API 替换、无 mock、未连接钱包。桌面实际宽度 2560；另通过原生 DevTools UI 的设备工具验证 440×956 CSS px（iPhone 16 Pro Max preset），不是连接 DevTools 自动化或真实手机验收；完成后关闭设备工具及 DevTools。
+
+| 检查 | 实际结果 |
+| --- | --- |
+| 默认排序与数值排序 | 列表默认 BTC / ETH / SOL；最新价格降序、升序切换成功，升序开头 kBONK / PUMP / kSHIB / kPEPE，恢复默认仍 BTC / ETH / SOL。初始 Tradebox DOGE 不当作列表排序失败。 |
+| ETH 分类和别名 | Crypto → Layer1 保留 ETH；搜索 `ethereum` 仅返回 ETH，选择后 header 显示 ETH/USD [USDC-USDC]。 |
+| 搜索与空结果 | `bonk` / `shib` / `pepe` 匹配对应 k-token；不存在的名称显示明确无匹配结果，清除后列表恢复。 |
+| 千倍价格及选择联动 | kBONK、kSHIB、kPEPE 在行、header、规模估值单位使用 k 前缀与千倍展示；选择后 header 与相应池更新，价格持续变化。图表在异步加载后同步名称，未扩大为 TRD-85 图表全量验收。 |
+| 空分类与未知日期 | Solana 仅显示 All / Crypto，无空 TradFi、Recently Listed 或虚构 New 标签。先在 Arbitrum 选 TradFi，再切回 Solana并打开列表，自动回到 All 且有市场。 |
+| 跨网与刷新 | Solana kPEPE 刷新保留网络/市场；切回 Arbitrum 显示 BTC [BTC-USDC] 且 USDC 抵押品正常初始化；再回 Solana 保留 kPEPE。Swap 在 Solana 隐藏。 |
+| 窄屏 | 440px 选择器显示 BTC / ETH / SOL，搜索 ethereum、选择 ETH、更新 header 正常；header 详情可展开显示 volume / OI / liquidity / net rates，无空 TradFi。只声明该 CSS 视口，不冒充真机或全部设备。 |
+| 默认开关行为 | 在当前 head 关闭本地 solanaNetwork 后回到 Arbitrum；点击 Solana 显示“由独立域名提供服务”的 GMTrade 提示及外链，仍保持 Arbitrum。最终该本地 origin 开关为 off，未打开外链。 |
+
+**AC2 可自动核对的技术部分通过，语义批准仍保留。** 18:10–18:12 CST 采集真实 Solana `/v1/markets/config`、`/values`（各67条）、`/pairs`（95条）和当前配置的 Arbitrum keeper `/prices/tickers`、`/prices/24h`。CLI 默认 User-Agent 被 keeper 返回403，使用普通浏览器 User-Agent 后同一官方地址成功，未换服务、绕过安全提示或修改产品 fallback。临时 Vitest 读取这些真实响应，经生产 SDK parser、merge、oracle mint 映射、buildGmsolTokensData、composeGmsolMarkets 和 UI 共用计算函数组合为63个有价格的静态列表市场，1项检查通过；临时检查与数据保留 delivery `.local/acceptance/trd63-ui-final/`，不加入产品测试或 fixture。
+
+- 价格来自 Arbitrum keeper 通过 `arbitrumTokenAddress` 映射到 Solana mint，取 min/max 中价；k-token 显示乘1000，24h high/low同样缩放，百分比不变。采集的 PEPE 原价0.0000038386285 → kPEPE 0.0038386285；SHIB原价0.000003822108 → kSHIB 0.003822108。页面实时价格随后变化，不声称跨分钟数值完全相等。
+- volume 使用 Solana pairs 的 `pool_id` / `target_volume`，header按选中 market，selector按 index 聚合；OI用共用 getOpenInterestForBalance，百分比由 long/total 推导；liquidity取 reserve及OI剩余额度的较小值并截零；净费率为每小时 funding 收付减 borrowing。真实 kPEPE [WSOL-USDC] 采集值：volume $7331.8522、OI $2723.6849/$384.0031（88%/12%）、liquidity $9366.5394/$7700.0265、净费率 −0.0115366%/+0.0728720%，与页面 $7.3k、$2.7k/$384.0、$9.4k/$7.7k、−0.0115%/+0.0729% 的格式化一致。SHIB OI $148.0411/$201.0229（42%/58%）、liquidity约$30.1k/$30.1k、净费率−0.0014%/+0.0010%也一致。BONK/ETH在采集与后续页面之间有实际OI变化，不将时序不同误报为计算错误。
+- max leverage 使用统一 GMX opening/liquidation 双约束、5x向下取整以及既有UI cap；实际API配置计算 BTC400x / ETH255x / SOL220x，与列表一致。另以独立 Decimal 算式核算 ETH：minCollateralFactor=0.0034、liquidation factor=0.0017、position fee=0.00024；opening 上限 1/(0.0034+2×0.00024)=257.73196x，liquidation 上限 1/(2×0.0017)=294.11765x，取较小值再按5x向下取整得到255x。294x恰好对应此时仅liquidation约束的数值，但没有旧GMTrade同版本代码/数据证据，不能认定其根因。不能由此宣称与旧 GMTrade 294x 的产品语义已获认可，也没有独立链上 reference 数学验收；AC2最终口径由相关负责人/reviewer确认。
+- 上市日期仍无可信来源；本轮确认不显示虚构日期。TRD-69是已存在的后续需求，本任务不实现其日期能力。
+
+**CI 的新增事实。** 两个当前 head 的常规 workflow 最初分别在 SDK public API 的 fetchMarkets（GET）和 cross-chain withdraw prepare（POST）30秒超时；本地完整 public suite 首次又在另一项 subaccount order prepare 请求超时（49 passed / 1 failed / 2 skipped）。第二次本地完整重跑为 **4 files / 50 passed / 2 existing skipped**，未改代码、超时、测试选择或端点。各失败点均为 Arbitrum SDK 公共接口，PR相对release无SDK文件差异；这支持外部请求不稳定的判断，但不是已经定位后端根因。已对两个失败 workflow 各重跑一次，最终结果见下段。Audit、组件测试、SDK standalone、两项Pages均已通过。
+
+两个失败 workflow 各重跑一次后，[44053521985](https://github.com/gmx-io/gmx-interface/actions/runs/44053521985)与[44053464492](https://github.com/gmx-io/gmx-interface/actions/runs/44053464492)均为success：前端3374 passed/1既有skipped、SDK982 passed、multicall14 passed/1既有skipped、public50 passed/2既有skipped；lint、types和SDK standalone也通过。连同Audit、组件测试和两项Pages，当前head远端checks全绿。首次失败日志与最终成功日志均保存在本机证据目录。
+
+随后更新PR描述触发了 `.github/workflows/pr-tests.yml` / `audit.yml` 的 `pull_request: edited`：同一head又自动启动重复CI。因此上段“全绿”指描述更新前已完成的两条重跑及相关checks；最终查询还有描述编辑触发的新任务运行中，不将pending写成passed。源码、依赖、配置和工具链未变，已完成的匹配结果仍有效，不为纯PR描述编辑机械追加本地测试或无限等待同输入重跑。
+
+本轮未发现需要新增修复的本需求缺陷。原PR英文Validation同步本head的页面/真实API/CI结果与金融语义、真机、日期边界，业务head及单提交历史保持不变。最终仍须区分技术验收、外部接口可用性、AC2金融语义批准及review批准；不因线程未resolve而重复改代码，也不代 reviewer resolve/approve。未签名用户钱包、未广播交易、未修改Linear或发送review消息。
+
 ## 历史 gitlinks 清理完成（2026-11-17）
 
 用户在明确解释历史替换及 force-with-lease 后创建目标并授权实施。基于 fetch 后最新 release `22e1eda78ec0d51eae8104548744fb846f40d542`（新增 #3285 / SDK2.9.3 原生数学），在原 delivery 目录切换到重建交付分支 `solana-market-selector-header-release-trd-63-clean`，生成唯一需求提交 `786dcaadc7e2ab3399c5d2f934f18430a6c0e116`。11 个需求文件与旧 head `f6e2282703` 逐字节一致，相对最新 release 仍 +277/-25；两 head 的其他差异完全来自已合入 release 的 SDK 文件，没有修改业务语义。原 development 保持既有现场；此次仅重建 delivery 历史，没有第二处独立开发。
