@@ -1,5 +1,9 @@
 # FESOL-113 — fee discount / order 字段组合核验
 
+## 正式替代实施（2026-11-17）
+
+在原交易线接续最新 #3205/#3207，统一共享字段 readers 并删除重复 helper；保留交易消费者 orderInfo.solana、base58/strict callback/escrow 与 unsigned bigint 契约。 验证和推送收尾状态以[统一实施记录](../solana-trading-dependencies.md#trd-136-正式替代实施2026-11-17)为准。
+
 ## 正式替代核查（2026-11-17 晚间）
 
 已只读核对最新上游head与TRD136集成的实际差异。钱包API补丁运行依赖已退役；release已吸收部分能力；余额/字段新PR已无冲突但有语义差异，不整文件覆盖。具体head、替换条件、残留入口及RPC核验缺口见[正式替代审计](../solana-trading-dependencies.md#trd-136-临时方案正式替代核查2026-11-17-晚间)。

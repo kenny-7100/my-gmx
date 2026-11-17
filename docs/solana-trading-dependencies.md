@@ -1,5 +1,35 @@
 # Solana 交易链路依赖审计
 
+## TRD-136 正式替代实施（2026-11-17）
+
+用户确认按正式替代审计建议创建目标并实施。以下为实施记录，优先于后文只读快照；本轮不将候选接入等同上游合并或完整真实交易验收。
+
+1. 在 TRD-136 原开发线删除 `api-wallet-scope.patch`、API 启动器的 `--wallet`/`TRD136_INDEX_WALLET`/walletScope 分支及过时 README，改为已合并 c82a14e990 的全局索引说明。签名提交 `83aa07d64c`，精确同步持续实验分支 `c6375ffa6c`；诊断模拟的 `--wallet` 是交易账户公钥输入，保留。API 源码未改、未推送，未启动新服务。
+2. 原 TRD-72 development 依次接入 #3190 `9896a85fbc`、#3195 `666fa1669a`、#3205 `baed302cb0`、#3207 `6bb15c691f`，用签名 merge 保存来源，四个提交 `3d826dbea9` / `47659f59ad` / `526bbd1562` / `8275ade2e0`。上游仍未合并，wallet 原 PR 的 CHANGES_REQUESTED 与 orders 的 stacked base 不因本地集成消失。
+3. 所有目标的 19 个受影响文件起点逐个 Git blob 核对一致后，以 merge 的第一父差异精确 cherry-pick 到 78/70 原 development/delivery、72 delivery、136 和 playground。没有整条开发分支合入交付，未改 77 独立产物。全部新增提交 GPG 签名已核验。
+
+冲突取舍：采用上游中央 RPC registry 的 Solana networkChange 生命周期，删除重复 `useSolanaRpcTracking` 与其专属测试；EVM 启停仍由既有 RpcTrackersRegistry 负责，保留跨 Solana 切换回归。余额和钱包列表遵循最新配置 mint 契约，抵押/pay 资格独立，现有 WSOL/WGMX 图标已具备。字段统一到共享 string/unsigned bigint/unsigned integer readers，保留 safe number 或十进制 string 的 bigint 契约、严格 callback/escrow 和原始 base58；`orderInfo.solana` 交易消费者扩展保留。slot/freshness、sender/tracker、WASM pin 和开关隔离没有改动。
+
+| 逻辑开发线 | development head | delivery / 实验 head |
+| --- | --- | --- |
+| TRD-72 | `8275ade2e0` | `ce2d726b79` / Draft #3258 |
+| TRD-78 | `dc3e30c646` | `68ec526e70` / Draft #3261 |
+| TRD-70 | `9e88e5d639` | `532c8c050d` / Draft #3262 |
+| TRD-136 | `627ed6f9d1` | 无独立 release PR |
+| 持续实验 | `0255e54315` | Draft #3288 |
+
+本轮本地验证完成：TRD-72 原开发完整前端 345 文件/3454 测试通过，保留 1 个既有跳过；SDK 全量 66 文件/1011 测试通过，app/SDK 全量零 warning lint、3 项 ESLint 规则通过。七个接续目标实际目录的 SDK 重建、app/landing 类型与相关回归共 28 项检查全部通过；三条 delivery 分别为 10 文件113/114/114测试，78/70 development 与136也为114测试。所有目标的17个变化文件实际零 warning lint通过。playground 实际完整前端352文件3483测试通过，保留1个既有跳过，生产 build 通过，只有既有 bundle/annotation 警告。
+
+受影响19路径起点/终点逐个 blob 一致；同逻辑线 src/sdk/landing/lock 一致，SDK 源码/依赖/测试配置一致后复用1011项结果。额外核实实际 Vitest 使用的 vite.config.ts：development/playground 显式限定 project/test 路径，delivery 保留release发现配置，因此不声称所有构建/测试配置一致，各 delivery 均执行自己的类型与相关 suite。机器记录 `target-checks.json`、`source-verification.json`、`changed-lint.json`、`propagation-blobs.json`、`reuse-tree-check.json` 及日志在 `.local/replacement-audit-20261117/`。
+
+四条相关 development 已推 my-gmx，三条 delivery 和 playground 已推 my-gmx-pr，原 Draft #3258/#3261/#3262/#3288 正文按最新来源、验证及边界重写，任务登记已重绑实际 head。没有改77独立产物/PR，没有更新他人原前置PR、Linear或review状态。新head远端CI另见本节收尾快照；未完成检查不记通过。
+
+### 本轮远端 CI 快照
+
+#3258/#3261/#3262 新 head 当前各5项success、1项failure、2项综合检查仍运行；#3288新head8项仍运行。三个组件失败已逐条读取本次run44110647833/44110655685/44111384008日志，均明确“All tests passed”，失败在Pages报告及评论写入403。没有沿用旧head归因、扩大token权限或把报告工作流更改混入业务PR。Audit、SDK standalone及部分WASM检查已通过，完整综合检查未完成的不称通过；快照在 `final-pr-*.json`，本次失败日志在同目录 `ci-*-failed.log`。
+
+仍保留本地真实 API/DB/indexer/reader、简单无 LUT 配置及显式 RPC 入口：最新只读审计没有证明正式部署/可信 LUT/统一代理可替代。TRD-84 未发现可直接接入的公开退出 UI，最小本地接线继续暂缓。未操作钱包、签名广播或部署；现有预览仍是旧部署源码，不能视为本轮代码验收。
+
 ## TRD-136 临时方案正式替代核查（2026-11-17 晚间）
 
 用户要求核查上游推进后，哪些提前跑通的特殊安排仍有必要。本轮为只读审计，不修改业务、切换服务或交易；实时核对关键Linear正文/评论、GitHub PR及源码、远端release、公网市场API、原实验工具与当前集成。release远端仍28ddd42ce6，与本地origin/release一致。原始PR/files与逐文件差异保存在忽略目录 `.local/replacement-audit-20261117/`。

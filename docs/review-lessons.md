@@ -55,6 +55,8 @@
 
 **有区分力的核验：** 选当前配置里“能持有但不能作抵押”的真实 mint，沿配置→reader→mapper→钱包列表检查，并按影响覆盖 Token/Token-2022、合法空 ATA 与 malformed 数据。必须确保输入确实到达被测分支。当前条目用于预防与核验，不授权修改 #3195。
 
+**2026-11-17 接续：** 最新 #3190 `9896a85fbc` / #3195 `666fa1669a` 已恢复配置 mint 全量 reader/list；本地交易线接续该正式候选并撤掉旧 GMSOL_BALANCE_TOKENS 过滤，未修改他人原 PR。当前代码已有 WSOL/WGMX 图标，旧“缺图标需回退”不再适用；需以目标版本实际资源核对，不能永久保留历史兼容。
+
 ## RL-04 入口与状态生命周期
 
 **项目判断：** UI 可见性、请求启停、业务状态归属及在途任务存活分别决定。隐藏入口不等于关闭所有入口；CSS 隐藏或丢弃 Hook 返回值仍可能请求。暂停新读取不应无条件销毁在途交易 watcher，关闭整页也可能误伤网络中立设置。
@@ -67,6 +69,8 @@
 
 **有区分力的核验：** 对受影响部分列明入口、请求、state owner、异步回调和销毁时机；按需验证 flag off/on、刷新/站内切换、单链/双钱包、在途成功/失败/超时与卸载。不要把所有组合变成每个任务的固定门禁。历史切片延期不等于永久免做，后续范围以当前 Linear 与最终决定为准。
 
+**2026-11-17 中央 RPC 接续：** #3190 新 registry 仅管理 Solana 选择事件及 lazy init；EVM 的 start/stop 属于 RpcTrackersRegistry.syncTracking，不能因 registerRpcTracker 不再自动启动 EVM 就重复添加 owner。接续中央实现时应撤掉已被替代的本地 hook，同时核验当前 tab/flag、切换后延迟初始化、清理和 EVM 切回；保留仍在使用的 watcher，而非按名称批量删 tracking。
+
 ## RL-05 验证必须能区分错误
 
 **要保护的判断：** 通过的测试要能说明目标行为。先问“旧实现或缺少该 guard 时，这个输入是否仍通过？”对关键保护可定向做反例验证，不要求普遍 mutation testing，不以 mock 调用次数或样例数量代替业务结果。
@@ -74,6 +78,8 @@
 **证据：** [#3201 guard 缺失仍通过](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355273)；[#3110 旧会话没有 picked 记录](https://github.com/gmx-io/gmx-interface/pull/3110#discussion_r4324738579)，新 preview 会话无法覆盖；[#3138 NEAR 两链精度不同](https://github.com/gmx-io/gmx-interface/pull/3138#discussion_r4375833519)，可区分精度来源。#3068 的 [worker 入口](https://github.com/gmx-io/gmx-interface/pull/3068#discussion_r4259921377)与 [bootstrap 缺失](https://github.com/gmx-io/gmx-interface/pull/3068#discussion_r4259921402)说明保护工具也要有失败反例。
 
 **应用与边界：** 选择有差异的真实配置、恢复状态、精度或账户类型，再断言可观察结果。历史 FESOL-42 用 MegaETH→Phantom 区别 settlement 行为，这是当时验收条件，不是永久指定网络。生命周期问题注意实际生产构建与 StrictMode 差别；仍按上游测试准入和当前授权选择必要验证，不为简单改动镜像实现写测试。
+
+**2026-11-17 结果复用自审：** 核对测试配置应读取实际入口（本项目 Vitest 使用 vite.config.ts），不能把两边同名文件均不存在当作 identity。源码相同不保证发现范围、alias/project 路径或构建配置相同；记录已知差异，并让交付目录执行必要的实际检查，不把其他目录结果改写成自己执行。
 
 ## RL-06 原生单位与计算顺序
 
