@@ -6,6 +6,7 @@ import type { Address } from "viem";
 
 import { isSolanaNetwork, type NetworkId } from "config/chains";
 import { USD_DECIMALS } from "config/factors";
+import { getNetworkFeatures } from "config/features";
 import { PROMOTED_TOKENS_ORDER } from "config/promotedTokens";
 import type { SortDirection } from "context/SorterContext/types";
 import {
@@ -202,6 +203,7 @@ type SortField =
 function MarketsList() {
   const { networkId } = useChainId();
   const isSolana = isSolanaNetwork(networkId);
+  const swapEnabled = getNetworkFeatures(networkId).swap;
   const chainId = useSelector(selectChainId);
   const perpTokens = useSelector(selectAvailablePerpChartTokens);
   const swapTokens = useSelector(selectAvailableSwapChartTokens);
@@ -212,13 +214,14 @@ function MarketsList() {
   const {
     topLevelTab: storedTopLevelTab,
     subCategoryTab: storedSubCategoryTab,
-    mode,
+    mode: storedMode,
     setMode,
     setModeAndResetFilters,
     setSubCategoryTab,
     favoriteTokens,
     toggleFavoriteToken,
   } = useTokensFavorites("chart-token-selector");
+  const mode = swapEnabled ? storedMode : "perp";
 
   const localizedSubCategoryLabels = useLocalizedMap(subCategoryTabLabels);
 
@@ -235,18 +238,18 @@ function MarketsList() {
   useEffect(() => {
     if (initialModeSyncRef.current) return;
     initialModeSyncRef.current = true;
-    setMode(tradeFlags.isSwap ? "swap" : "perp");
+    setMode(swapEnabled && tradeFlags.isSwap ? "swap" : "perp");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const isSwap = mode === "swap";
   const availableTokens = isSwap ? swapTokens : perpTokens;
-  const otherModeAvailableTokens = isSwap ? perpTokens : swapTokens;
+  const otherModeAvailableTokens = swapEnabled ? (isSwap ? perpTokens : swapTokens) : undefined;
 
   const { availableChartTokens: options, availableChartTokenAddresses } = useMemo(() => {
-    const availableChartTokens = availableTokens?.filter((token) =>
-      isSolana ? !token.isChartDisabled : isChartAvailableForToken(chainId, token.symbol)
-    );
+    const availableChartTokens = isSolana
+      ? availableTokens
+      : availableTokens?.filter((token) => isChartAvailableForToken(chainId, token.symbol));
     const availableChartTokenAddresses = availableChartTokens?.map((token) => token.address as Address);
 
     return {
@@ -257,9 +260,9 @@ function MarketsList() {
 
   const otherModeOptions = useMemo(
     () =>
-      otherModeAvailableTokens?.filter((token) =>
-        isSolana ? !token.isChartDisabled : isChartAvailableForToken(chainId, token.symbol)
-      ),
+      isSolana
+        ? otherModeAvailableTokens
+        : otherModeAvailableTokens?.filter((token) => isChartAvailableForToken(chainId, token.symbol)),
     [chainId, isSolana, otherModeAvailableTokens]
   );
 
@@ -273,8 +276,14 @@ function MarketsList() {
     return options.some((t) => favoriteTokens.includes(t.address));
   }, [options, favoriteTokens]);
 
+  const hasTradfiMarkets = options?.some((token) => token.categories?.includes("tradfi")) ?? false;
+  const excludedTabs = useMemo<TopLevelTab[]>(
+    () => (isSwap ? SWAP_EXCLUDED_TOP_LEVEL_TABS : hasTradfiMarkets ? [] : ["tradfi"]),
+    [isSwap, hasTradfiMarkets]
+  );
+
   const shouldFallbackToAll =
-    (isSwap && SWAP_EXCLUDED_TOP_LEVEL_TABS.includes(storedTopLevelTab)) ||
+    excludedTabs.includes(storedTopLevelTab) ||
     (storedTopLevelTab === "favorites" && !hasAvailableFavorites) ||
     (storedTopLevelTab === "recently-listed" && recentlyListedCount === 0);
   const topLevelTab = shouldFallbackToAll ? "all" : storedTopLevelTab;
@@ -367,13 +376,7 @@ function MarketsList() {
     }
 
     return sortedTokens.map((token) => {
-      const wrappedAddress = (
-        isSolana
-          ? token.isNative
-            ? token.wrappedAddress ?? token.address
-            : token.address
-          : convertTokenAddress(chainId, token.address, "wrapped")
-      ) as Address;
+      const wrappedAddress = getWrappedTokenAddress(chainId, networkId, token.address);
       return {
         token,
         tokenData: tokensData?.[wrappedAddress],
@@ -384,7 +387,7 @@ function MarketsList() {
         maxLeverage: indexTokenStatsMap?.[wrappedAddress]?.maxUiAllowedLeverage,
       };
     });
-  }, [sortedTokens, chainId, isSolana, tokensData, dayPriceDeltaMap, dayVolumes, indexTokenStatsMap]);
+  }, [sortedTokens, chainId, networkId, tokensData, dayPriceDeltaMap, dayVolumes, indexTokenStatsMap]);
 
   useMissedCoinsSearch({
     searchText: searchKeyword,
@@ -462,7 +465,7 @@ function MarketsList() {
       <div className="flex flex-col">
         <ArbitrumRecommendation />
         <div className="mb-4 flex items-center gap-12 px-12 pt-12 max-md:flex-col max-md:gap-8">
-          <ModeTabs mode={mode} setMode={setMode} />
+          {swapEnabled && <ModeTabs mode={mode} setMode={setMode} />}
           <SearchInput
             className="w-full *:!text-body-medium"
             value={searchKeyword}
@@ -479,7 +482,7 @@ function MarketsList() {
             recentlyListedCount={recentlyListedCount}
             hasAvailableFavorites={hasAvailableFavorites}
             className="px-16"
-            excludedTabs={isSwap ? SWAP_EXCLUDED_TOP_LEVEL_TABS : undefined}
+            excludedTabs={excludedTabs}
             selectedValue={topLevelTab}
           />
         </ButtonRowScrollFadeContainer>
@@ -938,6 +941,11 @@ function MarketListItem({
   );
 }
 
+function getWrappedTokenAddress(chainId: number, networkId: NetworkId, address: string): Address {
+  // Solana perp options already use index mints; native SOL is not a market option.
+  return isSolanaNetwork(networkId) ? (address as Address) : convertTokenAddress(chainId, address, "wrapped");
+}
+
 function tokenSortingComparatorBuilder({
   chainId,
   networkId,
@@ -964,19 +972,12 @@ function tokenSortingComparatorBuilder({
 }) {
   const directionMultiplier = direction === "asc" ? 1 : -1;
 
-  const wrappedAddress = (token: Token) =>
-    isSolanaNetwork(networkId)
-      ? token.isNative
-        ? token.wrappedAddress ?? token.address
-        : token.address
-      : convertTokenAddress(chainId, token.address, "wrapped");
-
   return (a: Token, b: Token) => {
-    const aAddress = wrappedAddress(a);
-    const bAddress = wrappedAddress(b);
+    const aAddress = getWrappedTokenAddress(chainId, networkId, a.address);
+    const bAddress = getWrappedTokenAddress(chainId, networkId, b.address);
 
     if (orderBy === "unspecified" || direction === "unspecified") {
-      const promoted = PROMOTED_TOKENS_ORDER[chainId];
+      const promoted = PROMOTED_TOKENS_ORDER[networkId];
       if (promoted) {
         const aIdx = promoted.indexOf(a.address);
         const bIdx = promoted.indexOf(b.address);

@@ -45,6 +45,7 @@ import { TokensData, useTokensAllowanceData } from "../tokens";
 import {
   buildResetTradeOptions,
   INITIAL_SYNTHETICS_TRADE_OPTIONS_STATE,
+  normalizeTradeOptions,
   readStoredTradeOptions,
   resolveStoredTradeOptionsSync,
   type StoredTradeOptions,
@@ -54,6 +55,8 @@ import {
 import { useAvailableTokenOptions } from "./useAvailableTokenOptions";
 import { useSidecarOrdersState } from "./useSidecarOrdersState";
 import { getAvailableTradeModes } from "./utils/availableTradeModes";
+
+export type { StoredTradeOptions } from "./tradeboxStorage";
 
 export type TradeStage = "trade" | "processing";
 
@@ -141,7 +144,7 @@ export function useTradeboxState(
   const setStoredOptionsOnChain = useCallback(
     (args: SetStateAction<StoredTradeOptions>) => {
       setStoredOptionsWithoutFallbacks((oldState) => {
-        const newState = typeof args === "function" ? args(oldState) : args;
+        const newState = normalizeTradeOptions(networkId, typeof args === "function" ? args(oldState) : args, oldState);
 
         if (isEqual(oldState, newState)) {
           return oldState;
@@ -210,6 +213,11 @@ export function useTradeboxState(
     (args: SetStateAction<StoredTradeOptions>) => {
       setStoredOptionsOnChain((oldState) => {
         let newState = typeof args === "function" ? args(oldState) : args;
+
+        // Ignore unsupported Swap requests, but let identity updates initialize position tokens and collateral.
+        if (newState.tradeType === TradeType.Swap && !getNetworkFeatures(networkId).swap) {
+          return oldState;
+        }
 
         if (newState && (newState.tradeType === TradeType.Long || newState.tradeType === TradeType.Short)) {
           newState = fallbackPositionTokens({

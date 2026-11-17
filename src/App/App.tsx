@@ -90,8 +90,10 @@ function App() {
   app = <SEO>{app}</SEO>;
   app = <ConnectModalProvider>{app}</ConnectModalProvider>;
   app = <I18nProvider i18n={i18n as any}>{app}</I18nProvider>;
-  app = <PendingTxnsContextProvider>{app}</PendingTxnsContextProvider>;
+  // The networkId key remounts this subtree. Pending txns live above it so the poller can pause on
+  // Solana and resume on EVM without dropping receipt or replacement tracking.
   app = <SWRConfigWithKey>{app}</SWRConfigWithKey>;
+  app = <PendingTxnsContextProvider>{app}</PendingTxnsContextProvider>;
   app = <SettingsContextProvider>{app}</SettingsContextProvider>;
   app = <GlobalStateProvider>{app}</GlobalStateProvider>;
   app = <ChainContextProvider>{app}</ChainContextProvider>;

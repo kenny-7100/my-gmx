@@ -16,6 +16,24 @@ export function getGmsolListedMarketAddresses(rawMarketsInfoData: RawMarketsInfo
   return GMSOL_MARKETS.map((market) => market.marketTokenAddress).filter((address) => rawMarketsInfoData[address]);
 }
 
+// Hydration drops a listed market whose index or collateral token has no price, and that market's
+// positions with it. Callers treat a false result as incomplete data, not as a shorter market list.
+export function hasGmsolListedMarketPrices(rawMarketsInfoData: RawMarketsInfoData, tokensData: TokensData): boolean {
+  for (const address of getGmsolListedMarketAddresses(rawMarketsInfoData)) {
+    const market = rawMarketsInfoData[address];
+
+    if (
+      !tokensData[market.indexTokenAddress] ||
+      !tokensData[market.longTokenAddress] ||
+      !tokensData[market.shortTokenAddress]
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export function composeGmsolMarkets(rawMarketsInfoData: RawMarketsInfoData, tokensData: TokensData): GmsolMarkets {
   const marketsAddresses = getGmsolListedMarketAddresses(rawMarketsInfoData);
   const marketsData: MarketsData = {};

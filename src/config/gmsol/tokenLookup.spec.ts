@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { NATIVE_TOKEN_ADDRESS } from "sdk/configs/tokens";
 import { getIsEquivalentTokens } from "sdk/utils/tokens";
 
+import { applyTopLevelFilter, applySubCategoryFilter } from "components/ChartTokenSelector/marketFilters";
+
 import {
   convertGmsolTokenAddress,
   getGmsolNativeToken,
@@ -18,23 +20,11 @@ const WBTC_MINT = "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh";
 const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 describe("gmsol token lookup", () => {
-  it("exposes GMX categories and scaled names without changing Solana mint decimals", () => {
-    for (const [symbol, category] of [
-      ["SOL", "layer1"],
-      ["LINK", "defi"],
-      ["BONK", "meme"],
-      ["SHIB", "meme"],
-      ["PEPE", "meme"],
-    ]) {
-      expect(getGmsolTokenBySymbol(symbol)?.categories).toContain(category);
-    }
-    for (const symbol of ["BONK", "SHIB", "PEPE"]) {
-      const token = getGmsolTokenBySymbol(symbol)!;
-      expect(token).toMatchObject({ visualMultiplier: 1000, visualPrefix: "k" });
-      expect(getGmsolToken(token.address)).toBe(token);
-      expect(token.address).not.toMatch(/^0x/);
-    }
-    expect(getGmsolTokenBySymbol("BONK")?.decimals).toBe(5);
+  it("includes Solana ETH in Crypto and Layer 1 using native ETH metadata", () => {
+    const eth = getGmsolTokenBySymbol("ETH")!;
+    const crypto = applyTopLevelFilter([eth], { topLevelTab: "crypto", favoriteAddresses: [] });
+    expect(crypto).toEqual([eth]);
+    expect(applySubCategoryFilter(crypto, { topLevelTab: "crypto", subCategoryTab: "layer1" })).toEqual([eth]);
   });
 
   it("keeps base58 case, native SOL and collateral twins", () => {

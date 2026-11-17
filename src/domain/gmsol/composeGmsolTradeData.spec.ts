@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ARBITRUM } from "config/chains";
+import { PRICES_CACHE_TTL } from "lib/timeConstants";
 import { GmxApiSdk } from "sdk/clients/v2";
 import { mergeMarketsConfigValues } from "sdk/utils/markets";
 import type { ApiOrderInfo } from "sdk/utils/orders/types";
@@ -15,6 +16,7 @@ import {
 } from "./orders/composeGmsolOrdersInfo";
 import { composeGmsolPositionsInfo } from "./positions/composeGmsolPositionsInfo";
 import { buildGmsolTokensData } from "./tokens/buildGmsolTokensData";
+import { resolveGmsolTokensData } from "./tokens/resolveGmsolTokensData";
 
 const OWNER = "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";
 const BTC_MARKET = "7RNev94wKusSmFEqo3gvv1d1zMweP6sa2LtjJjroAvym";
@@ -55,6 +57,37 @@ describe("Solana trade state from the gmx-api samples", () => {
     expect(position.collateralToken.symbol).toBe("USDC");
 
     expect(Object.keys(ordersInfoData)).toHaveLength(orders.length);
+  });
+
+  it("keeps a missing ticker's last price only within the cache TTL", async () => {
+    const { raw, tokensData } = await loadSamples();
+    const btcAddress = raw[BTC_MARKET].indexTokenAddress;
+    const withoutBtc = { ...tokensData };
+    delete withoutBtc[btcAddress];
+
+    const complete = resolveGmsolTokensData({
+      tokensData,
+      receivedAt: 0,
+      rawMarketsInfoData: raw,
+      lastComplete: undefined,
+    });
+    const withinTtl = resolveGmsolTokensData({
+      tokensData: withoutBtc,
+      receivedAt: PRICES_CACHE_TTL - 1,
+      rawMarketsInfoData: raw,
+      lastComplete: complete.lastComplete,
+    });
+    const pastTtl = resolveGmsolTokensData({
+      tokensData: withoutBtc,
+      receivedAt: PRICES_CACHE_TTL,
+      rawMarketsInfoData: raw,
+      lastComplete: complete.lastComplete,
+    });
+
+    expect(complete.tokensData).toBe(tokensData);
+    expect(withinTtl.tokensData?.[btcAddress]).toBe(tokensData[btcAddress]);
+    expect(withinTtl.pricesUpdatedAt).toBe(0);
+    expect(pastTtl.tokensData).toBeUndefined();
   });
 
   it.each`
