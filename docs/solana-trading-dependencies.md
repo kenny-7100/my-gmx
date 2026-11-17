@@ -26,7 +26,9 @@
 
 ### 本轮远端 CI 快照
 
-#3258/#3261/#3262 新 head 当前各5项success、1项failure、2项综合检查仍运行；#3288新head8项仍运行。三个组件失败已逐条读取本次run44110647833/44110655685/44111384008日志，均明确“All tests passed”，失败在Pages报告及评论写入403。没有沿用旧head归因、扩大token权限或把报告工作流更改混入业务PR。Audit、SDK standalone及部分WASM检查已通过，完整综合检查未完成的不称通过；快照在 `final-pr-*.json`，本次失败日志在同目录 `ci-*-failed.log`。
+本轮新head最终所有检查均已结束，无pending：#3258 `ce2d726b79` 与 #3261 `68ec526e70` 各7项success/1项报告发布failure；#3262 `532c8c050d` 10项success/1项报告发布failure（含正文更新触发的同head重跑）；#3288 `0255e54315` 8项全部success。三条原交付的组件测试均通过，失败均在Pages报告/评论写入403，已逐条核对本次run44110647833/44110655685/44111384008日志；没有把权限失败归为业务回归，也没有将报告工作流修改混入业务PR。
+
+实验线综合run44112790313与SDK standalone全部通过，日志明确前端3483passed/1skip、SDK1011passed、multicall14passed/1skip、public50passed/2skip；保留既有skip。原70最后正文重跑run44112849728完整通过。最终快照在 `final-pr-*.json` / `final-ci-summary.json`，完整日志 `playground-final-ci.log`，失败日志 `ci-*-failed.log`。四条PR保持Draft且MERGEABLE，无Ready/reviewer/merge操作。本轮实施目标完成，后续正式前置合并、部署资源和完整交易验收按各自条件继续。
 
 仍保留本地真实 API/DB/indexer/reader、简单无 LUT 配置及显式 RPC 入口：最新只读审计没有证明正式部署/可信 LUT/统一代理可替代。TRD-84 未发现可直接接入的公开退出 UI，最小本地接线继续暂缓。未操作钱包、签名广播或部署；现有预览仍是旧部署源码，不能视为本轮代码验收。
 
