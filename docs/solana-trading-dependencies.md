@@ -23,7 +23,7 @@ TRD-136 原集成目录 SDK rebuild、app/landing typecheck、完整前端suite 
 
 四条development已推送my-gmx，四delivery推送my-gmx-pr，保留原PR和旧分支名，PR标题及需求链接接续TRD。原56 development也实际tscheck/full suite通过3448项；共有SDK units/math两套41项及变更units文件ESLint零warning/Prettier通过。19/20原线与delivery关键运行源码一致，19已登记的selector/list额外范围仍未整支带入；实验工具与个人基础未混进业务PR。
 
-远端新head跟进：3258组件suite全部通过，workflow失败在Pages报告发布及评论权限403（run44031144297）。3262原head `aed7c77c76` 的Run Tests因余额Hook import顺序与测试JSX对象4条warning失败，已在原development以 `5c5acd03fb` 修正，精确转入delivery `00d5d7b138` 与136 `0a6277ec90`；只调整import/测试fixture引用，无业务值或断言变化。上述3483/3485完整suite来自清理前同业务源码，最终delta另验实际目录lint/types/两套6项余额/组合回归；不将旧CI归因套到这次真实lint失败。新head远端CI仍需按实际运行结果区分pending/成功/权限失败，不能称全绿。
+远端新head跟进：3258组件suite全部通过，workflow失败在Pages报告发布及评论权限403（run44031144297）。3262原head `aed7c77c76` 的Run Tests因余额Hook import顺序与测试JSX对象4条warning失败，已在原development以 `5c5acd03fb` 修正，精确转入delivery `00d5d7b138` 与136 `0a6277ec90`；只调整import/测试fixture引用，无业务值或断言变化。上述3483/3485完整suite来自清理前同业务源码，最终delta另验实际目录lint/types/两套6项余额/组合回归；不将旧CI归因套到这次真实lint失败。收尾时进一步核实：3261组件run44031497193、3259组件run44032212432也均“All tests passed”，失败同在Pages/评论403；三条旧于70最后lint提交的最终head均已有Rust reproduction、SDK standalone及至少一项常规Run Tests成功，其余重复触发项仍运行。3262最终head `00d5d7b138` 全套CI重新运行中。新head远端CI仍需按实际运行结果区分pending/成功/权限失败，不能称全绿。
 
 外部范围仍保留：TRD-100/80 原PR review、TRD-98/63 与字段stack的原作者冲突/review、可信LUT、API正式部署及金融reference验收；未向他人发消息/评论、改Linear、请求reviewer、转Ready或合并。TRD-84 本地最小撤单/平仓接线仍按用户暂缓，不因本轮上游跟进恢复。五需求不能统一标记Done；完整真实交易矩阵仍未完成。
 
