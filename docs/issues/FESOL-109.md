@@ -1,5 +1,23 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 补充 Cycle 2 已分配或已介入的前端工作（2026-11-17）
+
+用户明确将协调表范围扩展为 Cycle 1 加上 Cycle 2 已分配 Kenny/Rainer/Sulliven、或实际已有前端介入/进展的工作，仍排除 Done。本轮官方 MCP 查询 Trading Cycle 2 全页（8 条，hasNextPage=false），其中迁移项目 4 条：TRD-70、84、83、119。
+
+| 当前需求 | 历史编号 | 当前负责人 | 状态 | 当前周期 | 纳入依据 | 确认的实现 PR |
+| --- | --- | --- | --- | --- | --- | --- |
+| [TRD-70](https://linear.app/gmx-io/issue/TRD-70) | [FESOL-19](https://linear.app/gmx-io/issue/FESOL-19) | Kenny | In Progress | Cycle 2 | 已分配且已有实现；旧计划 Cycle 3 | [#3262](https://github.com/gmx-io/gmx-interface/pull/3262)，Open/Draft，仍有明确延期范围与验收条件 |
+| [TRD-84](https://linear.app/gmx-io/issue/TRD-84) | [FESOL-59](https://linear.app/gmx-io/issue/FESOL-59) | Sulliven | In Progress | Cycle 2 | 已分配且状态为开发中；旧计划 Cycle 3 | 未确认独立实现 PR |
+| [TRD-83](https://linear.app/gmx-io/issue/TRD-83) | [FESOL-28](https://linear.app/gmx-io/issue/FESOL-28) | 未分配 | Todo | Cycle 2 | 父需求已有子项 TRD-84 由 Sulliven 推进；Kenny 在 10 月 16 日评论确认评估并将补充技术前置 | 未确认独立实现 PR |
+
+TRD-83 作为父级协调项补列，不代表整条已开工或已分配给 Sulliven/Kenny，不与 TRD-84 重复计算独立交付量；保证金增减等其余范围仍待明确实施负责人。TRD-119/FESOL-18 当前无负责人、Todo、无评论，未核实到实际介入或实现进展，因此未按新条件纳入；创建者为 Kenny 不等于当前已接手。Cycle 2 其他四条不属于此次 Solana 迁移项目/人员范围。
+
+之前 Cycle 1 的 14 条保留，新增 2 条独立实施 issue，加 1 条父级协调项，展示合计 17 行。Cycle 字段不调整，Cycle 2 完整收口不代表届时才开工。本轮仅只读核验，未修改 Linear。TRD-84 未关联 PR，且 GitHub 按 FESOL-59/TRD-84 标题搜索无独立结果；#3207 正文提及其依赖，但不是本需求实现 PR。
+
+## 上游跟进实施（2026-11-17）
+
+TRD-101 相关 API #340 新增量索引候选 `996cf05db9` 已在独立干净checkout实测：105,529账户bootstrap，约32秒ready，未使用钱包过滤补丁；全局非空仓位、slot/freshness拒绝与恢复通过。原索引DB suite（含160k账户prune与追赶未完不serve）及四个金融/records suites共72 passed。只本地运行，未改上游源码/推送/发布；正式部署与完整负载验收仍另行。 统一来源、交付版本、验证和外部剩余项见[五需求跟进实施](../solana-trading-dependencies.md#五需求跟进实施2026-11-17)。
+
 ## Trading Cycle 1 前端筛选（2026-11-17）
 
 补充PR实时核验：TRD-63→#3201、72→#3258、77→#3259、78→#3261、75→#3242（Merged）、98→#3195、85→#3223、65→#3193（已Merged，Linear仍In Test）、80→#3238、100→#3243。TRD-103/104均关联#3190，PR正文明确89/96，是同一reader/hook实现；#3195为下游余额集成。TRD-142仅关联#3120，但它是FESOL-48来源PR并明确延期110范围，不列为142的实现PR。TRD-136未确认独立PR；列表只保留确证的实现PR，未声称附属PR/未关联实现全部不存在。
