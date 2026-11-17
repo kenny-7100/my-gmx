@@ -1,5 +1,9 @@
 # Solana 交易链路依赖审计
 
+## TRD-63 原 PR 发布结果（2026-11-17）
+
+用户明确要求更新原 PR 后，#3201 源分支已普通 fast-forward 到 `f6e2282703`，标题/正文接续 TRD-63，GitHub 确认 **MERGEABLE**，本次代码冲突已解除。此前 origin 只读发布阻碍已由本次明确授权解除；review 仍 CHANGES_REQUESTED，新 head 的 CI 正在运行，页面完整矩阵及公开 gitlink 历史边界仍保留。没有合并、转状态或请求 reviewer。
+
 ## Kenny 的 TRD-63 冲突跟进（2026-11-17）
 
 此前“待原作者处理 #3201”的表述已由本轮接续：Kenny 就是该需求负责人，Agent 已复用原开发线处理最新 release 的 35 处冲突，交付候选 `f6e2282703` 收敛为 11 文件；自身 SDK、类型、lint、3374 项完整测试及生产构建通过。候选保存到正式个人 fork，原 PR 因源分支在 gmx-io 且 origin 只读，仍待本次写入例外，不能称公开冲突已解除。页面完成真实 Solana 数据/header 局部 smoke，搜索分类与全量 AC 未完成；原公开 gitlink 历史未重写。具体版本、取舍与验证边界见 [FESOL-15 / TRD-63](issues/FESOL-15.md#上游冲突处理2026-11-17)。

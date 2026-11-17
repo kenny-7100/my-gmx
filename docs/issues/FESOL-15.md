@@ -1,5 +1,9 @@
 # FESOL-15 — Solana 市场选择器与 header
 
+## 原 PR 已更新（2026-11-17）
+
+用户随后明确要求“也更新 PR”，授权本次写入原上游源分支；已普通 fast-forward 推送 `056f8d689c` → `f6e228270340a7889df62aa96dbb5103a233a63f` 到 `gmx-io/gmx-interface:solana-market-selector-header-release-fesol-15`，未强推或改写历史。#3201 标题改为 TRD-63，正文换成当前 release、11 文件范围、实际测试/构建和局部页面验收边界，删除旧前置未合、旧全量验收及签名描述。远端确认 head 一致、**MERGEABLE**；mergeStateStatus 仍 BLOCKED，reviewDecision 为 CHANGES_REQUESTED。新 Audit、组件测试、常规测试、SDK standalone 与 Pages 检查运行中，未称 CI 全绿。原 PR 保持实际非 Draft 状态，未转换、请求 reviewer、回复 review 或合并。本次明确写入授权仅用于该 PR 更新，不改变 origin 长期只读约定。
+
 ## 上游冲突处理（2026-11-17）
 
 用户确认 #3201 归 Kenny 负责并授权跟进上游、正确解决冲突。本轮角色为实现与局部验收负责人。当前需求 [TRD-63](https://linear.app/gmx-io/issue/TRD-63)，沿用原 FESOL-15 开发线及原 [PR #3201](https://github.com/gmx-io/gmx-interface/pull/3201)，不另建重复 PR。
