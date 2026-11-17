@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 上游跟进实施（2026-11-17）
+
+TRD-77 原 development/delivery 已同步 release `7868f48f3e`；development组合精确接续 #3243 等值常量复用，独立delivery未带入该交易源码。原 Draft #3259 仍18文件，固定source/toolchain/vendor/WASM hash未变，不重复Rust构建或恢复已确定的版本选择。最终head与检查见统一实施表。 统一来源、交付版本、验证和外部剩余项见[五需求跟进实施](../solana-trading-dependencies.md#五需求跟进实施2026-11-17)。
+
 ## 前置增量核验（2026-11-17）
 
 当前TRD-77；PR3259及WASM pin未变，不需因API索引变化重建WASM；原mainnet矩阵仍未完成，136一次真实long不代表全范围通过。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。

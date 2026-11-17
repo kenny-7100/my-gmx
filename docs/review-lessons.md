@@ -41,6 +41,8 @@
 
 **真实消费者反例（2026-11-16）：** [TRD-70 本地联调](issues/FESOL-19.md#trd-136-真实钱包联调发现的余额接线修复2026-11-16)中余额 Hook 成功但共享 TokensData 未合并 balance/walletBalance，TradeBox按未知余额显示不足。核验必须走到共享验证/展示消费者及 loaded flags；合并时按当前 owner/network，未知与错误保留 undefined，合法0保持0，并验证 funded→切换/错误→zero，不能用一次 RPC 成功代替业务接线验收。
 
+**验收保护补充（2026-11-17）：** 同一余额接线修复在本地类型/行为测试通过后，远端零warning lint仍因import顺序及回归用例的JSX临时对象失败。相关修复/接缝除行为验证外须运行既有适用lint；测试文件同样受规则约束，不能以“只改测试”跳过。该次最小清理保留funded→undefined→zero断言及owner/network余额清除语义，不删除测试或放宽规则消除失败。
+
 **隐藏消费者重新启用（2026-11-16）：** [GMTrade #1096 / FESOL-115](issues/FESOL-115.md)恢复 FEES 列时，旧 formatter 将接口 null 显示为 `$0.00`。已有函数也须按新启用场景核对未知、不适用与真实零的显示契约；区分旧逻辑存在与本次首次暴露。移除提现 PDA 聚合则应核实当前接口 owner 已是钱包，不能用旧注释推定回归。
 
 ## RL-03 资格条件属于具体用途

@@ -1,5 +1,9 @@
 # FESOL-52 — 统一数据层与 FESOL-56 集成审查
 
+## 上游跟进实施（2026-11-17）
+
+TRD-65 / #3193 已于2026-11-16合入release，四条原开发/交付线与136已同步到 `7868f48f3e`。已消费同head不再重复cherry-pick，PR差异自然收敛；保留其后续slot/owner/余额扩展，未整支覆盖Provider。当前不再将65原review/合并列为待办。 统一来源、交付版本、验证和外部剩余项见[五需求跟进实施](../solana-trading-dependencies.md#五需求跟进实施2026-11-17)。
+
 ## 前置增量核验（2026-11-17）
 
 当前TRD-65；#3193已于11月16日16:41 CST合入，head仍e712a1d342，当前release实际保留Provider。四线已提前消费同head，转为交付diff收敛事项，不重复集成。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。

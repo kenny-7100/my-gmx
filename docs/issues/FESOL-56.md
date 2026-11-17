@@ -1,5 +1,9 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## 上游跟进实施（2026-11-17）
+
+TRD-72 原线已同步 release `7868f48f3e`，精确对齐 TRD-100/#3243 的两个等值常量（原提交 `7fda907550`），保留全部数学导出及转换保护。原 development 类型与完整前端回归3448 passed/1 skipped、SDK定向41 passed；原 delivery `153536c592` 已完成自身SDK rebuild/types/full suite（3448 passed/1 skipped），已推送同一 Draft #3258，标题/正文接续TRD编号。Provider合并后PR范围收敛为95文件。 统一来源、交付版本、验证和外部剩余项见[五需求跟进实施](../solana-trading-dependencies.md#五需求跟进实施2026-11-17)。
+
 ## 前置增量核验（2026-11-17）
 
 当前TRD-72为In Review；65合入、100新head已无冲突；98/63/113冲突及可信LUT仍待跟进。新API值得隔离核验，未把候选代码/CI等同运行或主网验收。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。

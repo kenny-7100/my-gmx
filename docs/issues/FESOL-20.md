@@ -1,5 +1,9 @@
 # FESOL-20 — 订单发送与成交状态
 
+## 上游跟进实施（2026-11-17）
+
+TRD-78 原 development/delivery 已同步 release `7868f48f3e` 并精确接续 #3243 等值常量复用；保留本需求receipt/watcher/recovery/notification扩展，未改事件判定或重签保护。原 Draft #3261 继续同一逻辑开发线，Provider前置合并后PR差异收敛为112文件；最终head与检查见统一实施表。 统一来源、交付版本、验证和外部剩余项见[五需求跟进实施](../solana-trading-dependencies.md#五需求跟进实施2026-11-17)。
+
 ## 前置增量核验（2026-11-17）
 
 当前TRD-78；PR3261 head未变，主体依赖TRD72和API确认刷新链路。136真实long已有两阶段证据，新API仍需核验coverage/minContextSlot行为后才能替换运行。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。

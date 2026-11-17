@@ -1,5 +1,9 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## 上游跟进实施（2026-11-17）
+
+TRD-70 原 development/delivery 已同步 release `7868f48f3e` 并精确接续 #3243 等值常量复用。真实钱包余额接线仍在原 development `9a3342837b`，delivery 包含精确提交 `d0726f09d9`；本轮将其纳入同一原 Draft #3262 的更新范围。15/25额外列表/selector范围仍按原边界，不整支合入delivery；PR差异收敛为135文件。随后跟进远端CI发现4条lint warning，在原线 `5c5acd03fb` 修复import顺序/fixture引用，精确进入delivery `00d5d7b138` 和136 `0a6277ec90`；保留全部余额断言，未放宽lint。最终head与检查见统一实施表。 统一来源、交付版本、验证和外部剩余项见[五需求跟进实施](../solana-trading-dependencies.md#五需求跟进实施2026-11-17)。
+
 ## 前置增量核验（2026-11-17）
 
 当前TRD-70五需求前置核验：65已合，100/80可推进review；原PR3262仍996a167e5c，本地余额修复delivery d0726f09d9未推送。只读核验不自动更新PR。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。

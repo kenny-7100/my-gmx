@@ -1,5 +1,32 @@
 # Solana 交易链路依赖审计
 
+## 五需求跟进实施（2026-11-17）
+
+用户授权实际跟进后，已将 release `7868f48f3e5cf1423a33a4e3f8cbbc9d5cd90d18` 同步到四条原 development/delivery、TRD-136 和个人基础；均干净自动合并，未覆盖他人工作。个人基础 merge 因 GPG agent 不可用失败，已按长期授权使用命令级不签名提交完成，未改变长期配置。TRD-65 / #3193 已合成果不重复集成；交付差异文件数由 223/240/253 收敛为 TRD-72 **95**、TRD-78 **112**、TRD-70 **135**，TRD-77 保持 **18** 文件。
+
+TRD-100 / #3243 新 head `50118fee998` 的真实差异已在 TRD-72 原 development 精确接续：`units.ts` 复用 `GMSOL_PRECISION_SCALE` 与 `GMSOL_MAX_UNSIGNED`，数值、舍入及范围保护均不变；原提交 `7fda907550`。选择性转入其余 development、136 和三条消费者 delivery，保留 `gmsol/index.ts` 数学函数与 units 导出；TRD-77 独立产物 PR 不带此交易源码。两套 SDK 测试共 **41 passed**。TRD-70 的真实余额接线修复仍源于原 development `9a3342837b`，delivery 已含其精确提交 `d0726f09d9`。
+
+**API #340 的新索引已实测解决当前本地全局启动阻碍。** 独立干净 detached checkout `/Volumes/kenny/gmx/gmx-api-trd-136-incremental` 固定 `996cf05db9603d9af1689fdbac05f5a0ecf8e0e1`，沿用其未变化的 package/lock 依赖；未改 API 源码、未推送或创建 API PR。Docker DataFolder 与实际 Docker.raw 均确认位于 `/Volumes/kenny/docker/DockerDesktop`。启动器创建独立 owned PostgreSQL/reader/writer，**不传钱包限制**；105,529 个账户完成 bootstrap，约 32 秒 ready，67/67 gmsol 市场，测试钱包 orders/positions/fee-discount 为200，其他真实钱包能返回非空仓位。slot 等待 470430200 → 470430204；暂停 owned writer 超过10秒后 config/positions 均503 `BACKEND_UNAVAILABLE`，恢复后200（470430275）。原钱包当前空仓位且 RPC 470429549 确认原仓位账户不存在，本轮未平仓，不据此证明退出入口。
+
+新 API 的原有5 suites（真实隔离DB索引、market/position math、fee-discount、order records）**72 passed**；indexStore 必须用真实DB，首次误选 offline harness 缺DB未通过，不将64条纯函数结果当索引通过。随后通过本次 owned DB 的随机 partition 跑原suite并自行清理，未改变全局索引数据。API自身tsoa routes生成后TypeScript检查通过。前端3016已使用3056全局API，配置模块、无LUT配置与真实WASM entry HTTP验证通过；旧钱包范围孤儿进程及其独立数据库已按report/PID/owner核对后清理，保留checkout与日志。新版本上重新执行现有 unsigned builder/validator/simulation：市价多/空892bytes、限价多/空925bytes，slots470432112/118/125/131全通过，每种模拟均由现有helper重新读取真实keeper flag并确认enabled；初次独立查询403不再代表本轮后续无法取得flag。未签名广播；仍非完整浏览器交易验收。历史钱包补丁不再是当前推荐环境的必要前置，保留旧checkout供追溯。
+
+本机证据集中在 TRD-136 `.local/trd-136/incremental-*` 与 `api-oZP7rM/`，不将钱包金融数据/凭据作为共享附件；可复现入口已更新需求工具 README。各原 Draft PR 已更新并保持Draft；最终目录均实际完成SDK rebuild、app/landing typecheck和完整前端suite。原有1个skip file/test均保留，未称全量零skip。没有为本轮常量/基线变化重跑未变化的Rust reproduction或完整应用build，旧证据保持其原版本边界。
+
+| 需求 / 原 PR | 最终development | 已推送delivery | 本轮实际delivery完整suite | 相对release文件数 |
+| --- | --- | --- | --- | --- |
+| TRD-72 / [#3258](https://github.com/gmx-io/gmx-interface/pull/3258) | 7fda907550 | 153536c592 | 345 files / 3448 passed，1 skipped | 95 |
+| TRD-78 / [#3261](https://github.com/gmx-io/gmx-interface/pull/3261) | fb9e853562 | b7e3b09766 | 349 files / 3469 passed，1 skipped | 112 |
+| TRD-70 / [#3262](https://github.com/gmx-io/gmx-interface/pull/3262) | 5c5acd03fb | 00d5d7b138 | 352 files / 3483 passed，1 skipped | 135 |
+| TRD-77 / [#3259](https://github.com/gmx-io/gmx-interface/pull/3259) | 3524b09f15 | 17cd0bb460 | 333 files / 3366 passed，1 skipped | 18 |
+
+TRD-136 原集成目录 SDK rebuild、app/landing typecheck、完整前端suite **353 files / 3485 passed，1 skipped** 通过（`d7320b4821`）。
+
+四条development已推送my-gmx，四delivery推送my-gmx-pr，保留原PR和旧分支名，PR标题及需求链接接续TRD。原56 development也实际tscheck/full suite通过3448项；共有SDK units/math两套41项及变更units文件ESLint零warning/Prettier通过。19/20原线与delivery关键运行源码一致，19已登记的selector/list额外范围仍未整支带入；实验工具与个人基础未混进业务PR。
+
+远端新head跟进：3258组件suite全部通过，workflow失败在Pages报告发布及评论权限403（run44031144297）。3262原head `aed7c77c76` 的Run Tests因余额Hook import顺序与测试JSX对象4条warning失败，已在原development以 `5c5acd03fb` 修正，精确转入delivery `00d5d7b138` 与136 `0a6277ec90`；只调整import/测试fixture引用，无业务值或断言变化。上述3483/3485完整suite来自清理前同业务源码，最终delta另验实际目录lint/types/两套6项余额/组合回归；不将旧CI归因套到这次真实lint失败。新head远端CI仍需按实际运行结果区分pending/成功/权限失败，不能称全绿。
+
+外部范围仍保留：TRD-100/80 原PR review、TRD-98/63 与字段stack的原作者冲突/review、可信LUT、API正式部署及金融reference验收；未向他人发消息/评论、改Linear、请求reviewer、转Ready或合并。TRD-84 本地最小撤单/平仓接线仍按用户暂缓，不因本轮上游跟进恢复。五需求不能统一标记Done；完整真实交易矩阵仍未完成。
+
 ## 五需求前置增量核验（2026-11-17）
 
 范围：TRD-70/72/77/78/136 的直接及关键传递前置，非全项目进度扫描；只读调研，不自动实施、同步开发基线、合并或部署。官方Linear实时读取五条正文/关系及关键依赖，五条与关键前置评论单独核对；GitHub读取最新PR/head/reviews/checks、API源码和公开HTTP。release在线为 `7868f48f3e5cf1423a33a4e3f8cbbc9d5cd90d18`（11月16日16:42 CST）。本轮没有fetch/pull、业务修改、构建或交易。
