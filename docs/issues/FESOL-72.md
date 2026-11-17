@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 五需求晚间前置核验（2026-11-17）
+
+上游数学与API更新未改变固定WASM source/pin/hash；仅按受影响基线核验，不机械重建产物。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## 四条批次状态复核（2026-11-17）
 
 只读核对当前 Linear、原 Draft PR 和最终 head CI；最新 release 冲突与 CI 收尾结果见[统一复核](../solana-trading-dependencies.md#四条批次状态复核2026-11-17)。本轮未改业务或执行交易，既有验收边界保留。

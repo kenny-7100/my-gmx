@@ -1,5 +1,9 @@
 # FESOL-51 — 余额与 RPC 前置调研
 
+## 五需求晚间前置核验（2026-11-17）
+
+需求明确#3190→#3195交付顺序；空System-owned ATA修复已有reviewer确认，未resolved旧P2不再等于待修；仍需原PR冲突、/rpc-debug等review及配置mint范围收口。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## 前置增量核验（2026-11-17）
 
 当前TRD-98；#3195原head未变，现CONFLICTING且Changes requested。读取未resolved线程仍有空System-owned ATA整次余额读取失败的P2；需原线审查收口，未在本轮修改。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。

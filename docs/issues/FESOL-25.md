@@ -1,5 +1,9 @@
 # FESOL-25 — 持仓与订单列表依赖调研
 
+## 五需求晚间前置核验（2026-11-17）
+
+TRD-80旧#3238已关闭并由#3286替代，后者20:13 CST已合入release，实际15文件；Linear仍In Review。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## 前置增量核验（2026-11-17）
 
 当前TRD-80；#3238原head07117e1691未变但现MERGEABLE、Review required、checks成功，值得推进review，不能把依赖或完整验收一并视为完成。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。

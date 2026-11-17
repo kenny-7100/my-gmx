@@ -1,5 +1,23 @@
 # Solana 交易链路依赖审计
 
+## 五需求晚间前置核验（2026-11-17）
+
+用户要求核对固定五需求 TRD-72/70/78/77/136 可跟进的前置。本轮只读刷新五条正文/关系/评论、14条关键前置及7条关键前置评论，GitHub原/替代PR、当前release源码和公开API。未全量扫描项目，未fetch/pull、修改业务、启动服务、测试或交易；不自动恢复此前暂缓范围。以下优先于本日早间及四条状态复核中的旧release/review观察。
+
+当前release为 `28ddd42ce6ff50aa92a30eb00122b25970e3bf99`；TRD-63/#3201于20:14 CST合并，TRD-80新PR#3286于20:13 CST合并，源码已包含Solana Trade provider、selector/header及fundingClaims/pendingPriceImpact/positionFeeHistory功能开关。两条Linear仍In Review，不能继续据Linear或旧PR称等待合并。TRD-80旧#3238已关闭，作者明确由#3286替代；新PR实际15文件，不把旧100文件重复整体集成。TRD-63新head `7c9968cc03` APPROVED、checks成功，既有“Changes requested待review”已过时。
+
+SDK原生数学#3285已于17:00 CST合入release（`22e1eda78e`，source `46a034218b`），版本2.9.3，新增共享市场/仓位/折扣原生计算。五线最后统一同步仍为 `7868f48f3e`，下一步应按原线接续最新release，保护units与原生数学导出、slot/freshness、余额接线及sender/tracker扩展，按实际冲突取舍；本轮未执行合并或冲突分析，不承诺自动无冲突。TRD-77独立产物的source/pin/hash本身未变，只验受影响基线，不因数学升级重建Rust/WASM。
+
+TRD-100旧#3243已关闭，作者明确替代为#3287，head `411459b87f`，当前CONFLICTING、REVIEW_REQUIRED、返回checks全成功且无review/thread。新旧units.ts和gmsolUnits.spec.ts Git blob逐字一致，消费者已接入同实现，不需重做单位转换；应跟进新PR对最新release冲突与review，并保留gmsol/index.ts新旧全部导出。
+
+API#340已于18:04 CST合入main（merge `322b06ad0a`，head `c82a14e990`，main当前 `fb17db32a2`）。相对TRD-136已实测的 `996cf05db9` 多1个提交：升级sdk-next 2.9.2→2.9.3，市场、pending fees、fee discount等复用SDK原生实现，删除API重复实现，共22文件。优先在保留旧固定现场的前提下核验该最终版本的实际依赖、全局启动/slot/freshness、金融reference与前端组合；不能把旧72项及4种unsigned模拟冒充新版本通过。API源码仍以getPositionInfo组合，但不能因此判断仍按旧EVM数学：需结合gmsol字段和新SDK实现。TRD-108正文“SDK2.2.1”已过时。仅合并未证明部署：本轮公开 `https://solana.gmxapi.io/v1/markets/config` HTTP200、67市场、0个tradeMath=gmsol；values也200、67市场，未返回X-Solana-Slot。未探测账户/钱包接口或金融值，不能泛化为全部线上错误。gmx-infra#96本账号仍不可读，正式DB/部署验收有证据缺口。
+
+TRD-98仍需按需求明确的#3190 reader/hook→#3195 wallet顺序跟进。#3195同head `2495be234e` CONFLICTING/CHANGES_REQUESTED，当前评论明确确认empty System-owned ATA修复已有效、个人key已移除；不要把未resolved旧P2线程再派为未修复bug。剩余/rpc-debug不可达、格式/冗余测试及配置mint资格回退需收口并复核；当前需求明确读取配置mint，保留已核实历史保护。#3190 head `83eb9d629e`尚OPEN/REVIEW_REQUIRED，常规检查成功而组件workflow失败，本轮未读取该失败日志，不沿用其他PR403归因。
+
+原113字段#3205/#3207仍原head、均CONFLICTING；fee base release，orders仍stacked。既有11月15日候选基于旧52，不能直接称最新release交付；需原PR收敛字段栈，保留fee/referral/order metadata消费契约。TRD-109仍Todo/Divhead、无评论或新表地址；72实际delivery expected-authority map仍空，本轮未重读链上表或keeper flag，不把历史链上/flag值当新证据。TRD-84仍In Progress/Sulliven、无评论；按TRD-84及Solana close搜索未找到独立新PR，不证明无未公开工作；它是136退出/撤单的运行依赖，同时在Linear上又依赖70/80，不称五条全部开发的前置，按用户此前决定继续暂缓本地接线。
+
+推荐首项：接续已合入release的63/80/SDK2.9.3，处理原开发线与交付冲突，再精确更新原Draft（需实施/交付指令）；其次TRD-136核验最终API2.9.3组合。可协调100新PR与98/113原PR收口；可信LUT、正式部署与金融验收仍独立跟进。没有发送消息、评论、改Linear或请求review。只读原始PR/API差异留在 `.local/dependency-audit-20261117-evening/`。
+
 ## 四条批次状态复核（2026-11-17）
 
 用户所指近期四条为 TRD-72/70/78/77（原 FESOL-56/19/20/72），均由 Kenny 负责。本轮只读刷新官方 Linear 正文/关系/评论及 GitHub 原 PR，四条评论均为空；未改业务、同步分支或执行交易。Linear 分别为 In Review / In Progress / In Progress / In Progress。

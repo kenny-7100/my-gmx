@@ -1,5 +1,9 @@
 # FESOL-20 — 订单发送与成交状态
 
+## 五需求晚间前置核验（2026-11-17）
+
+63/80及SDK2.9.3已合入，可随原交易线接续，保护sender/tracker及slot/freshness；真实通知验收未因上游合并完成。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## 四条批次状态复核（2026-11-17）
 
 只读核对当前 Linear、原 Draft PR 和最终 head CI；最新 release 冲突与 CI 收尾结果见[统一复核](../solana-trading-dependencies.md#四条批次状态复核2026-11-17)。本轮未改业务或执行交易，既有验收边界保留。

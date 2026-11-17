@@ -1,5 +1,9 @@
 # FESOL-112 — 金融集成验收依赖
 
+## 五需求晚间前置核验（2026-11-17）
+
+API#340已合并且最终多出SDK2.9.3原生计算迁移，旧本地实测不覆盖该提交；公开config仍67市场/0gmsol，正式金融与部署验收仍待。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## 上游跟进实施（2026-11-17）
 
 TRD-108 相关 API #340 `996cf05db9` 已完成本地原版全局索引启动、真实HTTP账户消费、slot等待及stale拒绝/恢复验证，SDK-next alias仍2.9.2。原market/position math、discount/order及真实DB index suites共72 passed。上述证明本地候选可消费，不证明正式部署、全部金融reference或需求Done；无API推送/PR。 统一来源、交付版本、验证和外部剩余项见[五需求跟进实施](../solana-trading-dependencies.md#五需求跟进实施2026-11-17)。

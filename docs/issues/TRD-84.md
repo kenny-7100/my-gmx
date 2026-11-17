@@ -1,5 +1,9 @@
 # TRD-84 — Solana 平仓、编辑和撤单
 
+## 五需求晚间前置核验（2026-11-17）
+
+仍In Progress、Sulliven、无评论；定向搜索未找到新独立PR，不证明无未公开工作。136退出/撤单运行依赖仍保留，本地接线继续按用户决定暂缓。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 2026-11-16，角色：TRD-136 退出路径调研。Issue：[TRD-84](https://linear.app/gmx-io/issue/TRD-84/close-positions-edit-and-cancel-orders-on-solana)，历史 FESOL-59；负责人 Sulliven，本次不接管开发。
 
 通过官方 MCP 实时读取正文、关系及评论：当前 In Progress（11月15日开始）、无评论。要求共用 PositionSeller 平仓、共用订单列表编辑/撤单，复用原交易 builder；callback/referrer 来自 API，不能从已知错误 IDL 推导 referrer。保证金增减归其他需求，不将整个编辑范围扩入 TRD-136。

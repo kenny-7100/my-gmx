@@ -1,5 +1,9 @@
 # FESOL-113 — fee discount / order 字段组合核验
 
+## 五需求晚间前置核验（2026-11-17）
+
+两条原字段PR均仍冲突；旧候选不能当最新release交付，需原栈收敛且保留消费者metadata与fee/referral契约。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## 前置增量核验（2026-11-17）
 
 字段#3205已改base release但仍CONFLICTING，#3207仍stacked并冲突；共享Provider已合后可跟进原PR字段范围收口，保留交易消费者metadata与fee契约。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。

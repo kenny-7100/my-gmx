@@ -1,5 +1,9 @@
 # FESOL-71 — FESOL-56 主网运行条件
 
+## 五需求晚间前置核验（2026-11-17）
+
+TRD-109仍Todo、无新评论/表地址，72交付expected-authority map仍空；本轮未查链上或flag，不更新其运行结论。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## 前置增量核验（2026-11-17）
 
 当前TRD-109；Todo、Divhead、无新地址。链上slot470423402原两表仍active且有authority，73/155地址；正式LUT验收未解除。keeper flag本轮403，未取得今日值。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。

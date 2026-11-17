@@ -1,5 +1,9 @@
 # FESOL-15 — Solana 市场选择器与 header
 
+## 五需求晚间前置核验（2026-11-17）
+
+TRD-63原#3201已于20:14 CST合并、APPROVED且checks成功；不再列为冲突或review待办。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## PR commit 补签（2026-11-17）
 
 用户明确授权为 PR #3201 当前唯一 commit 补 GPG 签名并更新 PR。交付目录 clean、本地与远端 head 均为 `786dcaadc7e2ab3399c5d2f934f18430a6c0e116` 后执行 signed amend；新 head 为 `7c9968cc0335590879c3734595c4772014233778`。逐项核对 tree、parent、author、author date、message 完全一致，仅签名及 committer 时间等提交元数据变化；本地 `git verify-commit` 返回 Good signature。使用绑定旧 SHA 的精确 force-with-lease 更新 PR 原 source branch，GitHub 回读 `verified=true`、`reason=valid`，PR head 与新 SHA 一致。

@@ -1,5 +1,9 @@
 # FESOL-92 — SDK 单位转换依赖核验
 
+## 五需求晚间前置核验（2026-11-17）
+
+TRD-100旧#3243已关闭并由#3287替代，新PR有冲突待review；units与测试两文件新旧blob一致，无需重新实现。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## 上游跟进实施（2026-11-17）
 
 TRD-100 / #3243 `50118fee998` 已不再冲突；与既有units相比仅复用等值 `GMSOL_PRECISION_SCALE`/`GMSOL_MAX_UNSIGNED`。在TRD-72原development以 `7fda907550` 精确接续，并选择性转入三条交易消费者delivery、其余development及136；保留release数学与units双方导出。原units/math两suite41项通过；未修改Sulliven原分支或请求review。旧resolution候选不再是当前必需步骤。 统一来源、交付版本、验证和外部剩余项见[五需求跟进实施](../solana-trading-dependencies.md#五需求跟进实施2026-11-17)。

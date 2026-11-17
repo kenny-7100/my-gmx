@@ -1,5 +1,9 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 五需求晚间前置核验（2026-11-17）
+
+前端63/80及SDK2.9.3、API#340现均已合并，需区分原线集成/部署/金融验收；详细增量统一记录。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
+
 ## 补充 Cycle 2 已分配或已介入的前端工作（2026-11-17）
 
 用户明确将协调表范围扩展为 Cycle 1 加上 Cycle 2 已分配 Kenny/Rainer/Sulliven、或实际已有前端介入/进展的工作，仍排除 Done。本轮官方 MCP 查询 Trading Cycle 2 全页（8 条，hasNextPage=false），其中迁移项目 4 条：TRD-70、84、83、119。
