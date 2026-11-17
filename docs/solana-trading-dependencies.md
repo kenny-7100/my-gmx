@@ -1,5 +1,9 @@
 # Solana 交易链路依赖审计
 
+## TRD-63 AC2 阻塞判断收敛（2026-11-17）
+
+独立调查需求/review、GMX已合入公式PR2407、旧TradeHeader/Go后端及当前API映射后，确认255x与294x来自不同UI定义；reviewer已知采用GMX公式，只要求补字段表，现已存在。撤销此前“需另行选择金融口径”的独立外部阻塞；保留正常AC2验收/review批准，不将作者调查当成approve。当前公式与最新ETH参数吻合，无证据要求业务改为294x。详细来源及线上版本边界见[AC2调查](issues/FESOL-15.md#ac2-口径调查结论2026-11-17)。
+
 ## TRD-63 自动验收补齐（2026-11-17）
 
 后续实时查询确认：同head的描述编辑触发任务也已结束，当前18个checks全部SUCCESS，无pending/failure；CI收尾项完成，review仍CHANGES_REQUESTED。下段“新任务仍运行中”为此前阶段状态，已由本次结果替代。

@@ -1,5 +1,38 @@
 # FESOL-15 — Solana 市场选择器与 header
 
+## AC2 口径调查结论（2026-11-17）
+
+用户要求独立搜集信息后给出结论。本轮角色为需求/review/跨仓库源码调查；未修改业务、Linear、PR描述或review线程。**结论：撤销此前将“AC2金融口径选择”列为独立外部阻塞的判断。现有需求、review与已合入GMX的规则足以确认本PR沿用GMX计算并说明差异；没有发现要求改回GMTrade294x或另开产品选择的指令。字段说明及此前真实API/UI验证已完成，可据此交正常review。正式AC2验收勾选、review批准与合并仍不能由此冒充完成。** 下方历史记录的“AC2语义确认尚待外部决定”按本结论收敛，不再让Kenny重复组织尚无证据需要的新决策。
+
+### 原始要求和review实际要求
+
+- 实时读取[TRD-63](https://linear.app/gmx-io/issue/TRD-63)正文、关系及完整评论（0条）。AC2要求确认数据源、计算定义和不可用/非等价字段的处理；没有要求复制旧GMTrade数值。现有字段表明确最大杠杆使用GMX双约束、5x向下取整、UI cap，并写明“This is a UI limit, not a copy of GMTrade's displayed maximum”。表末仍写AC2 review未完成，不能将这份作者说明当成最终批准。
+- 完整重读原PR的reviews、issue comments及inline replies，未见新产品选择要求。[Divhead首轮总评](https://github.com/gmx-io/gmx-interface/pull/3201#pullrequestreview-5788682179)原文为：“For AC2, could you add a short field table to FESOL-15? Max leverage uses GMX's formula, so it's lower than what GMTrade shows (ETH 255x vs 294x), and that should be written down.” 他已解释公式差异，要求补字段表；不是要求294x一致或等待产品方选公式。同一review说明当时header OI和net rate与gmx-api同一时刻一致。
+- [Kenny于11月9日回复](https://github.com/gmx-io/gmx-interface/pull/3201#issuecomment-6734943525)已补AC2字段及杠杆说明。后续review发现的是EVM collateral P1，未提出新的AC2口径异议；“未提出”不等于最终approve。TRD-130（API config/values）负责人亦为Divhead，不能再将数据定义review完全描述为尚未与后端核对。
+
+### 两套杠杆规则的源码证据
+
+- 当前交付源码仍是`786dcaadc7`。共享`getMaxAllowedLeverage`的来源为[已于2026-05-07合入的PR #2407](https://github.com/gmx-io/gmx-interface/pull/2407)，关联FEDEV-3759，commit `1f0b343f970d2ed109318137ac8fd8cc7ccc6aaa`。PR说明开仓项计入open/close两次手续费，清算项保留50% buffer，按5x向下取整；最终有APPROVED。它早于本Solana PR，不是本需求临时新增的风险公式。已存在的SDK测试覆盖equal/split factors、opening bound主导、取整与fallback。
+- 只读fetch旧前端origin/main，实时远端SHA为`55639eefb623e28fd89ac858db228629d9f6a3aa`；API origin/main为`322b06ad0aa8466fa0042a47eb22701c52a82157`。保持旧前端本地HEAD `74170b8a`和API detached HEAD `b86956d`不动，未快进固定gitlink或干扰TRD-136服务。
+- 旧前端实际TradeHeader将`sortedIndexTokens`交给HeaderPanel；[HeaderPanel](https://github.com/gmsol-labs/gmx-solana-interface/blob/55639eefb623e28fd89ac858db228629d9f6a3aa/app/src/components/TradeHeader/HeaderPanel.tsx#L693)将后端`token.maxLeverage`除以10^20后作为整数展示。旧仓库另有旧ChartTokenSelector的`getTradeMaxLeverage(...)/2`路径，不能看到同名helper就认作这条当前TradeHeader的公式。
+- 同仓库[Go后端getMaxLeverage](https://github.com/gmsol-labs/gmx-solana-interface/blob/55639eefb623e28fd89ac858db228629d9f6a3aa/services/gmxsol-golang/task/cron/indextoken/index_list_task.go#L1185)取status中long/short最低抵押率倒数的较大值，`MaxLeverageUsage=1`，index再取各池最大值。这里没有GMX开平手续费项、独立清算buffer项或5x取整。用户提供的Rust后端快照`gmtrade-web-backend/src/aggregate/market_info.rs:max_leverage`同样取两侧抵押率倒数较大值，进一步支持旧数据契约含义；快照无远端版本，不据此认定线上部署。
+- [API marketRecords](https://github.com/gmx-io/gmx-api/blob/322b06ad0aa8466fa0042a47eb22701c52a82157/src/domain/gmsol/markets/marketRecords.ts#L89)将Solana `minCollateralFactor`、清算factor（含关闭市场/0值fallback）和`orderFeeFactorForNegativeImpact`映射到共享字段，因子统一由20位乘10^10转30位，未发现此处误用小数或把maxLeverage数值直接搬运的迹象。原链上市场能力来自已合入[API #295](https://github.com/gmx-io/gmx-api/pull/295)；当前native计算经SDK2.9.3接续。
+
+### 最新数据复算与边界
+
+本轮重新GET官方Solana `/v1/markets/config`，ETH [USDC-USDC]仍是MCF=0.0034、liqMCF=0.0017、fee=0.00024。独立Decimal复算：
+
+| 路径 | 计算及结果 |
+| --- | --- |
+| 旧后端规则在有效最低抵押率为0.0034时 | 1/0.0034=294.117647…，旧header整数展示294x |
+| GMX opening bound | 1/(0.0034+2×0.00024)=257.731959… |
+| GMX liquidation bound | 1/(2×0.0017)=294.117647… |
+| GMX最终UI上限 | 较小值257.731959…按5x向下取整为255x |
+
+修正此前推断：本组参数中旧路径1/MCF与GMX liquidation项数值恰好相同，不能据此说旧版294x是按GMX liquidation公式算出的。已经确认两套源码规则确实不同，且当前参数可重现255/294差异；没有取得11月5日线上旧版实际部署SHA和同slot数据，不声称完全重建当时每个池的快照或旧服务上线版本。
+
+其余price/24h源、index聚合与selected market、hourly rate及不可用日期处理，现有AC2表已定义；此前同head真实API生产路径和原生页面验收继续有效，本轮无新源码/依赖/配置变化，不重复跑全量业务测试，也不扩大为全市场实时链上parity验收。原始review、PR2407、旧源码、最新config及复算输出保存在个人基础`.local/acceptance/trd63-ac2-investigation/`。
+
 ## 自动验收补齐（2026-11-17）
 
 **后续 CI 收尾查询：** 用户要求核实最终结果，实时读取原 PR 当前 head `786dcaadc7` 的完整 statusCheckRollup，18个checks均为COMPLETED / SUCCESS，无pending或failure。包含PR描述编辑触发的三批追加运行；最新[Run Tests 44066265730](https://github.com/gmx-io/gmx-interface/actions/runs/44066265730)及[Audit 44066265516](https://github.com/gmx-io/gmx-interface/actions/runs/44066265516)均通过。此前“描述编辑后新任务仍运行中”的阶段状态已结束。PR仍MERGEABLE / CHANGES_REQUESTED，CI通过不替代review批准；本次不再编辑PR描述以免触发重复CI。
