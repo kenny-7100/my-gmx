@@ -2,6 +2,8 @@
 
 ## 自动验收补齐（2026-11-17）
 
+**后续 CI 收尾查询：** 用户要求核实最终结果，实时读取原 PR 当前 head `786dcaadc7` 的完整 statusCheckRollup，18个checks均为COMPLETED / SUCCESS，无pending或failure。包含PR描述编辑触发的三批追加运行；最新[Run Tests 44066265730](https://github.com/gmx-io/gmx-interface/actions/runs/44066265730)及[Audit 44066265516](https://github.com/gmx-io/gmx-interface/actions/runs/44066265516)均通过。此前“描述编辑后新任务仍运行中”的阶段状态已结束。PR仍MERGEABLE / CHANGES_REQUESTED，CI通过不替代review批准；本次不再编辑PR描述以免触发重复CI。
+
 用户要求创建目标并完成可独立执行的验收。本轮以原 PR #3201 的公开 head `786dcaadc7e2ab3399c5d2f934f18430a6c0e116`、delivery 实际目录及其 SDK 产物进行验证；没有新增业务修改，上一阶段该 head 的 SDK build、types、lint、3374 项前端测试、生产 build、46 项原生数学结果仍有效。
 
 **原生 Chrome 页面验收通过。** 使用用户现有登录/profile/扩展的同一浏览器，本任务 owned Vite `127.0.0.1:3035`，无测试 API 替换、无 mock、未连接钱包。桌面实际宽度 2560；另通过原生 DevTools UI 的设备工具验证 440×956 CSS px（iPhone 16 Pro Max preset），不是连接 DevTools 自动化或真实手机验收；完成后关闭设备工具及 DevTools。
