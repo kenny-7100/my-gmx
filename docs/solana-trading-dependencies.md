@@ -1,5 +1,19 @@
 # Solana 交易链路依赖审计
 
+## 五需求前置接续实施中（2026-11-17 晚间）
+
+用户已创建目标并授权实施。原5条development与4条delivery均已接续最新release `28ddd42ce6`；所有新增merge/commit显式GPG签名并核验。除77独立delivery无冲突外，其余唯一冲突均为gmsol/index.ts导出；先在72原development解决，保留release2.9.3原生数学和既有units全部导出，再按同一已核实解析接入其他原线。没有整支development合入delivery、恢复用户暂缓范围或修改他人上游PR。个人基础也已签名同步同release。
+
+最终API#340的2.9.3版本 `c82a14e990ece30103defda0ed764fea3cf65aa0` 在独立干净checkout `/Volumes/kenny/gmx/gmx-api-trd-136-sdk293` 使用自身锁定依赖安装（原生corepack yarn4.12）、生成tsoa并TypeScript检查通过。独立owned实例3066/3067，bootstrap105536账户、约32秒ready，67/67gmsol市场。原5套indexStore/marketAccount/positionAccount/userAccount/orderRecords测试72passed；indexStore在本次owned DB随机partition运行并自行清理，不以offline harness冒充DB验证。SDK原生数学nativeMath与单位转换两套74passed；不是完整金融/真实交易AC。
+
+最终API账户HTTP200；minContextSlot470550701实际返回470550709。暂停本次owned writer进程组超过10秒，config与positions均503，恢复后config200。新前端 `7455203605` +最终API +同hash真实WASM执行原prepare/builder/validator/pre-signature检查：市价long/short892bytes、限价long/short925bytes，slots470550183/191/200/208均unsigned模拟通过；每次重读真实交易flag，未签名广播，不是完整浏览器/keeper验收。测试脚本首次误用account查询参数返回400，按原API契约修正address后上述运行断言通过，没有修改业务绕过验证。
+
+API新实例按report owner `trd136-6ae905315d0e` 清理；原996cf05实例3056/3057及旧Vite3016保留。旧API固定checkout不移动、不改源码、不推送API或建PR。API/SOL金融原始数据保留忽略目录，不作为共享附件。
+
+TRD136原development文档提交 `b600fc9189` 已说明最终API复现入口/证据边界；精确转入已有持续实验分支时保留其英文公开README，冲突收口后head `0718470deb`。产品src、SDK、锁文件和vite配置与原development一致（仅package脚本存在个人基础差异），本次实验线仅改文档，已推my-gmx-pr并更新同一Draft #3288；未重复部署，预览仍绑定b1c1f0a2bb，旧CI不得冒充新head结果。原4条Draft尚待各实际目录的本轮验证完成再推送。
+
+原线及交付当前merge：72devac2db2ca36/delivery08d527a393；78dev5ff7dfc690/delivery10322b0e08；70dev00d50c8af3/delivery1f4825c8bf；77dev3166115941/deliverye164801e28；136dev7455203605后加文档b600fc9189。registry已重绑并清除旧verification。验证正在串行执行，各目标SDK重建/types/full frontend结果写在个人基础 `.local/acceptance/five-followup-20261117/verification.json`；当前72dev3456passed/1existing skipped，其他目标尚未在本节宣称通过。TRD100新PR单位文件未变，无需重复实现；余额/113前置消费无新已发布head，不擅自更新他人原PR、请求review或合并。
+
 ## 五需求晚间前置核验（2026-11-17）
 
 用户要求核对固定五需求 TRD-72/70/78/77/136 可跟进的前置。本轮只读刷新五条正文/关系/评论、14条关键前置及7条关键前置评论，GitHub原/替代PR、当前release源码和公开API。未全量扫描项目，未fetch/pull、修改业务、启动服务、测试或交易；不自动恢复此前暂缓范围。以下优先于本日早间及四条状态复核中的旧release/review观察。
