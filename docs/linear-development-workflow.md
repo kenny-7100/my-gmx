@@ -11,7 +11,7 @@
 - Agent 在新需求前和明确的上游变化时主动 fetch/sync。已有任务进行中，先判断上游变化是否影响它；不每轮合并、不自动把个人基础新历史并入已有功能分支。
 - 个人基础写入按[协调归属](agent-collaboration.md#个人基础写入归属)集中处理，不能用自动提交所有 dirty 内容来解除阻塞。
 - 基础设施主工作区需干净；有未提交工作、未完成 Git 操作或被其他任务占用时不 stash/reset。先完成当前相关沉淀，或保留现场继续独立工作。冲突先分析两侧；可明确判断的环境冲突可处理，产品语义不明再集中询问。
-- 同步命令先 merge-tree 预检冲突，失败时原 checkout 不进入 merge；钩子失败时保留现场诊断，不跳过检查。任何时候 GPG 签名失败（包括最终 PR 提交），已获用户长期授权使用命令级 `git -c commit.gpgsign=false` 等方式改为不签名，不必再次询问、不改长期配置；未失败时仍按既有签名配置执行（2026-11-13 用户明确）。
+- 同步命令先 merge-tree 预检冲突，失败时原 checkout 不进入 merge；钩子失败时保留现场诊断，不跳过检查。所有实际开发与沉淀 commit 必须使用 GPG 签名，包括个人仓库、业务 PR、本地及 merge/cherry-pick 新提交；显式使用 `git commit -S`、`git merge -S`、`git cherry-pick -S` 等并核验新提交。签名失败保留现场，排查或由用户本机解锁，不得免签兜底（2026-11-17 用户明确，替代此前免签授权）。配置及验证见[GPG 签名排障](agent-failure-diagnosis.md#gpg-签名与密码缓存)。
 
 ```sh
 # Run from the infrastructure checkout; these commands mutate local Git state.

@@ -44,3 +44,38 @@
 在当前需求工作表或对应主题文档中记录：错误分类、触发命令、目标目录与版本、时间/退出码、最小错误摘要、报告/日志位置、已排除原因、当前结论、下一步及责任方。本机 `.local/acceptance/` 产物不自动共享，移交时按[证据包说明](agent-evidence.md)实际携带。
 
 发现可复用的新环境原因时，把详细步骤更新到相关专题；只有必要的预防条件才补充[执行前索引](coding-and-self-review.md#执行前的环境检查与顺序)，故障特征补本页导航；详细操作和原始证据只维护在对应主题中。不要把未经证实的推测加入通用前置检查，也不要要求后续任务重跑所有诊断命令。
+
+
+## GPG 签名与密码缓存
+
+2026-11-17 用户明确：所有实际开发与沉淀 commit 均须有 GPG 签名，个人仓库与业务 PR 一致；此前签名失败可免签的授权已撤销。此要求针对后续操作，不代表授权重写既有未签名历史。隔离测试临时仓库构造的 fixture 提交不作为开发交付，不因本规则让离线测试依赖个人私钥。
+
+### 本机已验证方案
+
+用户选择手动输入一次 GPG 私钥密码，以 `gpg-agent` 内存缓存支持 Agent 后续签名。当前 Mac 使用 Homebrew GnuPG 2.5.24，GPG home 为 `/Users/kenny/.gnupg`，签名 key ID 为 `9FB76150CFDA2294`；其他机器或用户先核对实际配置，不能机械套用该 key。没有安装 `pinentry-mac`，已有终端 pinentry 足以完成用户手动解锁，不将安装 GUI pinentry 当作前置。
+
+在 `gpgconf --list-dirs homedir` 返回目录下的 `gpg-agent.conf` 保留其他配置，将以下两项各设置一次；修改前备份，目录权限 700、配置权限 600：
+
+```text
+default-cache-ttl 2592000
+max-cache-ttl 2592000
+```
+
+执行 `gpgconf --reload gpg-agent` 重新加载，不为应用配置主动 kill agent。用户在自己的 Terminal 执行以下命令后，用现有 key 对临时文件作 detached signature，并在本机输入密码：
+
+```bash
+export GPG_TTY="$(tty)"
+gpg-connect-agent updatestartuptty /bye
+```
+
+随后从 Agent 环境对临时文件运行 `gpg --batch --pinentry-mode error --local-user <key-id> --detach-sign ...`，再用 `gpg --verify ...` 验证；该模式禁止密码提示，成功证明当前 Agent 可使用缓存。临时文件验证无需创建或改写 commit。`--pinentry-mode error` 下出现 `No pinentry` 只说明此次无可用缓存且不允许交互，不证明 pinentry 程序不存在。
+
+2026-11-17 实测：两项 TTL 均为 2592000 秒；当前 Agent 无交互签名成功，RSA fingerprint 为 `D3A709F1B133185B1C85F3A49FB76150CFDA2294`，`gpg --verify` 返回 `Good signature`。这证明当时缓存可用，不保证后续永远可用。
+
+### 使用与失败边界
+
+- `default-cache-ttl` 是空闲时间，使用后重置；`max-cache-ttl` 是自缓存开始计算的最长时间，两项都设 30 天意味着最长 30 天后仍需重新解锁。重启机器、重启 agent 或清除缓存可能更早失效；缓存不延长密钥有效期。
+- 用户接受一个月内同一用户下可访问 agent 的进程能够调用签名的便利性取舍；密码不写入仓库、脚本、环境变量或聊天，也不导出私钥。
+- 缓存失效时保留提交现场，请用户在本机终端重新签署临时文件解锁，再由 Agent 非交互验证；同时核对用户、`GNUPGHOME`、agent socket 和 key，避免误判为 Agent 不支持签名。不自动改用无密码密钥或其他身份。
+- 创建实际提交时显式签名，之后用 `git verify-commit HEAD` 验证；merge/cherry-pick 产生的是新提交，也要重新签名。签名失败不得使用 `--no-gpg-sign` 或 `commit.gpgsign=false` 继续交付。
+- 本地签名有效性与 GitHub 的 Verified 展示分别判断；后者还涉及公钥上传、身份和邮箱关联。缓存配置不会自动为既有 commit 补签；补签会改变 SHA，发布历史改写须另有授权。
