@@ -1,5 +1,29 @@
 # Solana 交易链路依赖审计
 
+## TRD-136 临时方案正式替代核查（2026-11-17 晚间）
+
+用户要求核查上游推进后，哪些提前跑通的特殊安排仍有必要。本轮为只读审计，不修改业务、切换服务或交易；实时核对关键Linear正文/评论、GitHub PR及源码、远端release、公网市场API、原实验工具与当前集成。release远端仍28ddd42ce6，与本地origin/release一致。原始PR/files与逐文件差异保存在忽略目录 `.local/replacement-audit-20261117/`。
+
+| 特殊安排 | 正式替代证据 | 结论 |
+| --- | --- | --- |
+| 单钱包范围API补丁 | API#340已merged，最终head c82a14e990；未修改全局实现及SDK2.9.3已完成先前独立验证 | 已替换运行依赖，不再需要patch或--wallet；旧api-wallet-scope.patch、可选wallet代码及README旧命令仍留在工具，属于可退役残留，不误称已物理删除 |
+| 提前集成provider/selector/header/list与旧数学 | release已包含TRD65/63/80及SDK2.9.3，实验线已接续 | 已由正式release提供，不再维护独立临时版本；正式需求剩余验收不因代码入release自动完成 |
+| 本地API host覆盖及独立DB/indexer/reader | 公网config/values均200、67市场、0gmsol标记；TRD108仍Todo、正文2.2.1已落后实际代码，不能单据Linear否定已merged2.9.3 | 正式源码可用，本地实例仍有用途，尚不能删host覆盖切公网；正式部署的账户/slot/数学契约需另证，不将市场探测扩大成全API错误 |
+| 空LUT本地配置 | release仍为两张provisional表；实验生产authority map空；TRD109 Todo、无评论或新地址 | 尚无已核实可切换可信资源。原只读alt-preflight本次在getGenesisHash网络错误，未读到最新链上authority，不称表此刻仍mutable；简单无LUT单笔既有892/925bytes证据继续适用其范围，不替代带LUT AC |
+| 平仓/撤单最小本地接线计划 | TRD84 In Progress、无评论；按TRD84/FESOL59及Solana close检索未发现专门可用公开成果，release PositionSeller/OrderList仍走EVM signer/sendBatchOrderTxn | 暂无可直接接入的正式退出UI；计划未实施且用户暂缓，不能称已存在一套临时实现可删，亦不自动接管84 |
+| 本地RPC只读代理/Origin适配 | TRD29 In Review；已合2892为历史Solana RPC配置支持，当前release仍用既有provider入口 | 本轮未核实已可替换的正式统一代理，不凭状态认定部署就绪，不扩大到采购/换key/启服务 |
+| Node unsigned诊断 | 原脚本直接初始化真实WASM，调用产品prepare/validator但不含浏览器loader/tracker/sender | 是辅助工具，不是应由正式业务实现替换的运行分支；保留用途边界，不能继续用它代替浏览器验收 |
+
+### 新的正式候选与不能盲目覆盖的差异
+
+此前“上游head未变/CONFLICTING”的观察已过时。当前单位#3287 head24e983c4c4、余额reader/hook#3190 head9896a85fbc、wallet#3195 head666fa1669a、fee#3205 headbaed302cb0、orders#3207 head6bb15c691f均OPEN/MERGEABLE，但未merged；wallet仍CHANGES_REQUESTED，其余按各原PR review收口。orders仍以fee分支为base，不能误称独立release交付。
+
+单位units.ts与当前实验集成Git blob完全相同，index只改变units导出位置，无需新增换算实现。余额hook/useSolanaWalletAssets亦与当前集成逐字一致；reader改为GMSOL_TOKENS，替代集成的非synthetic余额集合，RPC生命周期改到registry网络事件；必须按最新TRD98配置mint契约及EVM/延迟初始化行为一起审查，不把新head等同可整支无损覆盖。
+
+字段正式候选去掉集成的getApiFieldReaders，改用原readApiString/readApiUnsignedBigInt与新增readApiUnsignedInteger；接续可减少本地自维护helper，但有数值输入接受范围差异且需要orders/referrals同步。#3207的composeGmsolOrdersInfo删除集成的orderInfo.solana赋值；当前transactions/orderContext.ts会消费该metadata或原始API字段，替换时必须保留真实交易消费链路。未运行新head测试、未称发现已确认上游bug或直接应用替换。
+
+结论：最大专用补丁已退出当前运行依赖，一批能力已由release吸收；本地API/LUT/退出并无足够正式运行资源证据可整体撤掉。最有价值的新接续是按原需求线审查余额/字段新head、单位继续复用，并清理工具中旧钱包补丁入口/过时当前命令。用户本次仅要求核查结论，尚未实施这些业务/工具清理，未改Linear或发消息。
+
 ## 五需求前置接续实施完成（2026-11-17 晚间）
 
 用户已创建目标并授权实施。原5条development与4条delivery均已接续最新release `28ddd42ce6`；所有新增merge/commit显式GPG签名并核验。除77独立delivery无冲突外，其余唯一冲突均为gmsol/index.ts导出；先在72原development解决，保留release2.9.3原生数学和既有units全部导出，再按同一已核实解析接入其他原线。没有整支development合入delivery、恢复用户暂缓范围或修改他人上游PR。个人基础也已签名同步同release。
