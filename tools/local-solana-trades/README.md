@@ -18,7 +18,9 @@ NODE_OPTIONS=--max-old-space-size=8192 node tools/local-solana-trades/web.mjs \
   --api-url http://127.0.0.1:3056 --port 3016
 ```
 
-本次全局验证：测试钱包 positions/orders/fee-discount 均返回 200；slot 等待请求 470430200 返回 470430204。暂停本次 owned writer 超过 10 秒后，市场和仓位均返回 503 `BACKEND_UNAVAILABLE`，恢复 writer 后重新出数（slot 470430275）。本机原始材料位于 `.local/trd-136/incremental-api-validation.json`、`incremental-sample-wallets.json` 与启动报告；钱包及金融原始数据不纳入共享附件。旧钱包范围运行实例仅作为历史/回退现场保留，不作为新版本的必要依赖；不要停止或清理归属未知的服务。
+本次全局验证：测试钱包 positions/orders/fee-discount 均返回 200；slot 等待请求 470430200 返回 470430204。暂停本次 owned writer 超过 10 秒后，市场和仓位均返回 503 `BACKEND_UNAVAILABLE`，恢复 writer 后重新出数（slot 470430275）。本机原始材料位于 `.local/trd-136/incremental-api-validation.json`、`incremental-sample-wallets.json` 与启动报告；钱包及金融原始数据不纳入共享附件。旧钱包范围 checkout/补丁保留作历史追溯，原运行实例与其独立数据库已按 owner 核对后清理；它不再是新版本的必要依赖。不要停止或清理归属未知的服务。
+
+原 API 的5套索引/市场数学/仓位数学/折扣/订单测试，在本次 owned DB 的隔离 partition 下共72项通过；生成自身 tsoa routes 后 TypeScript 检查通过。新 API 上重新运行现有 unsigned simulation：市价多/空892bytes、限价多/空925bytes，slots470432112/470432118/470432125/470432131均通过。前端HTTP已核对实际SDK API配置指向3056、LUT配置为空、真实WASM entry可加载；这些不代表本轮完整浏览器签名流程已验收。
 
 前端已同步 release `7868f48f3e5cf1423a33a4e3f8cbbc9d5cd90d18`；已合并的 TRD-65 Provider 不重复集成。单位转换精确对齐 TRD-100 / UI #3243 `50118fee998b3d6834b1c4088860c2c5ee460d26` 的等值常量复用，保留现有数学导出和交易保护。余额接线修复已进入 TRD-70 原 delivery，PR 更新及本次检查以需求记录为准。
 
