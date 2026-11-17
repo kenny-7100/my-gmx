@@ -2,7 +2,29 @@
 
 用于把现有 Solana PR 放在同一开发集成版中验证。所有命令从本需求 frontend checkout 根目录执行，Node 22，锁定依赖已安装；Node/Vite 命令使用 8 GiB 堆。这里只改变本地运行配置，不修改生产 API 主机、LUT 信任规则或交易开关。不要把本地构建/模拟结果当作订单执行证据。
 
-## 固定版本与当前结果（2026-11-16）
+## 当前推荐环境与增量跟进（2026-11-17）
+
+上游 [gmx-api #340](https://github.com/gmx-io/gmx-api/pull/340) `996cf05db9603d9af1689fdbac05f5a0ecf8e0e1` 已在独立、干净 checkout 完成本地全局索引验证，**无需应用钱包范围补丁**。该版本首次全量 bootstrap 后按程序交易签名与 writable accounts 增量追赶，保留 coverage、cursor、lease、slot 和 freshness 检查。本机约 105,529 个账户完成 bootstrap，约 32 秒后真实 HTTP ready，67/67 市场包含 `tradeMath: "gmsol"`；其他真实钱包也能返回非空仓位。没有修改 API 源码、推送 API 或创建 API PR；正式 review/部署仍待上游完成。
+
+优先在安装了该 API 自身锁定依赖的干净 checkout 启动，不传 `--wallet`：
+
+```sh
+NODE_OPTIONS=--max-old-space-size=8192 node tools/local-solana-trades/api.mjs \
+  --api-dir /path/to/gmx-api-at-996cf05 \
+  --port 3056 --index-port 3057 \
+  --rpc-config /path/to/infrastructure/tools/solana-rpc-proxy/config.json
+
+NODE_OPTIONS=--max-old-space-size=8192 node tools/local-solana-trades/web.mjs \
+  --api-url http://127.0.0.1:3056 --port 3016
+```
+
+本次全局验证：测试钱包 positions/orders/fee-discount 均返回 200；slot 等待请求 470430200 返回 470430204。暂停本次 owned writer 超过 10 秒后，市场和仓位均返回 503 `BACKEND_UNAVAILABLE`，恢复 writer 后重新出数（slot 470430275）。本机原始材料位于 `.local/trd-136/incremental-api-validation.json`、`incremental-sample-wallets.json` 与启动报告；钱包及金融原始数据不纳入共享附件。旧钱包范围运行实例仅作为历史/回退现场保留，不作为新版本的必要依赖；不要停止或清理归属未知的服务。
+
+前端已同步 release `7868f48f3e5cf1423a33a4e3f8cbbc9d5cd90d18`；已合并的 TRD-65 Provider 不重复集成。单位转换精确对齐 TRD-100 / UI #3243 `50118fee998b3d6834b1c4088860c2c5ee460d26` 的等值常量复用，保留现有数学导出和交易保护。余额接线修复已进入 TRD-70 原 delivery，PR 更新及本次检查以需求记录为准。
+
+2026-11-16 用户执行的一笔 40 USD 市价多单已取得创建、keeper 执行及仓位刷新证据。2026-11-17 测试钱包当前为空仓位，RPC 确认原仓位账户已不存在；本轮没有执行平仓，不能据此证明退出入口已验收。此前只读/unsigned 阶段的“没有交易”表述仅是历史阶段记录。市价空、限价多空/撤单/触发成交和退出仍未完成；TRD-84 最小本地接线按用户后续要求暂缓，正式 LUT 与四钱包验收也未解除。
+
+## 历史固定版本与阶段结果（2026-11-16）
 
 - frontend：TRD-136 从个人基础建立，集成 TRD-70 development `14d67c82d09166213e067c86b2ee1f374f7764e4`，集成提交 `8e0d8e21d6bef04c3b53143a1bd62a0c12fc0005`；继承 TRD-72/77/78 成果。业务修复仍回对应原需求线。余额接线修复在 TRD-70 原 development `9a3342837b`，本任务 cherry-pick `3cee91eb7e`；原 release delivery 本地 `d0726f09d9`，尚未推送更新 PR。
 - API：gmx-api #340，`59e49c649d6dd5a331af5ef793f0292f47898907`，published SDK alias 2.9.2；本机 checkout `/Volumes/kenny/gmx/gmx-api-pr340`。更换机器时按实际路径传参，不把本机目录作为共享依赖。
