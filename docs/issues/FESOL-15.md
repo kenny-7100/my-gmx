@@ -1,5 +1,12 @@
 # FESOL-15 — Solana 市场选择器与 header
 
+## PR commit 补签（2026-11-17）
+
+用户明确授权为 PR #3201 当前唯一 commit 补 GPG 签名并更新 PR。交付目录 clean、本地与远端 head 均为 `786dcaadc7e2ab3399c5d2f934f18430a6c0e116` 后执行 signed amend；新 head 为 `7c9968cc0335590879c3734595c4772014233778`。逐项核对 tree、parent、author、author date、message 完全一致，仅签名及 committer 时间等提交元数据变化；本地 `git verify-commit` 返回 Good signature。使用绑定旧 SHA 的精确 force-with-lease 更新 PR 原 source branch，GitHub 回读 `verified=true`、`reason=valid`，PR head 与新 SHA 一致。
+
+本次无业务改动，复用原 tree 的既有验收结果，未重跑业务测试；新 SHA 的 CI 状态需单独查询，不将旧 head 的 CI 状态冒充新 head 已通过。PR 描述及 review 状态未修改。下方旧 SHA 均保留为当时调查/验收的历史版本。
+
+
 ## AC2 口径调查结论（2026-11-17）
 
 用户要求独立搜集信息后给出结论。本轮角色为需求/review/跨仓库源码调查；未修改业务、Linear、PR描述或review线程。**结论：撤销此前将“AC2金融口径选择”列为独立外部阻塞的判断。现有需求、review与已合入GMX的规则足以确认本PR沿用GMX计算并说明差异；没有发现要求改回GMTrade294x或另开产品选择的指令。字段说明及此前真实API/UI验证已完成，可据此交正常review。正式AC2验收勾选、review批准与合并仍不能由此冒充完成。** 下方历史记录的“AC2语义确认尚待外部决定”按本结论收敛，不再让Kenny重复组织尚无证据需要的新决策。
