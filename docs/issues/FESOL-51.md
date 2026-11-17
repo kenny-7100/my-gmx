@@ -1,5 +1,9 @@
 # FESOL-51 — 余额与 RPC 前置调研
 
+## 前置增量核验（2026-11-17）
+
+当前TRD-98；#3195原head未变，现CONFLICTING且Changes requested。读取未resolved线程仍有空System-owned ATA整次余额读取失败的P2；需原线审查收口，未在本轮修改。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。
+
 ## Review经验深挖（2026-11-15）
 
 角色：只读调查。当前#3195 `2495be234e`虽保留empty System-owned ATA修复，但`2ad57a5c3b`重新引入`!isSynthetic`过滤，同时影响reader与wallet list；这与Divhead要求读取全部配置mint及11月6日真实余额确认不一致。已读线程未见新范围决定，本轮未跑页面，不直接改作者分支。具体提交、规范语境冲突与方案见[深挖证据链九](../review-learning-investigation-2026-11-15.md#证据链九已经验证的修复被重新引入是本轮最具体的学习缺口)。本轮原编号Linear不可读，需求使用11月12日历史快照，不能当实时验收。

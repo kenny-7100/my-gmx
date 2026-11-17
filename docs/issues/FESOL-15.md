@@ -1,5 +1,9 @@
 # FESOL-15 — Solana 市场选择器与 header
 
+## 前置增量核验（2026-11-17）
+
+当前TRD-63；#3201原head056f8d689c未变，现CONFLICTING且Changes requested；多条review已有作者修复回复，需冲突处理和复核，不机械重新派同一缺陷。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。
+
 更新：2026-11-15。角色：review 反馈吸收流程调查，不是本轮实现或验收负责人。
 来源：[PR #3201](https://github.com/gmx-io/gmx-interface/pull/3201)。本轮实时读取 inline comments 和 reviews，未刷新 Linear、执行代码/页面验收或核对所有修复提交；不据此确认整需求完成。
 

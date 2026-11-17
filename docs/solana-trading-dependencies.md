@@ -1,5 +1,28 @@
 # Solana 交易链路依赖审计
 
+## 五需求前置增量核验（2026-11-17）
+
+范围：TRD-70/72/77/78/136 的直接及关键传递前置，非全项目进度扫描；只读调研，不自动实施、同步开发基线、合并或部署。官方Linear实时读取五条正文/关系及关键依赖，五条与关键前置评论单独核对；GitHub读取最新PR/head/reviews/checks、API源码和公开HTTP。release在线为 `7868f48f3e5cf1423a33a4e3f8cbbc9d5cd90d18`（11月16日16:42 CST）。本轮没有fetch/pull、业务修改、构建或交易。
+
+| 前置 | 最新证据 | 下游影响与可跟进事项 |
+| --- | --- | --- |
+| TRD-65 / 原52，#3193 | Linear In Test；11月16日16:41 CST APPROVED并MERGED，merge18e78fefba、原heade712a1d342不变；当前release实际存在GmsolSyntheticsStateProvider | 四线/136早已含同head，非新功能待集成；可按最新release整理交付diff、移除已吸收的前置范围，保留后续slot/owner/余额扩展。不要重复cherry-pick或整支覆盖 |
+| TRD-100 / 原92，#3243 | In Review；新head50118fee998，MERGEABLE、Review required、各返回checks成功、无review；相对release仅3文件 | 原5e081e5ab1冲突候选已过时，无需再提修冲突。units与136的差异仅改用既有GMSOL_PRECISION_SCALE/GMSOL_MAX_UNSIGNED常量，值相同；待原PR review/合并，不重复实现转换，也不把整支新head带入旧工作区 |
+| TRD-80 / 原25，#3238 | In Review；head07117e1691未变，当前MERGEABLE（此前CONFLICTING），Review required、返回checks成功、无review | 位置/订单列表前置具备推进review条件；其数学/API/规范依赖仍需分别验收，不因mergeable判完成 |
+| TRD-98 / 原51，#3195 | In Review；head2495be234e未变，CONFLICTING、Changes requested；未resolved线程仍含空System-owned ATA导致整次余额读取失败的P2及不可达rpc-debug/测试意见 | 跟进Rainer原PR冲突与审查收口；下游已集成旧head、136余额接线另在TRD70修复，不用旧CI绿证明当前可合或忽略资格过滤历史保护 |
+| TRD-63 / 原15，#3201 | In Review；head056f8d689c未变，CONFLICTING、Changes requested | 多条review已有作者修复回复（ETH分类、空TradFi、swap保留、EVM collateral fallback），不重复派旧缺陷；需原线处理release冲突并请reviewer复核 |
+| 原113字段 #3205/#3207 | 分别head087a98fa37/c711f6ebe7；3205现base release，3207仍stack在fee分支；两者CONFLICTING | 共享状态已合后，需在原PR收敛字段stack并核对fee/order metadata仍可供交易消费；四线已含其旧成果，不等于正式交付已完成 |
+| TRD-108 / 原112，API#340 | Todo；#340新head996cf05db9，Open/MERGEABLE/Review required，test及Plan成功、Apply skipped；相对本地固定59e49新增787217/4e99bf/704d4c/996cf0四提交 | 已改启动全量bootstrap+按程序交易signature/writable账户增量追赶，cursor/coverage/lease及追赶未完不报fresh；bootstrap192MiB/60秒、总200k容量，不是单纯重跑旧扫描。优先隔离核验是否可替换本地wallet补丁；本轮未启动新版本，不能宣称大扫描问题已解决 |
+| API运行与金融就绪 | #340仍使用sdk-next alias2.9.2，positionRecords真实调用其getPositionInfo；公开config HTTP200、67市场、0gmsol标记 | TRD108正文“仍2.2.1”不能当新候选源码事实；但代码已用新alias不证明金融reference、正式部署和post-trade验收通过。gmx-infra#96本账号不可读取，无法确认CloudSQL前置；不推送API、不建PR |
+| TRD-109 / 原71，可信LUT | Todo、Divhead、无评论/附件新地址；本轮链上slot470423402，两表active且authorityPresent=true，73/155地址；现配置expected authorities仍空 | 正式LUT/四钱包/atomic验收继续受阻；不能因无LUT小额交易已成交就豁免正式范围。keeper flags本轮HTTP403，不能沿用昨日true冒充今日验证 |
+| TRD-84 | In Progress、Sulliven、无评论；本轮按Solana close搜索未发现新主仓PR（不证明没有未公开/其他命名工作） | 136退出/撤单仍需负责人已有成果或已授权本地最小接线；用户先授权后明确可以之后做，当前不恢复实施 |
+
+五条自身：70 In Progress、72 In Review、77/78 In Progress、136 Backlog；四Draft PR3258/3259/3261/3262远端head仍a07d84427d/2f2ac84771/c88e50533d/996a167e5c，返回代码/WASM检查成功，组件workflow仍Failure，不能称CI全绿，本轮未重读同head历史403日志。TRD70真实余额修复原delivery本地d0726f09d9仍未推送（远端仍996a），应在交付授权下更新同一PR。136的SDK启动修复9d7e57bde5仅实验工具；11月16日40USD真实long已成交证据仍限定对应版本/账户/市场，不代替其他四需求全部验收。
+
+建议跟进顺序：优先**本地隔离验证新API#340，判断能否去掉wallet范围实验补丁**，保留现有现场及只本地权限；并行协调100/#3243与80/#3238的review，利用65已合清理交付依赖；随后收口98/63/113原PR冲突与review。可信LUT/金融部署/退出继续分别跟进负责人。此排序是分析建议，不是本轮自动实施指令。
+
+原始只读快照保留忽略目录 `.local/dependency-audit-20261117/`。公开响应不含tradeMath仅证明不能用该host运行当前严格gmsol入口，不证明所有线上值错误。未新建Linear、评论、PR或联系他人。
+
 ## 不等待71/112正式交付的本地交易可行性（2026-11-16）
 
 用户要求评估mock、固定值、本地计算与RPC等方案，尚未授权实施或链上写入。只读核对19 development `14d67c82d0`的市场/provider/TradeBox/sender/LUT/lifecycle与API#340固定`59e49c649d`源码，复用同阶段上游及既有HTTP契约证据。结论：可以先建设使用真实数据与链上交易的本地集成版，不必等待两项正式合并/部署；不是当前版本已经可真实交易。最省重复实现的候选是19 development＋本地运行现有API#340索引/读取服务＋自建冻结LUT；若严格限定浏览器代码，需新增RPC读取/解码/映射适配，改动更大。未启动服务、验证实时索引、测量新交易组合或签名广播，不能承诺开箱运行或工期。

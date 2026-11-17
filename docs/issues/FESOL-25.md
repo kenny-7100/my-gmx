@@ -1,5 +1,9 @@
 # FESOL-25 — 持仓与订单列表依赖调研
 
+## 前置增量核验（2026-11-17）
+
+当前TRD-80；#3238原head07117e1691未变但现MERGEABLE、Review required、checks成功，值得推进review，不能把依赖或完整验收一并视为完成。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。
+
 ## 固定 52 基线的独立切片已验证（2026-11-15）
 
 用户授权按推荐顺序实施。本轮在 `/Volumes/kenny/gmx/gmx-interface-fesol-25-verification` 从 52/#3193 `e712a1d342e994d85f77e52a748e081e48f559f3` 实际合入 25/#3238 `07117e1691a034af91720664ed595e4a152b4283`，无冲突。组合 commit `909a09d47064a830d53bfc1046ff031b34ac6998`，tree 与前轮 merge-tree 的 `7dae1f8a48add674f22b3ec0fbd49b00d66125c6` 完全一致，相对 52 仅 5 个业务源码与 10 个 locale，没有改写原作者实现。组合保存到个人分支 `fesol-25-on-52-verification-20261115`，未修改上游 PR head/base 或创建重复 PR。

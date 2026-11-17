@@ -1,5 +1,9 @@
 # FESOL-92 — SDK 单位转换依赖核验
 
+## 前置增量核验（2026-11-17）
+
+当前TRD-100；#3243更新为50118fee998，现MERGEABLE、Review required、checks成功。历史原PR冲突已不再是当前阻碍；与136已有units差异仅复用等值常量，不能重复实现转换。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。
+
 ## release 冲突解决候选已验证（2026-11-15）
 
 用户授权按顺序实施。原 #3243 位于上游 `gmx-io/gmx-interface:FESOL-92`，遵守 origin 只读，没有直接推送原作者分支或新建重复 PR。在隔离目录 `/Volumes/kenny/gmx/gmx-interface-fesol-92-resolution` 从原 head `5e081e5ab1` 合入当前 release `84ab9293a8`，只在 `sdk/src/utils/gmsol/index.ts` 出现预期 add/add。保留 release 全部数学函数及原 PR units 导出，解决文件与 56 已使用的组合逐字一致，未改 conversion 或舍入/范围校验语义。

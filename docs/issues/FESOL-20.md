@@ -1,5 +1,9 @@
 # FESOL-20 — 订单发送与成交状态
 
+## 前置增量核验（2026-11-17）
+
+当前TRD-78；PR3261 head未变，主体依赖TRD72和API确认刷新链路。136真实long已有两阶段证据，新API仍需核验coverage/minContextSlot行为后才能替换运行。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。
+
 ## Review 经验复审（2026-11-15）
 
 已先核对原development与远端Draft的成果同步，再按新review经验审查。最新版本、发现/修复、定向验证与运行边界统一见[四PR复审](../solana-trading-dependencies.md#基于-review-经验的四-pr-复审2026-11-15)。本轮未确认新的P0/P1/P2代码问题；56/20/19已补齐过期交易README并推送原PR，72产物无需改动。以下剩余验收/暂缓项继续有效，不据复审通过修改需求状态。

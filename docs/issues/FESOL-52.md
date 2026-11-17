@@ -1,5 +1,9 @@
 # FESOL-52 — 统一数据层与 FESOL-56 集成审查
 
+## 前置增量核验（2026-11-17）
+
+当前TRD-65；#3193已于11月16日16:41 CST合入，head仍e712a1d342，当前release实际保留Provider。四线已提前消费同head，转为交付diff收敛事项，不重复集成。 统一证据、版本及跟进建议见[五需求依赖核验](../solana-trading-dependencies.md#五需求前置增量核验2026-11-17)。
+
 ## Review经验深挖（2026-11-15）
 
 角色：只读调查。复核#3193 `e712a1d342`的review完整线程、当前provider、account snapshot和mapper：availability与owner缓存隔离已有实现；order metadata仍在mapper前裁剪，应按交易消费者重新核对，不能把原显示阶段取舍永久化。未运行组合/页面，原编号Linear不可读，参考11月12日快照；87和110实时正文支持切片不豁免整体与遗留入口单独承接。历史建议演变、具体源码及待审方案见[深挖调查](../review-learning-investigation-2026-11-15.md)。
