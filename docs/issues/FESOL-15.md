@@ -1,5 +1,30 @@
 # FESOL-15 — Solana 市场选择器与 header
 
+## 全部 reviewer 反馈复核（2026-11-17）
+
+用户要求查看全部 reviewer 问题。本轮实时完整读取 #3201 的 reviews、issue comments、9 个 reviewThreads 及所有线程回复（无后续分页），逐项对照当前公开 head `f6e228270340a7889df62aa96dbb5103a233a63f`，不是仅按作者“fixed”回复判断。reviewer 为 Divhead；9 线程全部 unresolved，8 条 outdated、TradFi 1 条非 outdated；这些元数据不代表缺陷仍存在或 reviewer 已认可。未发评论、resolve thread、请求 reviewer、改业务代码或重写历史。
+
+| reviewer 问题 / 原评论 | 当前核验结论 |
+| --- | --- |
+| [ETH 不在 Crypto / Layer1](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355195) | 已修：toToken 先转 native ETH 再取元数据；现有测试通过真实分类 filter 验证 ETH。 |
+| [空 TradFi 与跨网络残留选择](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355210) | 代码已修：按 options 是否有 tradfi 决定 excludedTabs，并对旧 tab/subcategory 回退 All。本轮静态核验；此前全量 suite 通过，但新 head 尚未重做该桌面/移动端页面用例。 |
+| [unsupported Swap 不应把 Short Limit 改为 Long Market](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355226) | 已修：setter 保留 previousOptions，仅 storage read 无前态时 Long/Market fallback；trade type/config/swap order 三入口回归验证 Short、Limit、输入金额与 storage 保留。 |
+| [默认顺序错误从 DOGE 开始](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355231) | 代码已修：comparator 使用 networkId，Solana promoted 配置为 BTC/ETH/SOL。注意首次 Tradebox 选中 DOGE 不等于 selector 默认列表排序失败；前者 firstMarket 与此 comparator 不同。新 head 列表页面顺序仍待实测。 |
+| [重复映射、不可达 native 分支、无效 isChartDisabled](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355239) | 已修：行数据和 comparator 复用 getWrappedTokenAddress，Solana index mint 原样返回，不再重复 native 特判与无效 filter。未按 nit 字面调用 convertGmsolTokenAddress，但此处无 native perp option，该函数对 index mint 也原样返回，语义一致。 |
+| [共享 TokenIcon 特判符号](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355252) | 已修：共享组件与 release 一致，ic_wsol.svg/ic_wgmx.svg 随需求交付，无 WSOL/WGMX symbol 特判。 |
+| [测试仅重述 multiplier/prefix/decimals 配置且漏 ETH](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355260) | 已修：配置复读用例已移除，保留真实分类、base58 大小写、native/index/collateral twin 行为测试。 |
+| [listing 测试无 guard 也能通过、return masking](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355273) | 已修：无效测试和 Solana return masking 已移除，Hook 仅用 null key 禁止请求；上一阶段真实 Hook/SWR 检查固定 chainId=Arbitrum，移除 guard 确实失败，源码已恢复。 |
+| [P1 identity early return 阻断 EVM collateral 初始化](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4519631690) | 已修：early return 只用于 unsupported Swap，Long/Short identity 仍执行 token/collateral fallback；fresh、restored Long/Short 回归均在本 head 已通过 suite 中。 |
+
+总评 [5788682179](https://github.com/gmx-io/gmx-interface/pull/3201#pullrequestreview-5788682179) 还含以下独立交付要求，不能只看 9 条行内问题：
+
+- **AC2 字段表与杠杆差异：文档已补，语义尚待确认。** 实时 TRD-63 正文已有 price/24h/OI/volume/rates/liquidity/max leverage/listing date 来源及规则表，注明 GMX 公式与 ETH 255x vs GMTrade 294x 只是当时快照；没有 reviewer 最终认可或后端一致性完整验收证据，不标 AC2 完成。
+- **AC6 后续 issue：已创建。** 旧 FESOL-116 经官方 Linear 解析为 [TRD-69](https://linear.app/gmx-io/issue/TRD-69/confirm-solana-market-listing-dates-for-new-and-recently-listed)，当前 Backlog、TRD-63 子任务，确认可信日期语义/来源及后续交付归属。reviewer 要求“开后续”已满足，不等于日期能力实现完成。
+- **先合 #3138/#3193 再基于 release 收敛：当前依赖与文件差异已满足，历史形态没有完全照做。** 两 PR 已合，当前 head 包含最新 release，仅 11 文件需求差异；本轮是普通 merge 保留公开历史，不是 reviewer 所述仅保留需求提交的 clean rebuild。公告组件当前与 release 一致；原“保留你的版本”针对当时等价实现及 prettier，不能覆盖后续 outage/app-update 变化。
+- **从公开历史移除 `183aacb863` 的 gitlinks：明确未完成。** `git merge-base --is-ancestor` 确认旧提交仍为当前 head 祖先，旧树存在 8 个内部仓库 gitlinks。最终树删除不满足 reviewer 对 merge-commit 公开历史的要求；上一轮解决代码冲突不等于关闭这项 review。真正清理需另行授权历史重建/分支替换方案，不能擅自 force push。
+
+当前 head 远端 checks 已全部 pass：Audit、Lint/Type/Tests、组件测试、SDK standalone、两项 Cloudflare Pages。组件 bot 也明确报告本 head All tests passed；不是沿用旧 CI。PR 仍 CHANGES_REQUESTED / MERGEABLE，没有 reviewer approve。上述“已修”指当前源码和已有匹配验证证据，不冒充 reviewer 线程已闭合或全部页面 AC 验收。
+
 ## 原 PR 已更新（2026-11-17）
 
 用户随后明确要求“也更新 PR”，授权本次写入原上游源分支；已普通 fast-forward 推送 `056f8d689c` → `f6e228270340a7889df62aa96dbb5103a233a63f` 到 `gmx-io/gmx-interface:solana-market-selector-header-release-fesol-15`，未强推或改写历史。#3201 标题改为 TRD-63，正文换成当前 release、11 文件范围、实际测试/构建和局部页面验收边界，删除旧前置未合、旧全量验收及签名描述。远端确认 head 一致、**MERGEABLE**；mergeStateStatus 仍 BLOCKED，reviewDecision 为 CHANGES_REQUESTED。新 Audit、组件测试、常规测试、SDK standalone 与 Pages 检查运行中，未称 CI 全绿。原 PR 保持实际非 Draft 状态，未转换、请求 reviewer、回复 review 或合并。本次明确写入授权仅用于该 PR 更新，不改变 origin 长期只读约定。
