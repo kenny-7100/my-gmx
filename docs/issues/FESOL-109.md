@@ -2,6 +2,8 @@
 
 ## Trading Cycle 1 前端筛选（2026-11-17）
 
+补充PR实时核验：TRD-63→#3201、72→#3258、77→#3259、78→#3261、75→#3242（Merged）、98→#3195、85→#3223、65→#3193（已Merged，Linear仍In Test）、80→#3238、100→#3243。TRD-103/104均关联#3190，PR正文明确89/96，是同一reader/hook实现；#3195为下游余额集成。TRD-142仅关联#3120，但它是FESOL-48来源PR并明确延期110范围，不列为142的实现PR。TRD-136未确认独立PR；列表只保留确证的实现PR，未声称附属PR/未关联实现全部不存在。
+
 本轮官方 MCP 全页查询 Trading Cycle 1（hasNextPage=false），筛选 Kenny/Rainer/Sulliven 及未分配的前端相关工作，排除 Done/Canceled/Duplicate。共14条：Kenny4、Rainer3、Sulliven4、未分配3。旧编号通过迁移前快照 UUID 匹配；TRD-136为新建需求，无旧FESOL编号，读取完整正文确认它涉及共享TradeBox真实交易本地联调、钱包/发送/生命周期及API环境协作，属于前端参与的跨侧联调，非纯UI实现。
 
 | 当前编号 | 旧编号 | 负责人 | 当前状态 |
