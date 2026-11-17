@@ -1,5 +1,28 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## Trading Cycle 1 前端筛选（2026-11-17）
+
+本轮官方 MCP 全页查询 Trading Cycle 1（hasNextPage=false），筛选 Kenny/Rainer/Sulliven 及未分配的前端相关工作，排除 Done/Canceled/Duplicate。共14条：Kenny4、Rainer3、Sulliven4、未分配3。旧编号通过迁移前快照 UUID 匹配；TRD-136为新建需求，无旧FESOL编号，读取完整正文确认它涉及共享TradeBox真实交易本地联调、钱包/发送/生命周期及API环境协作，属于前端参与的跨侧联调，非纯UI实现。
+
+| 当前编号 | 旧编号 | 负责人 | 当前状态 |
+| --- | --- | --- | --- |
+| TRD-63 | FESOL-15 | Kenny | In Review |
+| TRD-72 | FESOL-56 | Kenny | In Review |
+| TRD-77 | FESOL-72 | Kenny | In Progress |
+| TRD-78 | FESOL-20 | Kenny | In Progress |
+| TRD-75 | FESOL-57 | Rainer | In Review |
+| TRD-98 | FESOL-51 | Rainer | In Review |
+| TRD-85 | FESOL-29 | Rainer | In Review |
+| TRD-80 | FESOL-25 | Sulliven | In Review |
+| TRD-65 | FESOL-52 | Sulliven | In Test |
+| TRD-100 | FESOL-92 | Sulliven | In Review |
+| TRD-142 | FESOL-110 | Sulliven | In Progress |
+| TRD-104 | FESOL-89 | 未分配 | In Progress |
+| TRD-103 | FESOL-96 | 未分配 | In Progress |
+| TRD-136 | 无 | 未分配 | In Progress |
+
+与此前对话不同，FESOL-110现已迁移为TRD-142并在Cycle1，不沿用旧Release观察。TRD-105/106为Done排除；TRD-70/84位于Cycle2，不计入当前Cycle1成员（跨周期阶段目标仍保留）。本轮只查询，未修改Linear，不将状态解读为代码/部署验收结论。
+
 ## TRD-101 正文全部 FESOL 引用映射（2026-11-16）
 
 用户随后明确授权实施，已通过 Linear patch 将 38 条已迁移需求在 TRD-101 正文中的全部引用（显示编号与 URL）更新为核实的 TRD 编号。保留 FESOL-79/110/114 以及 DES 引用；未追加解释文字或改动原计划语义。更新前从最新正文生成完整编号匹配的预期结果，patch 仅覆盖 Markdown 引用；更新后独立 get_issue 回读，正文与预期逐字符完全一致，确认没有其他正文差异。未修改任何关联任务属性、团队或周期。
