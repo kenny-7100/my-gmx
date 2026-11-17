@@ -1,5 +1,9 @@
 # Solana 交易链路依赖审计
 
+## TRD-63 历史清理交付（2026-11-17）
+
+用户明确授权历史替换后，原 #3201 已以精确 SHA 的 force-with-lease 更新为 `786dcaadc7`：基于最新 release `22e1eda78e`，仅1个需求提交/11文件，原 gitlink 提交不在祖先历史，需求文件与此前验证版完全一致。delivery SDK/types/lint/3374项完整测试/生产构建及新增原生数学46项测试通过；远端新CI运行中、MERGEABLE、review仍CHANGES_REQUESTED。公开历史清理项已处理，不代表AC2及完整页面验收通过；[详细证据](issues/FESOL-15.md#历史-gitlinks-清理完成2026-11-17)。
+
 ## TRD-63 原 PR 发布结果（2026-11-17）
 
 用户明确要求更新原 PR 后，#3201 源分支已普通 fast-forward 到 `f6e2282703`，标题/正文接续 TRD-63，GitHub 确认 **MERGEABLE**，本次代码冲突已解除。此前 origin 只读发布阻碍已由本次明确授权解除；review 仍 CHANGES_REQUESTED，新 head 的 CI 正在运行，页面完整矩阵及公开 gitlink 历史边界仍保留。没有合并、转状态或请求 reviewer。

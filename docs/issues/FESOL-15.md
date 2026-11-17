@@ -1,5 +1,17 @@
 # FESOL-15 — Solana 市场选择器与 header
 
+## 历史 gitlinks 清理完成（2026-11-17）
+
+用户在明确解释历史替换及 force-with-lease 后创建目标并授权实施。基于 fetch 后最新 release `22e1eda78ec0d51eae8104548744fb846f40d542`（新增 #3285 / SDK2.9.3 原生数学），在原 delivery 目录切换到重建交付分支 `solana-market-selector-header-release-trd-63-clean`，生成唯一需求提交 `786dcaadc7e2ab3399c5d2f934f18430a6c0e116`。11 个需求文件与旧 head `f6e2282703` 逐字节一致，相对最新 release 仍 +277/-25；两 head 的其他差异完全来自已合入 release 的 SDK 文件，没有修改业务语义。原 development 保持既有现场；此次仅重建 delivery 历史，没有第二处独立开发。
+
+历史检查：`release..HEAD` 只有一个提交，其父为最新 release；新提交 tree 无 mode160000；引入 gitlinks 的 `183aacb863` 不再是新 head 祖先。旧 head 已本地备份 `backup/pr-3201-before-history-cleanup-20261117`。本次清理保证这些旧提交不会经该 PR 的 merge ancestry 带入 release，不代表 GitHub 已永久抹除既有 SHA、旧 diff、缓存或其他备份引用。
+
+在重建后的实际 delivery 验证 SDK build、app/landing typecheck、ESLint、完整前端 suite（334 files / **3374 passed，1 skipped**）、生产 build 全通过；上游新增原生数学 suite **46 passed**。依赖锁文件未变，沿用该目录自身安装，SDK 产物已重建。没有复用旧 head CI 冒充新 head 检查，也没有新增浏览器验收结论。
+
+已使用精确 expected SHA 的 `--force-with-lease=refs/heads/solana-market-selector-header-release-fesol-15:f6e228270340a7889df62aa96dbb5103a233a63f` 更新同一原 #3201。随后从远端 fetch 回读并核实：公开 head=786dcaadc7、只有1个PR提交、11个文件，旧 gitlink 提交不在祖先链；GitHub 为 MERGEABLE。正式 fork 同步保存新 clean ref，未创建重复 PR。原 PR 描述同步最新 release、历史清理、TRD-69 和实际验证；保留非 Draft 状态，不请求 reviewer、不 resolve 线程、不合并。
+
+发布后新 CI（Audit / 组件 / 常规测试 / SDK standalone / Pages）正在运行，当前 reviewDecision 仍 CHANGES_REQUESTED；不称已获 reviewer 认可。原总评的公开 gitlink 历史交付项现已处理；AC2 语义确认、完整页面回归及上币日期后续仍按各自边界保留。此前下方“未清理”均为本次清理之前的历史记录。owned Vite3035 在切换重建历史时已停止，未触碰 TRD-136 服务。
+
 ## 全部 reviewer 反馈复核（2026-11-17）
 
 用户要求查看全部 reviewer 问题。本轮实时完整读取 #3201 的 reviews、issue comments、9 个 reviewThreads 及所有线程回复（无后续分页），逐项对照当前公开 head `f6e228270340a7889df62aa96dbb5103a233a63f`，不是仅按作者“fixed”回复判断。reviewer 为 Divhead；9 线程全部 unresolved，8 条 outdated、TradFi 1 条非 outdated；这些元数据不代表缺陷仍存在或 reviewer 已认可。未发评论、resolve thread、请求 reviewer、改业务代码或重写历史。
