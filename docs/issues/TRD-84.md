@@ -1,5 +1,15 @@
 # TRD-84 — Solana 平仓、编辑和撤单
 
+## 正式 PR 集成与页面接缝修复（2026-11-18）
+
+用户明确授权“合并进入 TRD-136，测试验收通过后发布 playground”。精确集成 #3293 末端业务 `0722cc8701`，未整支合并其 TRD-70 前置、未合并上游 PR、未另开平仓业务路径。TRD-136 对应 `aad386e224`，刷新 catalog `a0273c5eb4`；保留 UI2.2、错误 reason 和共享实验无 LUT 构建。
+
+在用户指定、已打开的 kenny Chrome 原生窗口核验当前 DOGE 20 USD/10 USDC 抵押多仓：平仓 Market 默认 100%、按钮可用，但接收行为空。定位共享 TokenSelector 无 tokenInfo 时回查 EVM 配置并返回 null，available receive selector 也仍使用 EVM reachable graph。TRD-136 补丁 `ad71f2f80d`/`daa6df395f` 显式传 Solana tokenInfo、仅提供 collateral（WSOL 可解包 SOL），不扩展 swap。页面再验已显示约10.01 USDC、选择列表仅USDC；金额随行情变化，不是最终到账承诺。最终开发 head `daa6df395f`，playground 对应 `e7d2616b5c`。实际页面没有未完成订单，未验证真实编辑/撤单。未签名或广播。
+
+自动验证：接入后完整前端 353文件/3494 tests通过、1既有skip；app/landing types、变更lint/format通过。接收补丁 44测试通过（后续仅动态import/可选marketInfo修正，selector33测试再通过），开发最终types/lint通过。playground实际目录最终检查、CI和部署收尾见 [TRD-136](TRD-136.md)。
+
+实时 unsigned 诊断从当前真实仓位读取精确size，使用正式 buildGmsolCloseAction→prepare→validator→pre-signature RPC模拟通过：1000 bytes、无LUT、slot470847316、网络费45000lamports。诊断为Node固定WASM/RPC adapters、1%价格边界/零collateral withdrawal，不包含共享UI计算映射，不等同浏览器真实提交；报告在开发目录 `.local/trd-136/close-integration-20261118.json`。真实签名、Keeper成交、仓位删除及余额/UI刷新仍待用户接手；不宣称完整TRD-84 AC通过。
+
 ## 正式 PR 已出现：恢复条件满足（2026-11-18 后续）
 
 用户提供 Sulliven 的 [#3293](https://github.com/gmx-io/gmx-interface/pull/3293) 并要求核对上下文。本轮只读分析，没有创建目标、集成代码、构建、部署或操作钱包。PR OPEN、非Draft、base release、head `0722cc8701f2b0b197f6bb3c506ce89dd1f31b82`，MERGEABLE、REVIEW_REQUIRED；正文空，查询时无review/inline评论。当前head check-runs全部success，包含Audit、主lint/types/tests、standalone、WASM、组件和Cloudflare。Linear仍In Progress、Sulliven，验收要求真实平仓、编辑及撤单落链和列表更新。

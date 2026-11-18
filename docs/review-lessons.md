@@ -35,6 +35,8 @@
 
 **Playground 的实验配置一致性（2026-11-18，用户明确）：** playground 本身允许实验能力，应复现 TRD-136 本地验收路径，不能把“常规生产构建”当作必须保留不同 LUT 配置的理由。可共享本地启动/模拟/预览构建的明确配置入口；公开 API/RPC 与本地服务仍按实际环境区分，不宣称数据源完全相同。配置差异必须随产物验证，既有大小/模拟/签名前保护保留，未签名模拟不代替真实下单。此次通过 `build-playground` 与共享无 LUT 模块修正入口，不把实验选择混入普通 `build-app`。
 
+**Solana 共享币种组件接缝（2026-11-18，实际页面复现）：** 集成 [TRD-84 #3293](issues/TRD-84.md) 后，平仓按钮已不再等待 EVM allowance，但接收行仍为空。TokenSelector 未传 tokenInfo 时回查 EVM getToken，未知 Solana mint 会直接返回 null；接收列表仍查 EVM reachable graph。修复应向既有组件传真实 token metadata，selector 只列正式 builder 支持的抵押币及 WSOL 对应 native SOL，保留 EVM 原路由；不要扩容 EVM 静态币种表或伪造 swap route。按钮可用、builder 模拟通过不足以证明表单完整，必须走到币种名称、金额、选择列表这些实际消费者。
+
 ## RL-02 数据含义与完整性
 
 **要保护的行为：** 资产仍存在时，缺价格、请求失败或市场禁止新开仓不能被表示为零资产。区分零、空、未知、部分、过期；首次失败和带缓存刷新失败应分别处理。保留缓存需核对 owner、来源和本次列表，不能跨钱包复用或无限沿用过期值。
