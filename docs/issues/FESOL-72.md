@@ -1,5 +1,11 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 全签名交付历史重建（2026-11-19）
+
+用户明确要求 PR 所有提交有签名并允许重建。原 Draft [#3259](https://github.com/gmx-io/gmx-interface/pull/3259) 已从最新 release `0bc6c2ba2d` 重建为单个 GPG 签名提交 `2733850a2f4f47d08aeaae940e7502b742062d88`；GitHub commits API 确认仅 1 commit、verified=true、reason=valid、PGP signature。使用绑定旧远端 SHA `6e2dd5f81c` 的 force-with-lease 更新原交付分支，未新建 PR、转 Ready 或请求 reviewer。原历史保留于本地 `refs/backup/trd-77-pr-before-signed-rebuild-6e2dd5f81c43fd3793f7b09ad6b795c28c6f2179`，development `c70a3d77d1` 未改。
+
+重建前后需求补丁 stable patch-id 均为 `e4c44378d572698ddee7b82ba0632810c8487113`；交付仍精确 18 文件，全部交付文件与旧 head 字节一致，新增树差异仅为 release 的 32 个 Tooltip 文件。最初本地生成补丁时使用两端 tree diff 而带入了撤销 release 的差异，已在推送前改用原共同基线到旧 head 的需求补丁并重建，未向远端发布错误版本。固定 SDK source/toolchain/recipe/hash 未变，无需重复 Rust 重建。实际交付目录 app/landing typechecks、带安装文件完整性检查的 SDK production bundle、loader suite（2 tests）均通过，worktree clean。PR 正文已更新基线和签名/验证边界；新 head CI 独立判断，不继承旧 head 的成功结论。完整主网矩阵等验收剩余项不变。下方旧 head 与 unsigned 审计为历史观察，已被本节取代。
+
 ## 正式 review 首选判断（2026-11-19）
 
 当前TRD-77 In Progress，原#3259 OPEN/Draft、head6e2dd5f81c、精确18文件、无review/review threads/review requests。固定产物/构建/完整性切片独立，现有Phantom开仓/平仓与部署hash消费证据支持优先送审；完整72主网四钱包/LUT/原子矩阵仍未完成，不等于完整Done或立即可merge。最新release0bc6c2ba2d的Tooltip32文件与本PR无重叠，本轮查询未自动同步。完整五条比较与上游状态见[统一就绪判断](../solana-trading-dependencies.md#五需求正式-review-就绪判断2026-11-19-0041-cst)。未转Ready或请求reviewer。
