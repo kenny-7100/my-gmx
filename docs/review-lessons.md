@@ -15,7 +15,7 @@
 
 | 改动或疑问 | 当前经验 |
 | --- | --- |
-| SDK/API、重复包装、ctx、fixture、无消费者字段、图标 | [RL-01 共享接缝与删减](#rl-01-共享接缝与删减) |
+| SDK/API、重复包装、ctx、fixture、无消费者字段、图标、集成验收与正式 PR 复用 | [RL-01 共享接缝与删减](#rl-01-共享接缝与删减) |
 | 持仓、缺价格、disabled market、缓存、owner、空列表 | [RL-02 数据含义与完整性](#rl-02-数据含义与完整性) |
 | 钱包余额、isSynthetic、collateral/pay token、Token-2022、ATA | [RL-03 资格条件属于具体用途](#rl-03-资格条件属于具体用途) |
 | 网络开关、Provider、Hook、pending、promise、轮询、设置入口 | [RL-04 入口与状态生命周期](#rl-04-入口与状态生命周期) |
@@ -30,6 +30,8 @@
 **证据与应用：** [#3193 总评](https://github.com/gmx-io/gmx-interface/pull/3193#pullrequestreview-5789044554)要求清理 fixture、无人使用的机制及复制 mapper；[Divhead 的 #3197](https://github.com/gmx-io/gmx-interface/pull/3197)把 API 客户端纳入 SDK，[直接提交 4f62a4eacf](https://github.com/gmx-io/gmx-interface/commit/4f62a4eacfc0a18381c218488049de766b93dc58)将 ctx 类改为普通对象，并在真实 EVM 操作边界验证。图标扩展沿用[既有 SVG 命名机制](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355252)。上述为历史 review/提交证据。
 
 **反例与边界：** “当时无人读取”不是永久禁止。显示阶段删掉的订单 metadata 或 refetch，可能被后续 update/cancel 消费者需要。抽取或删除前检索当前调用方和字段流向，验证共享消费者仍收到所需数据；历史调查对 compose 字段的观察只是待核验线索，不是新增缺陷结论。
+
+**集成验收的正式成果承接（2026-11-18，用户纠正）：** [TRD-136 平仓核查](issues/TRD-84.md#按正式-pr-路径复核2026-11-18)中，MarketDecrease 底层和未签名模拟已可用，但共享 PositionSeller 尚未接通。最初以“底层具备条件”推荐独立补最小接线，遗漏了该能力由 Sulliven 的 TRD-84 承接、可能与未公开工作重复的约束。用户明确优先依赖已有 PR，避免为本地闭环构建随后废弃的路径。今后选方案同时判断技术可行性、已有正式成果的覆盖范围及新增修改的交付归属；复用 builder/Hook 不足以证明没有重复实现。先核对目标 PR 的真实消费者、源码和开发线；集成缺口修回所属需求，验收分支只组合成果。查不到 PR 不等于负责人没有实现，也不自动成为接管或新开开发线的依据。本次按用户“无 PR 则暂时停止”暂停；不将这一条件推广为所有任务必须等待 PR 的规则。
 
 ## RL-02 数据含义与完整性
 
