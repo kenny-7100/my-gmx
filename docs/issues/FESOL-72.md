@@ -6,6 +6,8 @@
 
 2026-11-19 01:05（UTC+8）按用户要求再次只读核验：Linear 正文/关系仍以 TRD-72 为 blockedBy、父任务 TRD-70，无评论；上述 PR head、18 文件范围、review 和 release SHA 未变。GitHub 当前为 MERGEABLE / BLOCKED / REVIEW_REQUIRED；WASM reproduction、Audit、主检查及 SDK standalone 均成功。直接读取当前 head 的组件 CI 日志确认 286 tests passed，失败发生于 GitHub Pages 报告部署（git exit 128）及报告链接发布（403 Resource not accessible by integration），不能表述为全部 checks 通过或组件用例失败。未修改 Linear、PR、业务或部署；未重跑构建与交易验收。
 
+同轮补查开发与交付同步：原 development `c70a3d77d1`、delivery/PR `6e2dd5f81c` 均 clean，分别与个人远端对应分支一致。对照 PR 全部 18 文件，17 文件完全一致；`package.json` 仅有个人 Agent 工具 scripts 增量，SDK 相关 scripts、依赖及 lock 一致，未发现 TRD-77 成果漏交。开发线还集成交易、余额/RPC 等消费前置和个人基础文件，不能整支带入此独立产物 PR。两线均仍以 release `38b1503444` 为已同步基线，未吸收远端最新 `0bc6c2ba2d`；本轮只核对，未同步或改变业务分支。
+
 ## TRD-77 正式平仓消费证据（2026-11-19）
 
 原修复集成后的playground ca6fa8f824/4f3109d8完成用户签名的BTC多仓100%平仓：请求与keeper均finalized成功，8条Lighthouse断言成功，到账9.515259USDC，Order filled、空仓及刷新后余额得到核验。公网API首次stale503后恢复，minContextSlot以keeper471002042为floor返回471002755、0仓位/0订单。实际部署WASM下载hash仍为固定e82184ca…b46c840。具体回执与边界归[TRD-136](TRD-136.md#正式平仓到账与刷新闭环2026-11-19)。这是一种钱包/一个市价平仓样本，不扩大为完整AC；原暂缓范围不变。
