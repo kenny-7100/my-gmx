@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 正式 review 首选判断（2026-11-19）
+
+当前TRD-77 In Progress，原#3259 OPEN/Draft、head6e2dd5f81c、精确18文件、无review/review threads/review requests。固定产物/构建/完整性切片独立，现有Phantom开仓/平仓与部署hash消费证据支持优先送审；完整72主网四钱包/LUT/原子矩阵仍未完成，不等于完整Done或立即可merge。最新release0bc6c2ba2d的Tooltip32文件与本PR无重叠，本轮查询未自动同步。完整五条比较与上游状态见[统一就绪判断](../solana-trading-dependencies.md#五需求正式-review-就绪判断2026-11-19-0041-cst)。未转Ready或请求reviewer。
+
 ## TRD-77 正式平仓消费证据（2026-11-19）
 
 原修复集成后的playground ca6fa8f824/4f3109d8完成用户签名的BTC多仓100%平仓：请求与keeper均finalized成功，8条Lighthouse断言成功，到账9.515259USDC，Order filled、空仓及刷新后余额得到核验。公网API首次stale503后恢复，minContextSlot以keeper471002042为floor返回471002755、0仓位/0订单。实际部署WASM下载hash仍为固定e82184ca…b46c840。具体回执与边界归[TRD-136](TRD-136.md#正式平仓到账与刷新闭环2026-11-19)。这是一种钱包/一个市价平仓样本，不扩大为完整AC；原暂缓范围不变。

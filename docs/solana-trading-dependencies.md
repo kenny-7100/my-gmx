@@ -1,5 +1,15 @@
 # Solana 交易链路依赖审计
 
+## 五需求正式 review 就绪判断（2026-11-19 00:41 CST）
+
+用户要求列新旧issue、PR、状态和上游依赖，并判断最适合正式送审的一条。本轮仅查询，不转Ready、不请求reviewer、不修改Linear，也不继续未授权限价交易。实时Linear正文/关系/评论与GitHub原PR复核：72/70/78/77均In Progress，136为Done；五份PR均OPEN/Draft、base release、无reviews与review requests。新旧对应仍72←FESOL56、70←FESOL19、78←FESOL20、77←FESOL72，136无旧编号。各PR head与本轮交付一致。正文更新触发的同源码CI仍有运行项，不能称此刻所有checks已结束；上批同head验证和组件报告403证据仍按前节限定复用。
+
+关键上游：TRD100 In Review/#3287 OPEN非Draft；TRD98 In Test/#3195 OPEN非Draft且CHANGES_REQUESTED，旧#3190 CLOSED未合并，其reader/hook已由3195承接；TRD109 Todo/Divhead，无新地址或评论，正式LUT/参考钱包/flags完整验收未完成。71/97/86/127均Done；97#3110、86#3138已merged。75/63/80仍In Review，但#3242/#3201/#3286实际已merged入release；129 Done，API#340已merged/deployed，前端字段扩展#3205 OPEN非Draft、#3207 OPEN/Draft且base仍为3205分支。108 In Progress，剩同快照金融参考和完整交易后验收。136额外集成来源84 In Progress/#3293 OPEN非Draft、142 In Progress/#3294 OPEN非Draft、85 In Test/#3223 OPEN非Draft、49 In Review/#3273 OPEN非Draft，均未合并。已接入源码不等于上游已review/merged。
+
+首选TRD77/#3259进入正式review：GitHub精确changedFiles=18、无review threads，实际diff只包含固定产物、构建/复现/完整性配置及加载回归；不携带72/78/70交易实现。已核对manifest/toolchain/CI/构建时逐文件hash保护与真实部署WASM，Phantom开仓和平仓消费样本现已具备。Linear blockedBy72仍成立于完整主网验收，不能把可先评审产物切片说成完整Done或立即可合并。issue旧标题v0.10.0不覆盖用户已确认的0.11.0-beta.1实际版本。
+
+最新远端release为`0bc6c2ba2d57ff9b1c1c3135e6da6433ef6e438d`，较当前交付已同步的38b1503444新增4提交/#3278、32文件Tooltip设计系统修改；与77的18文件无交集，对70/84共享TradeBox/PositionSeller/OrderEditor等路径有交集。查询本轮未fetch/merge或重新验证该新组合。正式送审前可同步最新基线并核对新head适用检查，不能用旧head结果冒充同步后通过。136为持续集成playground，保持Draft承接实验，不作为最先转Ready的正式产品PR。后续主线候选为72（先收敛单位/余额与LUT/矩阵），再78和70。
+
 ## 五需求跟进实施（2026-11-18 深夜）
 
 接续用户创建的持续目标，本轮从只读核查进入原线修复和交付。该节优先于下方23:12“尚未实施”快照；真实交易矩阵仍未完成，目标保持active。
