@@ -1,5 +1,9 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## TRD-72 Lighthouse 兼容修复交付（2026-11-18 晚间）
+
+原 development `2155ca121f`、原 delivery `b0fae7d1f2` 已签名、验证并推送，更新同一 Draft #3258。受限接受 Phantom 追加的两类 Lighthouse 断言，保留原交易语义、权限/费用/LUT保护和签名，并在发送前对最终交易验证签名及模拟。development完整前端3457 passed/1既有skip；delivery自身types/lint及18交易测试通过。TRD-136/playground集成及线上验收进度见[本轮实施](TRD-136.md#lighthouse-兼容修复实施2026-11-18-晚间)，不扩大为全部钱包/keeper验收。下方“未改业务”为先前定位阶段的历史状态。
+
 ## TRD-72 Phantom 签名兼容缺口（2026-11-18）
 
 在 TRD-136 playground 实测 Phantom 返回时附加8条 Lighthouse 断言，原业务指令/账户权限、blockhash与费用未变；message827→1109bytes触发本人#3258的严格一致性检查，广播前失败。属原交易需求兼容缺口，未改业务。受限兼容方案、现场恢复与证据边界见[实测定位](TRD-136.md#phantom-返回消息差异已实测定位2026-11-18)；后续修复沿原开发/交付线，不在playground单独绕过保护。
