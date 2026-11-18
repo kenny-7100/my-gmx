@@ -1,5 +1,9 @@
 # FESOL-20 — 订单发送与成交状态
 
+## 五需求目标实施接续（2026-11-18 深夜）
+
+TRD-78接续72 Lighthouse；同时保留sender跟踪回调，另接地址key。 已同步release `38b1503444`。具体提交、验证、推送与剩余金融/LUT验收见[统一实施记录](../solana-trading-dependencies.md#五需求跟进实施2026-11-18-深夜)。目标持续active，修复交付不等于完整主网矩阵完成。
+
 ## 上游与后续核查（2026-11-18 23:12 CST）
 
 当前TRD-78；#3261仍 `0c50b8d579`、Draft，无新review。失败reason已交付，但sender仍旧逐字节比较，缺72 Lighthouse修复；接续时保留trackingRequests/receipts。136/playground已具备组合修复，无需重复搬运。余额新提交及矩阵边界见[统一核查](../solana-trading-dependencies.md#四需求与-trd-136-最新跟进核查2026-11-18-2312-cst)。

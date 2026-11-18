@@ -1,5 +1,9 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## 五需求目标实施接续（2026-11-18 深夜）
+
+TRD-72接入地址key，既有Lighthouse保护保留。 已同步release `38b1503444`。具体提交、验证、推送与剩余金融/LUT验收见[统一实施记录](../solana-trading-dependencies.md#五需求跟进实施2026-11-18-深夜)。目标持续active，修复交付不等于完整主网矩阵完成。
+
 ## 上游与后续核查（2026-11-18 23:12 CST）
 
 当前TRD-72；原Draft #3258 `b0fae7d1f2` 无新review，Lighthouse修复已在136/playground，但78/70原开发与交付sender仍旧逐字节比较，需要按原线精确接续并保留tracking。余额#3195地址key小补丁也未接入；正式API已出gmsol标记，可信LUT与完整矩阵仍独立验收。只读证据及边界见[统一核查](../solana-trading-dependencies.md#四需求与-trd-136-最新跟进核查2026-11-18-2312-cst)。

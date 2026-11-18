@@ -1,5 +1,33 @@
 # Solana 交易链路依赖审计
 
+## 五需求跟进实施（2026-11-18 深夜）
+
+接续用户创建的持续目标，本轮从只读核查进入原线修复和交付。该节优先于下方23:12“尚未实施”快照；真实交易矩阵仍未完成，目标保持active。
+
+- **TRD-72**：接入#3195新增`372e7ff471` token-address/chain React key；原开发`871140c086`、原交付`ed4209dac7`。不新增reader，不改变抵押资格。
+- **TRD-78**：从72原修复接入Lighthouse，合并import时同时保留`TrackedOrderAction`与新增validator；开发`7f457d56a1`、交付`3d785b4886`。sender/validator/transaction-spec与136逐blob一致，保留跟踪和恢复。另接地址key。
+- **TRD-70**：接入同一Lighthouse修复及78失败原因展示，开发`0783f618bf`/`da2e88130b`，交付`31f0eea678`/`462ee1f834`；另接地址key。不恢复swap/max leverage/完整simulate_order/GT Rewards暂缓范围。
+- **TRD-77**：本轮仅同步release；独立交付仍18文件，产物source/pin/hash/recipe不变，不重复Rust重建。实际consumer已通过的样本不能替代72完整主网矩阵。
+- **TRD-136/playground**：精确接入地址key，README移除旧公网缺失与正式平仓路径未接入的描述；已具备84/142/85/49来源head未变，不重复搬运。当前代码未重新部署，线上已验证版本仍`41092fae55`/`cd9dad15`。
+
+交付时发现release已前进至`38b1503444`（multicall/GLV、treasury、Receive文案、GT图标），已用签名merge同步个人基础及五条原development/交付。没有整支业务回流基础。72/78/70开发与对应交付、136与playground的src/sdk/landing/lock逐项一致；77独立交付刻意不包含开发集成中的其他业务。所有本轮新增提交GPG验证G，各现场clean。
+
+**公网契约新增证据**：正式HTTP账户positions/orders分别200，最小slot样本返回不低于请求floor；实际当前`GmxApiSdk`消费公网得到1仓位/0订单，position/order slot同为470991501，position/fee bigint解析成功。fee-discount成功但无slot头，不据此认定其违约。忽略目录仅保存本机原始账户样本，公共文档不复制金融明细。这个单账户只读样本不证明独立同快照四项金融输出或新交易后刷新；尚未停用本地API/DB/indexer/reader。
+
+**真实操作边界与下一步**：在用户已有Kenny原生Chrome、旧部署仅打开现有BTC多仓100% Close弹窗，未点Close Long、未进入新钱包签名/广播。下一步先部署本轮已验证构建（另授权），再真实平仓，核对请求/keeper、到账余额、仓位移除及刷新；再补限价编辑/撤单/触发和TP/SL。用户亲自最终签名。TRD-109无新可信LUT地址，未新读authority；正式LUT、四钱包及原子矩阵继续保留。无Linear写入、他人PR修改、上游合并、Ready/reviewer或外部消息。
+
+验证与推送收尾（11月19日00:04 CST）：24项串行检查全部通过，另有70/78原development全量与release受影响检查。72原development完整3457/1skip（release前），78完整3478/1skip（release前）及release后9项，70 release后完整3487/1skip，136完整3516/1skip；实际72/78/70 delivery分别32/38/38项，77 development28项/独立delivery9项，playground38项。相关目标app/landing types与定向零warning lint全部通过。136/playground检查过程中的最后差异仅README，runtime不变；playground最终`ca6fa8f824`的8GiB build-playground通过（既有annotation/bundle警告）。
+
+| 需求 | development | delivery / Draft |
+| --- | --- | --- |
+| TRD-72 | `00907a04d1` | `05a48d0a97` / #3258 |
+| TRD-78 | `f5b2ed7ecf` | `00f93d0687` / #3261 |
+| TRD-70 | `ed312d0e27` | `bd8e81e020` / #3262 |
+| TRD-77 | `c70a3d77d1` | `6e2dd5f81c` / #3259 |
+| TRD-136 | `87cc9d5ce4` | playground `ca6fa8f824` / #3288 |
+
+十个远端head已用ls-remote与本地核对一致，development推my-gmx、delivery/playground推my-gmx-pr；全部clean，原任务登记/当前context已重绑，不创建新TRD重复记录。五份原Draft正文已按当前最终行为与证据重写，删除旧公网缺失/等待签名信息差，保留真实历史部署及完整AC边界。当前head远端CI仍在运行，不能复用旧head绿灯或旧403归因；具体快照/log保存在忽略目录`.local/five-followup-20261118/`，尚未记录本轮全绿。
+
 ## 四需求与 TRD-136 最新跟进核查（2026-11-18 23:12 CST）
 
 本轮仅调研：实时读取四条需求与136、直接资源/数据依赖的Linear正文与关系及相关评论；核对原PR、关键前置PR和当前head检查，搜索当日更新PR；按真实worktree源码比较缺口，并探测公网config/values。原始GitHub快照位于忽略目录 `.local/five-upstream-20261118/`。未改业务、更新需求分支、重跑测试、操作钱包、部署或修改线上记录；fetch仅取回#3195新head供比较。
