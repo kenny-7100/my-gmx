@@ -76,6 +76,8 @@ git -C gmx-adrs show origin/adr-0015-solana-gmx-api:adr/0015-serve-solana-data-t
 
 2026-11-18 对 10 个 Git 子仓库均成功执行官方 `origin` fetch：`gmx-prompts` 从 `7204161` 快进至 `6e00153`（命名、Solana/GMSOL 模块归属及测试目录规范），旧前端从 `55639eef` 快进至 `b22d13f6`（Landing 文案、APR 展示与 Safari 缩放修复），两者更新后工作区干净。其余 8 个为父仓库固定 gitlink，保持 checkout 与父仓库指针不变：`gmtrade-sqd` 比 `origin/main` 落后 3 个提交（目标 `4b4f8d8`），`gmx-adrs` 落后 20 个（`830995c`），`gmx-api` 落后 317 个（`164f4fea`，当前 detached 且另有任务 worktree），`gmx-solana` 落后 11 个（`d81a3e69`，涉及 SDK 订单完成、临时 Pyth 账户回收与 treasury）；其余 4 个与 `origin/main` 一致。以上只核对源码版本，未升级依赖、重建 SDK/WASM、更新服务或验证运行兼容性。
 
+同日用户明确更新完成标准后，继续将上述 4 个落后 checkout 全部快进至所列 `origin/main` SHA，并同步父仓库 gitlink；`gmx-api` 保持 detached HEAD，其他任务 worktree 未移动。最终 10 个子仓库本地 HEAD 均与本轮 fetch 的 `origin/main` 一致、各自工作区干净。此结果仍仅代表源码同步，不代表依赖、生成产物或运行服务已更新。
+
 ## 必看：ADR-0015
 
 clone `gmx-adrs` 后，**必须查看 ADR-0015 的最新正文**。2026-11-18 核验：对应 [PR #27](https://github.com/gmx-io/gmx-adrs/pull/27) 已于 2026-11-17 合入 `origin/main`（`830995c`），正文状态仍为 **Proposed**。本地固定 checkout 尚不含该文件时，直接从远端引用读取，无需移动 checkout。
