@@ -122,7 +122,7 @@ git -C /path/to/delivery log --oneline origin/release..HEAD
 git -C /path/to/delivery push my-gmx-pr HEAD
 ```
 
-`my-gmx` 是个人镜像；`my-gmx-pr` 是正式 GitHub fork。独立镜像不能作为同一 fork 网络的 PR 来源。创建 PR 前用 gh 核实 fork 关系和远端 head，不向 origin 推送；正文用临时文件及 `--body-file` 传递。个人 fork 的报告发布可能受只读 token 限制，区分原生测试失败和报告发布失败。
+`my-gmx` 是个人镜像；`my-gmx-pr` 是正式 GitHub fork。独立镜像不能作为同一 fork 网络的 PR 来源。创建 PR 前用 gh 核实 fork 关系和远端 head，不向 origin 推送；正文用临时文件及 `--body-file` 传递。个人 fork 的报告发布可能受只读 token 限制，区分原生测试失败和报告发布失败。 跟进当前交付的 CI 时，绑定仓库、PR head SHA 和实际 run/job；已有 watch/session 优先读取其最新结果，发状态回复前处理已返回的查询，用户指出已结束时立即复核。PR正文编辑也可能触发新run，重新确认当前有效检查，不能沿用旧pending或旧成功。任务结束后停止已完成任务的watch；不为报告权限403反复重跑测试或扩大权限。
 
 deliver 默认拒绝个人目录和 gitlinks，选中提交必须属于登记的任务分支；真实业务文档/脚本被路径规则拒绝时按原生 Git 精确转移并审查，不伪装路径。原生命令同样可用：`git worktree add -b DELIVERY PATH origin/release` 后选择性 cherry-pick；不为使用工具强行改提交结构。
 
