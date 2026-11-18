@@ -1,5 +1,16 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 交易发布范围未分配核验（2026-11-18）
+
+参与角色：只读范围与负责人调研。按 [TRD-101](https://linear.app/gmx-io/issue/TRD-101) 最新正文（updatedAt 2026-11-17T18:34:00.951Z），范围为 11 月 30 日功能开关后开仓/执行/刷新/平仓闭环、12 月 10 日验收后公开交易，排除 After trading、明确非阻塞项及 Done/Canceled/Duplicate。官方 MCP 分别查询迁移项目和整个 Trading 团队的 Assignee=null、非归档 issue，两次均 hasNextPage=false；不是只按周期筛选，也未修改 Linear。
+
+范围内未关闭且 Assignee 为空的只有两条：
+
+- [TRD-83](https://linear.app/gmx-io/issue/TRD-83)：Todo。正文明确首次公开发布需要抵押品存取、实施负责人待确认；TRD-101 明确要求分配 collateral owner。正文历史 Owner 提及 chloe 不等于当前 Assignee；Kenny 10 月 16 日评论仅承诺补技术前置，不构成认领。平仓/改单/撤单按 TRD-84 由 Sulliven 推进，不能将整个 83 的广义正文重新视为无人负责。
+- [TRD-136](https://linear.app/gmx-io/issue/TRD-136)：In Progress。Assignee 仍为空、无评论，但 TRD-101/群消息及既有实现记录已明确 Kenny 通过 #3288 推进；属于字段未登记，不是实际无人实施。
+
+TRD-103/104 已 Duplicate，余额范围合入 TRD-98；TRD-119 已 Duplicate，本地化责任保留在 TRD-101 checklist；TRD-62 已 Duplicate，统一界面验收合入 TRD-101 及详细需求。以上不列为独立待认领任务。TRD-133 Done；TRD-69 明确非阻塞，TRD-151 Triage 且未纳入发布必需；TRD-89/90/91/110/113/114/115/116/117 属于 After trading，均未计入。旧 FESOL-114 对应不足 SOL 需求已另建 TRD-158，实时 Assignee 为 Kenny，未计入未分配。未逐个复核 GitHub CI 或部署，不把计划勾选等同验收通过。
+
 ## 五需求晚间前置核验（2026-11-17）
 
 前端63/80及SDK2.9.3、API#340现均已合并，需区分原线集成/部署/金融验收；详细增量统一记录。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
