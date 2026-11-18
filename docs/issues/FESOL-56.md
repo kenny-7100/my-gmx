@@ -1,5 +1,9 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## TRD-72 Phantom 签名兼容缺口（2026-11-18）
+
+在 TRD-136 playground 实测 Phantom 返回时附加8条 Lighthouse 断言，原业务指令/账户权限、blockhash与费用未变；message827→1109bytes触发本人#3258的严格一致性检查，广播前失败。属原交易需求兼容缺口，未改业务。受限兼容方案、现场恢复与证据边界见[实测定位](TRD-136.md#phantom-返回消息差异已实测定位2026-11-18)；后续修复沿原开发/交付线，不在playground单独绕过保护。
+
 ## 正式替代实施（2026-11-17）
 
 TRD-72 原开发线作为实现源，依次接入最新 #3190/#3195/#3205/#3207；保留 orderInfo.solana、账户/slot/交易保护，删除已被正式 registry 替代的重复 RPC hook。 验证和推送收尾状态以[统一实施记录](../solana-trading-dependencies.md#trd-136-正式替代实施2026-11-17)为准。
