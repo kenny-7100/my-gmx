@@ -10,7 +10,7 @@
 
 最新远端release为`0bc6c2ba2d57ff9b1c1c3135e6da6433ef6e438d`，较当前交付已同步的38b1503444新增4提交/#3278、32文件Tooltip设计系统修改；与77的18文件无交集，对70/84共享TradeBox/PositionSeller/OrderEditor等路径有交集。查询本轮未fetch/merge或重新验证该新组合。正式送审前可同步最新基线并核对新head适用检查，不能用旧head结果冒充同步后通过。136为持续集成playground，保持Draft承接实验，不作为最先转Ready的正式产品PR。后续主线候选为72（先收敛单位/余额与LUT/矩阵），再78和70。
 
-正文更新触发的同head重跑收尾：77的Run Tests `44349393595`（含SDK standalone）和Audit `44349393512`已success；playground的Run Tests `44349255949`与Audit `44349256171`也已success。77仍保留此前组件报告发布403失败，不称全部checks全绿。72/70/78的Run Tests `44349295584` / `44349263920` / `44349241902`在本次直接读取run及job时仍in_progress；分别处于前端测试/SDK public e2e/前端测试，不将既有同head成功结果写成这些run已结束。五份PR仍Draft，head未改变。
+正文更新触发的同head重跑已全部收尾：77的Run Tests `44349393595`（含SDK standalone）和Audit `44349393512`已success；playground的Run Tests `44349255949`与Audit `44349256171`也已success。随后直接读取72/70/78的Run Tests `44349295584` / `44349263920` / `44349241902`，均已completed/success，主检查与SDK standalone两个job均成功；78曾较慢，已观察其从前端测试推进至SDK、public e2e和Post收尾后成功，没有重启任务。四条正式需求仍保留此前组件报告发布403失败，不称全部checks全绿。五份PR仍Draft，head未改变。这些结果绑定既有head，不证明最新release `0bc6c2ba2d`组合已验证。
 
 后续只读链上复核已取得新证据：正式配置两张LUT在mainnet-beta/finalized读取时均仍有authority、active且非frozen，expected-authority map仍空；不是继续沿用旧mutable观察。具体公开authority及slot边界归[TRD-109原记录](issues/FESOL-71.md#正式配置-lut-链上复核2026-11-19)。因此完整正式LUT验收仍受外部条件阻碍，实验无LUT开/平成功不解除该条件。用户随后明确“先只保留平仓验收，暂不创建新订单”；限价59000→58500→撤单方案暂缓，尚未创建订单，不继续请求该组钱包确认。
 
