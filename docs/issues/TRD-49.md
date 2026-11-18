@@ -1,5 +1,9 @@
 # TRD-49 — Oracle ticker 类型契约
 
+## 接入实施（2026-11-18）
+
+两个来源提交已精确转入TRD-136与playground；完整frontend、SDK构建/1011测试、实际交付47项受影响测试通过。 版本、检查与外部服务边界统一见[三项集成记录](TRD-136.md#三项正式-pr-集成与验收2026-11-18)。
+
 ## 候选核查（2026-11-18）
 
 实时 Linear In Review、Tano，无评论/依赖。[PR #3273](https://github.com/gmx-io/gmx-interface/pull/3273) OPEN、非 Draft、release base，head `6995d3a0d5439e0edcdfb898ed6fb0a38149799a`，MERGEABLE、REVIEW_REQUIRED，无 review，全部 checks success。

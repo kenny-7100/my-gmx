@@ -1,5 +1,9 @@
 # TRD-85 — Solana 共享图表与个人成交
 
+## 接入实施（2026-11-18）
+
+已按release-relative业务diff接入TRD-136与playground，保留slot保护与正式订单Provider；真实当前DOGE索引1条、无关owner0条、原owner恢复1条。 版本、检查与外部服务边界统一见[三项集成记录](TRD-136.md#三项正式-pr-集成与验收2026-11-18)。
+
 ## 最新候选核查（2026-11-18）
 
 实时 Linear In Test、Rainer，无评论；显式前置 TRD-65/86 已进 release。[PR #3223](https://github.com/gmx-io/gmx-interface/pull/3223) OPEN、非 Draft、release base，head `beaa4d28dd3ee05b6ae9852ac289f16f66369a3a`，MERGEABLE、REVIEW_REQUIRED。历史记录见 [FESOL-29](FESOL-29.md)，本节以该实时 head 为准。
