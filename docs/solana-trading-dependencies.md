@@ -10,6 +10,8 @@
 
 最新远端release为`0bc6c2ba2d57ff9b1c1c3135e6da6433ef6e438d`，较当前交付已同步的38b1503444新增4提交/#3278、32文件Tooltip设计系统修改；与77的18文件无交集，对70/84共享TradeBox/PositionSeller/OrderEditor等路径有交集。查询本轮未fetch/merge或重新验证该新组合。正式送审前可同步最新基线并核对新head适用检查，不能用旧head结果冒充同步后通过。136为持续集成playground，保持Draft承接实验，不作为最先转Ready的正式产品PR。后续主线候选为72（先收敛单位/余额与LUT/矩阵），再78和70。
 
+后续只读链上复核已取得新证据：正式配置两张LUT在mainnet-beta/finalized读取时均仍有authority、active且非frozen，expected-authority map仍空；不是继续沿用旧mutable观察。具体公开authority及slot边界归[TRD-109原记录](issues/FESOL-71.md#正式配置-lut-链上复核2026-11-19)。因此完整正式LUT验收仍受外部条件阻碍，实验无LUT开/平成功不解除该条件。限价59000→58500→撤单方案仍待独立授权，尚未创建订单。
+
 ## 五需求跟进实施（2026-11-18 深夜）
 
 接续用户创建的持续目标，本轮从只读核查进入原线修复和交付。该节优先于下方23:12“尚未实施”快照；真实交易矩阵仍未完成，目标保持active。

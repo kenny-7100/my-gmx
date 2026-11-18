@@ -1,5 +1,11 @@
 # FESOL-71 — FESOL-56 主网运行条件
 
+## 正式配置 LUT 链上复核（2026-11-19）
+
+本轮只读使用Solana CLI，命令级明确mainnet-beta及finalized commitment，分别读取正式72交付配置中的两表；未读取/输出本机CLI配置、密钥或私有RPC。CoMLGFDWf5soeQ6vtzL6yXeARtwNhTV41cVsrTos31wg与CVHqcEnqZv2dr9PFRiJHJtWW3BPXr6WFZbixzsxmx9eG均仍有authority `FQNU5wn6fVdnPnSZyHL3PmCJsNLTi4Cf8dKU7f3MQjXj`，不是frozen；deactivationSlot均为u64 max（active）。lastExtendedSlot分别334632231/335402516，仅为扩展历史，不是本次读取slot。CLI输出不含account context slot，不能补造同slot链上快照。
+
+当前TRD-109仍Todo/Divhead，无新替代表地址；正式expected-authority map仍空，不将上述第三方mutable表改成受信任，也未创建、扩展或冻结任何表。简单无LUT的Phantom开/平闭环已经通过，但不能据此撤销正式LUT与四钱包/原子验收条件。本机原始CLI结果在`.local/review-readiness-20261119/lut-{1,2}.json`，公开authority结论在本文，不依赖临时文件接续。
+
 ## 五需求晚间前置核验（2026-11-17）
 
 TRD-109仍Todo、无新评论/表地址，72交付expected-authority map仍空；本轮未查链上或flag，不更新其运行结论。 角色为只读依赖调研，来源与验证边界见[统一核验](../solana-trading-dependencies.md#五需求晚间前置核验2026-11-17)。
