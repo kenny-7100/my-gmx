@@ -4,6 +4,8 @@
 
 当前TRD-77 In Progress，原#3259 OPEN/Draft、head6e2dd5f81c、精确18文件、无review/review threads/review requests。固定产物/构建/完整性切片独立，现有Phantom开仓/平仓与部署hash消费证据支持优先送审；完整72主网四钱包/LUT/原子矩阵仍未完成，不等于完整Done或立即可merge。最新release0bc6c2ba2d的Tooltip32文件与本PR无重叠，本轮查询未自动同步。完整五条比较与上游状态见[统一就绪判断](../solana-trading-dependencies.md#五需求正式-review-就绪判断2026-11-19-0041-cst)。未转Ready或请求reviewer。
 
+2026-11-19 01:05（UTC+8）按用户要求再次只读核验：Linear 正文/关系仍以 TRD-72 为 blockedBy、父任务 TRD-70，无评论；上述 PR head、18 文件范围、review 和 release SHA 未变。GitHub 当前为 MERGEABLE / BLOCKED / REVIEW_REQUIRED；WASM reproduction、Audit、主检查及 SDK standalone 均成功。直接读取当前 head 的组件 CI 日志确认 286 tests passed，失败发生于 GitHub Pages 报告部署（git exit 128）及报告链接发布（403 Resource not accessible by integration），不能表述为全部 checks 通过或组件用例失败。未修改 Linear、PR、业务或部署；未重跑构建与交易验收。
+
 ## TRD-77 正式平仓消费证据（2026-11-19）
 
 原修复集成后的playground ca6fa8f824/4f3109d8完成用户签名的BTC多仓100%平仓：请求与keeper均finalized成功，8条Lighthouse断言成功，到账9.515259USDC，Order filled、空仓及刷新后余额得到核验。公网API首次stale503后恢复，minContextSlot以keeper471002042为floor返回471002755、0仓位/0订单。实际部署WASM下载hash仍为固定e82184ca…b46c840。具体回执与边界归[TRD-136](TRD-136.md#正式平仓到账与刷新闭环2026-11-19)。这是一种钱包/一个市价平仓样本，不扩大为完整AC；原暂缓范围不变。
