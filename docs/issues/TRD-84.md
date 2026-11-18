@@ -1,5 +1,13 @@
 # TRD-84 — Solana 平仓、编辑和撤单
 
+## 正式 PR 已出现：恢复条件满足（2026-11-18 后续）
+
+用户提供 Sulliven 的 [#3293](https://github.com/gmx-io/gmx-interface/pull/3293) 并要求核对上下文。本轮只读分析，没有创建目标、集成代码、构建、部署或操作钱包。PR OPEN、非Draft、base release、head `0722cc8701f2b0b197f6bb3c506ce89dd1f31b82`，MERGEABLE、REVIEW_REQUIRED；正文空，查询时无review/inline评论。当前head check-runs全部success，包含Audit、主lint/types/tests、standalone、WASM、组件和Cloudflare。Linear仍In Progress、Sulliven，验收要求真实平仓、编辑及撤单落链和列表更新。
+
+该PR继承TRD-70原delivery `532c8c050d` 的交易前置，末端独立提交 `0722cc8701` 才是TRD-84新增接线（26文件，含catalog，1391+/120-）。已读固定head的GmsolOrderActionsProvider/buildOrderActions/PositionSeller：共享弹窗分支调用closePosition，跳过EVM allowance loading；Provider复用useGmsolOrderTransactions/notifications，提供market close、TP/SL、update/cancel和未知提交reconcile；cancel取API order.solana上下文。范围与此前等待的正式成果一致，满足“等负责人提出PR再继续”的前置条件，但不是已集成/真实退出验收通过。
+
+后续适合精确接入该末端业务提交，不整支覆盖playground已含的前置。固定WASM pin与当前一致；其配置仍两张mutable LUT+空authority，且notification.failed尚无本轮reason/message修复；需保留现有build-playground共享无LUT实验配置、2.2版本和TRD-78错误原因展示。接收币种默认/selector、精确全平、trigger/update/cancel及API实际字段仍需在组合目标逐项核验，源码入口存在不代替页面/交易验收。此前历史仓位/模拟不得冒充当前资产。用户本轮仅要求看情况，没有自动恢复已清除目标、合并或发布；下一切片是按正式PR接入TRD-136并验证组合，钱包签名由用户接手。
+
 ## 目标暂停（2026-11-18）
 
 用户授权创建正式链路实施及测试验收目标后，进一步明确：调查是否已有 PR，若尚未提出 PR，本任务可以暂时停止。最后一次实时查询 TRD-84（全状态）为空；FESOL-59 仅命中既有字段/状态/开关前置，Sulliven 当前 open PR 仅 #3287/TRD-100；Linear 仍 In Progress、无附件。本机无 TRD-84 登记或对应开发分支。依用户条件暂停目标，不新建业务分支、不实现替代接线、不修改 Linear 或联系负责人。恢复条件为用户提供/要求核查可集成的 TRD-84 PR，或明确改变当前安排；没有订阅或后台轮询，不承诺自动感知新 PR。目标验收尚未完成，既有模拟不作为完成证据。
