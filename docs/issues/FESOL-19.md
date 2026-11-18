@@ -1,5 +1,9 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## TRD-70 正式平仓消费证据（2026-11-19）
+
+原修复集成后的playground ca6fa8f824/4f3109d8完成用户签名的BTC多仓100%平仓：请求与keeper均finalized成功，8条Lighthouse断言成功，到账9.515259USDC，Order filled、空仓及刷新后余额得到核验。公网API首次stale503后恢复，minContextSlot以keeper471002042为floor返回471002755、0仓位/0订单。实际部署WASM下载hash仍为固定e82184ca…b46c840。具体回执与边界归[TRD-136](TRD-136.md#正式平仓到账与刷新闭环2026-11-19)。这是一种钱包/一个市价平仓样本，不扩大为完整AC；原暂缓范围不变。
+
 ## 五需求目标实施接续（2026-11-18 深夜）
 
 TRD-70接续72 Lighthouse与78失败原因展示，另接地址key；原暂缓范围不恢复。 已同步release `38b1503444`。具体提交、验证、推送与剩余金融/LUT验收见[统一实施记录](../solana-trading-dependencies.md#五需求跟进实施2026-11-18-深夜)。目标持续active，修复交付不等于完整主网矩阵完成。

@@ -30,6 +30,8 @@
 
 ### 本轮交付与发布收尾（2026-11-19 凌晨）
 
+正式平仓后续已闭环：用户确认过期后明确重试，新请求471002026与keeper471002042均finalized/err=null，8条Lighthouse断言成功，owner实际到账9.515259USDC；页面Order filled、0仓位，余额31.46302USDC。刷新时首次API stale503/页面加载错误随后自动恢复，当前SDK以keeper slot作floor读得positions0/orders0、两slot均471002755，fee bigint正常。真实部署WASM下载hash与77固定产物相符。证据和公开签名归[136闭环记录](issues/TRD-136.md#正式平仓到账与刷新闭环2026-11-19)，72/78/70/77各自记录已接续。该结果只覆盖单Phantom市价平仓/数据恢复，不完成完整金融或四钱包/原子矩阵。
+
 五个current head的本轮远端检查均已结束：72/78/70/77各7项success、1项组件报告job失败。逐份读取本次run44341583738/44341631730/44341650779/44342579681日志：72/78/77为286passed，70为285passed+1flaky（重试通过，测试步骤success），失败在Pages报告push/评论403；不称整体全绿。136/playground `ca6fa8f824`全部8项success，main44342868735前端3516/1skip、SDK1011、multicall14/1skip、public50/2skip。
 
 用户已明确授权部署及发起现有约20USD/2x BTC多仓100%平仓Phantom确认，最终用户签名。CI成功后部署[4f3109d8](https://4f3109d8.solana-playground.pages.dev/trade)，稳定别名已更新，HTML/entry/bootstrap/交易chunk的SHA256与本地一致。#3288同步发布证据；正文修改可能触发同源码重跑，既有current-head检查仍适用。原生Chrome切窗控制恢复及最终金融交接详见[136](issues/TRD-136.md#本轮部署与平仓授权2026-11-19-凌晨)。不重复询问已有授权，不扩大到新限价或TP/SL交易；持续目标active。
