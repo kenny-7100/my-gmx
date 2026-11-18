@@ -1,5 +1,9 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## 上游与后续核查（2026-11-18 23:12 CST）
+
+当前TRD-70；#3262仍 `532c8c050d`、Draft，无新review。代码核对缺72的Lighthouse兼容及78的失败reason，两者136/playground均已有；余额#3195地址key新提交未接入。先精确接续现有修复，不恢复swap/max leverage/完整simulate_order/GT Rewards暂缓项。证据见[统一核查](../solana-trading-dependencies.md#四需求与-trd-136-最新跟进核查2026-11-18-2312-cst)。
+
 ## 正式替代实施（2026-11-17）
 
 TRD-70 原开发/交付线已精确接续 TRD-72 本轮正式余额/字段候选差异；既有 swaps/max leverage/full simulate_order/GT Rewards 暂缓边界保留。 验证和推送收尾状态以[统一实施记录](../solana-trading-dependencies.md#trd-136-正式替代实施2026-11-17)为准。

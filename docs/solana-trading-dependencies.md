@@ -1,5 +1,26 @@
 # Solana 交易链路依赖审计
 
+## 四需求与 TRD-136 最新跟进核查（2026-11-18 23:12 CST）
+
+本轮仅调研：实时读取四条需求与136、直接资源/数据依赖的Linear正文与关系及相关评论；核对原PR、关键前置PR和当前head检查，搜索当日更新PR；按真实worktree源码比较缺口，并探测公网config/values。原始GitHub快照位于忽略目录 `.local/five-upstream-20261118/`。未改业务、更新需求分支、重跑测试、操作钱包、部署或修改线上记录；fetch仅取回#3195新head供比较。
+
+release远端仍 `28ddd42ce6ff50aa92a30eb00122b25970e3bf99`，无新release基线要同步。四条原Draft仍OPEN/MERGEABLE/REVIEW_REQUIRED，无review或评论；Linear为70 In Progress、72 In Review、78/77 In Progress，四条均无评论。PR heads：72/#3258 `b0fae7d1f2`，78/#3261 `0c50b8d579`，70/#3262 `532c8c050d`，77/#3259 `e164801e28`。各自常规/SDK/WASM/Audit成功，组件workflow失败；沿用此前已核实的相同head/run报告发布403边界，本次未重读相同日志，不称全绿。playground/#3288 `41092fae55` 所有返回检查成功，仍Draft，无新review。
+
+当前可精确接续的三项：
+
+1. **72修复尚未传到78/70**：78原dev/delivery与70原dev/delivery的sender blob均 `2444fc81ad`，仍逐字节比较签名前后message；72原dev `2155ca121f` / delivery `b0fae7d1f2` 已实现受限Lighthouse校验，136/playground也已接入（sender `6456abbf1c`，保留tracking）。应先在78原开发线语义接续72修复，保留trackingRequests/receipts，再精确传入70原线及原交付，不整文件覆盖。136/playground无需重复接入。
+2. **78失败原因展示尚未传到70**：78原dev `25affe5753` / delivery `0c50b8d579` 通知blob `cbb9c5dc43`，70仍 `cde61bdab1`、无reason接线。接续现有修复即可；136/playground已有新版本。
+3. **TRD-98/#3195新提交**：已集成 `666fa1669a` 到当前 `372e7ff471` 只有一笔提交、一个文件：给DisplayToken补address，并将资产行key从symbol+chainId改为address+chainId，同时覆盖GMX Account与Solana映射。72/78/70/136/playground均仍旧key。可复用上游小补丁并检查共享消费者，不另写reader或整支引入wallet历史。#3195全检查成功但仍CHANGES_REQUESTED；#3190于11月18日17:49关闭且未合并，不等于进入release；#3195仍包含已集成reader/hook成果。未resolved旧ATA线程不证明缺陷仍在，已有Divhead修复确认；rpc-debug/测试清理等review由原作者与reviewer收口。
+
+其他上游推进与136后续：
+
+- **公网API已推进**：TRD-108已In Progress并明确#340已部署、SDK2.9.3和gmsol字段已实现；API#352数据库切流、#354/#355/#356修复也已merged。本轮公网config HTTP200、67/67 `tradeMath=gmsol`；values HTTP200、67条。两次响应未返回X-Solana-Slot，本次未查账户接口，不能从市场路由推定账户slot契约通过或失败。旧“67市场/0gmsol”不再是当前阻碍。本地API可保留隔离诊断用途；停用前先核对最终host账户/费用/最小slot与组合刷新，不因config成功自动拆环境。
+- **金融与交易后验收**：TRD-108仍保留独立同快照PnL/close impact/closing fee/liquidation对照、GMTrade参考钱包、open-with-TP/SL→edit→close每步minContextSlot刷新验收。不能以parser/index或SDK单测替代；136既有新旧页/同输入比较仅覆盖其记录范围。
+- **正式资源**：TRD-109仍Todo/Divhead，无评论或新表地址，release/config未变；本次未重读链上authority，不把旧mutable观察当最新状态。无LUT实验不能替代72原AC的可信LUT、四钱包与原子TP/SL落链矩阵。
+- **136已有成果不重复搬运**：#3293/TRD-84 `0722cc8701`、#3294/TRD-142 `2ad1f8971a`、#3223/TRD-85 `beaa4d28dd`、#3273/TRD-49 `6995d3a0d5` 均与已接入来源一致；#3287 units、#3205 fee、#3207 orders候选head也未变，继续原PR评审/合并收口。77产物pin/hash未变，无新证据要求重建或升级WASM。
+
+建议先补齐72→78/70、78→70，再接余额地址key小补丁。136下一项优先通过已接入84正式路径完成真实平仓/到账/刷新，再补限价编辑、撤单、触发和TP/SL矩阵，金融操作另按授权执行。#3288正文仍写签名pending，落后本地晚间成交记录；72/70等正文亦含旧API观测，后续交付应同步准确证据。上述均为建议，不是本轮实施；TRD-70此前暂缓swap、max leverage、完整simulate_order与GT Rewards未自动恢复。
+
 ## TRD-136 正式替代实施（2026-11-17）
 
 用户确认按正式替代审计建议创建目标并实施。以下为实施记录，优先于后文只读快照；本轮不将候选接入等同上游合并或完整真实交易验收。

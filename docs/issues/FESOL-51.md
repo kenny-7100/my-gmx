@@ -1,5 +1,9 @@
 # FESOL-51 — 余额与 RPC 前置调研
 
+## 上游与后续核查（2026-11-18 23:12 CST）
+
+当前TRD-98；#3190已关闭未合并，#3195仍OPEN/CHANGES_REQUESTED、全检查成功。当前head `372e7ff471` 比已集成 `666fa1669a` 只新增一笔地址key修复，交易线和136/playground均未接入；不是reader/余额算法变更。旧ATA线程未resolved不能推定未修复；rpc-debug等review留原作者收口。证据见[统一核查](../solana-trading-dependencies.md#四需求与-trd-136-最新跟进核查2026-11-18-2312-cst)。
+
 ## 正式替代实施（2026-11-17）
 
 按最新配置 mint 契约接续 #3190/#3195，钱包持有资格不复用抵押过滤；上游中央 RPC 生命周期替代本地重复 hook，EVM 启停仍由原 registry 负责。 验证和推送收尾状态以[统一实施记录](../solana-trading-dependencies.md#trd-136-正式替代实施2026-11-17)为准。

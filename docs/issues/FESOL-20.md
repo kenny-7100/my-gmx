@@ -1,5 +1,9 @@
 # FESOL-20 — 订单发送与成交状态
 
+## 上游与后续核查（2026-11-18 23:12 CST）
+
+当前TRD-78；#3261仍 `0c50b8d579`、Draft，无新review。失败reason已交付，但sender仍旧逐字节比较，缺72 Lighthouse修复；接续时保留trackingRequests/receipts。136/playground已具备组合修复，无需重复搬运。余额新提交及矩阵边界见[统一核查](../solana-trading-dependencies.md#四需求与-trd-136-最新跟进核查2026-11-18-2312-cst)。
+
 ## Playground 下单异常原因展示修复（2026-11-18）
 
 用户要求先补齐下单失败原因并更新 playground。本次回 TRD-78 原 development 实施：useSolanaOrderNotifications.failed 将 Error/带字符串 message 的对象/字符串异常的原因接入既有 reason 展示，不改变失败/广播未知/确认/执行的状态判定、签名链接、autoClose、owner/network/unmount guards。保留现有 generic 状态标题；无法取得字符串原因时不渲染对象或虚构原因。扩展现有真实通知组件回归，验证 LUT 原因显示及未知广播的原因、提示和 explorer 链接。
