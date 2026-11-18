@@ -2,7 +2,7 @@
 
 ## TRD-72 Lighthouse 兼容修复交付（2026-11-18 晚间）
 
-原 development `2155ca121f`、原 delivery `b0fae7d1f2` 已签名、验证并推送，更新同一 Draft #3258。受限接受 Phantom 追加的两类 Lighthouse 断言，保留原交易语义、权限/费用/LUT保护和签名，并在发送前对最终交易验证签名及模拟。development完整前端3457 passed/1既有skip；delivery自身types/lint及18交易测试通过。TRD-136/playground集成及线上验收进度见[本轮实施](TRD-136.md#lighthouse-兼容修复实施2026-11-18-晚间)，不扩大为全部钱包/keeper验收。下方“未改业务”为先前定位阶段的历史状态。
+原 development `2155ca121f`、原 delivery `b0fae7d1f2` 已签名、验证并推送，更新同一 Draft #3258。受限接受 Phantom 追加的两类 Lighthouse 断言，保留原交易语义、权限/费用/LUT保护和签名，并在发送前对最终交易验证签名及模拟。development完整前端3457 passed/1既有skip；delivery自身types/lint及18交易测试通过。TRD-136/playground集成及线上验收进度见[本轮实施](TRD-136.md#lighthouse-兼容修复实施2026-11-18-晚间)，本次Phantom带8条Lighthouse断言的真实市价开仓、keeper成交及刷新已通过，见[最终链上与页面证据](TRD-136.md#lighthouse-真实开仓与刷新验收通过2026-11-18-晚间)；不扩大为全部钱包/交易动作验收。下方“未改业务”为先前定位阶段的历史状态。
 
 ## TRD-72 Phantom 签名兼容缺口（2026-11-18）
 
