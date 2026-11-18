@@ -28,6 +28,12 @@
 
 十个远端head已用ls-remote与本地核对一致，development推my-gmx、delivery/playground推my-gmx-pr；全部clean，原任务登记/当前context已重绑，不创建新TRD重复记录。五份原Draft正文已按当前最终行为与证据重写，删除旧公网缺失/等待签名信息差，保留真实历史部署及完整AC边界。当前head远端CI仍在运行，不能复用旧head绿灯或旧403归因；具体快照/log保存在忽略目录`.local/five-followup-20261118/`，尚未记录本轮全绿。
 
+### 本轮交付与发布收尾（2026-11-19 凌晨）
+
+五个current head的本轮远端检查均已结束：72/78/70/77各7项success、1项组件报告job失败。逐份读取本次run44341583738/44341631730/44341650779/44342579681日志：72/78/77为286passed，70为285passed+1flaky（重试通过，测试步骤success），失败在Pages报告push/评论403；不称整体全绿。136/playground `ca6fa8f824`全部8项success，main44342868735前端3516/1skip、SDK1011、multicall14/1skip、public50/2skip。
+
+用户已明确授权部署及发起现有约20USD/2x BTC多仓100%平仓Phantom确认，最终用户签名。CI成功后部署[4f3109d8](https://4f3109d8.solana-playground.pages.dev/trade)，稳定别名已更新，HTML/entry/bootstrap/交易chunk的SHA256与本地一致。#3288同步发布证据；正文修改可能触发同源码重跑，既有current-head检查仍适用。原生Chrome切窗控制恢复及最终金融交接详见[136](issues/TRD-136.md#本轮部署与平仓授权2026-11-19-凌晨)。不重复询问已有授权，不扩大到新限价或TP/SL交易；持续目标active。
+
 ## 四需求与 TRD-136 最新跟进核查（2026-11-18 23:12 CST）
 
 本轮仅调研：实时读取四条需求与136、直接资源/数据依赖的Linear正文与关系及相关评论；核对原PR、关键前置PR和当前head检查，搜索当日更新PR；按真实worktree源码比较缺口，并探测公网config/values。原始GitHub快照位于忽略目录 `.local/five-upstream-20261118/`。未改业务、更新需求分支、重跑测试、操作钱包、部署或修改线上记录；fetch仅取回#3195新head供比较。
