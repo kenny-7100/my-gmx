@@ -34,6 +34,8 @@
 
 用户已明确授权部署及发起现有约20USD/2x BTC多仓100%平仓Phantom确认，最终用户签名。CI成功后部署[4f3109d8](https://4f3109d8.solana-playground.pages.dev/trade)，稳定别名已更新，HTML/entry/bootstrap/交易chunk的SHA256与本地一致。#3288同步发布证据；正文修改可能触发同源码重跑，既有current-head检查仍适用。原生Chrome切窗控制恢复及最终金融交接详见[136](issues/TRD-136.md#本轮部署与平仓授权2026-11-19-凌晨)。不重复询问已有授权，不扩大到新限价或TP/SL交易；持续目标active。
 
+本地配置简化结论：常规playground真实交易已走正式公网API/RPC，不需要先启动本地Docker、DB、indexer/reader或RPC代理；`build-playground`保持这条现有路径，无需再造启动器或改公共host。`web.mjs`明确只接受loopback HTTP，是隔离诊断入口，不改成公网通用启动器；本地API保留用于固定版本复现、受控stale/minContextSlot故障与排障，不是日常交易前置。单账户只读契约成功及一笔开仓还不足以删除这些诊断工具或把既有本地服务直接停掉；本轮没有接管/停止原服务。无LUT仍是单独实验条件，不能随API已部署一并视作可退役。
+
 ## 四需求与 TRD-136 最新跟进核查（2026-11-18 23:12 CST）
 
 本轮仅调研：实时读取四条需求与136、直接资源/数据依赖的Linear正文与关系及相关评论；核对原PR、关键前置PR和当前head检查，搜索当日更新PR；按真实worktree源码比较缺口，并探测公网config/values。原始GitHub快照位于忽略目录 `.local/five-upstream-20261118/`。未改业务、更新需求分支、重跑测试、操作钱包、部署或修改线上记录；fetch仅取回#3195新head供比较。
