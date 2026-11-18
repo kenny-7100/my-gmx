@@ -1,5 +1,11 @@
 # FESOL-20 — 订单发送与成交状态
 
+## Playground 下单异常原因展示修复（2026-11-18）
+
+用户要求先补齐下单失败原因并更新 playground。本次回 TRD-78 原 development 实施：useSolanaOrderNotifications.failed 将 Error/带字符串 message 的对象/字符串异常的原因接入既有 reason 展示，不改变失败/广播未知/确认/执行的状态判定、签名链接、autoClose、owner/network/unmount guards。保留现有 generic 状态标题；无法取得字符串原因时不渲染对象或虚构原因。扩展现有真实通知组件回归，验证 LUT 原因显示及未知广播的原因、提示和 explorer 链接。
+
+原 development `25affe5753` 已签名、推送 my-gmx；完整frontend 349 files/3475 tests passed、1既有skip，app/landing tscheck、定向lint/Prettier通过。lingui:prepare通过，无新增固定文案，生成的既有无关catalog漂移未交付。同补丁签名转入原delivery `0c50b8d579`、更新同一Draft #3261；该实际目录5项通知测试、types及定向lint通过，未将development全量结果冒充delivery重跑。TRD-136 `73947297f9` 与 playground `93ebbd773f` 均已签名推送。playground 的实际5项通知测试、lint/Prettier、app/landing types及production build通过；最终部署和远端CI见 [TRD-136](TRD-136.md)。本次不修改LUT、不代点下单或签名，不以展示修复宣称交易恢复。
+
 ## 正式替代实施（2026-11-17）
 
 TRD-78 原开发/交付线已精确接续 TRD-72 本轮正式余额/字段候选差异，未改 watcher/receipt/recovery 语义。 验证和推送收尾状态以[统一实施记录](../solana-trading-dependencies.md#trd-136-正式替代实施2026-11-17)为准。
