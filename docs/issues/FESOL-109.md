@@ -1,5 +1,15 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 17 行协调表 PR 复核（2026-11-18 14:13 北京时间）
+
+参与角色：只读 PR 状态调研。恢复 11 月 17 日 14:29 最终表格后，重新查询 17 条 Linear 的状态/负责人/附件及 GitHub PR。相对该表新增合并：TRD-80 的替代 PR [#3286](https://github.com/gmx-io/gmx-interface/pull/3286) 于 11 月 17 日 20:13、TRD-63 [#3201](https://github.com/gmx-io/gmx-interface/pull/3201) 于 20:14 合入 release。原已合并项仍为 TRD-75 #3242（11 月 14 日 17:41）、TRD-65 #3193（11 月 16 日 16:41）。TRD-63/80/75 的 Linear 仍 In Review，65 仍 In Test；合并不代表完整验收。
+
+TRD-100 旧 #3243 已关闭未合并，当前 #3287 Open、非 Draft、返回检查全成功、REVIEW_REQUIRED。TRD-80 旧 #3238 同样关闭未合并，应使用 #3286。TRD-98 #3195 Open、Changes Requested，#3190 Open/Draft；两者组件测试失败，Linear 98 已 In Test。TRD-85 #3223 Open、非 Draft、组件测试失败，Linear 已 In Test。Kenny #3259/#3258/#3261/#3262 均 Open/Draft、REVIEW_REQUIRED、组件测试失败。#3288 Open/Draft、返回检查全成功，标题为 Solana playground，属于 TRD-136 联调载体，不是独立产品验收完成；Linear 136 当前已分配 Kenny。
+
+新发现 Sulliven [#3293](https://github.com/gmx-io/gmx-interface/pull/3293)，11 月 18 日 10:58 创建，分支 TRD-84，标题为 Close positions, edit and cancel orders on Solana；Open、非 Draft、REVIEW_REQUIRED、返回检查全成功。Linear 84 尚无 PR 附件，按作者/分支/标题及操作文件核实对应。其 diff 包含多条未合并前置代码，本轮只查元数据与文件清单，不代表已审实现范围。TRD-142 仍只关联来源 #3120，不能当作其独立实现；TRD-83 未确认独立 PR。GitHub 全状态按新旧编号搜索也未发现这两项独立实现 PR，不据此断言不存在未关联实现。
+
+TRD-103/104 当前均 Duplicate，指向 TRD-98；#3190 尚未合并，不应把需求归并当作代码完成。本轮未改 Linear、业务代码或执行页面/交易验收；历史表保留原观察值。
+
 ## 交易发布范围未分配核验（2026-11-18）
 
 参与角色：只读范围与负责人调研。按 [TRD-101](https://linear.app/gmx-io/issue/TRD-101) 最新正文（updatedAt 2026-11-17T18:34:00.951Z），范围为 11 月 30 日功能开关后开仓/执行/刷新/平仓闭环、12 月 10 日验收后公开交易，排除 After trading、明确非阻塞项及 Done/Canceled/Duplicate。官方 MCP 分别查询迁移项目和整个 Trading 团队的 Assignee=null、非归档 issue，两次均 hasNextPage=false；不是只按周期筛选，也未修改 Linear。
