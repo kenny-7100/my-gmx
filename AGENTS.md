@@ -81,9 +81,9 @@
 - 主动维护无需逐次询问；没有变化不新增流水账。影响当前工作的同步、需求/契约变化和回流，在阶段结果中简述实际动作及影响，不额外打断。
 - 变化只能在查询或收到信号时发现；没有订阅/轮询就不承诺实时感知。不为此新增常驻服务，按关键节点核验即可。
 - 分析/查询不改业务或线上状态，允许按上述规则沉淀本地知识；未经明确指令不修改 Linear 或发布外部消息/评论。
-- 创建 PR 须有交付指令；保持 Draft，未经明确同意不转 Ready、请求 reviewer 或合并。上游 `origin` 只读；个人基础推送 `my-gmx`，业务 PR 推送正式 fork `my-gmx-pr`。
+- 创建 PR 须有交付指令；保持 Draft，未经明确同意不转 Ready、请求 reviewer 或合并。个人基础推送 `my-gmx`；业务交付分支推送上游 `origin`，在 `gmx-io/gmx-interface` 仓库内建分支并向 `release` 提交 Draft PR，不使用 fork PR（用户于 2026-11-19 纠正）。
 - 用户只说 `push` 时，直接将当前仓库全部改动 `git add .`、英文总结 commit、推送个人 remote HEAD；不插入测试、自审、回流或无关修改，不再次确认范围。
-- 直接 push 的 remote：登记的交付分支用 `my-gmx-pr`，其他主项目分支用 `my-gmx`；gmx-api 用 `my-gmx-api`，旧前端用 `my-gmt`，其他仓库用已有个人 remote，gmx-prompts 按原配置。失败只处理具体阻碍。
+- 直接 push 的 remote：登记的交付分支用 `origin`，其他主项目分支用 `my-gmx`；gmx-api 用 `my-gmx-api`，旧前端用 `my-gmt`，其他仓库用已有个人 remote，gmx-prompts 按原配置。失败只处理具体阻碍。
 - 本仓库后续 Node/Vite 构建统一使用命令级 `NODE_OPTIONS=--max-old-space-size=8192`（8 GiB），不等默认堆溢出后再重试；不修改全局配置，大型构建串行安排（用户于 2026-11-13 明确）。具体见[构建排障](docs/agent-failure-diagnosis.md#已确认的构建与扫描问题)。
 - 后续需要 Docker 镜像时，镜像及其虚拟磁盘存储使用 `~/kenny` 下合适目录，避免占用本机 Mac 系统盘（用户于 2026-11-15 明确）。本机 `~/kenny` 指向 `/Volumes/kenny`；拉取前核对 Docker 实际存储位置，不能仅迁移容器挂载目录便认为镜像已迁移。其他机器先核对路径与磁盘，不机械套用本机链接。
 - 本地 Vite、Chrome、已授权任务的页面验收及本仓库开发验证所需构建（含 SDK/WASM）已有长期授权，无需重复询问；其他服务启动仍按明确授权。产物缺失不直接认定业务缺陷。

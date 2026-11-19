@@ -92,7 +92,7 @@ test("real dual-path delivery returns knowledge and transfers only business onto
     assert.equal(await git(root, "branch", "--show-current"), "solana-integration");
     const status = await workflow({ ...options, command: "status" });
     assert.equal(status.record.delivery.worktree, delivery);
-    assert.equal(status.record.delivery.remote, "my-gmx-pr");
+    assert.equal(status.record.delivery.remote, "origin");
     assert.equal(status.resume.authority.worktree, delivery);
     assert.equal(status.resume.verificationCurrent, false);
     assert.equal(status.resume.contextNeedsReview, true);

@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 上游仓库内交付纠正（2026-11-19）
+
+用户明确指出已有流程是在上游仓库建立分支并提 PR，应避免 fork。之前个人规则/工具错误地固化 fork 为默认交付，导致报告写权限问题；本轮已修正 AGENTS、交付 skill、日常流程与 agent-workflow 默认 remote 为 origin，个人基础/开发备份仍用 my-gmx。已确认上游 push 权限，将同一有效 GPG 提交 `2733850a2f` 推送至上游同名分支，创建替代 Draft [#3314](https://github.com/gmx-io/gmx-interface/pull/3314)；GitHub 确认 isCrossRepository=false、base=release，旧 fork #3259 已关闭。交付 registry 已 rebind 至 origin/#3314，保留原 development。代码/18 文件/提交签名未变，复用同源码的本地验证；新 PR CI 独立观察，未称报告发布已成功。仅迁移 TRD-77，其他已有 PR 未批量处理。管理工具 13 项测试通过；无共享业务 CI 修改。
+
 ## 全签名交付历史重建（2026-11-19）
 
 重建后 CI 已全部结束：head `2733850a2f` 的 Audit、主 lint/types/tests、SDK standalone、WASM reproduction 均 SUCCESS；唯一失败为组件 job [44361414236](https://github.com/gmx-io/gmx-interface/actions/runs/44361414236)。直接日志确认 286 tests passed、报告 artifact 上传成功；失败为推送上游 gh-pages 被 github-actions[bot] 拒绝（403/git exit 128）及创建 PR 报告评论 403。根因证据：PR 来自 `kenny-7100/gmx-interface` fork，pull_request job 实际 token 权限为 Contents/PullRequests read，尽管现有 workflow 声明 write；报告发布步骤只有 !cancelled 条件，未排除 fork。签名重建不改变此权限边界，重复重跑也不会获得写权限。用户本轮询问原因，未修改共享 CI；后续适合为 fork 跳过写入步骤、保留 artifact 和真实测试失败检查，若需自动发布则另设受信发布流程。

@@ -109,7 +109,7 @@ node scripts/agent-workflow.mjs backflow --issue TRD-123 \
 1. **准备**：完成当前基础设施回流，确认业务提交及未合并依赖。依赖不在 release 时明确等待，或按已确认的依赖 PR 顺序处理，不伪称可独立交付。
 2. **重建**：从 fetch 后的最新 release 创建交付 worktree，只选择本需求业务提交。工具按提交复制，不能自动理解混合补丁或丢弃前置实现。
 3. **复核与验证**：检查最终完整 diff 和提交历史，确认无个人基础、参考仓库和无关功能；对照相关[经验条目](review-lessons.md)确认组合未撤销历史修复、关键反例覆盖实际消费者与共享/EVM 路径；在实际交付目录执行相关测试及上游要求的检查。记录命令、结果、目标 SHA 和未覆盖项，避免无变化重复执行。依赖安装按目标锁文件，SDK/WASM 或生成路由按对应环境入口准备。
-4. **PR**：推送正式 fork `my-gmx-pr`，向 `gmx-io/gmx-interface:release` 建 Draft PR，标题、Summary、Linear、真实 Validation 和发布事项遵循[提交与 PR 规范](#commit分支与-pr-表达规范)。普通 PR 无需额外证据包。适用时按 gmx-prompts 自审最终 diff；发现问题按下文“PR 后的修复与交付现场”先回原开发分支验证，再转入交付目录复验。
+4. **PR**：推送上游 `origin` 的需求交付分支，向 `gmx-io/gmx-interface:release` 建 Draft PR，标题、Summary、Linear、真实 Validation 和发布事项遵循[提交与 PR 规范](#commit分支与-pr-表达规范)。普通 PR 无需额外证据包。适用时按 gmx-prompts 自审最终 diff；发现问题按下文“PR 后的修复与交付现场”先回原开发分支验证，再转入交付目录复验。
 
 ```sh
 node scripts/agent-workflow.mjs deliver --issue TRD-123 \
@@ -119,10 +119,10 @@ node scripts/agent-workflow.mjs deliver --issue TRD-123 \
 git -C /path/to/delivery diff origin/release...HEAD
 git -C /path/to/delivery log --oneline origin/release..HEAD
 # Only with an instruction to publish the PR:
-git -C /path/to/delivery push my-gmx-pr HEAD
+git -C /path/to/delivery push origin HEAD
 ```
 
-`my-gmx` 是个人镜像；`my-gmx-pr` 是正式 GitHub fork。独立镜像不能作为同一 fork 网络的 PR 来源。创建 PR 前用 gh 核实 fork 关系和远端 head，不向 origin 推送；正文用临时文件及 `--body-file` 传递。个人 fork 的报告发布可能受只读 token 限制，区分原生测试失败和报告发布失败。 跟进当前交付的 CI 时，绑定仓库、PR head SHA 和实际 run/job；已有 watch/session 优先读取其最新结果，发状态回复前处理已返回的查询，用户指出已结束时立即复核。PR正文编辑也可能触发新run，重新确认当前有效检查，不能沿用旧pending或旧成功。任务结束后停止已完成任务的watch；不为报告权限403反复重跑测试或扩大权限。
+`my-gmx` 是个人镜像，开发备份与个人基础仍使用它。业务 PR 在上游 `gmx-io/gmx-interface` 仓库内建立交付分支，通过 `origin` 推送并向 `release` 提交 Draft PR，不使用 fork PR（用户于 2026-11-19 纠正）。`my-gmx-pr` 仅保留为历史 fork remote，不再作为默认交付目标。创建 PR 前用 gh 核实 head/base 仓库均为上游及远端 head；正文用临时文件及 `--body-file` 传递。 跟进当前交付的 CI 时，绑定仓库、PR head SHA 和实际 run/job；已有 watch/session 优先读取其最新结果，发状态回复前处理已返回的查询，用户指出已结束时立即复核。PR正文编辑也可能触发新run，重新确认当前有效检查，不能沿用旧pending或旧成功。任务结束后停止已完成任务的watch；不为报告权限403反复重跑测试或扩大权限。
 
 deliver 默认拒绝个人目录和 gitlinks，选中提交必须属于登记的任务分支；真实业务文档/脚本被路径规则拒绝时按原生 Git 精确转移并审查，不伪装路径。原生命令同样可用：`git worktree add -b DELIVERY PATH origin/release` 后选择性 cherry-pick；不为使用工具强行改提交结构。
 
@@ -178,7 +178,7 @@ Linear: <actual Linear issue URL containing TRD-123>
 1. 核对 development、delivery 的实际目录、分支、HEAD 与 dirty 状态，以及远端 PR head；检查两处相关源码/依赖差异，保护未提交现场。
 2. 在原 development 实施和验证修复，提交只包含该修复的业务代码及必要测试。个人知识在基础单独沉淀，不夹入业务提交。
 3. 通过后精确 cherry-pick 修复提交到登记 delivery；不整支合入个人基础或 delivery。冲突按语义解决，尤其不能将开发侧个人基础差异带入 PR。
-4. 在实际 delivery 按源码、依赖和配置差异复验适用检查；开发侧通过不代替交付侧通过。通过后推送 `my-gmx-pr`，更新同一 Draft PR；开发分支备份用 `my-gmx`，保持两角色 HEAD/验证证据登记。
+4. 在实际 delivery 按源码、依赖和配置差异复验适用检查；开发侧通过不代替交付侧通过。通过后推送 `origin`，更新同一 Draft PR；开发分支备份用 `my-gmx`，保持两角色 HEAD/验证证据登记。
 
 不在 development 与 delivery 独立实现两份修复；delivery 保留 PR 发布版本的权威身份，development 是默认修复现场。工具 status 的 authority 和 note 的 verification 在已有 delivery 时指 PR 发布版本；开发验证单独记录 issue 与 context acceptance，不把开发 HEAD 填作交付 verification。仅有 delivery 的旧任务沿用已核实现场，不为套流程重建不存在的分支；有歧义再确认。新会话发现远端 head 与登记不同，先以远端事实核对差异再更新记录。普通修复不重新创建一套交付分支。
 

@@ -453,7 +453,7 @@ async function runWorkflow({
       role === "delivery"
         ? {
             ...resolved.workspace,
-            remote: "my-gmx-pr",
+            remote: "origin",
             commits: (
               await git(root, "rev-list", "--reverse", `${resolved.workspace.base}..${resolved.workspace.head}`)
             )
@@ -534,7 +534,7 @@ async function runWorkflow({
           base: pending.base,
           head: actual.head,
           commits: pending.commits,
-          remote: "my-gmx-pr",
+          remote: "origin",
         };
     }
     record.lastRecovery = { ...pending, outcome, head: actual.head, reviewedAt: new Date().toISOString() };
@@ -616,7 +616,7 @@ async function runWorkflow({
   }
   const head = await git(target, "rev-parse", "HEAD");
   if (command === "backflow") record.infrastructure.push({ commits: selected, head });
-  else record.delivery = { branch, worktree: target, base: expectedBase, head, commits: selected, remote: "my-gmx-pr" };
+  else record.delivery = { branch, worktree: target, base: expectedBase, head, commits: selected, remote: "origin" };
   delete record.pending;
   await save();
   return {
@@ -624,7 +624,7 @@ async function runWorkflow({
     record,
     next:
       command === "deliver"
-        ? "Review the complete diff and history, validate this checkout, then push my-gmx-pr and open a Draft PR into release."
+        ? "Review the complete diff and history, validate this checkout, then push the delivery branch to origin and open a same-repository Draft PR into release."
         : "Infrastructure returned to solana-integration.",
   };
 }

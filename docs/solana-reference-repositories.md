@@ -124,7 +124,7 @@ git -C gmx-adrs show origin/main:adr/0015-serve-solana-data-through-gmx-api.md
 
 | 仓库 | 上游 remote | 个人推送 remote |
 | --- | --- | --- |
-| 主项目 | `origin` → `gmx-io/gmx-interface` | 个人基础 `my-gmx` → `kenny-7100/my-gmx`；业务 PR `my-gmx-pr` → `kenny-7100/gmx-interface` |
+| 主项目 | `origin` → `gmx-io/gmx-interface` | 个人基础 `my-gmx` → `kenny-7100/my-gmx`；业务 PR 使用上游 `origin` 仓库内分支；`my-gmx-pr` 仅为历史 fork |
 | `gmx-api` | `origin` → `gmx-io/gmx-api` | `my-gmx-api` → `kenny-7100/my-gmx-api` |
 | `gmx-solana-interface` | `origin` → `gmsol-labs/gmx-solana-interface` | `my-gmt` → `kenny-7100/my-gmt` |
 | `gmx-prompts` | `origin` → `gmx-io/gmx-prompts` | 例外，不套用个人镜像推送规则 |
