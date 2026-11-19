@@ -1,5 +1,15 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## 下一条 Draft review 建议（2026-11-19 14:24 北京时间）
+
+角色：只读就绪比较，用户询问本人 Draft 下一条适合提交 review 的需求。限定现有五条与直接前置，复用本阶段15项协调表调查，补读72/78/70/77/109/100/98实时正文、关系和全部评论；查询五PR当前head、diff文件、review/checks及72/78/70全部review threads（均空），核对线上release `0bc6c2ba2d` 与本地对应commit。未转换Ready、请求review、改Linear或实施业务。
+
+首选TRD-72 [#3315](https://github.com/gmx-io/gmx-interface/pull/3315) `b5c1bc3f78`：Draft、MERGEABLE、最新7项检查全成功，无现有review/threads；是78与70共享交易基础。实际核对builder/validator/sender/README：固定真实WASM、atomic重编译/1232-byte拒绝、签名前校验、LUT信任及会话/新鲜开关边界已有实现。当前diff97文件含未合前置，并非纯独立transaction diff；#3287、#3195、#3205/#3207、#3314应明确来源和审查边界。PR正文仍引用旧#3259，应在正式送审准备时更正为#3314。
+
+这是优先进入实现review的建议，不是可合并/AC完成判断。TRD109仍Todo且无新评论；未刷新链上LUT authority。最新无LUT playground原子TP+SL1260bytes反馈、可信生产LUT、四钱包/limit/edit/cancel/atomic完整落链矩阵仍未收口；历史Phantom开平仓仅固定组合证据。若团队只接受全部AC完成后转Ready，则目前无下一条满足该标准，应先收口72验收。
+
+备选：78/#3316 `164102b83c`依赖72，组件job报告发布失败（非测试断言失败），其余最新检查成功；70/#3317 `2bc3392a65`最新检查已全成功，但支付币转换、最大杠杆一致性、完整独立金融对照及GT Rewards仍暂缓，且原子TP/SL依赖72/LUT，故排后。136/#3318 `2b53b1933e`最新检查全成功，但持续实验/联调载体按约定保持Draft；77/#3314已非Draft，不再列下一条候选。本轮仅状态与关键路径核验，不代表完整代码review或新增链上/浏览器验收。
+
 ## Playground 原子 TP/SL 超限反馈（2026-11-19）
 
 用户实测BTC市价开仓附TP+SL在当前无LUT playground构建为1260bytes，比1232上限多28bytes，builder在签名前拦截，未提交订单。是资源/环境能力限制，与TRD-70输入崩溃修复不同；根因链路、历史样本边界及下一步unsigned测量见[TRD-136记录](TRD-136.md#用户实测附带-tpsl-交易超限2026-11-19)。本轮仅源码与截图定位，未查新链上表状态、修改代码或发交易。
