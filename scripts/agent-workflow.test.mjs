@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import test from "node:test";
+import test, { after, before } from "node:test";
 import { promisify } from "node:util";
 
 import { infrastructureOnly } from "./agent-infrastructure-scope.mjs";
@@ -12,6 +12,35 @@ import { workflow } from "./agent-workflow.mjs";
 
 const exec = promisify(execFile);
 const git = async (cwd, ...args) => (await exec("git", args, { cwd })).stdout.trim();
+let signingDirectory;
+let signingProgram;
+before(async () => {
+  signingDirectory = await mkdtemp(path.join(tmpdir(), "agent-workflow-gpg-"));
+  await chmod(signingDirectory, 0o700);
+  await exec("gpg", [
+    "--homedir",
+    signingDirectory,
+    "--batch",
+    "--passphrase",
+    "",
+    "--quick-generate-key",
+    "Workflow Fixture <workflow@example.invalid>",
+    "ed25519",
+    "sign",
+    "0",
+  ]);
+  signingProgram = path.join(signingDirectory, "git-gpg");
+  const quotedDirectory = `'${signingDirectory.replaceAll("'", "'\\''")}'`;
+  await writeFile(signingProgram, `#!/bin/sh\nexec gpg --homedir ${quotedDirectory} "$@"\n`, { mode: 0o700 });
+});
+after(async () => {
+  if (!signingDirectory) return;
+  try {
+    await exec("gpgconf", ["--homedir", signingDirectory, "--kill", "gpg-agent"]);
+  } finally {
+    await rm(signingDirectory, { recursive: true, force: true });
+  }
+});
 async function commit(cwd, file, content) {
   await mkdir(path.dirname(path.join(cwd, file)), { recursive: true });
   await writeFile(path.join(cwd, file), content);
@@ -29,6 +58,8 @@ async function fixture(run) {
     await git(root, "config", "user.name", "Workflow Fixture");
     await git(root, "config", "user.email", "workflow@example.invalid");
     await git(root, "config", "commit.gpgsign", "false");
+    await git(root, "config", "user.signingkey", "workflow@example.invalid");
+    await git(root, "config", "gpg.program", signingProgram);
     await git(root, "config", "core.hooksPath", "/dev/null");
     await commit(root, "src/base.ts", "export const base = 1;\n");
     await git(root, "init", "--bare", remote);
@@ -61,6 +92,8 @@ test("real dual-path delivery returns knowledge and transfers only business onto
     assert.equal(await readFile(path.join(root, "docs/lesson.md"), "utf8"), "A reusable lesson\n");
     await assert.rejects(readFile(path.join(root, "src/feature.ts")), { code: "ENOENT" });
     const returned = await git(root, "rev-parse", "HEAD");
+    // The fixture disables automatic signing; workflow transfers must still sign explicitly.
+    assert.equal(await git(root, "show", "-s", "--format=%G?", returned), "G");
     await workflow({ ...options, command: "backflow", commits: [infra] });
     assert.equal(await git(root, "rev-parse", "HEAD"), returned);
     const upstream = path.join(dir, "upstream");
@@ -93,6 +126,7 @@ test("real dual-path delivery returns knowledge and transfers only business onto
     const status = await workflow({ ...options, command: "status" });
     assert.equal(status.record.delivery.worktree, delivery);
     assert.equal(status.record.delivery.remote, "origin");
+    assert.equal(await git(delivery, "show", "-s", "--format=%G?", "HEAD"), "G");
     assert.equal(status.resume.authority.worktree, delivery);
     assert.equal(status.resume.verificationCurrent, false);
     assert.equal(status.resume.contextNeedsReview, true);
@@ -122,6 +156,32 @@ test("real dual-path delivery returns knowledge and transfers only business onto
       }),
       /already exists/
     );
+  });
+});
+
+test("upstream synchronization signs a new merge despite automatic signing being disabled", async () => {
+  await fixture(async ({ dir, root, options }) => {
+    const upstream = path.join(dir, "upstream");
+    await git(root, "worktree", "add", upstream, "release");
+    await commit(upstream, "src/upstream.ts", "export const upstream = true;\n");
+    await git(upstream, "push", "origin", "release");
+    await workflow({ ...options, command: "sync" });
+    assert.equal(await git(root, "show", "-s", "--format=%G?", "HEAD"), "G");
+    assert.equal((await git(root, "show", "-s", "--format=%P", "HEAD")).split(" ").length, 2);
+  });
+});
+
+test("signing failures preserve pending transfer without creating an unsigned commit", async () => {
+  await fixture(async ({ root, dev, options }) => {
+    const lesson = await commit(dev, "docs/signing.md", "Preserve the signing failure\n");
+    const previous = await git(root, "rev-parse", "HEAD");
+    await git(root, "config", "gpg.program", "/usr/bin/false");
+    await assert.rejects(workflow({ ...options, command: "backflow", commits: [lesson] }), /sign|commit object/);
+    assert.equal(await git(root, "rev-parse", "HEAD"), previous);
+    const status = await workflow({ ...options, command: "status" });
+    assert.equal(status.record.pending.command, "backflow");
+    assert.notEqual(await git(root, "status", "--porcelain"), "");
+    await git(root, "cherry-pick", "--abort");
   });
 });
 

@@ -71,8 +71,12 @@ async function sync(root) {
   const release = await fetchRelease(root);
   // Detect conflicts without leaving the user's checkout in a merge operation.
   await git(cwd, "merge-tree", "--write-tree", "HEAD", release);
-  await git(cwd, "merge", "--no-edit", release);
-  return { base: await git(cwd, "rev-parse", "HEAD"), release };
+  const previous = await git(cwd, "rev-parse", "HEAD");
+  await git(cwd, "-c", "gpg.format=openpgp", "merge", "-S", "--no-edit", release);
+  const base = await git(cwd, "rev-parse", "HEAD");
+  // Fast-forward and up-to-date merges do not create a commit to sign.
+  if (base !== previous && base !== release) await git(cwd, "verify-commit", base);
+  return { base, release };
 }
 
 async function snapshot(workspace, common) {
@@ -567,7 +571,10 @@ async function runWorkflow({
   }
   assert.ok(record, "Start or register this task through the existing workflow first.");
   assert.ok(!record.pending, "Resolve the recorded pending operation first.");
-  assert.ok(command !== "deliver" || !record.delivery, "A delivery workspace already exists; validate fixes in the original development workspace, then transfer them to the existing delivery.");
+  assert.ok(
+    command !== "deliver" || !record.delivery,
+    "A delivery workspace already exists; validate fixes in the original development workspace, then transfer them to the existing delivery."
+  );
   assert.ok(commits.length, "Select reviewed commits explicitly with --commit.");
   const sources = [record.delivery, record.development].filter(Boolean);
   const selected = [];
@@ -612,7 +619,8 @@ async function runWorkflow({
     }
 
     // Failures preserve the exact worktree and pending record for diagnosis; never reset or auto-resolve.
-    await git(target, "cherry-pick", sha);
+    await git(target, "-c", "gpg.format=openpgp", "cherry-pick", "-S", sha);
+    await git(target, "verify-commit", "HEAD");
   }
   const head = await git(target, "rev-parse", "HEAD");
   if (command === "backflow") record.infrastructure.push({ commits: selected, head });

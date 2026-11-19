@@ -107,7 +107,7 @@ node scripts/agent-workflow.mjs backflow --issue TRD-123 \
 开发中针对性验证；收到交付指令后集中执行以下路径，不在每个工作切片重建交付现场。
 
 1. **准备**：完成当前基础设施回流，确认业务提交及未合并依赖。依赖不在 release 时明确等待，或按已确认的依赖 PR 顺序处理，不伪称可独立交付。
-2. **重建**：从 fetch 后的最新 release 创建交付 worktree，只选择本需求业务提交。工具按提交复制，不能自动理解混合补丁或丢弃前置实现。
+2. **重建**：从 fetch 后的最新 release 创建交付 worktree，只选择本需求业务提交，逐个保留原 commit 拆分并 GPG 签名，不聚合为单提交。工具按提交复制，不能自动理解混合补丁或丢弃前置实现。
 3. **复核与验证**：检查最终完整 diff 和提交历史，确认无个人基础、参考仓库和无关功能；对照相关[经验条目](review-lessons.md)确认组合未撤销历史修复、关键反例覆盖实际消费者与共享/EVM 路径；在实际交付目录执行相关测试及上游要求的检查。记录命令、结果、目标 SHA 和未覆盖项，避免无变化重复执行。依赖安装按目标锁文件，SDK/WASM 或生成路由按对应环境入口准备。
 4. **PR**：推送上游 `origin` 的需求交付分支，向 `gmx-io/gmx-interface:release` 建 Draft PR，标题、Summary、Linear、真实 Validation 和发布事项遵循[提交与 PR 规范](#commit分支与-pr-表达规范)。普通 PR 无需额外证据包。适用时按 gmx-prompts 自审最终 diff；发现问题按下文“PR 后的修复与交付现场”先回原开发分支验证，再转入交付目录复验。
 
@@ -122,9 +122,9 @@ git -C /path/to/delivery log --oneline origin/release..HEAD
 git -C /path/to/delivery push origin HEAD
 ```
 
-迁移 PR 来源仓库或补签时，保留原有 commit 拆分、提交信息及 merge 拓扑，不默认聚合为单提交；原已签名且父节点未变的提交可原样复用，父节点变化的后续提交须重新签名。以逐提交 tree、message、映射后父节点和最终 tree 核对内容不变，保留旧引用；改写/强推仅在用户明确授权范围内执行。
+分支重建（含 release 交付重建、PR 来源迁移和补签）保留原有 commit 拆分、顺序、提交信息及适用的 merge 拓扑，未经用户当次明确要求不得聚合为单提交；原已签名且父节点未变的提交可原样复用，父节点变化的后续提交须重新签名。以逐提交 tree、message、映射后父节点和最终 tree 核对内容不变，保留旧引用；改写/强推仅在用户明确授权范围内执行。
 
-`my-gmx` 是个人镜像，开发备份与个人基础仍使用它。业务 PR 在上游 `gmx-io/gmx-interface` 仓库内建立交付分支，通过 `origin` 推送并向 `release` 提交 Draft PR，不使用 fork PR（用户于 2026-11-19 纠正）。`my-gmx-pr` 仅保留为历史 fork remote，不再作为默认交付目标。创建 PR 前用 gh 核实 head/base 仓库均为上游及远端 head；正文用临时文件及 `--body-file` 传递。 跟进当前交付的 CI 时，绑定仓库、PR head SHA 和实际 run/job；已有 watch/session 优先读取其最新结果，发状态回复前处理已返回的查询，用户指出已结束时立即复核。PR正文编辑也可能触发新run，重新确认当前有效检查，不能沿用旧pending或旧成功。任务结束后停止已完成任务的watch；不为报告权限403反复重跑测试或扩大权限。
+`my-gmx` 是个人镜像，开发备份与个人基础仍使用它。业务 PR 在上游 `gmx-io/gmx-interface` 仓库内建立交付分支，通过 `origin` 推送并向 `release` 提交 Draft PR，不使用 fork PR（用户于 2026-11-19 纠正）。`my-gmx-pr` 仅保留为历史 fork remote，不再作为默认交付目标。创建 PR 前用 gh 核实 head/base 仓库均为上游及远端 head，并逐条核对 PR commit 为有效 GPG 签名；正文用临时文件及 `--body-file` 传递。 跟进当前交付的 CI 时，绑定仓库、PR head SHA 和实际 run/job；已有 watch/session 优先读取其最新结果，发状态回复前处理已返回的查询，用户指出已结束时立即复核。PR正文编辑也可能触发新run，重新确认当前有效检查，不能沿用旧pending或旧成功。任务结束后停止已完成任务的watch；不为报告权限403反复重跑测试或扩大权限。
 
 deliver 默认拒绝个人目录和 gitlinks，选中提交必须属于登记的任务分支；真实业务文档/脚本被路径规则拒绝时按原生 Git 精确转移并审查，不伪装路径。原生命令同样可用：`git worktree add -b DELIVERY PATH origin/release` 后选择性 cherry-pick；不为使用工具强行改提交结构。
 
