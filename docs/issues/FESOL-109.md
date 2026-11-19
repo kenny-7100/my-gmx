@@ -1,5 +1,15 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## Frontend Task Organization 更新（2026-11-19 13:57 北京时间）
+
+参与角色：任务协调状态核验与文档维护。用户明确要求跟进并更新 [Linear 协调表](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)。逐条读取原表 15 项的 Linear 正文、状态、负责人、cycle、附件、关系与全部评论，核对 Trading 周期列表及 GitHub 当前 PR/review/latest checks，更新同一文档并回读确认 15 行完整保存。未修改 issue 字段或发送评论，未执行产品验收。
+
+相对 11 月 18 日表：TRD-72 为 In Progress；TRD-136 已 Done，但保留持续 playground；TRD-83 已分配 Sulliven、In Progress，仍未通过附件和新旧编号搜索确认独立实现 PR，不据此判定保证金存取已完成。TRD-142 已 In Review，对应独立 PR #3294；#3120 仍只是历史来源。全部 cycle 与原表一致。
+
+五条当前 PR：TRD-77→#3314（非 Draft），72→#3315、78→#3316、70→#3317、136→#3318（后四条 Draft）；原 #3259/#3258/#3261/#3262/#3288 均已关闭未合并。#3314/#3315 最新返回检查全部成功；#3316 最新组件 job 在 Deploy report to GitHub Pages 步骤失败，其余最新检查成功；#3317/#3318 组件和综合 lint/types/tests 仍运行，其余最新检查成功。均待 approval，不将运行中或历史失败混作当前全部通过。
+
+TRD-98 #3195 仍 Changes Requested，最新检查全成功；#3190 已关闭未合并，当前交易 PR 说明 reader/hook 经 #3195 集成。TRD-85 #3223、TRD-100 #3287、TRD-84 #3293、TRD-142 #3294 最新检查全成功、待 approval。63/65/75/80 的已合并 PR 与 Linear 状态保留差异。此处为状态快照，完整表以线上文档为入口；旧记录保留历史时间，不当作当前状态。
+
 ## 17 行协调表 PR 复核（2026-11-18 14:13 北京时间）
 
 参与角色：只读 PR 状态调研。恢复 11 月 17 日 14:29 最终表格后，重新查询 17 条 Linear 的状态/负责人/附件及 GitHub PR。相对该表新增合并：TRD-80 的替代 PR [#3286](https://github.com/gmx-io/gmx-interface/pull/3286) 于 11 月 17 日 20:13、TRD-63 [#3201](https://github.com/gmx-io/gmx-interface/pull/3201) 于 20:14 合入 release。原已合并项仍为 TRD-75 #3242（11 月 14 日 17:41）、TRD-65 #3193（11 月 16 日 16:41）。TRD-63/80/75 的 Linear 仍 In Review，65 仍 In Test；合并不代表完整验收。
