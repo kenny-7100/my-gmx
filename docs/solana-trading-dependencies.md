@@ -1,5 +1,19 @@
 # Solana 交易链路依赖审计
 
+## 下一条正式 review 推荐（2026-11-19 15:13 CST）
+
+本轮角色为只读就绪分析；范围限定用户五条 PR，实时读五条 Linear 正文/关系/评论、GitHub PR/checks/review 和 release，并定向核对订单生命周期及通知代码；未做全量迁移需求调查、完整代码 review、构建、UI 或链上验收。五条 Linear 无评论，70/72/77/78 仍 In Progress、136 Done。
+
+推荐下一条为 [TRD-78 / #3316](https://github.com/gmx-io/gmx-interface/pull/3316)，head `164102b83c`。#3314（TRD-77，`161e89e4a4`）与 #3315（TRD-72，`b5c1bc3f78`）已非 Draft，均已请求 GMX Interface Devs、尚无 review，当前返回 checks 全成功；这取代先前把77作为下一条送审的判断。#3316/#3317/#3318仍Draft、无review requests或reviews；3316无review threads。未修改任何 PR/Linear 状态或发送消息。
+
+78提供创建回执身份识别、订单全生命周期RPC证据、提交/成交分离、取消reason、通知和slot-aware刷新。与当前72的直接tree差异为30文件（含10份翻译及较大固定fixtures/layout），范围较70集中；两条分支有独立重建历史，不能将这份tree差异称作GitHub三点比较或声称72 head是78祖先。读到的reader/reducer要求creation anchor、完整history与匹配trade/removal，证据不足保持unresolved；通知消费者保留owner/network/unmount guards和trackingRequests路径。原有Phantom市价开/平仓及Order filled是历史组合消费证据，不证明当前head全部AC，尤其真实取消reason、延迟/未知回执及完整钱包/LUT矩阵。
+
+3316主检查 [44456991427](https://github.com/gmx-io/gmx-interface/actions/runs/44456991427)失败在SDK公网data.spec.ts fetchMarkets的AbortError（49 passed/1 failed/2 skipped）；同一head后续 [44458778436](https://github.com/gmx-io/gmx-interface/actions/runs/44458778436)成功。组件 [44456991459](https://github.com/gmx-io/gmx-interface/actions/runs/44456991459)日志明确286 passed，失败在gh-pages报告push被fetch-first拒绝；不能称当前全部checks绿，也不能说组件用例失败。送审前宜收口报告检查或清楚披露，并刷新正文中的旧#3258/#3259/#3261引用及Draft固定措辞；本轮未重跑CI或改正文。
+
+70/#3317 head `2bc3392a65` 当前checks全成功，但依赖72/78，且支付转换、最大杠杆一致性、完整simulate_order数值对照、GT Rewards仍属既定暂缓；本日TP/SL输入修复不等于原子落链验收，因此排78之后。136/#3318 head `2b53b1933e` 当前checks全成功，仍为持续集成实验Draft，包含多条正式候选与临时无LUT等支持，不作为下一条正式生产送审对象。
+
+远端release已到 `2c107c63a13f3a61e7e556edb7bbc5861cc1c3e9`（#3241 gas-token permit），比五条PR所观察base `0bc6c2ba2d`多3 commits。19文件变化含TradeBox/useTradeButtonState，与70改动相交；78生命周期核心路径无直接同路径变化，但这不是合并后验收或无冲突保证。准备正式收口时按受影响范围同步/复验，当前仅线上读取，无fetch/pull或分支修改。结论是优先申请78的代码review，仍需前置PR合入和运行验收后才能决定合并/完成。
+
 ## 五需求实时状态复核（2026-11-19 10:27 CST）
 
 角色：只读状态与 CI 排障核验。通过官方 Linear MCP 重读五条需求正文、关系及全部评论（均为空），通过 GitHub 读取当前 PR head、checks、reviews、全部 review threads 和 #3314 状态事件。远端 release 为 `0bc6c2ba2d57ff9b1c1c3135e6da6433ef6e438d`。五条负责人均为 Kenny；72/70/78/77 仍 In Progress，136 仍 Done。当前五个 PR 均为上游仓库内分支、base release、OPEN/未合并、MERGEABLE；reviewDecision 均 REVIEW_REQUIRED，mergeStateStatus 均 BLOCKED，无 reviews 或 inline threads，现有评论仅部署/测试机器人。
