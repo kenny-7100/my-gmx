@@ -1,5 +1,19 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## 当前 PR 剩余依赖评估（2026-11-19 15:21 北京时间）
+
+用户明确 #3315 Ready 为本人主动调整；Ready 不证明依赖满足。角色为只读依赖分析，实时读取72及100/71/109/98/127/97/86正文/关系，109/98/100评论均空；刷新5条直接前置PR及代码，不修改PR/Linear或业务。72 head仍 `b5c1bc3f78`，release为 `2c107c63a1`。此前五条比较中的Ready仅为观察，不是本需求就绪凭据。
+
+代码已集成但上游尚未合入的前置：TRD-100 [#3287](https://github.com/gmx-io/gmx-interface/pull/3287) `24e983c4c4`（Ready；Linear In Review）、TRD-98 [#3195](https://github.com/gmx-io/gmx-interface/pull/3195) `372e7ff471`（Ready；In Test）、GMX WASM TRD-77 [#3314](https://github.com/gmx-io/gmx-interface/pull/3314) `161e89e4a4`（Ready）、费用解析 [#3205](https://github.com/gmx-io/gmx-interface/pull/3205) `baed302cb0`（Ready）、订单字段 [#3207](https://github.com/gmx-io/gmx-interface/pull/3207) `6bb15c691f`（Draft）。当前返回checks均成功，3207仅有两项Pages检查，不能说已通过完整测试。#3207自身stack在#3205。72正文仍写旧#3259，应指向替代#3314。
+
+逐文件blob核对：3287转换实现/测试相同，index仅export位置不同；3195的27份非翻译文件全部相同；3314的18文件全部相同；3205生产parser/types三文件相同，suite有整合差异；3207三文件相同，72另加共享Order.solana和compose透传。这些是已集成证据，不是已审查合入。orderInputs直接import单位转换，transaction hook直接import余额key与RPC，builder依赖固定WASM；orderContext直接要求orderAccount/rentReceiver/escrowTokens/actionState，故编辑/取消消费3207。3205是共享Provider费用读取依赖，不能等同所有低层builder必须等待GT VIP UI。
+
+最明确的正式运行阻碍为TRD-109（Divhead，Todo，无评论）：72仍配置两张provisional表且expected-authority map为空；prepare通过fetchGmsolLookupTables装载并执行trust gate。当天既有CLI已确认两表active但有第三方authority（见[FESOL-71](FESOL-71.md#正式配置-lut-链上复核2026-11-19)），本轮未再次读取链上，不声称最新slot状态。需提供冻结证明或可独立核实GMX归属的替代表、authority与覆盖，72再接配置并测实际组合/模拟。playground无LUT市价成功不等于正式配置可发送；最新无LUT1260bytes原子TP+SL仍被1232上限拦截，不能承诺仅冻结/复制表自然解决所有组合。
+
+已具备的基础：71懒加载/交易开关、97钱包、86价格与127 RPC资源的Linear均Done；钱包#3110与价格#3138在线确认为MERGED。72当前代码确实消费wallet session、GMX RPC及每次send前fresh trading flag，未发现需要等待70/78才能实现低层sender。70/78是下游消费者；完整共享UI及execution toast验收会组合使用它们，非倒置为72代码前置。Linear77 blockedBy72指新产物需重跑72主网流程，而72实现已使用77产物，构建与消费验收须分别判断。
+
+仍需真实主网验收：带可信LUT的limit/edit/cancel、increase+TP/SL单交易落链，以及Phantom/Solflare/OKX/TokenPocket各自真实签名落链；历史unsigned模拟和Phantom无LUT开平样本不替代它们。共享API的market/account/fee数据、confirmed-slot freshness、GMX RPC、keeper与solanaTrading开关须在目标preview重新确认，本轮未测在线服务或flag，不称当前连续健康。官方API已部署属于既有证据，不再笼统说等待API开发；稳定性与同快照金融数值核验仍另算。优先推进109资源和100/98/77前置review，3205/3207协调合入；实现review可并行进行，正式合并需先收敛来源/基线并完成约定验收。未执行构建、浏览器、签名或广播。
+
 ## 下一条 Draft review 建议（2026-11-19 14:24 北京时间）
 
 角色：只读就绪比较，用户询问本人 Draft 下一条适合提交 review 的需求。限定现有五条与直接前置，复用本阶段15项协调表调查，补读72/78/70/77/109/100/98实时正文、关系和全部评论；查询五PR当前head、diff文件、review/checks及72/78/70全部review threads（均空），核对线上release `0bc6c2ba2d` 与本地对应commit。未转换Ready、请求review、改Linear或实施业务。
