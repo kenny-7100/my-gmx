@@ -1,5 +1,9 @@
 # Solana 交易链路依赖审计
 
+## Kenny 当前开放 PR 来源核对（2026-11-19）
+
+按用户要求查询 `gmx-io/gmx-interface` 中 author=`kenny-7100`、state=open 的全部 PR（limit 100，实际 5 条），逐条核对 headRepository 与 isCrossRepository。仍有 4 条来自 `kenny-7100/gmx-interface` fork：TRD-72 #3258（05a48d0a97）、TRD-78 #3261（00f93d0687）、TRD-70 #3262（bd8e81e020）、TRD-136 playground #3288（ca6fa8f824）；全部 Draft、base=release。TRD-77 已为上游仓库内 #3314（2733850a2f），旧 fork #3259 已关闭。本轮只检查来源，未迁移或关闭这 4 条，不扩大为历史 closed/merged PR 或其他仓库的全量调查。后续交付统一使用上游 origin 仓库内分支，迁移时核对各自签名、head、现有讨论和唯一交付记录。
+
 ## 五需求正式 review 就绪判断（2026-11-19 00:41 CST）
 
 用户要求列新旧issue、PR、状态和上游依赖，并判断最适合正式送审的一条。本轮仅查询，不转Ready、不请求reviewer、不修改Linear，也不继续未授权限价交易。实时Linear正文/关系/评论与GitHub原PR复核：72/70/78/77均In Progress，136为Done；五份PR均OPEN/Draft、base release、无reviews与review requests。新旧对应仍72←FESOL56、70←FESOL19、78←FESOL20、77←FESOL72，136无旧编号。各PR head与本轮交付一致。正文更新触发的同源码CI仍有运行项，不能称此刻所有checks已结束；上批同head验证和组件报告403证据仍按前节限定复用。
