@@ -1,6 +1,14 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
 
+## TP/SL 输入触发 EVM payload 异常（2026-11-19）
+
+本轮角色为只读根因定位，未改业务或重新部署。用户截图报 `Incorrect address "DogeJP1vR955QsXWKT1vw5gJsyiTthqPEtJZj8enDWxF" for chainId 42161`，栈为 tokens → orderTransactions/utils → tpsl/sidecar → useSidecarOrderPayloads → useTradeboxTransactions。核对 playground `9b8647c236`：TradeBox 无条件调用 useTradeboxButtonState，继而无条件执行 useTradeboxTransactions/useSidecarOrderPayloads；后者只检查 market/account/collateral，未隔离 Solana。输入生成有效 decreaseAmounts 后，buildTpSlCreatePayloads 调用 EVM buildDecreaseOrderPayload，getToken 用 base58 index mint 查 EVM token map 并抛错。空 entries 时 map 不执行，解释了输入之前不崩溃。按钮随后以 solanaSubmitState 替换结果，不能撤销前面已执行的 Hook。
+
+useChainIdImpl 在 Solana 选择下保留默认 EVM chainId（Arbitrum 42161），ChainContext 另以 networkId 标识 Solana；这不是钱包自动切错链的证据。真实 SDK builder 最小执行（仅 chainId/indexTokenAddress，第一条语句即 getToken）复现同样异常，无 RPC、钱包或广播。当前 TRD-70 原 development `ce1e15a25d` 与 delivery `f6e2297431` 的 useSidecarOrderPayloads 与 playground 逐文件一致；实时 PR #3317 为 Kenny 的 Draft、head f6e2297431。归属为 TRD-70 共享 TradeBox Solana 适配遗漏，旧 EVM helper 本身拒绝非 EVM token 属正常保护，不应放宽校验或给 EVM token map 填 Solana mint。
+
+建议在 EVM payload 构建边界按 networkId 隔离 Solana，同时保留 GmsolTradeboxAdapter/buildGmsolTradeboxOrderAction 对 sidecarEntries 的正式转换及 EVM 行为。后续回归必须连接账户、输入有效 TP 或 SL、覆盖共享 Hook 渲染及 EVM 对照，不能只测 Solana intent builder。此前 2026-11-15 的 base58 position identity 修复仍在；本次是另一个 EVM payload 入口遗漏，并非该历史修复丢失。未声称本轮已做完整浏览器复现或 TP/SL 链上验收。
+
 ## 开仓后同步警告修复（2026-11-19）
 
 TRD-72 原线分离正常账户同步与真实刷新错误，TRD-70 保持同步期间下单禁用；同一修复已接续本需求原development/delivery并推送既有上游PR。具体提交、各目录验证及playground部署结果见[统一修复记录](TRD-136.md#开仓后同步警告修复交付2026-11-19)。本轮未执行新交易，不扩大原需求金融或钱包验收。
