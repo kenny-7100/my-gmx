@@ -1,6 +1,18 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
 
+## TP/SL 链边界修复已交付（2026-11-19）
+
+用户授权修复已确认与相邻潜在问题。原 development 签名提交 `89051c0810`，delivery `2bc3392a65` 更新既有 Draft #3317；精确接入 TRD-136 development `19f0e3e7e5` 与 playground `2b53b1933e` / Draft #3318，全部 GPG=G，分别推送 my-gmx/origin。未重建或改写历史；最新 release `0bc6c2ba2d` 的新增差异未修改本次两个构建文件。sidecar Hook 按 networkId 在 useMemo 内跳过整组 EVM create/update/cancel payload，保留 Hook 顺序与共享 entries 给正式 Solana adapter；networkId 加入依赖。主订单 selector 对 tradeMath=gmsol 明确返回 undefined，不依赖 EVM gas 缺省阻止 builder。未放宽 SDK 校验、添加替代数据或更改交易执行。
+
+新增同一回归 spec 的两项行为：真实 Hook + EVM builder 的 TP/SL/组合/update/cancel 与网络单独变化/切回 EVM；真实主订单 selector 在费用存在时仍跳过 gmsol。旧实现回放两项失败，sidecar 与截图 DOGE mint/42161 异常一致；修复后原 development 全量3490 passed/1既有skip，app/landing types、定向零warning ESLint、Prettier通过。实际 delivery、136 development、playground各3files/16tests、app/landing types、零warning ESLint通过，三份修复文件四目录字节一致。playground 8GiB build-playground通过。
+
+部署 `84fd2a81`，稳定地址与固定地址8项资源各自SHA256匹配本地，共16项；HTML `05c46e0d35de03ff889de87f11e18bf66620e9384dea50d3708b96878d8182a7`，WASM保持 `e82184ca…b46c840`。Kenny普通Chrome原钱包会话新建测试标签，在BTC输入后切DOGE/WSOL-USDC，有效margin3USD/size6USD、TP0.065/SL0.055，gain19.66%/loss14.13%及PnL更新；切Short后TP/SL方向调整、PnL继续渲染，无error boundary。未点击最终Long/Short提交按钮、未签名广播。不是原子TP/SL落链、全部钱包或独立金融对照验收。用户切回Linear后停止抢占窗口；只保留自己测试标签，原标签未更改。
+
+本轮起初Chrome活动窗口被切至“世豪”，新建测试标签后未执行表单交易；随后核对时该新标签已不存在，没有删除用户标签。用户明确必须用Kenny浏览器并要求沉淀，已修正AGENTS原入口为核对窗口kenny、保留会话、用户切换后重新核对。后续有效页面证据均来自Kenny窗口。
+
+远端当前源码初轮 CI：#3317 main `44467736206`、#3318 main `44467736667` 均success；组件、Audit、WASM、SDK standalone及两官方Pages均通过。PR正文已更新，编辑触发的同源码重复运行不覆盖初轮证据。日志、PR快照、资源哈希在 `/tmp/tpsl-fix-*`。个人知识回流不包含业务提交。
+
 ## TP/SL 遗漏复盘与相邻入口核查（2026-11-19）
 
 本轮继续只读分析，未修业务或部署。上轮账户同步修复的验证覆盖延迟刷新、账户数据及已有仓位只读 smoke，没有覆盖已连接钱包 + 有效 TP/SL 输入的共享 TradeBox 渲染；Solana intent builder 的离线用例不经过 EVM useSidecarOrderPayloads，现有 TradeBox 组件 stories 使用 EVM fixtures。因此通过的局部测试/构建不能排除本次错误。此前 base58 preview identity 处理已提醒同类链边界，但未沿共享渲染消费者检查所有 payload 入口；这一点是复盘缺口，不把单一 helper 修复等同完整 TP/SL 可用。
