@@ -1,5 +1,19 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## TRD-77 / #3314 定向审查（2026-11-19）
+
+角色：审查。实时 Linear TRD-77 仍 In Progress、无评论，blockedBy TRD-72；需求正文仍写 v0.10.0，但按既有用户决定使用 0.11.0-beta.1 和仓库内产物，不将旧正文差异误报为缺陷。审查当前上游 Draft #3314 head `161e89e4a40829159e85599d5c11b37b91a9de48`，对照远端最新 release `0bc6c2ba2d`；`git merge-tree --write-tree` 输出 `7ccb893dd2fae75697e40414aafbd6942f09aee4`，与 PR head tree 一致，当前合并结果无额外差异。18 文件保持独立产物/构建范围；没有交易消费者接线或资金计算修改。
+
+使用 gmx-prompts 的 gmx-interface-review、review-rules、runtime-checks、gmx-solana 及项目编码规范，并应用 RL-04/05/06/07。fetch 后 prompts origin/main 为 `7c5a4af`，相对本地仅两份 l10n prompt 改动，审查规范一致；未更新 gitlink。当前环境无可调用的 `/code-review`、`/security-review` 命令，按对应关注面顺序审查，不声称已运行这些工具。当前 PR 无 inline comments 或 reviews，无需重复既有发现。
+
+本轮结果：暂未确认应要求代码修改的问题。源码/revision/lock/toolchain 固定、八文件重建比较、Yarn file 安装、构建前已安装产物校验、独立 lazy SDK entry 和原 flag gate 路径均已审查。当前 head 所有 GitHub checks 成功；直接读取 [WASM reproduction run 44436904671](https://github.com/gmx-io/gmx-interface/actions/runs/44436904671)，确认在 GMX CI 获取固定源码、Rust 构建并输出八文件 verified 与固定 WASM 摘要，非仅 job 状态推断。
+
+实际 delivery 目录重跑 `NODE_OPTIONS=--max-old-space-size=8192 yarn build:gmsol-sdk` 成功，loader 与 sdk-entry 两份 suite 共 6 tests passed。隔离临时副本分别篡改安装后的 `index_bg.js`、`index_bg.wasm`，两者构建均 exit 1 并输出 approved GMX build mismatch；正常副本 exit 0。未修改共享依赖或业务源码，没有为一次审查添加永久测试。当前 head 完整 lint/type/tests/组件及 app/home build 复用其成功 CI，不重复全量本地运行。
+
+本轮从固定预览 `https://59bbd873.gmx-interface.pages.dev` 的真实 entry 提取 `assets/index_bg-LFWuFgSD.wasm?init` 地址，下载响应为 application/wasm，SHA-256 为 `e82184caacc60828f024743f88a0a92d97b9d3d55db6839e0d3fab8a9b46c840`。用 PR 内 bindings 在 Node 中真实 instantiate、bind、start 成功，default_store_program 返回正式 program/store。这证明预览产物可取、摘要与 bindings 初始化一致，不是浏览器 app 消费或主网交易验收。本轮没有重跑主网签名/广播，完整 TRD-72 四钱包、limit/trigger、atomic 与可信生产 LUT 矩阵仍未完成。
+
+页面验证中用户纠正应使用其打开的另一个 Chrome 窗口/个人资料。通过原生窗口菜单定位 `kenny` 窗口（保留 Phantom/OKX），停止使用误选的“世豪”窗口；在 kenny 窗口新建当前 head 固定预览标签页，Arbitrum 交易页正常显示。Solana flag 初始关闭，原生 DevTools 中检查 resource timing，SDK/WASM 请求列表为空（主线程有限资源列表的定向观察，不扩大为全站全时段网络审计）。随后通过原生控制台直接 import 预览 entry 并 initialize 成功，输出 `TRD77_BROWSER_SDK_OK` 和预期 program/store。这是浏览器真实产物初始化，未假称已经走到尚未接入 release 的交易消费者，也未完成 flag-on 网络切换/刷新全矩阵。测试标签页已关闭，恢复原 PR 页面，未使用独立浏览器或 CDP 连接。可重用的反例方法已由 RL-05 覆盖，本次仅在原 issue 留证，不另加公共门禁。未发布 PR review/comment、改 Linear 或转 Ready。
+
 ## 原多提交历史已恢复（2026-11-19）
 
 按用户追加要求，#3314 从原 #3259 的 5 个 commit 逐个补签恢复，保留各自 message/tree/merge 拓扑；另外以 1 个签名 merge 保留此前已交付的 release `0bc6c2ba2d` 同步。现共 6 个 commit，GitHub 全部 verified/valid，head `161e89e4a4`，最终 tree 与此前单提交 `2733850a2f` 完全相同。使用绑定旧 SHA 的 force-with-lease 更新原上游 PR；单提交版本另备份 refs/backup/trd77-before-multicommit-restore。交付 registry 已重绑，新 head CI 独立运行；同内容构建/类型/loader 结果复用，无业务代码变化。本节取代下文单提交数量与 head 的历史描述。完整映射见[批次记录](../solana-trading-dependencies.md#保留多提交的上游-pr-迁移完成2026-11-19)。
