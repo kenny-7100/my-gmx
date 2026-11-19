@@ -2,6 +2,8 @@
 
 ## 全签名交付历史重建（2026-11-19）
 
+重建后 CI 已全部结束：head `2733850a2f` 的 Audit、主 lint/types/tests、SDK standalone、WASM reproduction 均 SUCCESS；唯一失败为组件 job [44361414236](https://github.com/gmx-io/gmx-interface/actions/runs/44361414236)。直接日志确认 286 tests passed、报告 artifact 上传成功；失败为推送上游 gh-pages 被 github-actions[bot] 拒绝（403/git exit 128）及创建 PR 报告评论 403。根因证据：PR 来自 `kenny-7100/gmx-interface` fork，pull_request job 实际 token 权限为 Contents/PullRequests read，尽管现有 workflow 声明 write；报告发布步骤只有 !cancelled 条件，未排除 fork。签名重建不改变此权限边界，重复重跑也不会获得写权限。用户本轮询问原因，未修改共享 CI；后续适合为 fork 跳过写入步骤、保留 artifact 和真实测试失败检查，若需自动发布则另设受信发布流程。
+
 用户明确要求 PR 所有提交有签名并允许重建。原 Draft [#3259](https://github.com/gmx-io/gmx-interface/pull/3259) 已从最新 release `0bc6c2ba2d` 重建为单个 GPG 签名提交 `2733850a2f4f47d08aeaae940e7502b742062d88`；GitHub commits API 确认仅 1 commit、verified=true、reason=valid、PGP signature。使用绑定旧远端 SHA `6e2dd5f81c` 的 force-with-lease 更新原交付分支，未新建 PR、转 Ready 或请求 reviewer。原历史保留于本地 `refs/backup/trd-77-pr-before-signed-rebuild-6e2dd5f81c43fd3793f7b09ad6b795c28c6f2179`，development `c70a3d77d1` 未改。
 
 重建前后需求补丁 stable patch-id 均为 `e4c44378d572698ddee7b82ba0632810c8487113`；交付仍精确 18 文件，全部交付文件与旧 head 字节一致，新增树差异仅为 release 的 32 个 Tooltip 文件。最初本地生成补丁时使用两端 tree diff 而带入了撤销 release 的差异，已在推送前改用原共同基线到旧 head 的需求补丁并重建，未向远端发布错误版本。固定 SDK source/toolchain/recipe/hash 未变，无需重复 Rust 重建。实际交付目录 app/landing typechecks、带安装文件完整性检查的 SDK production bundle、loader suite（2 tests）均通过，worktree clean。PR 正文已更新基线和签名/验证边界；新 head CI 独立判断，不继承旧 head 的成功结论。完整主网矩阵等验收剩余项不变。下方旧 head 与 unsigned 审计为历史观察，已被本节取代。
