@@ -111,7 +111,7 @@
 
 2026-11-17 在 #3201 应用：旧前置 Provider/fixture 可能在 merge 中无冲突地保留；解决冲突文件还不够，应对最终 release diff 按归属逐项核验，清除已被上游替代的残留。仅保留 11 个需求文件，另以真实 Hook/SWR 的有效反例验证 listing null key；细节见 [TRD-63 接续](issues/FESOL-15.md#上游冲突处理2026-11-17)。
 
-2026-11-19 用户纠正交付入口：业务 PR 应在上游仓库建立需求分支并向 release 提交，不用 fork。遇到 fork 报告写权限失败，先核对 head/base 仓库和实际协作流程，不能默认把适配 fork CI 列为需求工作；本轮已修正规则和工具默认 remote，并将 TRD-77 迁移至上游 #3314。历史 fork 兼容方案仅适用于确实需要接收 fork 的共享 CI。
+2026-11-19 用户纠正交付入口：业务 PR 应在上游仓库建立需求分支并向 release 提交，不用 fork。遇到 fork 报告写权限失败，先核对 head/base 仓库和实际协作流程，不能默认把适配 fork CI 列为需求工作；本轮已修正规则和工具默认 remote，并将 TRD-77 迁移至上游 #3314。历史 fork 兼容方案仅适用于确实需要接收 fork 的共享 CI。 补签/迁移也要保留原多提交拆分，不因独立交付而默认 squash；本轮25/31/46/26个commit逐个核对并迁移，TRD-77恢复原5个加release同步。签名改变父节点会连带改变后续SHA和使旧签名失效，按有序父节点映射重签，逐提交 tree/message 与最终树一致才可复用内容验证。
 
 2026-11-17 playground/#3288：fork组件测试的Pages/comment 403应在权限步骤按same-repository条件处理，保留测试、artifact及测试失败门禁；不要把整项workflow跳过或改成忽略失败。本轮修复后远端组件workflow成功。部署SDK验证需读取entry实际引用的hash路径并核对WASM摘要；SPA对不存在路径也可能返回HTML200，单独HTTP状态不能证明产物存在。见[TRD-136持续实验分支](issues/TRD-136.md#持续实验分支交付2026-11-17)。
 

@@ -1,5 +1,9 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## 保留多提交的上游 PR 迁移（2026-11-19）
+
+原 fork #3262 已迁移为上游仓库内 Draft [#3317](https://github.com/gmx-io/gmx-interface/pull/3317)，原 PR 已关闭。原 46 个 commit 的拆分、顺序、message、逐提交 tree 与 merge 父节点映射均保留；所有 PR commit 经 GitHub 验证为有效 GPG 签名。新 head `c4347d2577`，最终 tree 与原 `bd8e81e020` 一致，未新增业务修改或同步 release。旧历史备份于本地 refs/backup/pr-3262-before-gpg-migration，commit 映射与远端验证快照留忽略目录 .local/pr-upstream-migration。交付 registry 已绑定上游 origin/新 PR；普通需求 development 未改，playground 因原 26 个提交全签名，保持 SHA 不变。已有同源码测试证据可复用，本轮只验证历史/内容/签名，不声称新 PR CI 已结束，也不重新执行钱包或交易。完整批次见[迁移结果](../solana-trading-dependencies.md#保留多提交的上游-pr-迁移完成2026-11-19)。
+
 ## TRD-70 正式平仓消费证据（2026-11-19）
 
 原修复集成后的playground ca6fa8f824/4f3109d8完成用户签名的BTC多仓100%平仓：请求与keeper均finalized成功，8条Lighthouse断言成功，到账9.515259USDC，Order filled、空仓及刷新后余额得到核验。公网API首次stale503后恢复，minContextSlot以keeper471002042为floor返回471002755、0仓位/0订单。实际部署WASM下载hash仍为固定e82184ca…b46c840。具体回执与边界归[TRD-136](TRD-136.md#正式平仓到账与刷新闭环2026-11-19)。这是一种钱包/一个市价平仓样本，不扩大为完整AC；原暂缓范围不变。

@@ -1,5 +1,19 @@
 # Solana 交易链路依赖审计
 
+## 保留多提交的上游 PR 迁移完成（2026-11-19）
+
+用户明确要求所有仍开放的 fork PR 改为上游仓库内分支，并保留多个 commit，仅补 GPG 签名；追加要求 TRD-77 恢复原多提交。未 squash、未改业务、未批量同步 release。冻结旧 head 并保存备份后，用逐提交原 tree/message/author/日期及映射后有序父节点重建签名历史；有效签名且父节点未变的提交原样复用。全部旧到新映射逐一核对 tree 和 parent order，最终 tree 一致；远端逐 PR commits API 核对数量及 GPG verified，head/base 均为 gmx-io/gmx-interface，保持 Draft、无 reviewer 请求。4 条旧 PR 均无 reviews/comments/review threads，迁移后关闭旧 PR，未删 fork 分支。
+
+| 需求 | 原 PR | 当前上游 PR | commit 数量 | 当前 head |
+| --- | --- | --- | --- | --- |
+| TRD-72 | #3258（已关闭） | [#3315](https://github.com/gmx-io/gmx-interface/pull/3315) | 25 → 25 | `c1473bbee4` |
+| TRD-78 | #3261（已关闭） | [#3316](https://github.com/gmx-io/gmx-interface/pull/3316) | 31 → 31 | `5da468c4a3` |
+| TRD-70 | #3262（已关闭） | [#3317](https://github.com/gmx-io/gmx-interface/pull/3317) | 46 → 46 | `c4347d2577` |
+| TRD-136 playground | #3288（已关闭） | [#3318](https://github.com/gmx-io/gmx-interface/pull/3318) | 26 → 26 | `ca6fa8f824` |
+| TRD-77 | #3314（沿用） | [#3314](https://github.com/gmx-io/gmx-interface/pull/3314) | 原 5 个恢复 + 1 个 release merge，共 6 个 | `161e89e4a4` |
+
+Playground 原 26 个 commit 均已签名，整支 SHA 不变，仅迁移来源仓库。TRD-77 最终 tree 与单提交版本2733850a2f一致，保留其最新 release；另三条最终 tree 各与原 head 一致，不把此次历史变更说成同步了最新 release。迁移不影响原开发线或线上部署；交付 registry 已 rebind 至 origin/当前 PR。无源码/依赖/配置变化，不重跑业务测试，依据逐提交和最终树一致性复用已有同内容验证；新 PR CI 单独观察。当前 PR 之间的历史来源 SHA/旧 PR 链接作为来源证据保留，不能用合并签名历史替代独立 review/验收。个人基础记录不带入业务 PR。
+
 ## Kenny 当前开放 PR 来源核对（2026-11-19）
 
 按用户要求查询 `gmx-io/gmx-interface` 中 author=`kenny-7100`、state=open 的全部 PR（limit 100，实际 5 条），逐条核对 headRepository 与 isCrossRepository。仍有 4 条来自 `kenny-7100/gmx-interface` fork：TRD-72 #3258（05a48d0a97）、TRD-78 #3261（00f93d0687）、TRD-70 #3262（bd8e81e020）、TRD-136 playground #3288（ca6fa8f824）；全部 Draft、base=release。TRD-77 已为上游仓库内 #3314（2733850a2f），旧 fork #3259 已关闭。本轮只检查来源，未迁移或关闭这 4 条，不扩大为历史 closed/merged PR 或其他仓库的全量调查。后续交付统一使用上游 origin 仓库内分支，迁移时核对各自签名、head、现有讨论和唯一交付记录。

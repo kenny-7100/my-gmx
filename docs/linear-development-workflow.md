@@ -122,6 +122,8 @@ git -C /path/to/delivery log --oneline origin/release..HEAD
 git -C /path/to/delivery push origin HEAD
 ```
 
+迁移 PR 来源仓库或补签时，保留原有 commit 拆分、提交信息及 merge 拓扑，不默认聚合为单提交；原已签名且父节点未变的提交可原样复用，父节点变化的后续提交须重新签名。以逐提交 tree、message、映射后父节点和最终 tree 核对内容不变，保留旧引用；改写/强推仅在用户明确授权范围内执行。
+
 `my-gmx` 是个人镜像，开发备份与个人基础仍使用它。业务 PR 在上游 `gmx-io/gmx-interface` 仓库内建立交付分支，通过 `origin` 推送并向 `release` 提交 Draft PR，不使用 fork PR（用户于 2026-11-19 纠正）。`my-gmx-pr` 仅保留为历史 fork remote，不再作为默认交付目标。创建 PR 前用 gh 核实 head/base 仓库均为上游及远端 head；正文用临时文件及 `--body-file` 传递。 跟进当前交付的 CI 时，绑定仓库、PR head SHA 和实际 run/job；已有 watch/session 优先读取其最新结果，发状态回复前处理已返回的查询，用户指出已结束时立即复核。PR正文编辑也可能触发新run，重新确认当前有效检查，不能沿用旧pending或旧成功。任务结束后停止已完成任务的watch；不为报告权限403反复重跑测试或扩大权限。
 
 deliver 默认拒绝个人目录和 gitlinks，选中提交必须属于登记的任务分支；真实业务文档/脚本被路径规则拒绝时按原生 Git 精确转移并审查，不伪装路径。原生命令同样可用：`git worktree add -b DELIVERY PATH origin/release` 后选择性 cherry-pick；不为使用工具强行改提交结构。

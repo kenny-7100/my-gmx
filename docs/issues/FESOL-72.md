@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 原多提交历史已恢复（2026-11-19）
+
+按用户追加要求，#3314 从原 #3259 的 5 个 commit 逐个补签恢复，保留各自 message/tree/merge 拓扑；另外以 1 个签名 merge 保留此前已交付的 release `0bc6c2ba2d` 同步。现共 6 个 commit，GitHub 全部 verified/valid，head `161e89e4a4`，最终 tree 与此前单提交 `2733850a2f` 完全相同。使用绑定旧 SHA 的 force-with-lease 更新原上游 PR；单提交版本另备份 refs/backup/trd77-before-multicommit-restore。交付 registry 已重绑，新 head CI 独立运行；同内容构建/类型/loader 结果复用，无业务代码变化。本节取代下文单提交数量与 head 的历史描述。完整映射见[批次记录](../solana-trading-dependencies.md#保留多提交的上游-pr-迁移完成2026-11-19)。
+
 ## 上游仓库内交付纠正（2026-11-19）
 
 用户明确指出已有流程是在上游仓库建立分支并提 PR，应避免 fork。之前个人规则/工具错误地固化 fork 为默认交付，导致报告写权限问题；本轮已修正 AGENTS、交付 skill、日常流程与 agent-workflow 默认 remote 为 origin，个人基础/开发备份仍用 my-gmx。已确认上游 push 权限，将同一有效 GPG 提交 `2733850a2f` 推送至上游同名分支，创建替代 Draft [#3314](https://github.com/gmx-io/gmx-interface/pull/3314)；GitHub 确认 isCrossRepository=false、base=release，旧 fork #3259 已关闭。交付 registry 已 rebind 至 origin/#3314，保留原 development。代码/18 文件/提交签名未变，复用同源码的本地验证；新 PR CI 独立观察，未称报告发布已成功。仅迁移 TRD-77，其他已有 PR 未批量处理。管理工具 13 项测试通过；无共享业务 CI 修改。
