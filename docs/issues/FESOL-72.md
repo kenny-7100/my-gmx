@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 五需求最新状态复核（2026-11-19 10:27 CST）
+
+本轮只读复核 Linear 正文/关系/评论与当前上游 PR/checks/review。状态、#3314 已转 Ready 事件、#3316/#3317 组件测试286 passed但报告发布 gh-pages 非快进失败，以及验收边界见[统一核查](../solana-trading-dependencies.md#五需求实时状态复核2026-11-19-1027-cst)。未改业务、PR/Linear 状态、CI、部署或钱包。
+
 ## TRD-77 / #3314 定向审查（2026-11-19）
 
 角色：审查。实时 Linear TRD-77 仍 In Progress、无评论，blockedBy TRD-72；需求正文仍写 v0.10.0，但按既有用户决定使用 0.11.0-beta.1 和仓库内产物，不将旧正文差异误报为缺陷。审查当前上游 Draft #3314 head `161e89e4a40829159e85599d5c11b37b91a9de48`，对照远端最新 release `0bc6c2ba2d`；`git merge-tree --write-tree` 输出 `7ccb893dd2fae75697e40414aafbd6942f09aee4`，与 PR head tree 一致，当前合并结果无额外差异。18 文件保持独立产物/构建范围；没有交易消费者接线或资金计算修改。

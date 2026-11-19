@@ -1,5 +1,9 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## 五需求最新状态复核（2026-11-19 10:27 CST）
+
+本轮只读复核 Linear 正文/关系/评论与当前上游 PR/checks/review。状态、#3314 已转 Ready 事件、#3316/#3317 组件测试286 passed但报告发布 gh-pages 非快进失败，以及验收边界见[统一核查](../solana-trading-dependencies.md#五需求实时状态复核2026-11-19-1027-cst)。未改业务、PR/Linear 状态、CI、部署或钱包。
+
 ## 保留多提交的上游 PR 迁移（2026-11-19）
 
 原 fork #3258 已迁移为上游仓库内 Draft [#3315](https://github.com/gmx-io/gmx-interface/pull/3315)，原 PR 已关闭。原 25 个 commit 的拆分、顺序、message、逐提交 tree 与 merge 父节点映射均保留；所有 PR commit 经 GitHub 验证为有效 GPG 签名。新 head `c1473bbee4`，最终 tree 与原 `05a48d0a97` 一致，未新增业务修改或同步 release。旧历史备份于本地 refs/backup/pr-3258-before-gpg-migration，commit 映射与远端验证快照留忽略目录 .local/pr-upstream-migration。交付 registry 已绑定上游 origin/新 PR；普通需求 development 未改，playground 因原 26 个提交全签名，保持 SHA 不变。已有同源码测试证据可复用，本轮只验证历史/内容/签名，不声称新 PR CI 已结束，也不重新执行钱包或交易。完整批次见[迁移结果](../solana-trading-dependencies.md#保留多提交的上游-pr-迁移完成2026-11-19)。

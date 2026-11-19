@@ -1,5 +1,24 @@
 # Solana 交易链路依赖审计
 
+## 五需求实时状态复核（2026-11-19 10:27 CST）
+
+角色：只读状态与 CI 排障核验。通过官方 Linear MCP 重读五条需求正文、关系及全部评论（均为空），通过 GitHub 读取当前 PR head、checks、reviews、全部 review threads 和 #3314 状态事件。远端 release 为 `0bc6c2ba2d57ff9b1c1c3135e6da6433ef6e438d`。五条负责人均为 Kenny；72/70/78/77 仍 In Progress，136 仍 Done。当前五个 PR 均为上游仓库内分支、base release、OPEN/未合并、MERGEABLE；reviewDecision 均 REVIEW_REQUIRED，mergeStateStatus 均 BLOCKED，无 reviews 或 inline threads，现有评论仅部署/测试机器人。
+
+| 需求 | 当前 PR / head | PR 状态 | 当前 head checks |
+| --- | --- | --- | --- |
+| TRD-72 | [#3315](https://github.com/gmx-io/gmx-interface/pull/3315) / `c1473bbee4` | Draft | 全部成功 |
+| TRD-70 | [#3317](https://github.com/gmx-io/gmx-interface/pull/3317) / `c4347d2577` | Draft | 组件 job 失败，其余成功；测试本身 286 passed |
+| TRD-78 | [#3316](https://github.com/gmx-io/gmx-interface/pull/3316) / `5da468c4a3` | Draft | 组件 job 失败，其余成功；测试本身 286 passed |
+| TRD-77 | [#3314](https://github.com/gmx-io/gmx-interface/pull/3314) / `161e89e4a4` | Ready | 全部成功 |
+| TRD-136 playground | [#3318](https://github.com/gmx-io/gmx-interface/pull/3318) / `ca6fa8f824` | Draft | 全部成功 |
+
+#3314 timeline 显示 kenny-7100 于 2026-11-19 10:16:44 CST 转 Ready；这是本轮观察到的外部变化，本轮没有更改 PR 状态。各 head 与迁移记录一致。五个 PR 的 app/home Cloudflare 检查均成功。
+
+#3316 [run 44436927125](https://github.com/gmx-io/gmx-interface/actions/runs/44436927125)、#3317 [run 44436962408](https://github.com/gmx-io/gmx-interface/actions/runs/44436962408) 的实际日志均确认 Run component tests 成功（各286 passed），artifact 上传成功；失败仅在 Deploy report to GitHub Pages：push gh-pages 被拒绝 `(fetch first)`，远端分支已前进，符合并发报告发布竞争。不是旧 fork 权限错误，也未发现测试断言失败；但整体 job 仍红，不能称全部 CI 通过。本轮仅诊断，未重跑 CI 或修改 workflow。
+
+验收边界沿用各 issue：Phantom BTC 市价开/平仓、keeper 成交、余额及 slot-floor 刷新已有固定版本历史证据，本轮未重新执行。完整四钱包、可信生产 LUT、限价创建/编辑/撤单/触发、原子 TP/SL 及金融矩阵仍未完成；用户已要求暂不创建新订单。TRD-70 原暂缓 swaps/max leverage/full simulate_order/GT Rewards 范围不恢复。TRD-77 Linear 正文 v0.10.0 与已确认 0.11.0-beta.1 选择的差异沿用既有决定。Linear blockedBy 关系不等于每项前置当前未完成，本轮未扩展调查全部前置。不改 Linear、业务、部署或钱包，不发布外部评论。
+
+
 ## 保留多提交的上游 PR 迁移完成（2026-11-19）
 
 用户明确要求所有仍开放的 fork PR 改为上游仓库内分支，并保留多个 commit，仅补 GPG 签名；追加要求 TRD-77 恢复原多提交。未 squash、未改业务、未批量同步 release。冻结旧 head 并保存备份后，用逐提交原 tree/message/author/日期及映射后有序父节点重建签名历史；有效签名且父节点未变的提交原样复用。全部旧到新映射逐一核对 tree 和 parent order，最终 tree 一致；远端逐 PR commits API 核对数量及 GPG verified，head/base 均为 gmx-io/gmx-interface，保持 Draft、无 reviewer 请求。4 条旧 PR 均无 reviews/comments/review threads，迁移后关闭旧 PR，未删 fork 分支。
