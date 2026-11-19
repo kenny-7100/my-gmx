@@ -1,19 +1,17 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { createServer as createHttpServer } from "node:http";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { createServer } from "vite";
 import * as wasm from "@gmsol-labs/gmsol-sdk/index_bg.js";
-import { createProxyHandler } from "../solana-rpc-proxy/proxy.mjs";
 import { withoutLookupTables } from "./lookupTableConfiguration.mjs";
 
 const { values } = parseArgs({
   options: {
     wallet: { type: "string" },
-    "api-url": { type: "string", default: "http://127.0.0.1:3046" },
+    "api-url": { type: "string", default: "https://solana.gmxapi.io" },
     market: { type: "string", default: "Dqq58gS1TgRMDouUbdvhhzc51XXTNHG921WLxH9X2eB8" },
   },
 });
@@ -30,12 +28,8 @@ globalThis.location = new URL("http://localhost:3016");
 globalThis.window = globalThis.self;
 globalThis.localStorage = { getItem: () => null };
 globalThis.module = { require: createRequire(import.meta.url) };
-const proxy = createHttpServer(createProxyHandler({ key: process.env.SOLANA_RPC_PROXY_KEY }));
-await new Promise((resolve, reject) => {
-  proxy.once("error", reject);
-  proxy.listen(0, "127.0.0.1", resolve);
-});
-const rpcUrl = process.env.TRD136_RPC_URL || `http://127.0.0.1:${proxy.address().port}`;
+const rpcUrl = process.env.TRD136_RPC_URL;
+assert.ok(rpcUrl, "Set TRD136_RPC_URL to an authorized read/simulation RPC endpoint");
 const root = process.cwd();
 const report = {
   at: new Date().toISOString(),
@@ -164,7 +158,7 @@ try {
     JSON.stringify(report, (_, v) => (typeof v === "bigint" ? String(v) : v), 2)
   );
   await server.close();
-  await new Promise((resolve) => proxy.close(resolve));
+
   delete globalThis.__trd136Wasm;
 }
 if (report.results.some((r) => !r.ok)) process.exitCode = 1;
