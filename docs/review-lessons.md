@@ -33,6 +33,8 @@
 
 **集成验收的正式成果承接（2026-11-18，用户纠正）：** [TRD-136 平仓核查](issues/TRD-84.md#按正式-pr-路径复核2026-11-18)中，MarketDecrease 底层和未签名模拟已可用，但共享 PositionSeller 尚未接通。最初以“底层具备条件”推荐独立补最小接线，遗漏了该能力由 Sulliven 的 TRD-84 承接、可能与未公开工作重复的约束。用户明确优先依赖已有 PR，避免为本地闭环构建随后废弃的路径。今后选方案同时判断技术可行性、已有正式成果的覆盖范围及新增修改的交付归属；复用 builder/Hook 不足以证明没有重复实现。先核对目标 PR 的真实消费者、源码和开发线；集成缺口修回所属需求，验收分支只组合成果。查不到 PR 不等于负责人没有实现，也不自动成为接管或新开开发线的依据。本次按用户“无 PR 则暂时停止”暂停；不将这一条件推广为所有任务必须等待 PR 的规则。
 
+2026-11-19 TRD-136 本轮授权进一步明确：已有 PR 的能力无论 PR 状态均采用最新候选，先合入正式成果，只保留当前候选确实未提供的接缝/资源条件。核对源码和来源 ancestry，不能只看 merged/Done，也不能因合并完成就删除正式候选尚未覆盖的 tokenInfo 接线或切回不可信 LUT；本轮实施与三项剩余支持见 [TRD-136](issues/TRD-136.md)。该授权用于本轮集成，不扩大为任意任务自动合并所有开放 PR。
+
 **Playground 的实验配置一致性（2026-11-18，用户明确）：** playground 本身允许实验能力，应复现 TRD-136 本地验收路径，不能把“常规生产构建”当作必须保留不同 LUT 配置的理由。可共享本地启动/模拟/预览构建的明确配置入口；公开 API/RPC 与本地服务仍按实际环境区分，不宣称数据源完全相同。配置差异必须随产物验证，既有大小/模拟/签名前保护保留，未签名模拟不代替真实下单。此次通过 `build-playground` 与共享无 LUT 模块修正入口，不把实验选择混入普通 `build-app`。
 
 **Solana 共享币种组件接缝（2026-11-18，实际页面复现）：** 集成 [TRD-84 #3293](issues/TRD-84.md) 后，平仓按钮已不再等待 EVM allowance，但接收行仍为空。TokenSelector 未传 tokenInfo 时回查 EVM getToken，未知 Solana mint 会直接返回 null；接收列表仍查 EVM reachable graph。修复应向既有组件传真实 token metadata，selector 只列正式 builder 支持的抵押币及 WSOL 对应 native SOL，保留 EVM 原路由；不要扩容 EVM 静态币种表或伪造 swap route。按钮可用、builder 模拟通过不足以证明表单完整，必须走到币种名称、金额、选择列表这些实际消费者。 后续接入TRD-142时，同类路径在TradeBox/MarginField再次出现，向调用方传真实fromToken；因此检查应覆盖所有由MultichainTokenSelector切换回TokenSelector的可达分支，不能只修当次弹窗。
