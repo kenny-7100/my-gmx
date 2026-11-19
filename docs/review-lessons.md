@@ -45,7 +45,7 @@
 
 **证据与应用：** #3193 的[缺价格隐藏持仓](https://github.com/gmx-io/gmx-interface/pull/3193#discussion_r4466217370)、[刷新错误态](https://github.com/gmx-io/gmx-interface/pull/3193#discussion_r4483646280)、[Sulliven 指出 disabled market 仍有仓位](https://github.com/gmx-io/gmx-interface/pull/3193#discussion_r4490450787)共同支持此判断。调查时静态读取的 snapshot 保留本次 API 仍列出但无法 compose 的旧项、标记 incomplete，缓存按 owner 隔离；这只是当时实现，未重新运行行为验证。
 
-**同步等待与请求失败需分开（2026-11-19，诊断复现）：** [TRD-136 仓位警告闪现](issues/TRD-136.md#开仓后仓位刷新警告闪现定位2026-11-19)中，提高交易确认 slot floor 后、API尚未返回时，账户 Hook 就将 pending 转为 error，导致即使接口成功也短暂显示刷新失败。验收需覆盖“延迟后成功”的在途渲染，而不只验证 await 后终态。修正提示语义时仍须保留 floor、旧快照拒绝、真实失败/超时提示及交易禁用，不能用隐藏警告解除数据保护。
+**同步等待与请求失败需分开（2026-11-19，诊断复现）：** [TRD-136 仓位警告闪现](issues/TRD-136.md#开仓后仓位刷新警告闪现定位2026-11-19)中，提高交易确认 slot floor 后、API尚未返回时，账户 Hook 就将 pending 转为 error，导致即使接口成功也短暂显示刷新失败。验收需覆盖“延迟后成功”的在途渲染，而不只验证 await 后终态。修正提示语义时仍须保留 floor、旧快照拒绝、真实失败/超时提示及交易禁用，不能用隐藏警告解除数据保护。随后实施以独立 isSyncing 传递等待状态，主动 mutate 的失败另由 slot tracker 保存并在成功快照后清除；仅删除 pending error 不足以保留失败提示，且不能只改列表而遗漏 TradeBox 的等待保护。实现与接续见[修复记录](issues/TRD-136.md#开仓后同步警告修复交付2026-11-19)。
 
 **有区分力的核验：** 按影响选择“持仓存在但缺一项价格”“已有仓位的市场 disabled”“刷新失败后恢复”“切换 owner”。追踪原始列表、compose、selector、计数、展示与可操作性，不能只断言数组非空。新鲜度/禁止操作策略须按当前契约决定，历史缓存做法不能自动推广。
 
