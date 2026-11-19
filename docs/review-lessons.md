@@ -71,7 +71,7 @@
 
 **项目判断：** UI 可见性、请求启停、业务状态归属及在途任务存活分别决定。隐藏入口不等于关闭所有入口；CSS 隐藏或丢弃 Hook 返回值仍可能请求。暂停新读取不应无条件销毁在途交易 watcher，关闭整页也可能误伤网络中立设置。
 
-**共享 TradeBox 的链边界（2026-11-19）：** [TP/SL 输入异常](issues/FESOL-19.md#tpsl-输入触发-evm-payload-异常2026-11-19)证明，渲染后替换 submit state 不能阻止之前无条件执行的 EVM payload Hook。Solana networkId 与兼容保留的 EVM chainId 并存时，须在实际构建边界隔离链专用 payload；共享计算仍可复用。回归需包含已连接账户及有效 TP/SL entries，单测最终 Solana intent builder 不能覆盖共享渲染路径。
+**共享 TradeBox 的链边界（2026-11-19）：** [TP/SL 输入异常](issues/FESOL-19.md#tpsl-输入触发-evm-payload-异常2026-11-19)证明，渲染后替换 submit state 不能阻止之前无条件执行的 EVM payload Hook。Solana networkId 与兼容保留的 EVM chainId 并存时，须在实际构建边界隔离链专用 payload；共享计算仍可复用。回归需包含已连接账户及有效 TP/SL entries，单测最终 Solana intent builder 不能覆盖共享渲染路径。 同类入口核查需区分显式链隔离、依赖缺少 gas/fee 的隐式短路、以及实际可达的 builder；不要把每个 EVM Hook 调用或通用字符串 key 都判成缺陷。已有 preview 哈希修复不能替代对 payload 消费者的回归。
 
 **GMTrade pending 退出入口（2026-11-16）：** Sulliven 的 [旧前端 #1095](https://github.com/gmsol-labs/gmx-solana-interface/pull/1095) 将价格不可用与关联市价单 pending 拆为独立条件：两者都锁定一般操作，但仅价格不可用禁用 Close，且表格/卡片保持一致。不要把所有状态合成整行 `pointer-events-none` 而误封退出入口；遍历订单时也不要让后遇到的普通订单覆盖先前发现的 pending。核验正常/pending/价格不可用/两者同时存在，逐一检查 Close、编辑抵押、TP/SL 与大小屏。此为旧项目前端设计证据，不自动作为新 GMX 产品规则，也不证明 Keeper 执行或交易已通过；[本次调查与证据边界](gmtrade-eur-pending-investigation.md#后续修复pr-1095)。
 

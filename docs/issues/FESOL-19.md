@@ -1,6 +1,14 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
 
+## TP/SL 遗漏复盘与相邻入口核查（2026-11-19）
+
+本轮继续只读分析，未修业务或部署。上轮账户同步修复的验证覆盖延迟刷新、账户数据及已有仓位只读 smoke，没有覆盖已连接钱包 + 有效 TP/SL 输入的共享 TradeBox 渲染；Solana intent builder 的离线用例不经过 EVM useSidecarOrderPayloads，现有 TradeBox 组件 stories 使用 EVM fixtures。因此通过的局部测试/构建不能排除本次错误。此前 base58 preview identity 处理已提醒同类链边界，但未沿共享渲染消费者检查所有 payload 入口；这一点是复盘缺口，不把单一 helper 修复等同完整 TP/SL 可用。
+
+相邻入口核查（代码级，不是完整 UI 验收）：同一 useSidecarOrderPayloads 的 update 分支也无网络 guard，buildUpdateOrderPayload 第一条同样 getToken，属于同一缺陷的潜在另一触发分支；尚未证明当前 Solana UI 能生成该分支，不列独立已复现故障。AddTPSLModal:806 与 OrderEditor:463 在 solanaOrderActions 存在时跳过 EVM payload，未发现同样遗漏。TradeBox 主订单 selector 没有显式 Solana guard，但 Gmsol Provider 将 gasLimits/gasPrice 设 undefined，selectTradeboxExecutionFee/commonParams 因而返回 undefined，当前无法沿该路径构建 EVM 主单；这是隐式依赖风险，不能称当前另一个已复现 bug。useGasPrice 与 useMulticall 均已有 Solana 请求隔离，useGasLimits 间接受其保护，不能仅见到 EVM Hook 被调用就认定正在发送 EVM RPC。USDG 预兑换依赖配置地址命中及 gas/fee 条件，当前没有发现 base58 误入 builder 的成立路径。pendingOrders 的 getPositionKey 仅拼接字符串，不能因函数名就视作 EVM ABI hash。
+
+后续修复应覆盖同一 Hook 的 create/update/cancel 构建边界，保留共享 sidecar 状态和 Solana intent；最小有效回归为已连接账户 + 有效 TP、SL/组合 + EVM 对照，并确认真实共享 Hook 不调用 EVM builder。不因这次遗漏泛化为重写所有共享组件，也不以本次定向扫描宣称全站无同类问题。
+
 ## TP/SL 输入触发 EVM payload 异常（2026-11-19）
 
 本轮角色为只读根因定位，未改业务或重新部署。用户截图报 `Incorrect address "DogeJP1vR955QsXWKT1vw5gJsyiTthqPEtJZj8enDWxF" for chainId 42161`，栈为 tokens → orderTransactions/utils → tpsl/sidecar → useSidecarOrderPayloads → useTradeboxTransactions。核对 playground `9b8647c236`：TradeBox 无条件调用 useTradeboxButtonState，继而无条件执行 useTradeboxTransactions/useSidecarOrderPayloads；后者只检查 market/account/collateral，未隔离 Solana。输入生成有效 decreaseAmounts 后，buildTpSlCreatePayloads 调用 EVM buildDecreaseOrderPayload，getToken 用 base58 index mint 查 EVM token map 并抛错。空 entries 时 map 不执行，解释了输入之前不崩溃。按钮随后以 solanaSubmitState 替换结果，不能撤销前面已执行的 Hook。
