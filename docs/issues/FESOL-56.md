@@ -1,5 +1,17 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## PR #3315 当前 head 独立 review（2026-11-20）
+
+角色：只读审查，未修改业务、提交 GitHub review、Linear 或发送交易。按 gmx-prompts 的 interface review/Solana 规范和 RL-04/05/07 检查 `15f50b87d2`；实时 release `1cd20c1a5a` 的无提交合并结果 tree 与 head 完全一致。上游规范 main 为 `7c5a4aff`，本地 `6e001536` 的本次 review/Solana/编码规则与其无差异；gmx-solana main 为 `d81a3e69`，按产物固定 revision `7fe40082` 逐项核对五种允许指令的 discriminator 和 account order，全部一致。API main `678fc2e8` 仅通过远端 ref 阅读，保留固定 checkout。
+
+**NEEDS CHANGES：P2，明确的 RPC preflight rejection 留下永久 pending 锁。** [sendOrderTransactions.ts:225](https://github.com/gmx-io/gmx-interface/blob/15f50b87d2ac4cc38b3e2bc9bf315a35d86d71af/src/domain/gmsol/transactions/sendOrderTransactions.ts#L225) 在发送前保存签名，但 `sendTransaction(skipPreflight:false)` 返回明确 `-32002` 时不撤销本次记录；`reconcileGmsolSubmission` 对从未广播的签名持续读到 null 并抛错，sender 与 hook 都在下一次签名前阻断，localStorage 令刷新也无法恢复。真实 WASM/Ed25519 签名及安装版 `@solana/errors` 的 `getSolanaErrorFromJsonRpcError` 构造真实错误，受控 RPC 复现记录仍在、reconcile 拒绝、再次 submit 不再签名。首次期望清理的反例失败，再以实际错误类确认行为通过。建议仅对确定未广播的错误清理匹配的本次签名；超时、断连等不确定结果继续保留并 reconcile，不能在通用 catch 清空所有 pending。
+
+新增本轮验证：前端受影响 12 suites/125 tests、SDK 3 suites/36 tests、app/landing `tscheck:ci`、SDK `build:types`、固定 WASM 构建校验均通过。临时复现不进入产品测试；日志保存在本机 `/tmp/pr3315-*`，反例源为 `/tmp/pr3315-review3315.scratch.spec.ts`。当前 PR 全部返回 checks 成功且 inline comments/reviews 为空；CI 成功不覆盖新增失败分支。
+
+使用 Kenny Chrome 原生窗口访问当前不可变 production preview `72c1d7d2.gmx-interface.pages.dev`：flag off EVM 交易页可加载，flag on 可站内切入 Solana 并刷新；Solana `/rpc-debug` 显示 Alchemy、有效 slot 和正常 tracker。未采集完整跨 worker 请求计数、console/storage telemetry 矩阵，未重跑全量前端/SDK或应用生产构建，不把页面 smoke 当交易验收。公开 API `/v1/markets/config` 返回 67 条，测试地址 `/v1/orders` 返回空数组，仅证明基础路由可达，未以空结果证明新订单字段部署。
+
+Linear TRD-72 当前 mainnet AC 仍待：远价 limit→edit→cancel、带冻结 LUT 的原子 increase+TP/SL 落链，及 Phantom/Solflare/OKX/TokenPocket 各自签名落链。真实 WASM 恶意指令/receiver 拦截已在本轮单测验证；真实钱包和落链没有本轮新增证据，历史 unsigned 模拟及旧部署 Phantom 开平仓不替代当前 head 验收。
+
 ## 冻结 LUT 前置已到位（2026-11-20）
 
 根据用户群聊补充实时核实：#3325已合入release，当前72 `c59c5fc672`已使用两张新冻结表；CLI确认authority=null、active、73/155地址与旧表同序。此前“109未提供可信资源”判断已过期；下游78/70/playground仍旧配置，真实交易矩阵仍未完成。见[统一更正](../solana-trading-dependencies.md#群聊补充后的-lut-状态更正2026-11-20)。
