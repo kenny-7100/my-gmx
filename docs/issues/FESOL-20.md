@@ -1,5 +1,9 @@
 # FESOL-20 — 订单发送与成交状态
 
+## 五需求现状复核（2026-11-20）
+
+本轮只读核对五条 Linear 正文/关系/空评论与对应上游 PR/head/checks/review。当前状态、Divhead 新增72原子订单准备拆分提交及尚未进入下游历史、78报告发布失败边界，见[统一核查](../solana-trading-dependencies.md#五需求当前状态复核2026-11-20)。未改业务、外部状态、部署或交易；既定暂缓及未完成验收范围继续有效。
+
 ## 下一条正式 review 推荐（2026-11-19 15:13 CST）
 
 本轮只读核验后，推荐 TRD-78 / #3316 作为下一条正式申请 review 的 PR：77/#3314及72/#3315已Ready且已请求团队review；78生命周期/通知范围比70集中，70又消费78。当前head `164102b83c` 主检查先因公网fetchMarkets AbortError失败、随后同head通过；组件286项通过，报告gh-pages并发push仍失败，不称全绿。已有市价开/平仓消费证据不替代真实取消reason、异常路径及完整AC。最新release前进至 `2c107c63a1`，本轮未同步分支。完整比较、代码证据、检查链接和送审边界见[统一推荐](../solana-trading-dependencies.md#下一条正式-review-推荐2026-11-19-1513-cst)。未转Ready、请求reviewer、改Linear或发送消息。

@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 五需求现状复核（2026-11-20）
+
+本轮只读核对五条 Linear 正文/关系/空评论与对应上游 PR/head/checks/review。当前状态、Divhead 新增72原子订单准备拆分提交及尚未进入下游历史、78报告发布失败边界，见[统一核查](../solana-trading-dependencies.md#五需求当前状态复核2026-11-20)。未改业务、外部状态、部署或交易；既定暂缓及未完成验收范围继续有效。
+
 ## 五需求最新状态复核（2026-11-19 10:27 CST）
 
 本轮只读复核 Linear 正文/关系/评论与当前上游 PR/checks/review。状态、#3314 已转 Ready 事件、#3316/#3317 组件测试286 passed但报告发布 gh-pages 非快进失败，以及验收边界见[统一核查](../solana-trading-dependencies.md#五需求实时状态复核2026-11-19-1027-cst)。未改业务、PR/Linear 状态、CI、部署或钱包。

@@ -1,5 +1,24 @@
 # Solana 交易链路依赖审计
 
+## 五需求当前状态复核（2026-11-20）
+
+角色：只读状态调查。官方 Linear MCP 重读五条正文、关系、评论（全部无评论）；GitHub 实时读取 head、checks、review requests/reviews、全部 inline threads（均空）及最新提交。70/72/77/78 均 In Progress，136 Done，负责人均 Kenny；五 PR 均 OPEN、base release、未合并。只更新个人知识，无业务、Linear、PR、CI、部署或钱包写入。
+
+| 需求 | PR / head | 送审状态 | 当前返回 checks |
+| --- | --- | --- | --- |
+| TRD-72 | #3315 / `c59c5fc672` | Ready，已请求 GMX Interface Devs，无 review | 全部成功 |
+| TRD-70 | #3317 / `2bc3392a65` | Draft，无 review requests/reviews | 全部成功 |
+| TRD-78 | #3316 / `164102b83c` | Draft，无 review requests/reviews | 保留两个失败记录；同 head 后续主检查成功，组件报告发布仍红 |
+| TRD-77 | #3314 / `161e89e4a4` | Ready，已请求 GMX Interface Devs，无 review | 全部成功 |
+| TRD-136 | #3318 / `2b53b1933e` | 持续实验 Draft，无 review requests/reviews | 全部成功 |
+
+重要新增：Divhead 在 2026-11-19 22:42:58 北京时间提交 #3315 `c59c5fc672`（merge release and keep LUT-backed orders atomic），合入 release `1cd20c1a5a`（本轮最新远端）。定向 diff 显示：组合超过1232bytes时，可把 prepare_user/prepare_position/钱包 ATA 准备移到前一交易，所有 create orders、escrow setup 与 collateral transfers 仍留最终同一交易；validator 限定前置准备交易，新增回归覆盖结构、keeper费用分配、越界指令及准备失败不签订单。当前 CI 全成功，但本轮没有独立重跑测试/完整 review 或真实钱包/LUT验收，不承诺用户1260bytes具体样本已解决。与3316/3317/3318的GitHub compare均diverged，新72 head不是这三条head的祖先；不能把72新实现当作已部署到playground。其余四PR观察baseRefOid仍0bc6c2ba2d；本轮未fetch/同步任何分支。
+
+3316主检查44456991427失败在SDK公网fetchMarkets AbortError（49passed/1failed/2skipped），同head后续44458778436成功；组件44456991459的286测试通过，失败仅报告push gh-pages被fetch-first拒绝。本轮直接重读失败日志，未重跑CI。3314/3315的mergeable=MERGEABLE、mergeStateStatus=BLOCKED且REVIEW_REQUIRED；其余三条mergeable返回UNKNOWN，不据此断言冲突。
+
+仍沿用固定版本历史证据：Phantom市价开/平、keeper执行、余额/slot刷新，以及playground TP/SL输入修复和84fd2a81部署。正式可信LUT、四钱包、limit/edit/cancel/trigger、原子TP/SL及完整金融矩阵没有新的完成证据；本轮未刷新链上authority或线上服务。70支付转换/最大杠杆一致性/完整simulate_order数值对照/GT Rewards继续暂缓。136 Done表示提前联调环境切片，不表示全部原需求验收完成。3315正文仍写旧release/旧3259及Draft固定措辞，与实时状态不一致；3316/3317仍有旧依赖PR链接，本轮未改外部正文。
+
+
 ## 下一条正式 review 推荐（2026-11-19 15:13 CST）
 
 本轮角色为只读就绪分析；范围限定用户五条 PR，实时读五条 Linear 正文/关系/评论、GitHub PR/checks/review 和 release，并定向核对订单生命周期及通知代码；未做全量迁移需求调查、完整代码 review、构建、UI 或链上验收。五条 Linear 无评论，70/72/77/78 仍 In Progress、136 Done。
