@@ -134,6 +134,8 @@ deliver 默认拒绝个人目录和 gitlinks，选中提交必须属于登记的
 
 2026-11-20 发布分支说明核验：上游 `docs/onboarding/release-process.md` 本地 blob 与 GitHub 当前版本一致（`2a92eacc16a200e625ed7c2ff93627550fb8b6d7`）。普通任务进入 `release`，通常周四从其切出 `release-N`，候选分支经测试及必要修复后以 `Release N` PR 合入生产 `master`；这不是要求整个 `release` 停止开发，也不要求等测试结束才创建发布 PR。未计划开放的已合代码须由默认关闭的 flag 隔离；不能概括成其他功能一律无 flag，另有 keeper 运行时开关。Hotfix 经协调从 `master` 派生并直接 PR 回 `master`，随后同步到 `release`。Release 136/#3322（`release-136`→`master`）已于11月20日00:17上海时间合并，近期周四节奏按UTC/团队时区理解；北京时间可能已跨至周五。GMTrade main/beta/stable仅可按用户描述作角色类比，不据此声称已核验旧仓库发布规则。
 
+2026-11-20 发布合并一致性核验：Release 136 在 [#3327](https://github.com/gmx-io/gmx-interface/pull/3327) 先将 `master` 同步到 `release-136`；候选最终 HEAD `ee4f5d56494ac4489f5e91dc507230152de8d422` 与 [#3322](https://github.com/gmx-io/gmx-interface/pull/3322) 合入 master 的 merge commit `3e2bc5fefd19d54f05f41db86214c9e10087c29f`，Git tree 均为 `458c067874da034290d1179fa48f76536c6056f8`，故本次最终合并没有改变候选文件内容。不同 commit SHA 不代表代码内容不同；此实例不证明所有发布都自动保持一致，也不证明最终 HEAD 已完成全部人工回归。仓库 `pr-tests.yml` 使用 pull_request 默认 checkout，常规 CI 检查模拟合并结果；`release-regression.yml` 将 Cloudflare 预览绑定 PR head SHA，但不是每次 head 更新自动重跑的完整回归。发布主控规范另要求集成环境人工回归、生产 smoke、flag 和回滚计划。候选/合并 tree 一致不等于生产构建产物、环境及运行时配置完全一致。实时 master protection 接口返回404、rules接口返回空数组，未能确认当前强制门禁与分支必须最新策略；不能仅按文档声称它们已实际启用。
+
 ### Commit 与分支
 
 - 本地约定：commit 英文，以动作说明实际结果，例如 `Fix stale Solana order status TRD-123`；有明确关联需求时带真实编号，没有编号的基础设施维护不编造编号。当前已核对的上游规则未要求 Conventional Commits，不强制添加 `feat:` / `fix:`。
