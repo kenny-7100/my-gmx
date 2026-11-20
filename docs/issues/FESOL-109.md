@@ -1,5 +1,13 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## Frontend Task Organization 刷新（2026-11-20 13:59 北京时间）
+
+角色：任务协调状态核验与文档维护。用户要求重新检查既有15行表并更新；使用已读Linear skill/MCP读取全部15项正文、状态、负责人、cycle、附件及全部评论，核对Trading cycle列表、14个当前PR元数据及所有开放PR最新checks；补查TRD-83/FESOL-28仍无专属PR结果。更新同一[线上文档](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)并回读核对，保留Rainer→Sulliven→Kenny排序；未改issue/PR状态或发送评论，未执行产品验收。
+
+新增：TRD-98已Done，Reflectiv于11月20日04:26评论feature branch验证通过；#3195仍Open/非Draft/CHANGES_REQUESTED，head `58e343bb14`，检查全成功。TRD-142已Done，Reflectiv于03:47评论逐项验证通过；#3294仍Open/非Draft/REVIEW_REQUIRED，head `5e30dbc18f`，检查全成功。只引用评论结论，未另验截图或扩大到release部署。
+
+TRD-78/#3316 `390eba5a6c`、TRD-70/#3317 `a54508119b`、playground/#3318 `d930bf0641`最新返回检查均全成功，删去旧组件报告发布失败/运行中的描述。72/#3315 `15f50b87d2`仍Ready、77/#3314仍非Draft，均待approval且检查全成功；其余开放PR同样检查全成功。63/65/75/80仍为原已合并PR，其他Linear状态、全部负责人/cycle及PR关联不变。Linear Done与PR未合并的差异原样保留；本轮不把CI/feature branch验证当生产验收。顺带搜索观察到LUT #3325、order fields #3207已合并，非本表独立行，未扩展调查或改写产品完成结论。
+
 ## Frontend Task Organization 更新（2026-11-19 13:57 北京时间）
 
 参与角色：任务协调状态核验与文档维护。用户明确要求跟进并更新 [Linear 协调表](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)。逐条读取原表 15 项的 Linear 正文、状态、负责人、cycle、附件、关系与全部评论，核对 Trading 周期列表及 GitHub 当前 PR/review/latest checks，更新同一文档并回读确认 15 行完整保存。未修改 issue 字段或发送评论，未执行产品验收。
