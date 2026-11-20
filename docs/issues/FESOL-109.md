@@ -1,5 +1,23 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 12 月 10 日发布未开工范围核查（2026-11-20 14:24 北京时间）
+
+角色：只读交付缺口分析，不接管实施。读取 TRD-101 正文/关系/空评论及迁移项目全部 70 条 issue（Trading，非归档，单页无后续页），定向补读 83/85/92/109/119/158、DES-65 的正文/关系/全部评论及 TRD-70 正文，核对主仓库近期全状态 PR、候选正文/文件及固定源码。此次不估算完整迁移百分比、不修改 Linear、外部文档、PR、部署或钱包。
+
+TRD-101 updatedAt 仍为 2026-11-17T18:34:00.951Z，不能把其旧负责人/PR/CI记录当当前状态。12 月 10 日范围仍包含 collateral、Depth（除非明确延期）、交易签名前不足 SOL 检查、本地化及桌面/移动端设计验收；After trading 独立排除。
+
+- **TRD-70 已开始但内部暂缓**：当前 #3317 `a54508119b` 正文仍明确支付币兑换、最大杠杆一致性、完整 simulate_order 数值对照及 GT Rewards 不在本次集成切片；原需求仍要求相应功能/验收。延续用户此前暂缓决定，本轮只列缺口，不恢复开发；切片暂缓不等于发布范围豁免。完整金融对照属于验收，不描述成全无实现。
+- **TRD-83 保证金存取**：11 月 19 日已变为 Sulliven / In Progress，正文仍留“implementation assignee needs confirmation”的旧说明。全状态按 TRD-83/FESOL-28 搜索未确认其独立实现 PR；#3293 `8818b1d46e` 明确提供 close/edit/cancel/TP-SL，未提供 collateral deposit/withdraw。应确认实际开发线与交付切片，不能再说无人负责，也不能凭没有 PR 断言本地没开工。
+- **TRD-158**：Kenny / Backlog，无评论。#3315 `b280eadf75` 的 sendOrderTransactions.ts 已有签名前真实 RPC 模拟、network/keeper/wrapping 余额检查；但模拟失败仍可能抛通用日志，未证明完整覆盖规定的明确不足 SOL 文案。属部分覆盖、完整需求未独立收口；GM/GLV 等后续交易随 TRD-116 后移，不强行列为本次发布新增范围。
+- **本地化**：TRD-119 已 Duplicate，责任在 TRD-101 checklist。当前计划未列独立执行负责人/全量影响清单/翻译验收证据；不能把已有翻译文件或 extraction checks 等同全迁移语言验收，也不能据此断言所有翻译从未开始。
+- **DES-65**：Pasha / Backlog、无评论；正文要求 accepted desktop/mobile frames、VOB/history 决策与网络/失败恢复交接。未确认该需求完整交接，建议核对实际设计成果；未全量调查 Figma，不断言设计从零未做。
+
+纠正容易误判的两项：TRD-109 仍 Todo / Divhead，但 [#3325](https://github.com/gmx-io/gmx-interface/pull/3325) `2b07029b79` 已于 11 月 19 日合入 release，正文称使用 GMX 冻结表且保留 73/155 地址顺序，故不是零开工；本轮未重读链上 authority 或 keeper flags。TRD-85 仍 In Test / Rainer，#3223 `c8f9c4a85d` 不改 DepthChart，但实时 release 的 DepthChart.tsx 已有 tradeMath=gmsol 专用 price-impact/execution-price 分支，不能按旧记录“移除 preview”推断 Depth 完全未实现；仍缺本轮真实 Depth 验收。
+
+TRD-107/108 均已 In Progress / Divhead。11 月 19 日新增证据包含金融四输出固定原生参考对照，以及 API #361 已部署、#362 性能/恢复改进；3 秒 post-trade 目标、生产约束容量/恢复及真实 open-with-TP/SL→edit→close 刷新验收仍开放。它们属于已开始未完成，不列为未开工需求。当前 Kenny 业务 PR 为 #3314/#3315/#3316/#3317，playground #3318；#3259/#3258/#3261/#3262/#3288 已关闭替换。
+
+优先协调：确认 Sulliven collateral 实现线；确认 Kenny 已暂缓产品能力如何满足发布范围；指定本地化执行与设计验收责任；按 11 月 30 日闭环、12 月 4 日功能收口、12 月 7–9 日验收推进。公开可见 PR/字段不能证明个人本地是否已编码，以上对“未开始”保留此边界。
+
 ## Frontend Task Organization 刷新（2026-11-20 13:59 北京时间）
 
 角色：任务协调状态核验与文档维护。用户要求重新检查既有15行表并更新；使用已读Linear skill/MCP读取全部15项正文、状态、负责人、cycle、附件及全部评论，核对Trading cycle列表、14个当前PR元数据及所有开放PR最新checks；补查TRD-83/FESOL-28仍无专属PR结果。更新同一[线上文档](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)并回读核对，保留Rainer→Sulliven→Kenny排序；未改issue/PR状态或发送评论，未执行产品验收。
