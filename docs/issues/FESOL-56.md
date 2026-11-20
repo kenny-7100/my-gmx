@@ -365,3 +365,7 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 ## 2026-11-14 独立推进收尾
 
 最终CI、19交付组合的原生Chrome未连接钱包回归与56固定WASM原子体积归因已完成，详见[三项收尾](../solana-trading-dependencies.md#独立推进三项收尾2026-11-14)。四PR关键代码检查通过；组件报告403，56另有1 flaky重试通过。未确认需新增业务修复的问题，HEAD未变。原子组合仍1255/1232 bytes，假设单表1221不代表真实LUT可用。71/112及真实钱包验收未解除；72版本已由用户确认。既有Draft正文已更新，未转正式review。
+
+## 上游接续实施（2026-11-20）
+
+本轮参与角色：Kenny 自有需求上游接续、冲突修复与组合验证。详见[本轮实施证据](../solana-trading-dependencies.md#五需求上游接续实施2026-11-20)。先在原开发线实现，精确接续现有交付PR；未修改Linear状态或代发协作消息。

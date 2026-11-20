@@ -1,5 +1,21 @@
 # Solana 交易链路依赖审计
 
+## 五需求上游接续实施（2026-11-20）
+
+用户授权执行 Kenny 可推进的事项。本轮已在原开发线合并核验过的上游，再更新对应现有交付线；保留 commit 拆分、原拓扑与已有 Ready/Draft 状态，不代改其他负责人 PR，不修改 Linear 或发群消息。
+
+- 72 接续 Divhead 的 c59c5fc672 原子准备逻辑和 release 1cd20c1a5a，合并 #3195 58e343bb14、#3205 31bb690ebe。消费者改用迁移后的 useGmsolWalletBalances；交付历史合并残留的8个旧 hook/test路径删除，canonical实现保留。
+- 78 合并72并保留 trackingRequests、receipt、未知回执恢复、真正刷新错误与最低slot保护。70继续接续78，保留release permit规则和Solana gate，更新canonical余额hook；TPSLInputRow旧fixture改用release新的collateralAmountInIndexTokens契约，原价格/PnL断言保留。
+- 136/playground 合入上述交付，以及 #3294 5e30dbc18f 正式Pay tokenInfo和 #3223 c8f9c4a85d 图表revision/refetch；保留balance injection、isSyncing、手动Retry。平仓合并的重复isTwap声明在原136修复后精确转入playground。
+- 删除playground空LUT运行时override及插件，使用release冻结LUT；增加unsigned atomic诊断选项。其余正式候选head未变，不重复集成。77无新head/代码动作需求。
+- 四组真实RPC unsigned atomic模拟全部通过：市价多/空1172bytes，限价多/空1204bytes，均低于1232。另按用户此前具体BTC市价多意图（5USD、2.498094USDC、TP70000、SL60000）复现，1172bytes、slot471575759模拟成功。相对价格四组slots471575138/152/166/173；全部signed=false、broadcast=false，仅模拟，不证明Phantom Lighthouse扩展后体积、落链与keeper。
+
+当前各开发/交付src/sdk/landing/yarn.lock一致。72前端3510passed/1skip，SDK1025passed；78前端3530passed/1skip；playground关联34文件309tests通过。交付72/78/70分别178/215/236关联tests通过，实际交付与136/playground app+landing类型检查通过，变更TS零warning lint通过。136实际SDK重建通过，playground生产构建8GiB成功，产物包含两张正式冻结LUT。Kenny原生Chrome在127.0.0.1:3016读取真实DOGE/BTC图表、USDC余额45.08和暂无仓位，BTC TP70000/SL60000输入及PnL显示正常，刷新后空仓位/余额恢复、金额输入清空；没有点击提交/签名。UI固定9.5x设置会随保证金联动仓位，因此不将该页面样本写成5USD精确交易；精确5USD样本仅为前述unsigned模拟。
+
+70最终全量3538passed/1skip，语言初始化和WASM编码两项5秒超时；单worker、命令级30秒timeout补跑两文件59tests通过。136最终全量3551passed/1skip、语言初始化5秒超时、两个worker启动超时；单worker正常timeout补跑语言、useSizeConversion、usePositions三文件60tests通过。因本机资源竞争及调度，保留全量异常记录，不称一次全绿，也未修改断言或产品校验来消除超时。
+
+新head：72开发2e5db35310/交付15f50b87d2，78开发334e53fbc1/交付390eba5a6c，70开发cc6cf57b5c/交付a54508119b，136开发5f5ffd79c9/playground d930bf0641。开发已推my-gmx，四条交付已推origin并更新原#3315/#3316/#3317/#3318正文；本轮新增Kenny commits均GPG G，上游已有签名/历史原样保留。77仍161e89e4a4，无新增补丁。3314/3315保留Ready，其余保留Draft，未请求reviewer/合并/修改Linear。本次收尾CI观察：3314全成功；3315组件/WASM/SDK/审计/两个Pages成功、主测试仍运行；3316/3317/3318仍有主测试/组件/WASM或重复事件任务运行，已返回项未见失败，不能称全部全绿。未因旧head gh-pages报告冲突重跑无关历史任务，新head自行生成检查；后续在交付/收到失败信号时刷新，不承诺常驻监控。部署和钱包签名/广播仍需独立授权；四钱包、limit/edit/cancel/trigger、真正原子落链与keeper及独立金融对照不因本轮模拟而完成。
+
 ## 五需求可跟进的上游增量（2026-11-20）
 
 用户要求列可更新依赖及跟进事项。本轮补查12条直接相关PR状态/checks，比较136已记录集成head到最新head的增量，未实施业务。除前节冻结LUT/72新builder外，新增如下：

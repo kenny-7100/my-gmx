@@ -246,3 +246,7 @@ Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新
 新增消费者回归覆盖 pending→funded→scope/error unknown→真实零；原开发目录相关3 suites/12 tests与TypeScript通过，全量352 suites passed/1 skipped、3484 tests passed/1 skipped。本任务精确cherry-pick `3cee91eb7e`，该目录TypeScript与相关12tests通过；原release delivery精确转入 `d0726f09d9`，该目录TypeScript与相关12tests通过。交付提交仍仅本地，未推送更新PR；不把开发全量结果冒充delivery全量。
 
 现有原生Chrome在TRD-136集成页验证真实余额展示，3 USDC/6 USD多空输入通过；1 USDC被最低保证金校验阻止。没有订单提交、签名或广播。复用判断更新 [RL-02](../review-lessons.md#rl-02-数据含义与完整性)：RPC读取成功仍需追踪共享消费者，不能只看Hook就确认余额业务可用。
+
+## 上游接续实施（2026-11-20）
+
+本轮参与角色：Kenny 自有需求上游接续、冲突修复与组合验证。详见[本轮实施证据](../solana-trading-dependencies.md#五需求上游接续实施2026-11-20)。先在原开发线实现，精确接续现有交付PR；未修改Linear状态或代发协作消息。

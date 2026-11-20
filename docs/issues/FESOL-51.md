@@ -37,3 +37,7 @@
 56 需复用该 raw balance/RPC 与 hook key 做发送确认后的刷新；本轮未运行页面/RPC。详见 [FESOL-56](FESOL-56.md)。
 
 本轮已 merge #3195 至 56 开发分支并与最新 #3193 RPC 生命周期组合。新增发现：余额 hook 尚未被 Solana 统一 TokensData provider 消费，交易校验会把 undefined 当 0；这是跨 PR 集成缺口，不代表余额 decoder 本身错误。后续接入与 mutate 复用见 [FESOL-56](FESOL-56.md)。
+
+## Kenny 消费者集成（2026-11-20）
+
+参与角色：候选集成与组合验证，未接管原需求、修改原作者PR或代作验收。余额/RPC候选58e343bb14已由Kenny集成进72→78→70→136，并将旧路径消费者切至canonical hook；保留owner/network/freshness、健康探针取消及独立读取保护。 证据与边界见[本轮接续](../solana-trading-dependencies.md#五需求上游接续实施2026-11-20)。

@@ -13,3 +13,7 @@
 主检查、standalone、Audit、Cloudflare 成功；组件 workflow 红色源于 [run 44088629315](https://github.com/gmx-io/gmx-interface/actions/runs/44088629315) 报告发布 git push origin gh-pages 的 non-fast-forward，实际 286 项组件测试通过（4.9m）。不是测试失败，也不是权限 403。三个未关闭 review thread 已 outdated，Rainer 已回复处理；增量游标/缓存和移除 depth preview 在当前源码可见，不将 thread 未 resolve 等同代码未修。
 
 集成风险：PR 的 useGmsolAccountData 基于旧接口，当前 TRD-136 有 GmsolAccountSlotTracker/minContextSlot、成交确认新鲜度和 positions 15s/fee 60s 刷新预算，不能被旧文件覆盖；refetch 应叠加到当前接口。Provider 必须保留余额及 TRD-84 GmsolOrderActionsProvider。只读 patch 检查账户 hook 上下文不匹配，尚未实际 merge，不声称已证明 merge 冲突。建议在 TRD-142 后单独接入，验收标记、市场/钱包切换、操作后刷新与重试；计划见 [TRD-136](TRD-136.md)。
+
+## Kenny 消费者集成（2026-11-20）
+
+参与角色：候选集成与组合验证，未接管原需求、修改原作者PR或代作验收。候选c8f9c4a85d已集成136/playground，组合positions+markets+prices refetch并保留isSyncing、手动Retry与balance injection；SDK按本分支源码重建。 证据与边界见[本轮接续](../solana-trading-dependencies.md#五需求上游接续实施2026-11-20)。
