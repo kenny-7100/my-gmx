@@ -1,5 +1,18 @@
 # Solana 交易链路依赖审计
 
+## 五需求可跟进的上游增量（2026-11-20）
+
+用户要求列可更新依赖及跟进事项。本轮补查12条直接相关PR状态/checks，比较136已记录集成head到最新head的增量，未实施业务。除前节冻结LUT/72新builder外，新增如下：
+
+- #3294 `2ad1f8971a`→`5e30dbc18f`，唯一新commit fix Solana pay token selectors，实际diff在TradeBox.tsx/MarginField.tsx各加tokenInfo={infoTokens[fromTokenAddress]}。正式PR已提供136对应Pay临时接线，可比较等效后纳入正式来源并移除重复归属；不能声称已同步或已完成手测。OPEN/Ready，6项返回checks成功。
+- #3195 `372e7ff471`→`58e343bb14`新增4commits：wallet recovery/price freshness、cancelled RPC probes、wallet loading简化、reads independent of health probes；涉及provider/hook、shared RPC/fallback tracker及测试20文件。OPEN/Ready，reviewDecision仍CHANGES_REQUESTED；最新主CI失败日志为SDK markets.spec.ts:31测试15秒超时（994passed/1failed），不是组件报告问题，也不能凭此认定业务逻辑缺陷或CI全绿。可跟进原作者修复/验证及群里Reflectiv桌面移动手测，集成需核对session/owner/network/freshness保护。
+- #3223 `beaa4d28dd`→`c8f9c4a85d`新增fix Solana chart revisions and position retries（7文件，含provider/token/raw market/chart fetcher），OPEN/Ready，6项返回checks成功；与136保留retry/slot保护有交集，应精确组合验证，不整文件覆盖。
+- #3207 `6bb15c691f`已11月19日22:03北京时间MERGED，但目标是#3205的fesol-113-fee-discount-fields分支，非release。#3205 `baed302cb0`→`31bb690ebe`已合并order fields并consolidate Solana SDK updates、包含nested order parsing及release/LUT更新；OPEN/Ready、6项checks成功。不能把3207 merged称所有order字段已进入release。其增量包含大量release提交，应分开基线同步和业务parser差异，避免复制无关变化。
+- #3271已合入release，136原已集成同head cb6f535c9b，仅更新来源状态，无新业务补丁；#3287仍24e983c4c4、#3293仍0722cc8701、#3273仍6995d3a0d5，均OPEN/Ready且当前返回checks成功，没有新head可重复集成。#3293未新增136 close Receive selector接缝的正式替代。
+
+后续可先在原需求线接续72新冻结表/atomic准备，精确同步78/70，再汇入136，比较3294等效补丁并逐项吸收3195/3205/3223增量；按来源处理冲突并复验目标。未发布评论、请求review、重跑CI、变更Linear或部署。原有完整金融/四钱包/原子链上矩阵仍待验收，不把接入候选代码等同前置已合入或已验收。
+
+
 ## 群聊补充后的 LUT 状态更正（2026-11-20）
 
 用户提供11月19日群聊截图，包含Divhead提交#3325、Quinn批准，以及3294/3195交Reflectiv手测。由此定向刷新，取代下节仍把可信LUT列为未提供资源的过期判断。GitHub确认[#3325](https://github.com/gmx-io/gmx-interface/pull/3325)由qwinndev APPROVED，于11月19日21:32:51北京时间MERGED，merge commit `1cd20c1a5a`；所有返回checks成功。只改lookupTables.ts地址。
