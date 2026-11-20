@@ -1,5 +1,9 @@
 # Solana 交易链路依赖审计
 
+## 独立 playground 已更新（2026-11-20）
+
+用户后续明确授权部署，已将d930bf0641发布至既有个人Pages环境：[稳定地址](https://solana-playground.solana-playground.pages.dev/trade)、[固定部署19b0c9a4](https://19b0c9a4.solana-playground.pages.dev/trade)。两地址各11项关键资源哈希匹配本地构建，Kenny Chrome真实BTC行情/图表/余额/空仓位和原生刷新通过；无签名广播。已更新#3318部署证据，详见[TRD-136记录](issues/TRD-136.md#独立-playground-更新部署2026-11-20)。本节取代下方本轮实施时“尚未部署/需部署授权”的时点状态。
+
 ## 五需求上游接续实施（2026-11-20）
 
 用户授权执行 Kenny 可推进的事项。本轮已在原开发线合并核验过的上游，再更新对应现有交付线；保留 commit 拆分、原拓扑与已有 Ready/Draft 状态，不代改其他负责人 PR，不修改 Linear 或发群消息。
