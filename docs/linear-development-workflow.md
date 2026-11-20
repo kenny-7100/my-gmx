@@ -132,6 +132,8 @@ deliver 默认拒绝个人目录和 gitlinks，选中提交必须属于登记的
 
 依据：[上游发布流程第 3 节](../gmx-prompts/docs/onboarding/release-process.md#3-pull-requests-and-ci)（2026-11-12 核对）。使用前按子仓库规则核验相关规范的新变化；下面明确区分上游要求和本地写作约定。
 
+2026-11-20 发布分支说明核验：上游 `docs/onboarding/release-process.md` 本地 blob 与 GitHub 当前版本一致（`2a92eacc16a200e625ed7c2ff93627550fb8b6d7`）。普通任务进入 `release`，通常周四从其切出 `release-N`，候选分支经测试及必要修复后以 `Release N` PR 合入生产 `master`；这不是要求整个 `release` 停止开发，也不要求等测试结束才创建发布 PR。未计划开放的已合代码须由默认关闭的 flag 隔离；不能概括成其他功能一律无 flag，另有 keeper 运行时开关。Hotfix 经协调从 `master` 派生并直接 PR 回 `master`，随后同步到 `release`。Release 136/#3322（`release-136`→`master`）已于11月20日00:17上海时间合并，近期周四节奏按UTC/团队时区理解；北京时间可能已跨至周五。GMTrade main/beta/stable仅可按用户描述作角色类比，不据此声称已核验旧仓库发布规则。
+
 ### Commit 与分支
 
 - 本地约定：commit 英文，以动作说明实际结果，例如 `Fix stale Solana order status TRD-123`；有明确关联需求时带真实编号，没有编号的基础设施维护不编造编号。当前已核对的上游规则未要求 Conventional Commits，不强制添加 `feat:` / `fix:`。
