@@ -1,5 +1,15 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## PR #3315 P2 修复（2026-11-20）
+
+用户授权修复后，沿原 development 实施并精确 cherry-pick 到原 delivery；开发提交 `a2622449a3`、交付提交 `b280eadf75`，两者 GPG 验证均为 G，三份交易模块文件内容一致。仅捕获 `sendTransaction().send()` 返回的实际 Solana `-32002` preflight failure，清理匹配本次签名的持久化记录并移除本次 `pendingSignature`；并发替换记录不清理，超时/断连继续 reconcile，前序已确认 preparation 签名保留。未改变依赖、WASM、LUT、订单构建或钱包校验。
+
+回归使用既有真实 WASM/Ed25519 fixture 和安装版 SDK 的错误转换；修复前失败、修复后验证 pending 清理、reconcile 恢复和下一次提交成功，以及被另一笔签名替换时保留记录。新增一个表驱动测试；另以临时用例验证先前 preparation 成功而后续发送被拒绝时仍保留成功签名，临时源不进入产品提交。开发目录全量前端 **3511 passed / 1 skipped**、交易与 hook **21 passed**、app/landing types、修改文件 ESLint/Prettier 与 diff 检查通过。
+
+交付目录全量前端 **3511 passed / 1 skipped**、app/landing types、修改文件 ESLint/Prettier 与 diff 检查也通过。开发分支已备份推送 `my-gmx`，交付分支已推送 `origin` 并更新原 [#3315](https://github.com/gmx-io/gmx-interface/pull/3315) 的 Summary/Validation；保留用户设置的 Ready 状态。GitHub 确认新交付提交签名 `verified=true / valid`；新 head 的远端 CI 仍在进行，本地通过不替代 CI 完成。
+
+本次仅修复发送失败的状态生命周期；下方 review 是修复前版本的历史证据。未新增部署、钱包签名或主网交易验收，完整钱包/订单 AC 继续按既有边界处理。
+
 ## PR #3315 当前 head 独立 review（2026-11-20）
 
 角色：只读审查，未修改业务、提交 GitHub review、Linear 或发送交易。按 gmx-prompts 的 interface review/Solana 规范和 RL-04/05/07 检查 `15f50b87d2`；实时 release `1cd20c1a5a` 的无提交合并结果 tree 与 head 完全一致。上游规范 main 为 `7c5a4aff`，本地 `6e001536` 的本次 review/Solana/编码规则与其无差异；gmx-solana main 为 `d81a3e69`，按产物固定 revision `7fe40082` 逐项核对五种允许指令的 discriminator 和 account order，全部一致。API main `678fc2e8` 仅通过远端 ref 阅读，保留固定 checkout。

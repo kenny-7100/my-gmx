@@ -73,7 +73,7 @@
 
 **项目判断：** UI 可见性、请求启停、业务状态归属及在途任务存活分别决定。隐藏入口不等于关闭所有入口；CSS 隐藏或丢弃 Hook 返回值仍可能请求。暂停新读取不应无条件销毁在途交易 watcher，关闭整页也可能误伤网络中立设置。
 
-**确定拒绝与广播不确定性（2026-11-20）：** [#3315 当前 head review](issues/FESOL-56.md#pr-3315-当前-head-独立-review2026-11-20) 复现：签名前 simulation 成功后，发送 RPC 的 preflight 仍可能明确拒绝；若所有 send 错误一律保留持久化签名，从未广播的签名将始终无 history，使后续提交永久阻塞。应区分明确未广播与超时/断连，前者只清理匹配本次签名的 pending，后者继续 reconcile；不能用通用 catch 清空来破坏防重复保护。反例应覆盖实际 SDK 错误类型、null history、下一次提交和持久化恢复；这是已验证缺陷与修复建议，尚未实施修复。
+**确定拒绝与广播不确定性（2026-11-20）：** [#3315 当前 head review](issues/FESOL-56.md#pr-3315-当前-head-独立-review2026-11-20) 复现：签名前 simulation 成功后，发送 RPC 的 preflight 仍可能明确拒绝；若所有 send 错误一律保留持久化签名，从未广播的签名将始终无 history，使后续提交永久阻塞。应区分明确未广播与超时/断连，前者只清理匹配本次签名的 pending，后者继续 reconcile；不能用通用 catch 清空来破坏防重复保护。反例应覆盖实际 SDK 错误类型、null history、下一次提交和持久化恢复；已在原需求线修复：使用 SDK 的明确 `-32002` 类型判断并比较持久化签名；回归覆盖拒绝后重提及并发替换记录，临时补验保留先前成功 preparation 签名，见[修复记录](issues/FESOL-56.md#pr-3315-p2-修复2026-11-20)。
 
 **共享 TradeBox 的链边界（2026-11-19）：** [TP/SL 输入异常](issues/FESOL-19.md#tpsl-输入触发-evm-payload-异常2026-11-19)证明，渲染后替换 submit state 不能阻止之前无条件执行的 EVM payload Hook。Solana networkId 与兼容保留的 EVM chainId 并存时，须在实际构建边界隔离链专用 payload；共享计算仍可复用。回归需包含已连接账户及有效 TP/SL entries，单测最终 Solana intent builder 不能覆盖共享渲染路径。 同类入口核查需区分显式链隔离、依赖缺少 gas/fee 的隐式短路、以及实际可达的 builder；不要把每个 EVM Hook 调用或通用字符串 key 都判成缺陷。已有 preview 哈希修复不能替代对 payload 消费者的回归。 本轮修复回归在真实 Hook 上覆盖 networkId 单独变化及 EVM 切回，并用有费用的 gmsol 主订单反例证明隔离不依赖缺省数据；已通过 Kenny 钱包会话的有效 BTC/DOGE TP/SL 输入验收，见[交付记录](issues/FESOL-19.md#tpsl-链边界修复已交付2026-11-19)。
 
