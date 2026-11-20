@@ -1,5 +1,9 @@
 # FESOL-71 — FESOL-56 主网运行条件
 
+## 冻结 LUT 已交付并链上核验（2026-11-20）
+
+用户群聊补充触发刷新：#3325已于11月19日21:32北京时间合入release，72最新head已接入。CLI mainnet-beta/finalized确认两张新表authority=null、active，73/155地址与旧表逐项同序相同；78/70/playground尚旧配置。具体地址、版本及109其余AC边界见[状态更正](../solana-trading-dependencies.md#群聊补充后的-lut-状态更正2026-11-20)。本节取代旧记录“资源尚未提供”的当前判断；未实施配置同步、部署或交易。
+
 ## 正式配置 LUT 链上复核（2026-11-19）
 
 本轮只读使用Solana CLI，命令级明确mainnet-beta及finalized commitment，分别读取正式72交付配置中的两表；未读取/输出本机CLI配置、密钥或私有RPC。CoMLGFDWf5soeQ6vtzL6yXeARtwNhTV41cVsrTos31wg与CVHqcEnqZv2dr9PFRiJHJtWW3BPXr6WFZbixzsxmx9eG均仍有authority `FQNU5wn6fVdnPnSZyHL3PmCJsNLTi4Cf8dKU7f3MQjXj`，不是frozen；deactivationSlot均为u64 max（active）。lastExtendedSlot分别334632231/335402516，仅为扩展历史，不是本次读取slot。CLI输出不含account context slot，不能补造同slot链上快照。

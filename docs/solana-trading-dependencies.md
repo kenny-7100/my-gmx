@@ -1,5 +1,16 @@
 # Solana 交易链路依赖审计
 
+## 群聊补充后的 LUT 状态更正（2026-11-20）
+
+用户提供11月19日群聊截图，包含Divhead提交#3325、Quinn批准，以及3294/3195交Reflectiv手测。由此定向刷新，取代下节仍把可信LUT列为未提供资源的过期判断。GitHub确认[#3325](https://github.com/gmx-io/gmx-interface/pull/3325)由qwinndev APPROVED，于11月19日21:32:51北京时间MERGED，merge commit `1cd20c1a5a`；所有返回checks成功。只改lookupTables.ts地址。
+
+Solana CLI显式mainnet-beta/finalized只读重验：新表`GtCrmXDriRQTtzeFqrJkiVxrjeUoRGkhLVH3rcEySb4o`、`TackgvLbopMf7HwUdDEvJZvMCJufJo1nHTaYP6TGJdM`均authority=null、deactivationSlot=u64 max，分别73/155地址，与原CoML/CVHq表逐项同序相等。旧表仍原authority。本输出无context slot，不把lastExtendedSlot当读取slot。冻结与完整复制已有当前链上证据，不再要求Divhead提供尚不存在的新资源。
+
+读取远端各固定head配置：release及72 `c59c5fc672`已用新表；78 `164102b83c`、70 `2bc3392a65`、136/playground `2b53b1933e`仍旧表，playground另有无LUT构建覆盖。72保留空expected-authority map，冻结表无需由该map证明可变authority归属，不能把空map本身继续报为冻结表阻碍。当前剩余是下游接入新配置、评估撤除实验覆盖，并核对真实交易体积/模拟及约定主网矩阵；未开始实施、部署或签名。
+
+TRD109 Linear仍Todo，但已不能据此判断LUT未交付；reference wallet、flags/banner等完整AC本轮未验收。#3294当前OPEN/Ready head`5e30dbc18f`，无reviews；#3195 OPEN/Ready head`58e343bb14`，保留历史changes-requested reviews。两者均比136记录的已集成旧head前进；群里交手测/Reflectiv答应稍后检查不证明手测完成，本轮未实质审查两条新diff、未判定已解决临时选择器接缝，也未联系他人。
+
+
 ## 五需求当前状态复核（2026-11-20）
 
 角色：只读状态调查。官方 Linear MCP 重读五条正文、关系、评论（全部无评论）；GitHub 实时读取 head、checks、review requests/reviews、全部 inline threads（均空）及最新提交。70/72/77/78 均 In Progress，136 Done，负责人均 Kenny；五 PR 均 OPEN、base release、未合并。只更新个人知识，无业务、Linear、PR、CI、部署或钱包写入。
