@@ -1,5 +1,25 @@
 # Solana 交易链路依赖审计
 
+## 五需求最新现状复核（2026-11-20 17:44 CST）
+
+本轮角色为只读状态调查。实时重读五条 Linear 正文、关系及评论（均空），读取五个 GitHub PR 当前 head/checks/review，并对照本地对应交付源码；未开发、部署、签名广播或修改外部协作状态。本轮仅覆盖指定五条，不是全量迁移进度评估，不更新整体百分比。
+
+| 需求 | Linear | PR / head | 送审与当前检查 |
+| --- | --- | --- | --- |
+| TRD-72（原56） | In Progress | #3315 / `b280eadf75` | Ready，已请求 GMX Interface Devs；无 review；当前全部返回 checks 成功 |
+| TRD-70（原19） | In Progress | #3317 / `a54508119b` | Draft，无 review requests/reviews；当前全部返回 checks 成功 |
+| TRD-78（原20） | In Progress | #3316 / `390eba5a6c` | Draft，无 review requests/reviews；当前全部返回 checks 成功 |
+| TRD-77（原72） | In Progress | #3314 / `161e89e4a4` | Ready，已请求 GMX Interface Devs；无 review；当前全部返回 checks 成功 |
+| TRD-136 | Done | playground #3318 / `d930bf0641` | 持续实验 Draft，无 review requests/reviews；当前全部返回 checks 成功 |
+
+全部 PR 仍 OPEN、目标 release，尚未合并。远端 release 为 `1cd20c1a5a`。本次当前 checks 包括主 lint/type/tests、组件、SDK standalone、WASM reproduction、Audit 和两项 Pages，均 SUCCESS；取代上一轮“仍运行”状态，旧 head 的报告发布失败不继续作为当前阻碍。
+
+**新确认的下游缺口**：TRD-72 今日 preflight rejection 修复 `b280eadf75` 已通过全部远端检查；但 78/70 delivery、136 development、playground 均不含该 commit，且实际 `sendOrderTransactions.ts` 均没有新增 `SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE` guard，不能将旧部署描述为已有修复。下一步应先从原需求线接续，再更新交付/组合验证；本次仅核查，未实施。超时/断连仍需保留未知回执恢复，不能泛化清除 pending。
+
+正式冻结 LUT 与 Divhead 原子准备拆分已于前次实施接入下游并部署，不能继续沿用“可信 LUT 未提供”的旧阻碍。已有四组 unsigned atomic 模拟（1172/1204 bytes）不证明钱包扩展后体积、真实原子落链或 keeper。TRD-136 的 Done 对应提前真实交易测试切片，历史 Phantom 市价开仓、平仓闭环不替代四条正式需求全部 AC；当前独立部署仍为 `19b0c9a4` / `d930bf0641`，本轮没有重新请求页面或链上资源，部署/UI/链上证据沿用前次注明日期的记录。
+
+剩余重点：接续最新72修复；完成两条 Ready 的正式 review，并推进78/70自审送审；按用户授权恢复真实限价/edit/cancel/trigger、原子TP/SL与四钱包矩阵。70既定暂缓的payment-to-collateral swap、最大杠杆一致性、完整simulate_order对照、GT Rewards仍未完成，不因136 Done或CI全绿豁免。
+
 ## 独立 playground 已更新（2026-11-20）
 
 用户后续明确授权部署，已将d930bf0641发布至既有个人Pages环境：[稳定地址](https://solana-playground.solana-playground.pages.dev/trade)、[固定部署19b0c9a4](https://19b0c9a4.solana-playground.pages.dev/trade)。两地址各11项关键资源哈希匹配本地构建，Kenny Chrome真实BTC行情/图表/余额/空仓位和原生刷新通过；无签名广播。已更新#3318部署证据，详见[TRD-136记录](issues/TRD-136.md#独立-playground-更新部署2026-11-20)。本节取代下方本轮实施时“尚未部署/需部署授权”的时点状态。

@@ -1,5 +1,9 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## 最新状态核查（2026-11-20 17:44 CST）
+
+本轮只读重查五条Linear及当前PR/checks/review：五PR当前检查均成功、77/72 Ready而其余Draft，均未合并。72最新preflight拒绝清理修复已过CI，但尚未进入78/70/136/playground实际sender源码；正式冻结LUT及此前unsigned atomic模拟已接续，完整链上/金融/四钱包验收仍未完成。版本与边界见[统一核查](../solana-trading-dependencies.md#五需求最新现状复核2026-11-20-1744-cst)。本次未改业务或外部状态。
+
 ## PR #3315 P2 修复（2026-11-20）
 
 用户授权修复后，沿原 development 实施并精确 cherry-pick 到原 delivery；开发提交 `a2622449a3`、交付提交 `b280eadf75`，两者 GPG 验证均为 G，三份交易模块文件内容一致。仅捕获 `sendTransaction().send()` 返回的实际 Solana `-32002` preflight failure，清理匹配本次签名的持久化记录并移除本次 `pendingSignature`；并发替换记录不清理，超时/断连继续 reconcile，前序已确认 preparation 签名保留。未改变依赖、WASM、LUT、订单构建或钱包校验。
