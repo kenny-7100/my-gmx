@@ -1,5 +1,9 @@
 # FESOL-51 — 余额与 RPC 前置调研
 
+## 前置增量核查（2026-11-20）
+
+只读实质核对本需求当前Linear、相关PR及固定版本差异；最新变化、处理建议与验证边界见[统一核查](../solana-trading-dependencies.md#五需求前置增量核查2026-11-20-2246-cst)。本轮未改业务或外部状态。
+
 ## 上游与后续核查（2026-11-18 23:12 CST）
 
 当前TRD-98；#3190已关闭未合并，#3195仍OPEN/CHANGES_REQUESTED、全检查成功。当前head `372e7ff471` 比已集成 `666fa1669a` 只新增一笔地址key修复，交易线和136/playground均未接入；不是reader/余额算法变更。旧ATA线程未resolved不能推定未修复；rpc-debug等review留原作者收口。证据见[统一核查](../solana-trading-dependencies.md#四需求与-trd-136-最新跟进核查2026-11-18-2312-cst)。

@@ -1,5 +1,18 @@
 # Solana 交易链路依赖审计
 
+## 五需求前置增量核查（2026-11-20 22:46 CST）
+
+本轮只读刷新10条直接相关前端PR、release、API main及近期PR，并重读TRD98/84/109/100/129/108/158/107及关键评论。比较基线为今日已集成的3195 `58e343bb14`、3293业务 `0722cc8701`、release `1cd20c1a5a`；未fetch/pull、修改业务、部署、发送交易或外部消息。
+
+- **优先接续3195新提交**：head `bb85bab5e9`，比已集成版本仅新增一笔Preserve Solana network validation and consolidate wallet tests。7文件，runtime主要为rpc.ts记录probe返回的genesisHash，getRpc与账户批量响应返回前assertMainnet；未知genesis仍允许读取，不恢复“必须等健康探测”的依赖。附测试整理及walletTokens注释。当前checks全成功，PR仍OPEN/CHANGES_REQUESTED，无本轮新review；TRD98已Done，Reflectiv于11月20日04:26北京时间评论“Verified on feature branch - looks good”。仅阅读评论文字，未查看三张附件，不将其扩大为精确最新版全矩阵验收。现有playground rpc无该guard；需原72线接续，保护owner/network/slot/余额缓存隔离并传播78/70/136。今日72 `b280eadf75` pending修复也仍需沿同链路接续。
+- **3293更新主要为前置重建**：新head `8818b1d46e` 父节点就是70当前 `a54508119b`，TRD84现In Review，PR OPEN/Ready、无reviews、当前checks全成功。新旧业务提交的GmsolOrderActionsProvider.tsx、buildOrderActions.ts逐字一致；PositionSeller与playground相比除空行外仍缺Receive `tokenInfo={isSolana ? receiveToken : undefined}`。不要把diverged compare中的314个历史提交称新增业务，也不整文件覆盖136已有接缝。跟进Sulliven review/原线吸收Receive修复及limit edit/cancel实测，不自行修改他人PR。
+- **release新增3302**：最新 `fb69d6dc0c`，20:38北京时间合并；比旧基线4commits/6files，TRD139抽离usePendingExpressTxnNotifications、按relay task去重失败处理，仅回滚该交易自己的debit/pending position。影响SyntheticsEventsProvider、types/utils和order callbacks等共享路径。下轮同步release需验证EVM Express失败通知及Solana共享通知组合；不是新增Solana订单能力。
+- **其余已接入前端来源无新head**：3205 `31bb690ebe`、3223 `c8f9c4a85d`、3294 `5e30dbc18f`、3273 `6995d3a0d5`、3287 `24e983c4c4`均OPEN/Ready，当前checks成功；无代码更新可重复集成，重点跟进review/合并。3207仍仅合入3205分支，非release。3271、3325已merged且此前已接入，不再重复列为缺失资源。
+- **API/金融边界有新可用结论**：main仍 `678fc2e8d7`，无新main代码。TRD108正文已于19日更新：12组captured positions、精确账户/virtual inventories/clock/prices，与记录Rust `8af1e70c`输出比较，PnL/close impact/closing fee完全一致，liquidation差小于一原生unit-price quantum；不是本轮独立复跑，样本零referral、不含index-token collateral，Rust参考当日未重生成。此前“尚无四项对照”应收窄为已具上述范围证据；GMTrade参考钱包及真实open-with-TP/SL→edit→close单次minContextSlot刷新仍待验收。
+- **API362值得跟进交付**：`7bf23fc23d` OPEN，当前两项test checks成功、无reviews，修复共享slot polling独立deadline及catch-up原子发布，10秒freshness/slot floor不放宽。TRD107现In Review，正文仍保留旧CI待完成措辞；本轮GitHub显示CI已通过，但未合并/部署。受控本地模拟负载post-trade p95仍3.030s/4.228s，4 readers重载4.583s且position429为1.45%，不称3秒目标或生产容量通过。API363仅Jest UTC测试配置、CI成功，非前端运行依赖，不为此更新业务SDK/服务。
+
+建议优先级：72最新pending修复与3195网络保护接续 → 同步release共享通知变化并组合验证 → 跟进3195/3293等review与API362部署/负载目标 → 按原授权范围补真实订单矩阵。TRD109仍Todo但冻结LUT已交付，完整reference-wallet/flags/banner验收未据此完成；TRD158仍Backlog，跨Pools/GLV gas检查不是本次交易线顺带扩展范围。
+
 ## 五需求最新现状复核（2026-11-20 17:44 CST）
 
 本轮角色为只读状态调查。实时重读五条 Linear 正文、关系及评论（均空），读取五个 GitHub PR 当前 head/checks/review，并对照本地对应交付源码；未开发、部署、签名广播或修改外部协作状态。本轮仅覆盖指定五条，不是全量迁移进度评估，不更新整体百分比。

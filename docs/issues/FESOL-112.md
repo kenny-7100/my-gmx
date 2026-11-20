@@ -1,5 +1,9 @@
 # FESOL-112 — 金融集成验收依赖
 
+## 前置增量核查（2026-11-20）
+
+只读实质核对本需求当前Linear、相关PR及固定版本差异；最新变化、处理建议与验证边界见[统一核查](../solana-trading-dependencies.md#五需求前置增量核查2026-11-20-2246-cst)。本轮未改业务或外部状态。
+
 ## 上游与后续核查（2026-11-18 23:12 CST）
 
 当前TRD-108已In Progress，正文确认#340部署、SDK2.9.3切换完成。本轮公开config HTTP200、67/67gmsol，values HTTP200、67条，旧无marker阻碍应移除；未查账户接口，不证明slot/金融/交易后矩阵通过。独立四项金融输出、GMTrade参考与open-with-TP/SL→edit→close刷新仍是需求明确剩余项。证据见[统一核查](../solana-trading-dependencies.md#四需求与-trd-136-最新跟进核查2026-11-18-2312-cst)。
