@@ -1,5 +1,13 @@
 # Solana 交易链路依赖审计
 
+## 五需求前置接续与部署（2026-11-20 深夜）
+
+已按用户授权完成下节建议的代码接续：72 preflight pending修复、3195 `bb85bab5e9` mainnet guard、release `fb69d6dc0c` Express失败通知保护，沿72→78→70既有开发/交付线进入136 `92e34971aa`及playground `1c7acb77f1`；新commit签名G，普通推送，保留PR状态和提交拓扑。3195仍未合并，3293只是前置重建，没有重复覆盖Receive tokenInfo。77及已核实未变来源不重复搬运。
+
+各开发/交付与136/playground运行源码一致；72开发全量3501passed/1skip，136全量3563passed/1skip，72/78/70交付及playground各48tests、types、定向lint通过。136 SDK与playground生产构建通过。已部署[07140b09](https://07140b09.solana-playground.pages.dev/trade)，[稳定页面](https://solana-playground.solana-playground.pages.dev/trade)已更新，24项线上资源hash匹配。
+
+**最终页面验收仍被外部RPC阻断**：Kenny Chrome真实行情/既有限价订单/TP-SL预估正常，余额缺失、表单Unable to load trading data；配置Alchemy应用在三个Origin下均403，服务明确SOLANA_MAINNET未启用。已请求用户启用后复验，不改用其他RPC绕过。另有既存Privy域名CSP限制。部署成功不等于页面全通过、钱包签名或真实订单验收。详细版本、检查与排障边界见[136接续记录](issues/TRD-136.md#前置更新与-playground-接续2026-11-20-深夜)。API362仍未合并/部署，负载目标与完整订单/钱包/金融矩阵继续保留。远端主CI仍运行，playground组件报告发布遇gh-pages并发push冲突，不称全绿。
+
 ## 五需求前置增量核查（2026-11-20 22:46 CST）
 
 本轮只读刷新10条直接相关前端PR、release、API main及近期PR，并重读TRD98/84/109/100/129/108/158/107及关键评论。比较基线为今日已集成的3195 `58e343bb14`、3293业务 `0722cc8701`、release `1cd20c1a5a`；未fetch/pull、修改业务、部署、发送交易或外部消息。
