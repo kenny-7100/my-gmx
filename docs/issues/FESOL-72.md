@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 五需求现状核查（2026-11-22）
+
+本轮刷新Linear、当前PR/checks/review及直接前置，确认77已合并但Linear仍In Progress、72新增原生SOL/WSOL原子资金修复尚未进入78/70/playground，以及70/playground当前与release冲突。最新用户自填配置部署未复验RPC，不沿用旧403为当前结论。各需求版本、剩余事项和证据边界见[统一核查](../solana-trading-dependencies.md#五需求最新现状复核2026-11-22)。未修改业务或外部状态。
+
 ## 最新状态核查（2026-11-20 17:44 CST）
 
 本轮只读重查五条Linear及当前PR/checks/review：五PR当前检查均成功、77/72 Ready而其余Draft，均未合并。72最新preflight拒绝清理修复已过CI，但尚未进入78/70/136/playground实际sender源码；正式冻结LUT及此前unsigned atomic模拟已接续，完整链上/金融/四钱包验收仍未完成。版本与边界见[统一核查](../solana-trading-dependencies.md#五需求最新现状复核2026-11-20-1744-cst)。本次未改业务或外部状态。

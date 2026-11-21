@@ -1,5 +1,9 @@
 # FESOL-56 — 交易构建、校验与发送的前置梳理
 
+## 五需求现状核查（2026-11-22）
+
+本轮刷新Linear、当前PR/checks/review及直接前置，确认77已合并但Linear仍In Progress、72新增原生SOL/WSOL原子资金修复尚未进入78/70/playground，以及70/playground当前与release冲突。最新用户自填配置部署未复验RPC，不沿用旧403为当前结论。各需求版本、剩余事项和证据边界见[统一核查](../solana-trading-dependencies.md#五需求最新现状复核2026-11-22)。未修改业务或外部状态。
+
 ## 前置接续部署（2026-11-20 深夜）
 
 本需求相关交易线已接续3195网络保护、72 preflight pending修复及release通知变更，并集成136/playground部署。实际版本、各目录检查及Alchemy应用未启用主网造成的页面验收阻碍见[136接续记录](TRD-136.md#前置更新与-playground-接续2026-11-20-深夜)。没有修改他人PR或Linear，未把构建/部署通过扩大为钱包与金融验收。

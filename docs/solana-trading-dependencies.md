@@ -1,5 +1,23 @@
 # Solana 交易链路依赖审计
 
+## 五需求最新现状复核（2026-11-22）
+
+本轮只读刷新五条 Linear 正文、关系和评论（均空），核对五个 GitHub PR 当前 head、reviews、checks、mergeability，及直接前置和 API 362/364/365。未改业务、部署、读取环境 key 或操作钱包。本轮仅覆盖指定五条，不评估完整迁移百分比。
+
+| 需求 | Linear | PR / head | 本轮实时结果 |
+| --- | --- | --- | --- |
+| TRD-77 | In Progress | [#3314](https://github.com/gmx-io/gmx-interface/pull/3314) / `161e89e4a4` | Divhead APPROVED，11月21日06:19北京时间已合入 release；merge `d1e9e1fc4c`，checks成功。Linear未同步完成，不据合并扩大全部链上AC |
+| TRD-72 | In Progress | [#3315](https://github.com/gmx-io/gmx-interface/pull/3315) / `fac83d15bd` | OPEN/Ready，REVIEW_REQUIRED，无reviews，MERGEABLE；当前返回6项checks均SUCCESS |
+| TRD-78 | In Progress | [#3316](https://github.com/gmx-io/gmx-interface/pull/3316) / `699b6d8e08` | OPEN/Draft，REVIEW_REQUIRED，无reviews，MERGEABLE；当前返回checks均SUCCESS |
+| TRD-70 | In Progress | [#3317](https://github.com/gmx-io/gmx-interface/pull/3317) / `b7b2f695d1` | OPEN/Draft，REVIEW_REQUIRED，无reviews，CONFLICTING；当前返回checks均SUCCESS，旧head成功不证明当前合并结果可用 |
+| TRD-136 | Done | [#3318](https://github.com/gmx-io/gmx-interface/pull/3318) / `3c507ad2a6` | 持续实验OPEN/Draft，CONFLICTING；当前head只返回两项Pages成功，不能称完整CI全绿 |
+
+实时 release 为 `d1e9e1fc4c`。与上次相比，3195（余额/RPC）、3205（SDK字段/金融计算）、3287（单位换算）、3294（Pay选择器）均已MERGED；3223图表、3293平仓/改单撤单仍OPEN，3293当前CONFLICTING。API362、364、365均已MERGED，main `90df09fd` 已包括slot等待/catch-up快照及增量市场发现修复；本地主目录源码已在前一独立切片同步，但不证明运行服务/线上已升级或负载目标通过。
+
+**新增下游接续缺口**：Divhead 在72提交 `0891747ffc`（fix native SOL funding for atomic TP and SL），随后 `fac83d15bd` 合并release/master。原生SOL原子开仓先使用现有WSOL，只wrap差额；体积不足时仅把钱包自有WSOL包装移到准备交易，订单/escrow/抵押转移仍原子；签名前/广播前校验WSOL快照，费用预留覆盖后续交易。实时读取四个head的builder，只有72含 `wrappedSolBalance`，78/70/playground三者builder blob均为 `e6b32c4c9d252a2130865476e5022362ab01269e`，尚无本修复。下一步应在原72开发线接续上游成果后按72→78→70→136/playground传播，连同最新release冲突处理和组合验证；本轮未实施，不将其他共享路径差异一并宣称审查通过。
+
+最新独立部署沿用11月21日用户自填配置切片：[551b2064](https://551b2064.solana-playground.pages.dev/trade)，source `3c507ad2a6`，此前10项资源hash一致。用户当时要求不查看key并自行手动验收；本轮延续边界，未读取环境文件或验证RPC/页面。旧Alchemy403是更早配置的历史证据，最新配置是否恢复未知，不继续将其写成当前已复现阻碍。Privy新登录、四钱包、限价/改单/撤单/触发、真实原子TP/SL落链及独立金融对照仍缺完整验收。70既定暂缓的payment转换、最大杠杆一致性、完整simulate_order对照、GT Rewards仍保留。136 Done仅对应提前联调切片。
+
 ## 五需求前置接续与部署（2026-11-20 深夜）
 
 已按用户授权完成下节建议的代码接续：72 preflight pending修复、3195 `bb85bab5e9` mainnet guard、release `fb69d6dc0c` Express失败通知保护，沿72→78→70既有开发/交付线进入136 `92e34971aa`及playground `1c7acb77f1`；新commit签名G，普通推送，保留PR状态和提交拓扑。3195仍未合并，3293只是前置重建，没有重复覆盖Receive tokenInfo。77及已核实未变来源不重复搬运。
