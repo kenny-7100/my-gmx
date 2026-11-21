@@ -87,3 +87,5 @@ claude.md
 /.local/acceptance/worksheet-consistency/
 /.local/acceptance/solana-page-slices/
 /.local/acceptance/fullstack/
+# Local playground diagnostics and API process reports
+/.local/trd-136/
