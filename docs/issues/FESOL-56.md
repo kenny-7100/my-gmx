@@ -403,3 +403,10 @@ GitHub CI 本轮读取：Audit、SDK standalone build SUCCESS；Linting/Type Che
 ## 上游接续实施（2026-11-20）
 
 本轮参与角色：Kenny 自有需求上游接续、冲突修复与组合验证。详见[本轮实施证据](../solana-trading-dependencies.md#五需求上游接续实施2026-11-20)。先在原开发线实现，精确接续现有交付PR；未修改Linear状态或代发协作消息。
+
+
+## 五需求前置接续与最新 playground（2026-11-22）
+
+原TRD-72开发线签名merge `fac83d15bd`（包含 `0891747ffc` 原生SOL/WSOL原子TP/SL修复及正式release），开发 `c92c296f59`；交付从999b安全fast-forward到现有上游fac。开发完整前端3509 passed/1 skipped、SDK与app/landing types通过；实际交付101项Solana测试、SDK和types通过。源码匹配，原Lighthouse与pending保护保留。已推送个人开发线、更新原3315正文，不改变Ready状态。
+
+余额3195最终tree与原接入版完全相同，不重复搬运；77固定WASM不变。详细共同证据与外部验收边界见[本轮依赖审计](../solana-trading-dependencies.md#前置接续与-playground-更新2026-11-22已部署)。本轮未修改他人PR/Linear，未签名广播交易；部署成功不扩大真实钱包/原子TP-SL/金融参考/负载验收。

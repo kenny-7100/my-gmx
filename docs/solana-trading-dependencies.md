@@ -1,10 +1,35 @@
 # Solana 交易链路依赖审计
 
+## 前置接续与 playground 更新（2026-11-22，已部署）
+
+用户授权创建目标接续可执行前置并最终更新 playground。本轮在原需求开发线实施，保留既有提交拓扑；新 merge、修复及 cherry-pick 均显式 GPG 签名并验证。开发线推送 my-gmx，交付线与 playground 推送 origin；更新原 #3315/#3316/#3317/#3318 说明，保留 Ready/Draft，不改他人 PR、Linear 或发送协作消息。
+
+- TRD-72 接入 Divhead `0891747ffc` 原生 SOL/WSOL 原子 TP/SL 资金修复及 `fac83d15bd` 的 release/master 同步；正式 release 为 `d1e9e1fc4c`。开发 `c92c296f59`，交付保持上游 `fac83d15bd`。原生 SOL 优先使用现有 WSOL、只 wrap 差额，必要时把钱包自身 wrapping 放到准备交易；orders/escrow/collateral 保持原子性，签名前/广播前检查余额快照，保留 Lighthouse 和明确 preflight 拒绝/不确定发送恢复保护。
+- TRD-78 开发 `92fef895c4`、交付 `aa6660fcb0`；TRD-70 开发 `059e18bb4b`、交付 `3213ee6e0c`。70 import 冲突同时保留 SolanaTradeboxState 与 useShowGmxAccountPayTokens；实际类型检查发现自动合并重复声明 networkId，已在原70线修复、验收，再签名精确转移交付。该正确行为此前已存在组合线，后续签名 merge 记录归属且 tree 不变。
+- TRD-136 开发 `41c6bd5c51`、playground `f54ba995d5`。保留 Receive tokenInfo/候选币种、生命周期/slot floors/刷新错误/手动 Retry 等接缝。最新 `.env.playground.local` 与原 playground `3c507ad2a6` 完全一致；只做无输出内容比较，未查看或输出真实 key。
+- #3195 最终 squash `1858f6c992` 与原接入 `bb85bab5e9` 完整 tree diff 为空，撤销此前“可能仍有代码差异”的待核验项，不重复转移。TRD-77/#3314 已合入 release；WASM 固定 `0.11.0-beta.1-gmx.1` 及已核实哈希保持不变，不升级参考协议 main。
+- 官方 RPC 已从 Alchemy assignment 迁移 GMX proxy，原 playground transform 会明确失配。原136线适配共享 provider 入口，保持各链、HTTP/WS、dev/生产 purpose 选择，并覆盖主 app 与独立 multicall Worker；普通 app 继续使用官方 proxy。临时假配置回归覆盖用途矩阵、Worker 插件保留及源码漂移失败；实际部署仍使用原样保留的用户配置。
+
+| 实际目录 | 本轮验证 |
+| --- | --- |
+| TRD-72 development | SDK build、app/landing types、完整前端 3509 passed / 1 skipped |
+| TRD-72 delivery | SDK build、app/landing types、17 Solana files / 101 tests passed |
+| TRD-78 development 与 delivery（分别执行） | SDK build、app/landing types、21 Solana files / 121 tests passed |
+| TRD-70 development 与 delivery（分别执行） | SDK build、app/landing types、35 Solana/TradeBox files / 217 tests、变更组件零 warning ESLint passed |
+| TRD-136 development 与 playground（分别执行） | SDK build、app/landing types、完整前端 3571 passed / 1 skipped；专用 RPC Node 回归 passed |
+| playground 实际生产构建 | 8 GiB Node heap 的 build-playground 成功；上传前验证源码版本、固定 WASM 哈希和干净 checkout |
+
+各 development/delivery 的 src/sdk/landing/yarn.lock（136另含专用工具）一致；个人 package scripts 等不整体带入交付。使用 cloudflare-deploy skill 验证认证与既有 Pages 项目后上传最终完整产物。固定部署 https://cdd4e7ac.solana-playground.pages.dev/trade ，稳定入口 https://solana-playground.solana-playground.pages.dev/trade ，source `f54ba995d571f37850671d3db82d209765e3457e`。两个地址共16项资源（HTML/config/入口/bootstrap/multicall Worker/TradeBox/SDK entry/WASM）与本地完成构建的字节哈希全部一致。
+
+收尾时 #3315/#3316/#3317/#3318 均为 MERGEABLE，72保留Ready，其余Draft；Audit/SDK独立构建及两个Pages已有成功结果，部分主CI/组件/WASM复现仍运行，不声称全部远端CI通过。
+
+本轮未重测浏览器 RPC 可用性、钱包/真实交易或 API 负载；旧403不继续作为本部署已复现阻碍。未签名或广播交易。后续仍跟进 TRD-84/#3293 作者原线同步与 Receive 接缝吸收、TRD-107 性能/容量、TRD-108 consumer 与完整金融/交易刷新矩阵、TRD-109 参考钱包/当前 flags，以及图表 review/AC。70 用户暂缓范围继续暂缓。部署和单测通过不等于这些产品验收完成。
+
 ## 五需求前置跟进清单（2026-11-22）
 
 本轮复用同阶段五条PR/release核验，补查16条直接前置Linear状态，其中109/108/107/84重读正文和空评论；核对3195最终版本差异、3273、3201/3286及API365合并提交的checks。未修改业务、服务、Linear或外部消息，未读取key、运行负载/交易测试。
 
-1. **优先更新自有开发/交付链**：72新增 `0891747ffc` 原生SOL/WSOL原子资金修复及 `fac83d15bd` 的release/master接续尚未传播78/70/136/playground；70与playground当前CONFLICTING。3195最终合并head `1858f6c992` 与原接入 `bb85bab5e9` 历史diverged、涉及钱包/RPC及测试重整，不能视为只改PR状态或直接重复cherry-pick旧版。应从原72开发线核对最终实现并同步正式release，再按原链传播、保护现有接缝并组合验证；详见下节版本证据。
+1. **自有开发/交付链已实施接续（验证/部署结果见上节）**：从原72开发线接入 `0891747ffc` 原生SOL/WSOL原子资金修复及 `fac83d15bd` 的release/master接续，传播78/70/136与playground，保留原提交拓扑并对新merge/修复提交GPG签名。70的import冲突同时保留SolanaTradeboxState与useShowGmxAccountPayTokens；实际目录类型检查另发现自动合并引入重复networkId声明，已在原70线删除冗余声明并通过开发/交付复验；136保留playground最新用户配置，不读取key。3195最终合并head `1858f6c992` 与原接入 `bb85bab5e9` 的 **完整tree diff为空**，历史虽diverged但无新增代码，不重复搬运。官方RPC proxy迁移使原playground key替换器失配，已在原136线适配共享provider入口，同时覆盖app/Worker及HTTP/WS、开发/生产用途，普通app使用官方proxy。
 2. **跟进Sulliven的TRD-84/#3293**：Linear In Review，PR OPEN/Ready、无review、当前CONFLICTING；代码head仍 `8818b1d46e`，没有新业务提交可重复集成。重点是作者原线同步前置/解决冲突、保留Receive tokenInfo接缝，以及限价edit/cancel和刷新验收。它是136退出闭环的组合依赖，又消费70/72/78，不将其误作所有开发的前置，也不代改他人PR。
 3. **跟进Divhead的TRD-107/108运行验收**：107当前In Progress（不再沿用旧In Review），108 In Progress。API365已合并，merge `90df09fd` 的 `api-solana-deploy (gmx-api-production)` 为completed/success，另有三网络deploy与两test成功；这证明部署工作流成功，不证明流量比例、持续健康或负载AC。本轮未访问运行实例。107仍需50ms普通读/3秒交易后目标、容量、扩缩及冷启动/重启/新鲜度验收；108已有12组四输出对照，但consumer合同确认、GMTrade参考钱包和真实open-with-TP/SL→edit→close每步单次minContextSlot刷新仍未完成。旧API正文“365待合并部署”已落后GitHub事实，不据此重复等待。
 4. **跟进Divhead的TRD-109**：仍Todo，正文明确每个开发者使用自己的钱包、小额SOL/USDC，不使用共享种子的钱包。冻结LUT已由3325交付并接入，不能再称缺少可信表。余项是指定开发者的GMTrade参考TP/SL仓位与限价单，以及实测时solanaTrading=true、banner key存在且off；本轮未新读keeper flags/链上状态，不据历史值声明当前通过。最新playground配置由用户手动验收，旧403不继续作为最新部署已复现阻碍；Privy新登录域名/四钱包证据仍需补齐。

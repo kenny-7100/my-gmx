@@ -188,3 +188,10 @@ Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新
 ## 上游接续实施（2026-11-20）
 
 本轮参与角色：Kenny 自有需求上游接续、冲突修复与组合验证。详见[本轮实施证据](../solana-trading-dependencies.md#五需求上游接续实施2026-11-20)。先在原开发线实现，精确接续现有交付PR；未修改Linear状态或代发协作消息。
+
+
+## 五需求前置接续与最新 playground（2026-11-22）
+
+原TRD-78开发/交付线分别签名merge同一 `fac83d15bd`，开发 `92fef895c4`、交付 `aa6660fcb0`。两个实际目录分别SDK build、app/landing types、121项Solana回归通过，业务源码一致；已推送并更新原3316 Draft。保留trackingRequests、receipt与slot恢复，仍依赖3315，未声称真实全订单矩阵完成。
+
+余额3195最终tree与原接入版完全相同，不重复搬运；77固定WASM不变。详细共同证据与外部验收边界见[本轮依赖审计](../solana-trading-dependencies.md#前置接续与-playground-更新2026-11-22已部署)。本轮未修改他人PR/Linear，未签名广播交易；部署成功不扩大真实钱包/原子TP-SL/金融参考/负载验收。

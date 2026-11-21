@@ -262,3 +262,10 @@ Mac 意外重启后核对工作区均 clean，未完成类型/全量测试重新
 ## 上游接续实施（2026-11-20）
 
 本轮参与角色：Kenny 自有需求上游接续、冲突修复与组合验证。详见[本轮实施证据](../solana-trading-dependencies.md#五需求上游接续实施2026-11-20)。先在原开发线实现，精确接续现有交付PR；未修改Linear状态或代发协作消息。
+
+
+## 五需求前置接续与最新 playground（2026-11-22）
+
+原TRD-70开发/交付线接入fac，解决相邻import冲突并保留EVM支付token逻辑。实际types发现自动合并重复声明networkId；在原开发线删除冗余声明，签名修复 `059e18bb4b`，再精确签名转移交付 `3213ee6e0c`。两目录分别SDK build、app/landing types、217项Solana/TradeBox回归和组件零warning ESLint通过；业务源码一致。已推送、更新原3317 Draft；与release冲突解除，用户暂缓payment conversion/max leverage/full simulate_order/GT Rewards保持原边界。
+
+余额3195最终tree与原接入版完全相同，不重复搬运；77固定WASM不变。详细共同证据与外部验收边界见[本轮依赖审计](../solana-trading-dependencies.md#前置接续与-playground-更新2026-11-22已部署)。本轮未修改他人PR/Linear，未签名广播交易；部署成功不扩大真实钱包/原子TP-SL/金融参考/负载验收。
