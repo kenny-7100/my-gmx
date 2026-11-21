@@ -80,6 +80,8 @@ git -C gmx-adrs show origin/adr-0015-solana-gmx-api:adr/0015-serve-solana-data-t
 
 同日用户明确更新完成标准后，继续将上述 4 个落后 checkout 全部快进至所列 `origin/main` SHA，并同步父仓库 gitlink；`gmx-api` 保持 detached HEAD，其他任务 worktree 未移动。最终 10 个子仓库本地 HEAD 均与本轮 fetch 的 `origin/main` 一致、各自工作区干净。此结果仍仅代表源码同步，不代表依赖、生成产物或运行服务已更新。
 
+2026-11-22 按用户要求同步全部 Git 子项目：复用本轮已成功完成的 10 个官方 `origin` fetch，安全快进 `gmx-api`（`164f4fea` → `90df09fd`，15 个提交）、`gmx-prompts`（`6e00153` → `0bb4da7`，6 个）、`gmx-adrs`（`830995c` → `9294572`，2 个）、`gmx-solana`（`d81a3e69` → `3e0a4115`，2 个）与旧前端（`b22d13f6` → `0e863b8d`，1 个）；同步主项目记录的 3 个 gitlink。其余 5 个仓库无需移动。更新后逐一核验，10 个本地 HEAD 均与本轮 fetch 的 `origin/main` 一致，工作区干净、无本地领先提交；`gmx-api` 保持 detached HEAD，关联任务 worktree 未移动。主要变化为 API 索引读取、catch-up 快照和增量市场发现修复、Solana rates/tsoa 路由调整、Tooltip/onboarding 规范、通知/GLV ADR，以及协议 rent collector/SDK/IDL 与 EVM proxy 骨架。此次只同步源码与版本指针，未安装依赖、执行数据库迁移、重建 SDK/WASM、重启服务或验证运行兼容性；无 remote 的 `gmtrade-web-backend` 快照保持不变。
+
 ## 必看：ADR-0015
 
 clone `gmx-adrs` 后，**必须查看 ADR-0015 的最新正文**。2026-11-18 核验：对应 [PR #27](https://github.com/gmx-io/gmx-adrs/pull/27) 已于 2026-11-17 合入 `origin/main`（`830995c`），正文状态仍为 **Proposed**。本地固定 checkout 尚不含该文件时，直接从远端引用读取，无需移动 checkout。
