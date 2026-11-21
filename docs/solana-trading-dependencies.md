@@ -1,5 +1,17 @@
 # Solana 交易链路依赖审计
 
+## 五需求前置跟进清单（2026-11-22）
+
+本轮复用同阶段五条PR/release核验，补查16条直接前置Linear状态，其中109/108/107/84重读正文和空评论；核对3195最终版本差异、3273、3201/3286及API365合并提交的checks。未修改业务、服务、Linear或外部消息，未读取key、运行负载/交易测试。
+
+1. **优先更新自有开发/交付链**：72新增 `0891747ffc` 原生SOL/WSOL原子资金修复及 `fac83d15bd` 的release/master接续尚未传播78/70/136/playground；70与playground当前CONFLICTING。3195最终合并head `1858f6c992` 与原接入 `bb85bab5e9` 历史diverged、涉及钱包/RPC及测试重整，不能视为只改PR状态或直接重复cherry-pick旧版。应从原72开发线核对最终实现并同步正式release，再按原链传播、保护现有接缝并组合验证；详见下节版本证据。
+2. **跟进Sulliven的TRD-84/#3293**：Linear In Review，PR OPEN/Ready、无review、当前CONFLICTING；代码head仍 `8818b1d46e`，没有新业务提交可重复集成。重点是作者原线同步前置/解决冲突、保留Receive tokenInfo接缝，以及限价edit/cancel和刷新验收。它是136退出闭环的组合依赖，又消费70/72/78，不将其误作所有开发的前置，也不代改他人PR。
+3. **跟进Divhead的TRD-107/108运行验收**：107当前In Progress（不再沿用旧In Review），108 In Progress。API365已合并，merge `90df09fd` 的 `api-solana-deploy (gmx-api-production)` 为completed/success，另有三网络deploy与两test成功；这证明部署工作流成功，不证明流量比例、持续健康或负载AC。本轮未访问运行实例。107仍需50ms普通读/3秒交易后目标、容量、扩缩及冷启动/重启/新鲜度验收；108已有12组四输出对照，但consumer合同确认、GMTrade参考钱包和真实open-with-TP/SL→edit→close每步单次minContextSlot刷新仍未完成。旧API正文“365待合并部署”已落后GitHub事实，不据此重复等待。
+4. **跟进Divhead的TRD-109**：仍Todo，正文明确每个开发者使用自己的钱包、小额SOL/USDC，不使用共享种子的钱包。冻结LUT已由3325交付并接入，不能再称缺少可信表。余项是指定开发者的GMTrade参考TP/SL仓位与限价单，以及实测时solanaTrading=true、banner key存在且off；本轮未新读keeper flags/链上状态，不据历史值声明当前通过。最新playground配置由用户手动验收，旧403不继续作为最新部署已复现阻碍；Privy新登录域名/四钱包证据仍需补齐。
+5. **图表与外围收口**：Rainer的TRD85/#3223仍OPEN/Ready、head `c8f9c4a85d`，前轮已接入，无新head，不重复搬运，跟进review及实际图表AC；3273静态列表相关PR仍OPEN/Ready、head `6995d3a0d5`，9 checks成功，跟进review。不能将Depth/完整图表验收自动作为简单交易链的阻塞。
+
+已具源码交付而不需重复等待的前置：71/97/86/98/127 Linear Done；63/#3201、80/#3286、100/#3287、75/#3205以及77/#3314已merged（63/80/100/75/77的Linear部分仍In Review/In Progress），65/#3193也已有release交付但Linear In Test。区分剩余验收和状态收口，不重建已有能力，不升级当前固定WASM到参考协议main来掩盖问题。此前用户暂缓70的payment conversion、最大杠杆、完整simulate_order与GT Rewards仍不自动恢复。
+
 ## 五需求最新现状复核（2026-11-22）
 
 本轮只读刷新五条 Linear 正文、关系和评论（均空），核对五个 GitHub PR 当前 head、reviews、checks、mergeability，及直接前置和 API 362/364/365。未改业务、部署、读取环境 key 或操作钱包。本轮仅覆盖指定五条，不评估完整迁移百分比。
