@@ -19,6 +19,12 @@
 
 仅历史整理、无源码/依赖/环境变动，不重复运行同tree已通过的业务suite。现有[playground固定部署](https://5c1589d7.solana-playground.pages.dev/trade)仍标识`509a63e910`，源码tree与新head相同，未为SHA变化重新部署；稳定URL及此前断开钱包的只读验收边界不变。TRD-83保持独立，未签名广播、修改Linear或发送队友消息。
 
+### 剩余截图提交来源核对（2026-11-23）
+
+用户继续询问清理后截图中的其他作者提交。刷新release/master/3337后确认：TRD-152 `257fe7630a`、PRO-4599 `0fdde8ef3a`、Alchemy轮换 `fb63e4c0be`、master合流 `ee4f5d5649`/#3327及release-136 `3e2bc5fefd`/#3322均在master且不在当前release ancestry，原四条head全部已包含。主要明确入口为Divhead的72 `fac83d15bd` 三parent merge（当前映射`fb1ea8e743`），第三parent `2aa7dd5240`为master侧#3331，沿途包含#3307/TRD-152、#3324/PRO-4599、#3329轮换及#3334 RPC proxy。不是本次3337另外选择这些PR。
+
+其中TRD-152对应SDK/static市场配置相对release仍净增加42/24/6行；PRO-4599的expressOrderUtils.ts仍净增加16行，RPC配置仍有实际差异。因此这些不能按3195完整tree相等的证据一并移除，也不能声称全是仅历史重复。旧key轮换后还有proxy迁移，单条历史存在不证明旧key仍是最终配置，未查看或输出密钥。截图`c59c5fc672`是Divhead原交易线的LUT-backed atomic业务merge，亦非作者无关噪音。若要排除这些实际master能力，属于另一次代码范围调整，应先核对依赖并重新验证，不能作为已授权“移除release已吸收历史”的自动延伸。本轮只查来源，无业务/PR/部署修改。
+
 ## 四交易PR统一交付（2026-11-23）
 
 用户已明确实施并新建统一PR：仅3315/3316/3317/3293；TRD-83/#3335暂不纳入。新共享分支`solana-trading-integration-trd-72`已推上游origin，向release创建[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，head `19850b6b461d598b5f9205bd14c60a4c9fc44342`。Kenny/Sulliven后续整合修改在此分支继续，不再在原四条线独立实现同一修复；用户通知Sulliven并手动关闭原四PR。未修改Linear、请求reviewer、转Ready、合并或发送队友消息。
