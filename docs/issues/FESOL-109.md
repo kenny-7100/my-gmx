@@ -1,5 +1,57 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 12 月 10 日目标范围与交付风险复核（2026-11-23 10:02 北京时间）
+
+角色：只读范围、实际推进与交付风险调查。当前需求为[TRD-101](https://linear.app/gmx-io/issue/TRD-101)，计划负责人及整体集成/验收负责人为Divhead；Kenny为Solana前端lead。未修改业务、Linear、协作文档、PR、部署或钱包。
+
+### 范围与历史版本
+
+读取当前TRD-101（updatedAt 11月20日15:50 UTC）、用户提供的Divhead群聊截图，以及迁移前本地快照中FESOL-109的两个不同正文版本：11月3日版（11月4日抓取）及11月12日版（含11月10/11日的确认与Trading周期调整）。这些是实际保存的历史版本，不是Linear完整逐次修改历史；历史快照UUID与当前任务一致。
+
+| 版本 | 阶段目标 | 对当前判断的作用 |
+| --- | --- | --- |
+| 旧FESOL Cycle 2，10月26日–11月9日 | 网络/钱包/余额/市场/价格与图表可见 | 基础能力阶段，不能沿用当时Todo或CI失败作为当前阻碍 |
+| 旧FESOL Cycle 3，11月9日–23日 | 市价附TP/SL、仓位/订单、平仓及受控主网测试 | 后被Trading周期安排覆盖，不与新Cycle编号混用 |
+| 旧FESOL Cycle 4，11月23日–12月7日 | 限价、改单撤单、保证金存取；12月10日公开开启 | 确认保证金存取不是交易后的可选能力 |
+| 11月11/12日Trading重排 | Cycle 1为11月16–30日，Cycle 2为11月30日–12月14日；必需实现12月4日前、验收12月8日前，9日修复/决策 | 新周期取代旧分配；12月24日只是历史备选，未批准替代12月10日 |
+| 当前TRD-101 | 11月30日开仓/执行/刷新/平仓连通并复核日期；12月4日限价/TP-SL/编辑撤销/存取保证金/不足SOL收口；12月7–9日全流程测试及阻断修复；12月10日验收后公开交易 | 当前执行依据；11月20日API验收节点已过，但107/108仍未关闭 |
+
+12月10日是基于共享GMX界面、真实数据的公开Solana交易，不是只部署playground或实现简单市价开平仓。包含外部四钱包、切网/恢复、余额及交易后刷新、市场/Price图表/默认Depth、仓位订单、market/limit开仓加仓与TP/SL、平仓/改单撤单、抵押品存取、安全检查、金融/API消费与运行验收、桌面/移动/本地化及EVM隔离。Depth只有明确记录延期后才可移出；金融正确性与API验收不能默认为延期候选。TRD-70详细AC仍要求支付币兑换、最大杠杆一致性、simulate_order对照与GT Rewards；个人切片暂缓没有改变发布AC。
+
+After trading排除TradFi、完整个人Trades历史/Claims/Net rate图、Swap、转账/embedded wallet、Pools/Earn/Referrals/GT-staking页面。TRD-92的切网/钱包恢复和错误场景仍被当前交易验收引用，不能因其总任务Backlog而一起后移；完整历史实施后移与DES-65“保留个人历史访问”之间仍需明确首发访问/不可用方式，不能自行推导必须立即完成整条TRD-89。support chat虽已Refining（计划仍写Triage），未明确列首发阻塞；统计页已取消；升级通知/上市日期与月度预算不阻塞。INF-4的standby/消除全部重启503不自动扩为本次硬门槛，但107规定的新鲜度及恢复验收仍需完成。
+
+### 当前缺口与风险
+
+| 工作 | 实际证据 | 分类、影响及下一步 |
+| --- | --- | --- |
+| 本地化（119→101 checklist） | 119 Duplicate，101仍未勾选；未确认全迁移受影响页面/文案清单、执行负责人或翻译验收。83分支新增Deposit collateral / Withdraw collateral等msgstr为空 | **执行安排缺口，高风险**。有提取/复用翻译工作，不是所有翻译零开工；需落实负责人、影响清单、翻译与移动端验收 |
+| DES-65与最终界面验收 | Pasha/Backlog、无评论或附件；正文仍要求accepted desktop/mobile frames及VOB/history明确决定 | **设计交接证据未确认，高风险**。未全量访问Figma，不断言未画设计；先取得已接受方案与交接/验收安排，避免临近发布改共享界面 |
+| TRD-70已暂缓范围 | #3317 `3213ee6e0c`正文明确payment conversion/max-leverage parity/full simulate_order/GT Rewards deferred；实际adapter拒绝payToken≠collateral与非noSwap | **已开发中的内部范围缺口，高风险**。SOL wrapping不等于支付币兑换，独立Swap页面后移不自动豁免下单兑换。延续用户暂缓，不自动恢复；需由产品/交付负责人确定何时补齐或正式变更范围，金融验收仍必需 |
+| TRD-83保证金存取 | Sulliven/In Progress；新发现远端`TRD-83` `140cc7295829d0e2a5e4186e657393f6175c8505`，11月20日12:58 CST，基于84 `8818b1d46e`多1提交。实际diff包括PositionEditor、deposit/withdraw builders、provider/types/feature开关和测试 | **有实质代码、尚未交付，高风险**。无对应PR，只有两项Pages checks成功，无返回的主lint/types/test检查；当前playground仍关闭collateralDeposit/Withdrawal。作者原线需同步最新前置、验证、建PR并集成验收；不能再说未分配或完全没开始 |
+| TRD-84平仓/改单撤单 | #3293 `8818b1d46e`仍OPEN/Ready/CONFLICTING、无review；checks成功；缺playground已有Receive tokenInfo接缝 | **已开发但集成受阻，高风险**。作者原线解决冲突/吸收接缝，完整partial/full close、edit/cancel、刷新与残余TP-SL取消验收；不代改他人PR |
+| TRD-72/78/70主链与136联调 | #3315 Ready；#3316/3317/3318 Draft；四者MERGEABLE、当前checks成功、无review。SOL/WSOL builder已统一。77/#3314已merged，Linear在本轮更新为Done（11月23日09:50 CST） | **实质推进，送审/全链验收仍有风险**。不能称交易未开始；已有11月18–19日历史简单交易/单钱包平仓回执，但未完成最新组合的atomic TP/SL、四钱包、限价/触发、拒签/失败/未知回执/切网矩阵。136 Done不是全流程AC通过 |
+| TRD-158不足SOL | Kenny/Backlog，无独立实现PR；72 sender已有真实模拟与network/keeper/wrapping余额检查，但模拟失败仍走通用Solana simulation failed | **部分实现、需求未完整收口，中高风险**。交易动作签名前及余额竞态失败后的统一明确文案、租金/多步骤费用边界须验证；GM/GLV随Pools后移，不以整条158 Backlog判全部阻塞 |
+| TRD-85图表与Depth | Rainer/In Test，#3223 `c8f9c4a85d`OPEN/Ready/待review、checks成功。release DepthChart已有gmsol真实price-impact/execution-price分支 | **已实现部分，完整AC未证明，中高风险**。不是零开工；PR正文还写dev-only depth preview，晚于正文的代码已移除该preview。需按当前代码验收历史/live切市场、scaled token、overlays/markers/actions与Depth；不以陈旧正文代替实际行为 |
+| TRD-107 API运行 | Divhead/In Progress；API361/362/364/365均merged，main `90df09fd2b`部署工作流成功。近期有多轮诊断及修复 | **持续实际推进，但原11月20日验收节点未收口，高风险**。365之后的生产容量/持续新鲜度/恢复、50ms普通读与3秒post-trade目标仍待证据；旧场景测得3.030/4.228/4.583s不能作新版本结论，但也不能四舍五入称达标。adrs#33当前CHANGES_REQUESTED，争议为验收记录是否应放ADR，不等于金融实现被否定 |
+| TRD-108 API消费及真实交易 | Divhead/In Progress；12组原生参考四输出对照已有范围证据，公开钱包/链账户与SDK/min-slot读取已验证 | **已推进，控制交易验收未完成，高风险**。待consumer合同确认、开发者GMTrade参考钱包、真实open-with-TP/SL→edit→close每步单次minContextSlot刷新。一次历史平仓不替代该序列 |
+| TRD-109测试准备 | Divhead/Todo，但冻结LUT已merged并进入当前组合 | **部分已完成、剩余条件证据不足**。指定开发者自有参考钱包/小额资金与当前flags、四钱包覆盖计划待收口；不共享seed，不再称缺LUT。最新用户配置部署未复验RPC，旧403不继续作为当前故障 |
+| 上线安排 | 101明确delivery owners/monitoring/rollback必须确认；125与API330已有监控实现 | **最终发布证据未汇总，中高风险**。核实告警试触发、开关/版本/部署/监控/回滚负责人与review容量；不声称监控从零未做，不把INF-4所有增强强塞为发布前置 |
+
+### 建议执行顺序及日期判断
+
+今天是11月23日，距11月30日闭环检查7天、12月4日必需实现收口11天、公开目标17天。**目前不能确认12月10日已处于稳妥交付轨道，但证据也不支持宣称必然延期。** 主要风险是多项实现、范围决定与全链验收集中在同一剩余窗口；不是单看PR/Done数量。
+
+1. 先补执行安排与范围决定：本地化、DES-65交接/移动端验收、70暂缓项的发布处置；确认83分支实际交付计划，而非重新分配一个已有owner的任务。
+2. 并行收口72 review、78/70后续送审计划、84原线冲突及83原线同步；保留72→78→70→84/83的共享交易契约。107/108不是等前端结束才开始，跨侧联合验收需现在安排。
+3. 11月30日以固定组合版本证明open→execute→refresh→close，记录WASM/API/前端版本、slot与回执，同时复核12月10日；保留既有历史样本，但不冒充新版本全矩阵。
+4. 12月4日前收口limit/TP-SL/edit/cancel/collateral/SOL检查与约定产品范围，12月7–9日留给四钱包、移动/语言、失败恢复、EVM隔离、负载和发布决策；不要把尚无owner/尚未送审的实现全部留到测试窗口。
+
+### 覆盖与证据边界
+
+官方MCP枚举迁移项目78条（含归档，单页hasNextPage=false），完整补读61条非归档非Duplicate正文/关系；另读119、DES-65、INF-4、TRD-12及关键评论、线上Frontend Task Organization（11月20日版，未更新）。枚举主前端全部分支/65个开放PR及11月10日以来104个已关闭PR，API全部分支/14个开放PR及31个近期已关闭PR，ADRs及个人my-gmx分支/PR；定向阅读83相对84的真实delta、当前sender/adapter/features/Depth源码、PR说明/checks和ADRs#33。gmx-infra API返回404，无权核对其当前部署/审核现场；未全量查Figma、他人本地未推送代码或线上负载。故“无执行证据/无PR”不等于证明个人未工作，未生成无依据百分比或更新完整迁移latest指针。
+
+本轮本地证据位于`.local/solana-progress/2026-11-23-release-audit/`，不含用户环境key；当前上游release `d1e9e1fc4c`、API main `90df09fd2b`。本轮以当前正式计划覆盖历史安排；截图的3195/3223组件失败、SDK待合并和83无owner等已被后续事实替代，不继续列为当前故障。完整Linear历史编辑序列不可由本次MCP取得，历史比较限已保存正文版本。
+
 ## 12 月 10 日发布未开工范围核查（2026-11-20 14:24 北京时间）
 
 角色：只读交付缺口分析，不接管实施。读取 TRD-101 正文/关系/空评论及迁移项目全部 70 条 issue（Trading，非归档，单页无后续页），定向补读 83/85/92/109/119/158、DES-65 的正文/关系/全部评论及 TRD-70 正文，核对主仓库近期全状态 PR、候选正文/文件及固定源码。此次不估算完整迁移百分比、不修改 Linear、外部文档、PR、部署或钱包。
