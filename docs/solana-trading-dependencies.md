@@ -25,6 +25,14 @@
 
 其中TRD-152对应SDK/static市场配置相对release仍净增加42/24/6行；PRO-4599的expressOrderUtils.ts仍净增加16行，RPC配置仍有实际差异。因此这些不能按3195完整tree相等的证据一并移除，也不能声称全是仅历史重复。旧key轮换后还有proxy迁移，单条历史存在不证明旧key仍是最终配置，未查看或输出密钥。截图`c59c5fc672`是Divhead原交易线的LUT-backed atomic业务merge，亦非作者无关噪音。若要排除这些实际master能力，属于另一次代码范围调整，应先核对依赖并重新验证，不能作为已授权“移除release已吸收历史”的自动延伸。本轮只查来源，无业务/PR/部署修改。
 
+### 临交付review的方案评估（2026-11-23）
+
+用户要求分析最适合即将review的方案，本轮不授权再次修改业务/PR。实时3337仍`4a85d23c7b`、Draft/MERGEABLE；release仍c588。核对master前置范围时以实际`2aa7dd5240`为固定快照（#3331，base master），#3307/#3334同样已merged到master。最终145个PR变更文件中42个文件内容与此master快照完全一致；另有共享文件同时承载上游金融/RPC/图表与Solana接线，不能从提交标题推断均可独立删除。RPC sender经getSolanaRpc消费共享config/rpc；金融共享计算还带gmsol分支保护，移除需要验证而非历史等价操作。
+
+推荐正式交付：由release维护者确认并通过独立上游同步把需要的固定master前置进入release，再同步3337；目标仍release、不为缩短列表改base为master、不额外拉最新master、不仅把前置压成一个commit掩盖代码范围。前置实际进入release后，GitHub自然排除其祖先/已吸收差异，再核验冲突处理、最终Solana差异及检查。若无法立即同步，可在现有Draft开始交易代码review并明确依赖边界与前置PR列表，但暂不称为独立可合入的纯四需求PR；无需临review冒险剥离/重签全线。只有release维护者明确不接收这些上游改动，才另做最小依赖提取和功能回归；这会改变代码，不复用历史清理的零代码变化结论。不得假设已merged master等于release维护者同意发布。
+
+新head组件run45200945636实际289 tests passed，唯一失败步骤Deploy report to GitHub Pages，日志gh-pages push fetch-first；Audit和SDK standalone已有成功，主测试及Pages仍运行。钱包四端、完整执行/刷新矩阵仍待完成，历史只读playground不扩大验收。不擅自转Ready/请求review/重跑CI或发送协调消息。
+
 ## 四交易PR统一交付（2026-11-23）
 
 用户已明确实施并新建统一PR：仅3315/3316/3317/3293；TRD-83/#3335暂不纳入。新共享分支`solana-trading-integration-trd-72`已推上游origin，向release创建[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，head `19850b6b461d598b5f9205bd14c60a4c9fc44342`。Kenny/Sulliven后续整合修改在此分支继续，不再在原四条线独立实现同一修复；用户通知Sulliven并手动关闭原四PR。未修改Linear、请求reviewer、转Ready、合并或发送队友消息。
