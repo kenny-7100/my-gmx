@@ -1,5 +1,16 @@
 # Solana 交易链路依赖审计
 
+## 统一交易PR额外候选筛查（2026-11-23）
+
+用户询问除83外是否还有类似应纳入的PR。本轮列举全部开放PR，定向读取3313/3299/3301/3309/3336/3280/3223/3273/3312的正文、文件、head/checks及部分patch；这是候选筛查，不逐条认领或新建issue记录，未修改业务/外部状态、未复现缺陷或跑测试。
+
+结论：除TRD-83/#3335外，未发现同等程度应整项纳入的候选。83的纳入仍是建议，尚未获得Divhead范围确认。3223图表独立由Rainer交付，Divhead单独安排Reflectiv测试；当前整合环境可组合图表验收但不吞并其正式PR。3301/TRD-17（badbaadaac）修改共享TradeboxMarginFields，保持USD输入size在limit→market/价格变化时一致，关联下单金额，值得优先核对；当前Solana builder消费amounts.sizeDeltaUsd，但未复现本缺陷于Solana，不称必需依赖或直接并入。若阻断最终交易AC，再明确接入固定版本或等release吸收。
+
+3299/TRD-18（63fa3f006f）为共享SDK/TP-SL费用修正，涉及gmsol条件但并非专门Solana整合交付，当前与release冲突；不能因函数重叠整支吸收EVM费用语义，需保留金融分支并关注后续release回归。3313/TRD-51（474db5e837）为TP-SL receive mode编辑，依赖API360，独立功能不自动扩充Solana支持的编辑字段。3309/TRD-149（4f5debe07b）/3336/TRD-150（e6786dffe9）为前端/SDK关闭市场swap路由；3309对GmsolProvider仅新增closedMarkets:undefined，不能当作Solana关闭市场限制已实现，当前payment conversion仍暂缓。3280/TRD-44（2ca1a9ebac）针对GMX Account/Express费用来源，3273是ticker类型契约，3312是发布SDK Node ESM构建，均不因改同文件而吞并。共享文件重叠用于接续与EVM回归，不等于同一PR交付范围。
+
+继续建议原四PR+待确认83作为清晰交易范围；最新release正常同步（含3321已合并数学修正），其他PR由原作者独立推进，实际发现阻断交易验收的前置再精确接入。
+
+
 ## 四交易PR整合实施条件评估（2026-11-23）
 
 用户转述Divhead建议将3315/3316/3317/3293合成一个PR，并询问若由Kenny承担是否具备实施条件；本轮仅评估，未据转述修改交付规则、业务、他人PR或创建整合分支。结论：代码整合可开始，最终送审仍需组合/钱包验收，最终PR归属与旧PR收口需协作对齐（用户后续已明确：新建统一PR，Sulliven后续交易整合修改也在统一分支，用户通知并手动关闭原四PR）。83不在点名整合清单中；不将playground整支当正式交易交付，不改变原需求成果归属。
