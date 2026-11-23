@@ -1,4 +1,24 @@
 # Solana 交易链路依赖审计
+## 已吸收依赖历史清理（2026-11-23）
+
+用户明确授权：基于最新release清理已被squash吸收的旧依赖历史，保留未合业务提交的拆分、message、顺序和适用merge关系；本轮允许重建这三条分支并以旧head绑定force-with-lease更新。交付skill负责执行，未扩大为清理所有其他作者的改动。
+
+实时release仍`c588a42b4c6d6c28dc14fa4a40d245559b4aa073`。已确认#3195旧head `bb85bab5e9`与release内最终head `1858f6c992`完整tree相同，但147个旧祖先不在release ancestry中。原四源均已携带截图的Midas `9a267026`；不是本次额外选择其PR，也不能把所有继承改动都称为“只有历史”。保留其余尚未被证明吸收的master/EVM差异；原剩余提交git cherry未发现与release等价的单条补丁，此检查不能单独证明所有跨提交squash关系。
+
+将边界上指向这批旧依赖的parent引用映射到release正式版本，按拓扑重建受影响提交；所有保留提交的完整tree及message逐一不变，未聚合业务commit，适用parent顺序/merge关系保留（重复parent去重）。三目标合计核对649个保留提交，其中216个parent发生变化而重建，均显式GPG签名并验为G；其余原SHA原签名保留，不将旧unsigned或本地不可验SSH签名称作通过。映射存本机`.git/agent-workflow/squash-cleanup-20261123.json`，SHA256 `f5a8b23e9c35edf5b8e2a979c9f1df69050388399f7d89ca78e1d2149f284b76`。
+
+| 目标 | 旧head | 新head | 相对release提交数 |
+| --- | --- | --- | --- |
+| #3337 | `19850b6b46` | `4a85d23c7b7d7be33a7cf5c58f72ac67c28b7b82` | 278 → 131 |
+| TRD-136开发 | `57e707fe08` | `1e5c1894dc80fd64571d20f5b781faeb4197a7ad` | 790 → 643（含个人开发历史） |
+| playground/#3318 | `509a63e910` | `3403b5396962f9ce8f7897e3dc5a9d94d64c4cf0` | 407 → 260 |
+
+三目标最终tree均与各旧head完全相同；3337仍145文件最终diff。四源映射后的head均为新3337祖先，新3337为新136/playground祖先；147旧提交均不再出现在三目标的release差集中，截图9a267026不再是祖先。已推送并核对远端head，两个PR正文更新且均保持Draft，远端新CI仍运行，不称全绿。原README中的固定来源SHA与旧部署SHA是历史快照证据，映射以本节为准。
+
+远端备份：origin `backup/trading-before-squash-cleanup-20261123`、`backup/playground-before-squash-cleanup-20261123`；my-gmx `backup/trd136-before-squash-cleanup-20261123`。其他原需求分支和个人基础历史未重写；以后接入这些旧分支可能再次引入旧历史，应从当前统一分支继续，必要时选择性转入真实新增补丁。
+
+仅历史整理、无源码/依赖/环境变动，不重复运行同tree已通过的业务suite。现有[playground固定部署](https://5c1589d7.solana-playground.pages.dev/trade)仍标识`509a63e910`，源码tree与新head相同，未为SHA变化重新部署；稳定URL及此前断开钱包的只读验收边界不变。TRD-83保持独立，未签名广播、修改Linear或发送队友消息。
+
 ## 四交易PR统一交付（2026-11-23）
 
 用户已明确实施并新建统一PR：仅3315/3316/3317/3293；TRD-83/#3335暂不纳入。新共享分支`solana-trading-integration-trd-72`已推上游origin，向release创建[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，head `19850b6b461d598b5f9205bd14c60a4c9fc44342`。Kenny/Sulliven后续整合修改在此分支继续，不再在原四条线独立实现同一修复；用户通知Sulliven并手动关闭原四PR。未修改Linear、请求reviewer、转Ready、合并或发送队友消息。
