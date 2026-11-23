@@ -33,6 +33,12 @@
 
 新head组件run45200945636实际289 tests passed，唯一失败步骤Deploy report to GitHub Pages，日志gh-pages push fetch-first；Audit和SDK standalone已有成功，主测试及Pages仍运行。钱包四端、完整执行/刷新矩阵仍待完成，历史只读playground不扩大验收。不擅自转Ready/请求review/重跑CI或发送协调消息。
 
+### 排除master后的剩余历史核对（2026-11-23）
+
+用户追问排除fac83d15bd引入的master后是否仅四功能。以旧3337减release、固定master快照2aa7dd5240、已吸收3195旧祖先做集合核对，剩106提交（含fac整合节点及3337三个整合/Receive提交，不等于实际重建后的最终数量）；作者Kenny98、Divhead4、Rainer3、Sulliven1，无其他作者。但作者集合不能证明纯需求范围。
+
+明确历史例外：fc52b13066为TRD-77/FESOL-72的GMX WASM构建pin（18路径），Rainer a3c43891f0/d33e372098/44c3b63344是TRD-98钱包asset key同一修复的不同历史版本（1路径）；这些路径当前3337与release均无差异。fee/order field迁移涉及4路径，其中SDK http/referrals/orders API与release一致，仅composeGmsolOrdersInfo还承载交易相关差异。另有release同步、需求间merge、重复转移的修复历史及3337自身三提交，不能声称剩余每条commit均独立属于原四条业务实现。未发现本轮审计范围内另一批同类master功能入口；具体移除fac需保留release侧及后续冲突解决，并重新验最终diff，不能以提交集合等同功能验收。此轮只读核对，无业务修改。
+
 ## 四交易PR统一交付（2026-11-23）
 
 用户已明确实施并新建统一PR：仅3315/3316/3317/3293；TRD-83/#3335暂不纳入。新共享分支`solana-trading-integration-trd-72`已推上游origin，向release创建[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，head `19850b6b461d598b5f9205bd14c60a4c9fc44342`。Kenny/Sulliven后续整合修改在此分支继续，不再在原四条线独立实现同一修复；用户通知Sulliven并手动关闭原四PR。未修改Linear、请求reviewer、转Ready、合并或发送队友消息。
