@@ -1,5 +1,9 @@
 # TRD-83 — Solana 仓位操作与保证金存取
 
+## 五需求晚间核查（2026-11-23）
+
+参与角色：只读依赖调研。Sulliven已提出正式Ready PR #3335，44580914b7，MERGEABLE、checks成功、Linear In Review；取代上午无PR判断。playground尚未集成，作者测试声明不代替本轮真实存取验收。 版本、证据与验证边界见[统一增量核查](../solana-trading-dependencies.md#五需求晚间增量核查2026-11-23-2130-cst)。本轮未修改业务或外部状态。
+
 ## 发布范围与远端实现核查（2026-11-23）
 
 参与角色：依赖与交付风险调研，非实现负责人。实时[Linear](https://linear.app/gmx-io/issue/TRD-83)为Sulliven / In Progress（11月19日起）；正文“implementation assignee still needs to be confirmed”已落后字段，不能继续说无人负责。保证金存取是12月10日首次公开交易必需范围，平仓/edit/cancel另由TRD-84承接。

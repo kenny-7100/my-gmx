@@ -1,5 +1,35 @@
 # Solana 交易链路依赖审计
 
+## 五需求晚间增量核查（2026-11-23 21:30 CST）
+
+本轮为只读调研：实时读取五条及83/84/85/107/108/109的Linear正文、关系与评论，核对当前PR/head/checks/review threads、release与API main，并定向比较上游源码。没有修改业务、Linear、PR、服务、部署或钱包；未运行测试/负载、浏览器或链上验收。下述运行数据来自负责人更新的Linear正文，本轮未独立访问Datadog或复跑报告。
+
+| 需求 | 最新Linear | PR/head | 实时GitHub结果 |
+| --- | --- | --- | --- |
+| TRD-77 | Done，11月23日09:50北京时间完成 | [#3314](https://github.com/gmx-io/gmx-interface/pull/3314) / `161e89e4a4` | 已合并、Divhead APPROVED；不再列作等待状态同步 |
+| TRD-72 | In Review | [#3315](https://github.com/gmx-io/gmx-interface/pull/3315) / `fac83d15bd` | OPEN/Ready，MERGEABLE、REVIEW_REQUIRED |
+| TRD-78 | In Progress | [#3316](https://github.com/gmx-io/gmx-interface/pull/3316) / `aa6660fcb0` | OPEN/Draft，MERGEABLE、REVIEW_REQUIRED |
+| TRD-70 | In Progress | [#3317](https://github.com/gmx-io/gmx-interface/pull/3317) / `3213ee6e0c` | OPEN/Draft，MERGEABLE、REVIEW_REQUIRED |
+| TRD-136 | Done，仅提前联调切片 | [#3318](https://github.com/gmx-io/gmx-interface/pull/3318) / `f54ba995d5` | 持续playground OPEN/Draft，MERGEABLE、REVIEW_REQUIRED |
+
+四个开放PR均无reviews、无人类普通评论、无未解决review thread；当前返回checks全部SUCCESS。GitHub最初部分mergeability为UNKNOWN，随后GraphQL明确返回MERGEABLE/BLOCKED；BLOCKED与REVIEW_REQUIRED并存，不应误报为代码冲突。五条Linear评论均空。TRD-78新正文进一步强调固定CPI布局、全生命周期/action匹配、失败交易排除、乱序/延迟/执行关闭分交易等；既有记录已有对应实现与回归，仍需实际RPC/toast验收，不能仅据正文更新重建追踪器。
+
+**可更新代码与接续顺序：**
+
+1. **release更新**：当前`c588a42b4c`，比已同步`d1e9e1fc4c`多7commits/14files。[#3321](https://github.com/gmx-io/gmx-interface/pull/3321)改动共享SDK `decrease.ts`和数学测试，按native collateral units分摊GMSOL TWAP费用、首段承担pending费用并保留超cap impact；[#3213](https://github.com/gmx-io/gmx-interface/pull/3213)修复GM/GLV/shift发送后清空输入及Paxos第二步展示。78/70/playground均behind release 7 commits；72实际decrease源码也缺该新增费用实现。适合下一实施切片从原72线正常同步并传播，保留既有master/EVM差异，不整文件覆盖release版本；不因此开放Solana TWAP。
+2. **TRD-84已有新业务**：Sulliven [#3293](https://github.com/gmx-io/gmx-interface/pull/3293) head由`8818b1d46e`更新`5fa8d01ce8`，后者父节点即当前70 delivery `3213ee6e0c`，现在MERGEABLE/Ready，checks成功、无review/threads。新增getUpdateError及bounded acceptable-price编辑拒绝、swap订单操作排除、独立getSolanaReceiveTokens，WSOL默认receive改native SOL。与playground实际源码比较确认这些为可接续内容；不能再说仅旧head冲突待同步。仍未传Receive `tokenInfo`，其TokenSelector无该prop时仍走EVM getToken；接续须保留playground已有显式tokenInfo及刷新/pending保护，并告知作者原线缺口，不代改。旧新compare diverged 56/1主要含前置重建，不把56笔当新增业务或整支覆盖。
+3. **TRD-83正式PR已出现**：Sulliven [#3335](https://github.com/gmx-io/gmx-interface/pull/3335) head`44580914b7`，OPEN/Ready、MERGEABLE、checks成功、无review，Linear In Review。正文提供保证金deposit/withdraw零size market订单、SOL/WSOL及禁At price方案与作者测试记录；取代上午“只有分支、尚无PR”的观察。当前playground未集成该能力，可在84接续后作为单独集成切片核验；作者Manual test passed不扩为本人真实存取验收或全部AC完成。
+4. **TRD-85增量较小**：Rainer [#3223](https://github.com/gmx-io/gmx-interface/pull/3223)新head`019069b7ed`、MERGEABLE/Ready、checks成功。相对已接入`c8f9c4a85d`的独立新增commit`7786fed065`仅10份locale，随后merge最新release；无新的chart runtime，不需重新整合旧图表实现。Linear仍In Test，Reflectiv于19:40北京时间新增“label needs to be fixed/updated”评论；本轮读取文字但未查看附件/聊天，不推断具体label或修复完成。Depth默认范围与完整图表AC仍需负责人收口。
+
+**跨侧进展与剩余验收：**
+
+- **TRD-107 / API366**：当前API main`f1a271e102`，[#366](https://github.com/gmx-io/gmx-api/pull/366)已merged，签名head`3bc1e8cd37`，两项head test checks现已SUCCESS（Linear较早“仍运行”已过时）。新增实际position payload可见性测量与pool/snapshot/decoding分段耗时，非已解决延迟。负责人正文记录Datadog确认reader `00058-tg5`/indexer `00018-6sh`部署；本轮未独立验证流量比例。部署后960/960有界ramp成功，route p95 config62/value60/order62/position65/discount60ms；ADR目标分别market/order50ms、position300ms、discount1500ms，不能继续误用所有路由50ms。market/order仍超标，snapshot均值41.67ms、decode4.88ms、pool0.19ms，均值不是p95。100wallet本地mock-RPC stress payload p95 3.382s仍超3秒，较低负载2.201s不能代替生产容量/恢复。gzip候选尚无后续提交/部署，不列为可立即接入成果。前端无须因监控patch改写sender。
+- **TRD-108**：仍In Progress，正文已补11月23日GMTrade public keeper+confirmed chain对照，served markets内12仓位/28订单一致；额外2仓位/4订单按既有市场过滤排除。12 native金融参考向量再通过、SDK2.9.3的60reads/20slot floors/280related-order检查通过。旧“GMTrade参考对照未完成”不再适用；剩余consumer sign-off及真实open-with-TP/SL→edit→close、每步一次post-trade minContextSlot刷新，非单纯等待下一索引slot。本轮未复跑或将顺序provider读取说成原子快照。
+- **TRD-109**：已从Todo进入In Progress（16:45北京时间），冻结LUT已合并接入；正文仍要求个人参考钱包TP/SL仓位+限价单、当前solanaTrading=true及banner key存在/off。没有新的当前钱包/flags实测证据，不以状态变化当AC通过，不共享seed。
+
+建议先同步release，再在136/playground精确吸收84新业务并保留Receive接缝；83保证金存取独立集成、85 locale按需接续；并行推进72review及108真实消费者序列，跟进107 market/order延迟与生产恢复、109运行准备。70已暂缓的payment conversion、最大杠杆、完整simulate_order与GT Rewards不自动恢复。最新部署仍以11月22日`f54ba995d5`/`cdd4e7ac`记录为准，本轮未复验RPC、Privy或新交易，不沿用更早Alchemy403为当前阻碍。
+
+
 ## 12月10日发布范围审计接续（2026-11-23）
 
 本轮扩大到TRD-101当前与FESOL历史计划的发布风险审计，发现TRD-83已有Sulliven远端实现分支但尚无PR、当前playground未接入；TRD-77于本轮查询期间已更新Done。本地化、设计交接与70暂缓项仍需明确执行/范围安排，107/108及完整交易矩阵未收口。证据、历史周期区别与跟进顺序见[目标范围审计](issues/FESOL-109.md#12-月-10-日目标范围与交付风险复核2026-11-23-1002-北京时间)。此前09:34状态保留为当时观察，不当作最新Linear字段。
