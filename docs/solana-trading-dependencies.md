@@ -1,4 +1,10 @@
 # Solana 交易链路依赖审计
+## 单条空提交移除（2026-11-24）
+
+用户仅授权删除461ac22420，现场/远端均无新增且clean。确认它与唯一parent563630b4f0完整tree相同后，仅将该节点映射至parent，其他节点保留tree/message/parent顺序，受影响63后继重建并GPG验G，489节点SHA不变。两个低优先级merge保留双parent；master历史不变。三目标最终tree及相对release完整diff一致，drop不再为祖先，统一源/下游祖先关系通过。
+
+当前3337 `5734a74943aecd0e71e9e8724efa2caedfd0b657`（89→88）、136开发`c48f0948987e14626a21339fafc40340c7c15c82`（547→546）、playground`8bdeab314854690d95a4fb3ba1be9273244c2f8e`（189→188）。原head备份origin `backup/trading-before-empty-drop-20261124`、`backup/playground-before-empty-drop-20261124`，my-gmx `backup/trd136-before-empty-drop-20261124`。仅指定空节点移除，无其他候选扩展；三线lease推送，两个PR保留Draft，registry与正文更新。映射`.git/agent-workflow/empty-drop-20261124.json`，校验日志`/tmp/gmx-empty-drop.log`。源码/config不变，复用原验证，CI新head独立运行；不重部署/新增钱包验收，线上source509a63e910仍与playground最终tree相同。
+
 ## 89commit清理后复查（2026-11-24）
 
 用户继续询问潜力，仅只读业务核对。刷新release/3337未变，排除master25祖先后64提交：无重复patch-id组，git cherry无release等价补丁；发现去重共享化后461ac22420（Merge reviewed release prerequisites TRD-70）与唯一parent563630b4f0完整tree相同，是本次去重产生、前次收尾未删除的空单parent节点，可安全候选移除但仍需最终tree映射/签名/下游核验。此前有意保留的两merge映射为ca1c189431（tree等第二parent，release起始壳）和d827f3ce27（tree等第一parent，保留78侧来源祖先）；后者第二parent含独有历史，不能按无代码变化抹掉审计来源。暂不扩展为业务commit squash；除空节点和两个低优先级merge外，未发现同类明确自动可删项。master范围需独立语义决策。本轮未改业务/PR/部署。
