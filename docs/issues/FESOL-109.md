@@ -1,5 +1,16 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## Frontend Task Organization 刷新（2026-11-23 14:08 北京时间）
+
+角色：任务协调状态核验与文档维护。用户授权刷新原15行[线上文档](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)并在聊天列中文全表。逐条实时读取15项Linear正文、关系、附件及全部评论，核对Trading周期列表和14条当前PR的状态、review、mergeability与返回checks；修改同一文档并回读确认15行、负责人排序与颜色保留。未改issue/PR状态、未发评论、未执行产品验收。
+
+- 新增合并到release：TRD-100/#3287（11月21日05:45）、TRD-98/#3195（06:05）、TRD-142/#3294（06:06）、TRD-77/#3314（06:19），均APPROVED；77的Linear已Done。连同原4项现共8项已合并；136仍按用户例外灰色，合计9灰/6绿。
+- 全部负责人、周期不变；70/83/84在Cycle2，其余Cycle1。75/80/100/63仍In Review、65仍In Test，保留Linear与合并状态差异。
+- TRD-84/#3293已更新至`0be618507f`，MERGEABLE、Ready、待approval、返回checks成功；不再沿用早上CONFLICTING快照。正文明确先合70/#3317，rebase前手测通过、之后未重测，不能扩大为最新版本手测通过。
+- TRD-83远端分支`140cc7295829d0e2a5e4186e657393f6175c8505`仍存在；与旧84 `8818b1d46e`比较多1个实现commit，含PositionEditor、collateral builders/provider与测试。issue附件及新旧编号全状态搜索未确认独立PR；标为已开发未交付，不再仅写无PR而忽略实际分支。
+- 72/#3315 `fac83d15bd` Ready，78/#3316 `aa6660fcb0`、70/#3317 `3213ee6e0c`、136/#3318 `f54ba995d5` Draft，均MERGEABLE、待approval、返回checks成功。85/#3223同为Ready/MERGEABLE、待approval、checks成功。
+- 表内补充70仍暂缓支付币兑换、最大杠杆一致性、完整simulate_order数值对照和GT Rewards，原需求未豁免；78于11月23日新增全生命周期事件验收说明，需固定事件布局/fixtures、匹配program/store/order/action、排除失败及无关事件，证据不足保持未决。此处记录需求变化，不代表已完成代码差异审查或新版AC验收。
+
 ## 12 月 10 日目标范围与交付风险复核（2026-11-23 10:02 北京时间）
 
 角色：只读范围、实际推进与交付风险调查。当前需求为[TRD-101](https://linear.app/gmx-io/issue/TRD-101)，计划负责人及整体集成/验收负责人为Divhead；Kenny为Solana前端lead。未修改业务、Linear、协作文档、PR、部署或钱包。
