@@ -1,5 +1,18 @@
 # Solana 交易链路依赖审计
 
+## 五需求前置跟进复核（2026-11-23 09:34 CST）
+
+本轮为指定五条需求及直接前置的只读增量调查，未全量评估迁移。实时重读五条及84/107/108/109的正文、关系和评论（均空），核对16条相关PR的head/review/checks，在线读取关键builder与PositionSeller；未修改业务、Linear、他人PR、部署或钱包，未读取用户key或运行负载。
+
+- release仍为`d1e9e1fc4c`，API main仍为`90df09fd2b`，相关来源未出现需再次接入的新head。72/78/70/playground head分别为`fac83d15bd`、`aa6660fcb0`、`3213ee6e0c`、`f54ba995d5`，均OPEN/MERGEABLE，全部返回checks成功、无reviews；72 Ready，其余Draft。取代前次部署收尾“部分CI仍运行”的状态。77/#3314已merged/approved，Linear仍In Progress；其余72/70/78仍In Progress，136 Done仅指提前联调切片。
+- 在线读取四个head的`buildOrderTransactions.ts`，blob均为`9548dccc352eda7bc1efed8b70daa11e2b00c182`且含`wrappedSolBalance`：SOL/WSOL原子资金修复已接入下游，不再列为待传播。70/playground已无此前合并冲突。最新独立部署及未做浏览器/RPC复验的边界沿用下节，不把当前CI通过当作交易验收。
+- **首要协调Sulliven的[TRD-84/#3293](https://github.com/gmx-io/gmx-interface/pull/3293)**：仍In Review、OPEN/Ready、CONFLICTING、无review，head仍`8818b1d46e`。需作者原线同步当前前置、解决冲突并验收平仓及限价edit/cancel。在线确认其PositionSeller尚无`tokenInfo={isSolana ? receiveToken : undefined}`，而playground已有；应回原线吸收，后续集成保留接缝。它是完整退出闭环的组合依赖，不是所有开仓开发的前置；本轮不代改。
+- **跟进Divhead的[TRD-107](https://linear.app/gmx-io/issue/TRD-107)**：仍In Progress。API365已merged，merge `90df09fd2b`的Solana production deploy及其余checks仍success；正文末段“等待365 review/rollout”落后实际GitHub事实，可更新为部署后验收。仍需50ms普通读/3秒交易后目标、支持容量、扩缩、持续新鲜度及cold/restart恢复证据；部署workflow成功不证明这些AC。未运行服务探测或负载。
+- **跟进Divhead的[TRD-108](https://linear.app/gmx-io/issue/TRD-108)与[TRD-109](https://linear.app/gmx-io/issue/TRD-109)**：分别In Progress/Todo，没有新正文或评论。108已有12组四输出对照，剩余consumer合同确认、GMTrade参考钱包比较、真实open-with-TP/SL→edit→close每步单次minContextSlot刷新。109冻结LUT已交付，余项是指定开发者自己钱包的小额SOL/USDC与参考TP/SL仓位/限价单、当前solanaTrading=true和banner key存在且off的证据；不共享seed，不将历史flags或旧Alchemy403当当前结论。
+- **次要review收口**：Rainer的85/#3223仍In Test、OPEN/Ready、head `c8f9c4a85d`、REVIEW_REQUIRED，checks成功；图表AC与Depth范围仍需明确收口，不自动阻塞简单交易。#3273仍OPEN/Ready、head `6995d3a0d5`，实际diff是TRD-49的SDK/frontend TickersResponse类型、timestamp及oracleDecimals弃用修正，**不是静态token/market/LUT列表**；此前清单分类在此更正。无需重复集成其未变代码。
+
+可更新事项：77的SDK构建交付状态与72尚未完成的运行AC分开表述；107正文更新365已合并且部署check成功；109按已完成LUT与剩余运行条件拆分进展。状态调整由需求负责人结合AC确认，本轮未修改Linear。70此前暂缓的payment conversion、最大杠杆、完整simulate_order与GT Rewards不自动恢复。当前建议先协调84原线与109运行条件，再组织108真实刷新闭环，并行跟进107性能/恢复验收及72review。
+
 ## 前置接续与 playground 更新（2026-11-22，已部署）
 
 用户授权创建目标接续可执行前置并最终更新 playground。本轮在原需求开发线实施，保留既有提交拓扑；新 merge、修复及 cherry-pick 均显式 GPG 签名并验证。开发线推送 my-gmx，交付线与 playground 推送 origin；更新原 #3315/#3316/#3317/#3318 说明，保留 Ready/Draft，不改他人 PR、Linear 或发送协作消息。
