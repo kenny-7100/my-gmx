@@ -1,4 +1,14 @@
 # Solana 交易链路依赖审计
+## 四交易PR统一交付（2026-11-23）
+
+用户已明确实施并新建统一PR：仅3315/3316/3317/3293；TRD-83/#3335暂不纳入。新共享分支`solana-trading-integration-trd-72`已推上游origin，向release创建[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，head `19850b6b461d598b5f9205bd14c60a4c9fc44342`。Kenny/Sulliven后续整合修改在此分支继续，不再在原四条线独立实现同一修复；用户通知Sulliven并手动关闭原四PR。未修改Linear、请求reviewer、转Ready、合并或发送队友消息。
+
+来源固定：72 `fac83d15bd1a773a980bad424d159e58e5515e3f`、78 `aa6660fcb0beb97939f7020c5fa3b309633c326b`、70 `3213ee6e0cf9109277802c4254393aee2adff672`、84 `5fa8d01ce84b35f229073e9d571b0980e8fd6e57`，均为新head祖先。基线release `c588a42b4c6d6c28dc14fa4a40d245559b4aa073`。在该release先merge84（`c680834ef9`），再显式merge78（`344937400e`，tree不变，仅保留剩余merge拓扑），最后补Receive `tokenInfo`（`19850b6b46`）。保留Sulliven最新getSolanaReceiveTokens/native SOL默认、新改单价格保护及swap排除，没有整支吞入playground或83。
+
+完整历史保留原拆分、message及merge关系，未重写历史/强推；四源已带入的共享master/EVM前置保留，含release3321的native collateral TWAP成本修正，未以release整文件覆盖原EVM修复。三笔新增commit均GPG G。来源含既有未签名、SSH签名以及本机不能完整验证的历史签名；原样保留，不冒称全部历史GPG验证通过。最终业务diff 145文件，无个人docs/scripts/AGENTS/.agents变更。
+
+实际统一交付目录验证全部通过：immutable安装及SDK声明/CJS/ESM构建；前端lint、ESLint规则3项、前端/landing类型、前端361文件/3554项通过（另1文件/1项跳过）；SDK lint/类型、69文件/1028项主测试、multicall6文件/14项通过（1项跳过）、v2 public4文件/50项通过（2项跳过）；8GiB生产构建含固定GMSOL产物通过，保留既有Sass/依赖注释/包体警告；diff whitespace及四来源祖先检查通过。Kenny原生Chrome访问本次3026/trade，Arbitrum图表、市场数据及共享TradeBox渲染；默认本地Solana visibility gate关闭，选择Solana正确弹出旧GMTrade域名提示，未覆盖flag，未验收enabled Solana UI及钱包。GitHub CI已启动，SDK standalone已通过，其他hosted检查当时仍运行，不能称CI全绿。新PR保持Draft，不能视为完整交易验收通过。需补当前head远价limit→edit→cancel、market/close/trigger、可信LUT原子entry+TP/SL、四钱包、拒签/preflight/未知回执与执行后slot刷新；历史playground交易不代替本次head。70已暂缓的payment conversion、最大杠杆一致性、完整simulate_order对照与GT Rewards保持原边界。未部署、钱包签名或广播。
+
 
 ## 统一交易PR额外候选筛查（2026-11-23）
 

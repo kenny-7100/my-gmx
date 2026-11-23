@@ -1,5 +1,10 @@
 # TRD-84 — Solana 平仓、编辑和撤单
 
+## 统一交易交付（2026-11-23）
+
+参与角色：统一整合实施。现已纳入[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，共享分支`solana-trading-integration-trd-72`，后续Kenny/Sulliven整合修改在该分支继续；原PR由用户手动关闭，TRD-83独立。来源、保留的历史/保护行为、实际验证与钱包验收边界统一维护在[整合交付记录](../solana-trading-dependencies.md#四交易pr统一交付2026-11-23)。本记录不表示原需求全部AC已通过。
+
+
 ## 四PR整合条件评估（2026-11-23）
 
 本轮只读评估Kenny承担整合的条件：现有PR及开发现场可接续，最终PR归属/旧PR收口需对齐，钱包与运行条件待实测。78与84的17个生命周期/通知/sender文件blob一致，不能以缺少merge节点认定漏代码。依据及边界见[整合评估](../solana-trading-dependencies.md#四交易pr整合实施条件评估2026-11-23)。未实施业务或修改外部状态。
