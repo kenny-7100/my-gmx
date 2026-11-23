@@ -1,4 +1,8 @@
 # Solana 交易链路依赖审计
+## 89commit清理后复查（2026-11-24）
+
+用户继续询问潜力，仅只读业务核对。刷新release/3337未变，排除master25祖先后64提交：无重复patch-id组，git cherry无release等价补丁；发现去重共享化后461ac22420（Merge reviewed release prerequisites TRD-70）与唯一parent563630b4f0完整tree相同，是本次去重产生、前次收尾未删除的空单parent节点，可安全候选移除但仍需最终tree映射/签名/下游核验。此前有意保留的两merge映射为ca1c189431（tree等第二parent，release起始壳）和d827f3ce27（tree等第一parent，保留78侧来源祖先）；后者第二parent含独有历史，不能按无代码变化抹掉审计来源。暂不扩展为业务commit squash；除空节点和两个低优先级merge外，未发现同类明确自动可删项。master范围需独立语义决策。本轮未改业务/PR/部署。
+
 ## 四交易分支重复补丁共享化（2026-11-24）
 
 用户明确同意实施10组重复补丁去重，要求最终源码零变化。新鲜fetch后release仍c588、3337/136/playground无他人新增且clean；已在本地及远端备份三个原head。沿用交付skill，单Agent，无新业务功能。
