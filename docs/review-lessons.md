@@ -134,6 +134,8 @@
 
 2026-11-19 用户纠正交付入口：业务 PR 应在上游仓库建立需求分支并向 release 提交，不用 fork。遇到 fork 报告写权限失败，先核对 head/base 仓库和实际协作流程，不能默认把适配 fork CI 列为需求工作；本轮已修正规则和工具默认 remote，并将 TRD-77 迁移至上游 #3314。历史 fork 兼容方案仅适用于确实需要接收 fork 的共享 CI。 用户随后重申这是基本研发流程：所有分支重建（含 release 交付、迁移、补签）均保留原 commit，不因独立交付而默认 squash；所有新 commit 显式 GPG 签名并核验。工具也必须显式传入签名参数，不能只依赖本地 commit.gpgsign 配置；本轮修正了 agent-workflow 的 merge/cherry-pick 入口，显式 OpenPGP 签名并 verify-commit；15 项工具回归通过，使用隔离的临时 GPG 密钥覆盖关闭自动签名后的 merge/转移签名，以及签名失败保留 pending/不生成未签名提交。本轮25/31/46/26个commit逐个核对并迁移，TRD-77恢复原5个加release同步。签名改变父节点会连带改变后续SHA和使旧签名失效，按有序父节点映射重签，逐提交 tree/message 与最终树一致才可复用内容验证。
 
+**2026-11-24 历史去重反例：** 稳定patch-id也包含周边context，不能把“没有同patch-id组”解释为没有重复实现。3337全量复查发现两份Phantom Lighthouse修复新增/删除逐行相同、新文件blob相同，但sender import和测试context不同，patch-id未归为一组。候选发现应补充按路径的新增/删除内容比对，再验证父链、上下文和后续演进；不能仅凭归一化文本直接drop。共享前置重建仍须核对最终tree/diff、适用merge、下游及新签名，见[复审记录](solana-trading-dependencies.md#88commit全量历史与整理工作复审2026-11-24)。
+
 2026-11-17 playground/#3288：fork组件测试的Pages/comment 403应在权限步骤按same-repository条件处理，保留测试、artifact及测试失败门禁；不要把整项workflow跳过或改成忽略失败。本轮修复后远端组件workflow成功。部署SDK验证需读取entry实际引用的hash路径并核对WASM摘要；SPA对不存在路径也可能返回HTML200，单独HTTP状态不能证明产物存在。见[TRD-136持续实验分支](issues/TRD-136.md#持续实验分支交付2026-11-17)。
 
 2026-11-17 在 #3201 验收补齐：金融数据页面对照先区分 selector 按 index 聚合与 header 按选中池展示，并记录 API/价格采集时间；实际 OI/volume 变化不能当成计算回归。真实响应经过生产 parser/compose/格式化路径能验证技术一致性，不能代替金融语义批准或独立链上 reference。PR描述编辑也可能触发edited CI，终态报告需区分已完成检查与同head的新任务。CI 公共接口超时须保留首次失败和重跑结果，本地重跑通过不能写成远端全绿；[本次证据](issues/FESOL-15.md#自动验收补齐2026-11-17)。

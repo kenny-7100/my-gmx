@@ -1,4 +1,16 @@
 # Solana 交易链路依赖审计
+## 88commit全量历史与整理工作复审（2026-11-24）
+
+用户要求检查全部commit和此前整理过程，本轮只读业务/PR，不继续重写。实时release仍`c588a42b4c`、3337仍`5734a74943`，Draft、88commit/145files。逐条检查88提交的parent/tree/签名/patch及所属范围：63条交易/整合提交均GPG=G，25条固定master历史保持原SHA，其中1条未签名、24条本机不可完整验证（含SSH verifier未配置）；不称全部88条签名通过。没有空单parent提交、没有相同稳定patch-id组、git cherry无release等价单条补丁。
+
+**新增明确候选：** `a4c488f912`与`a7174bd3af`的Phantom Lighthouse修复，四路径的新增/删除逐行完全一致，新增validateWalletTransaction.ts blob同为`a6a4e5ad160e120353a7bbc2c09f5c43e5403ba8`；patch-id不同仅来自周边context差异（sender import及测试上下文），此前去重仅识别其中两份副本，仍遗留第三份的等价实现。两节点处于不同父链，不能直接drop，应扩展现有共享前置并投影后继，预期净减1且须重新确认最终tree/diff/适用拓扑和签名。对全部非master单parent commit另做按文件的新增/删除内容分组，只发现此组；该检查仅提名候选，不替代上下文适用性审查。
+
+两个旧低收益merge候选目前为`ca1c189431`（tree等第二parent；release起始壳）和`cf8a4e9bf2`（tree等第一parent；保留78来源历史）。此前`d827f3ce27`是旧映射，当前对应cf8，不应再当当前SHA。master侧另有tree等parent的上游PR merge，属于保留的25条原始来源，不逐条抹掉。其余同题locale或wallet-key提交仍有真实差异；不按标题删除。建议只将新增Phantom副本列为值得进一步清理的候选，merge保持，master发布范围独立协调。
+
+**整理过程复验：** 独立读取四轮持久映射，共649/649/578/553条记录，保留节点message、记录中的tree及有序parents均与Git对象吻合，四阶段三个root的最终tree均不变。当前3337/136/playground与最初整合后19850b6b46/57e707fe08/509a63e910的完整最终tree分别相同，源到两下游祖先关系通过。已吸收路径投影和共享补丁提前进入历史有意改变中间快照，因此不声称每个中间commit都等于原快照或逐个可构建。最初整合保留release已有变更（含decrease原生抵押TWAP修复），显式接续78拓扑，整合自有Receive补丁仅新增Solana tokenInfo，EVM仍undefined；未带入个人工具/知识文件或TRD83独立交付。
+
+**当前review边界：** 固定master25条仍包含尚未进release的市场、RPC、EVM/图表能力，不能把PR描述为纯四需求独立可合入。GitHub当前head的组件测试步骤成功，红项为报告推gh-pages被fetch-first拒绝（run45218820015），非组件用例失败；主lint/types/tests有一轮成功、另一次触发仍运行，SDK standalone/Audit/两个Pages成功。未重跑业务suite、改业务/PR正文、签名广播或扩大全交易验收；playground最新部署见[TRD136记录](issues/TRD-136.md#同步后重新部署-playground2026-11-24)。详细88条盘点及独立映射核验`/tmp/pr3337-history-audit.json`、`.log`，组件失败证据`/tmp/pr3337-review-component-failure.log`。
+
 ## 单条空提交移除（2026-11-24）
 
 用户仅授权删除461ac22420，现场/远端均无新增且clean。确认它与唯一parent563630b4f0完整tree相同后，仅将该节点映射至parent，其他节点保留tree/message/parent顺序，受影响63后继重建并GPG验G，489节点SHA不变。两个低优先级merge保留双parent；master历史不变。三目标最终tree及相对release完整diff一致，drop不再为祖先，统一源/下游祖先关系通过。
