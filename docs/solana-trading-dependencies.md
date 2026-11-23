@@ -1,5 +1,16 @@
 # Solana 交易链路依赖审计
 
+## 四交易PR整合实施条件评估（2026-11-23）
+
+用户转述Divhead建议将3315/3316/3317/3293合成一个PR，并询问若由Kenny承担是否具备实施条件；本轮仅评估，未据转述修改交付规则、业务、他人PR或创建整合分支。结论：代码整合可开始，最终送审仍需组合/钱包验收，最终PR归属与旧PR收口需协作对齐。83不在点名整合清单中；不将playground整支当正式交易交付，不改变原需求成果归属。
+
+实时PR head仍为72 fac83d15bd、78 aa6660fcb0、70 3213ee6e0c、84 5fa8d01ce8，均OPEN/MERGEABLE，当前checks成功；release仍c588a42b4c。72/78/70各development/delivery及136/playground共8目录均clean。已有任务登记仍使用历史FESOL编号；以TRD-70查record为空不代表原FESOL-19现场不存在，本轮已核对后者development/delivery登记有效，不能为改编号重建任务。
+
+**生命周期的重要校正**：GitHub compare确认84包含70，78相对84仅多aa6660fcb0（Merge updated Solana transaction prerequisites TRD-78）一个merge节点，反方向84多41节点。进一步读取两个head完整Git tree，逐blob比较orderTracking目录、solanaOrderTracking通知目录与sender/hook两个入口共17文件，全部一致。缺少该merge节点不能直接推出缺少生命周期代码；应保留提交拓扑并核对实际组合接线、变更冲突和行为，尚未证明整合后测试/钱包流程通过。
+
+建议Kenny作为整合负责人在独立整合现场准备成果，原线保留来源与历史；最终复用哪个现有PR或新建统一Draft，以及旧PR由各作者如何标注/关闭，先与Sulliven/Divhead对齐，不擅改3293或关闭现有PR。使用既有固定WASM、同步release，接84新业务并保留Receive tokenInfo；TRD-83等额外范围不自动加入。送审矩阵按Divhead点名submission/status/market-limit+TP-SL/close/edit-cancel，并按各issue原AC保留四钱包、LUT原子落链、失败/未知回执与执行后slot刷新证据；若缩减矩阵需明确共同约定。当前RPC/Privy域名、钱包/资金、flags和API持续新鲜度仍需实测；本轮没有读取key、启动服务、运行钱包或链上交易，旧403不当作当前已复现阻碍。钱包签名/广播与部署按各自授权执行。
+
+
 ## 五需求晚间增量核查（2026-11-23 21:30 CST）
 
 本轮为只读调研：实时读取五条及83/84/85/107/108/109的Linear正文、关系与评论，核对当前PR/head/checks/review threads、release与API main，并定向比较上游源码。没有修改业务、Linear、PR、服务、部署或钱包；未运行测试/负载、浏览器或链上验收。下述运行数据来自负责人更新的Linear正文，本轮未独立访问Datadog或复跑报告。
