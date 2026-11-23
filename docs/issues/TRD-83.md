@@ -1,5 +1,11 @@
 # TRD-83 — Solana 仓位操作与保证金存取
 
+## 与统一交易PR的关系核查（2026-11-23）
+
+本轮只读核验：Linear仍Sulliven/In Review；#3335仍OPEN/Ready、44580914b7、MERGEABLE/REVIEW_REQUIRED、checks成功、无reviews。GitHub compare明确TRD-83当前head在TRD-84 5fa8d01ce8上仅多一笔44580914b7（26文件），不是独立于84的平行实现。新增保证金存取、SOL/WSOL和Price impact接线，修改共享GmsolOrderActionsProvider/buildOrderActions/solanaOrderActions及orderInputs等，后续整合基础改变时需要接续。作者PR记录types/lint/format、19+23定向测试、3559全量测试及manual test通过；本轮未复跑，不据此确认需求全部AC或真实落链/刷新/关闭市场限制通过。
+
+用户已决定新建统一交易PR，Sulliven后续交易整合修改也在统一分支进行，由用户通知；原四PR由用户手动关闭。TRD-83仍不在Divhead点名四PR清单内，不能自动将其全部工作迁入统一PR。建议现在通知整合方向；统一分支可用后，83继续独立交付并接续统一交易基础，共享基础修复优先在统一线完成。暂不改写83/84分支或发送消息。
+
 ## 五需求晚间核查（2026-11-23）
 
 参与角色：只读依赖调研。Sulliven已提出正式Ready PR #3335，44580914b7，MERGEABLE、checks成功、Linear In Review；取代上午无PR判断。playground尚未集成，作者测试声明不代替本轮真实存取验收。 版本、证据与验证边界见[统一增量核查](../solana-trading-dependencies.md#五需求晚间增量核查2026-11-23-2130-cst)。本轮未修改业务或外部状态。
