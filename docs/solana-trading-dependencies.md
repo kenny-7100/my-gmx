@@ -1,4 +1,22 @@
 # Solana 交易链路依赖审计
+## 四交易分支重复补丁共享化（2026-11-24）
+
+用户明确同意实施10组重复补丁去重，要求最终源码零变化。新鲜fetch后release仍c588、3337/136/playground无他人新增且clean；已在本地及远端备份三个原head。沿用交付skill，单Agent，无新业务功能。
+
+每组副本先核对稳定patch-id一致，再找所有副本父提交的共同祖先，将一份原补丁以原message/identity签名放在分叉前供各线继承。10组全部可三方干净应用；25个原副本删除，插入10个共享commit，净减15。剩余业务提交仍按原拓扑/message拆分，两个merge候选9aa37fb3b9/879fdbc187均保留为双parent节点；25个未吸收master祖先SHA不变。原生SOL、preflight、slot等后续演进仍在。中间快照有意提前包含共享修复，仅对尚未拥有该补丁的源节点投影；已有该补丁及后续演进时不重放旧补丁覆盖。下游自身历史保留其原快照并接续来源映射，最终tree均不变。
+
+| 目标 | 原head | 新head | 相对release提交数 |
+| --- | --- | --- | --- |
+| #3337 | `ee7ff037f2` | `e9e6edc6f002ab35802a5f93e21608ec20c877f7` | 104 → 89 |
+| TRD136开发 | `5933abb628` | `ed63be9988cad8865e4be6492186bc314e4688aa` | 562 → 547 |
+| playground/#3318 | `e2e4caa656` | `e61607039d1f85c43294af32445125c1ce997e50` | 204 → 189 |
+
+核验：三目标完整tree及相对release完整diff逐字节一致，3337仍145files；10个共享补丁的patch-id各与原组完全一致，25旧副本不再是3337祖先；两个双parent merge在新3337祖先中保留；共享补丁、新3337/下游祖先关系通过。518个原保留节点和10个共享节点重新GPG签名并逐一验G，message/parents/tree映射校验通过，25master原节点保持原签名。未将其他独立lint/docs合并或删除。
+
+原head远端备份：origin `backup/trading-before-patch-dedup-20261124`及`backup/playground-before-patch-dedup-20261124`，my-gmx `backup/trd136-before-patch-dedup-20261124`。三目标按旧SHA绑定lease推送并ls-remote复核；GitHub已确认3337=89/145files、3318=189，两个Draft保留，正文及任务映射更新。源码/依赖/config完全不变，复用既有同tree验证，新CI运行中不称通过；无业务suite复跑、重新部署或新增钱包验收。稳定playground仍source509a63e910，完整tree与新分支相同。
+
+原/新映射与共享节点：`.git/agent-workflow/patch-dedup-20261124.json`，SHA256 `50eda3ab3feb4ceaf7849cbde8e14597cf969c4c62706b68884a7a81019c92c8`；本机脚本/核验输出`/tmp/gmx-*patch-dedup*`。未改Linear、Ready/reviewer/merge或通知队友；不要整支合回旧需求历史。
+
 ## 104commit剩余清理候选（2026-11-23）
 
 用户只要求分析。刷新release/3337均无变化，排除固定master祖先2aa7dd5240后剩79commit。git cherry对release未找到补丁等价的剩余单parent提交，单parent全tree空commit为0。发现10组同patch-id分支副本，合计15个额外副本：import lint2、atomic zero-output3、packet-limit文档3、artifact provenance文档2、Phantom Lighthouse2、failure reason2、sync-vs-error3、两组locale同步各3、reviewed prerequisites2。副本位于原72/78/70不同父链，不能直接删，否则对应阶段可能缺修复；须统一共同前置/按拓扑重建并最终tree相同，此为未在release交付的同业务副本去重，非上一轮已吸收清理遗漏。

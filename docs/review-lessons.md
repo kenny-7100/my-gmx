@@ -43,6 +43,8 @@
 
 2026-11-23 第二阶段：代码被release吸收不仅来自squash，也可能来自补签/交付重建或选择性适配。清理应以当前release为代码基础、删除被覆盖后变空的迁移提交；混合文件保留真实消费者适配，例如orderInfo.solana，reader/type结构复用release。业务拆分/message/适用merge保留，中间tree会有意更新为release实现，不能同时宣称逐提交旧tree不变；必须核对最终完整tree和release diff一致，映射/签名/必要适配真实存在。最终与release无差异的文件，不应在剩余PR历史里再次引入旧实现再撤销。未吸收master范围独立保留。见[实施记录](solana-trading-dependencies.md#release已吸收实现与重复适配历史清理2026-11-23)。
 
+2026-11-24 重复补丁去重：相同patch-id出现在不同父链时，不能直接删除副本。可把一份原补丁以独立commit放在各副本父节点的共同祖先后，让分叉共同继承；保留后续演进，仅对尚未有补丁的源快照投影。须核对共享commit本身patch-id不变、最终tree/diff一致，以及来源merge/下游映射；有相同tree的merge不因此自动删除。此为本次授权历史整理，不推广为默认扁平化/squash。见[实施证据](solana-trading-dependencies.md#四交易分支重复补丁共享化2026-11-24)。
+
 **Playground 的实验配置一致性（2026-11-18，用户明确）：** playground 本身允许实验能力，应复现 TRD-136 本地验收路径，不能把“常规生产构建”当作必须保留不同 LUT 配置的理由。可共享本地启动/模拟/预览构建的明确配置入口；公开 API/RPC 与本地服务仍按实际环境区分，不宣称数据源完全相同。配置差异必须随产物验证，既有大小/模拟/签名前保护保留，未签名模拟不代替真实下单。历史上此次通过 `build-playground` 与共享无 LUT 模块修正入口（2026-11-20 已由正式冻结 LUT 配置接替），不把实验选择混入普通 `build-app`。
 
 **Playground RPC 构建覆盖（2026-11-21）：** [TRD-136 环境变量改造](issues/TRD-136.md#playground-alchemy-环境变量配置2026-11-21)中主 bundle 替换通过仍不代表独立 Worker 生效；multicall Worker 单独编译并导入中央 RPC。专用转换须同时覆盖 Worker、保留其原 isolation 插件，并扫描最终 JS 与 source map，不能只检查主 transform 的返回值。前端 key 会进入公开产物；2026-11-21 用户随后明确要求 playground 环境文件随分支提交，现按 tracked `.env.playground.local` 执行，不再沿用此前的 gitignore 方案。缺配置明确阻断，不回退失效 key。 2026-11-22 官方RPC从Alchemy assignment迁移到GMX proxy后，旧transform必须显式失配，不能静默构建成忽略用户配置的产物；在原TRD-136线适配当前共享provider入口，覆盖app/Worker及HTTP/WS、各链、开发/生产用途矩阵，普通app继续走官方proxy。用户要求不查看key时，使用临时假配置验证转换契约，部署仍使用原样保留的用户文件，不读取或输出真实值。
