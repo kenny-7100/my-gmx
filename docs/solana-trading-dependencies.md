@@ -1,4 +1,12 @@
 # Solana 交易链路依赖审计
+## 104commit剩余清理候选（2026-11-23）
+
+用户只要求分析。刷新release/3337均无变化，排除固定master祖先2aa7dd5240后剩79commit。git cherry对release未找到补丁等价的剩余单parent提交，单parent全tree空commit为0。发现10组同patch-id分支副本，合计15个额外副本：import lint2、atomic zero-output3、packet-limit文档3、artifact provenance文档2、Phantom Lighthouse2、failure reason2、sync-vs-error3、两组locale同步各3、reviewed prerequisites2。副本位于原72/78/70不同父链，不能直接删，否则对应阶段可能缺修复；须统一共同前置/按拓扑重建并最终tree相同，此为未在release交付的同业务副本去重，非上一轮已吸收清理遗漏。
+
+两条merge与某parent tree相等：9aa37fb3b9与第二parent64f28dd43e相同（第一parent为release，可作为起始整合简化候选）；879fdbc187与第一parent3b70d4deff相同（保留78来源历史的显式merge，删除涉及来源可追溯性，不能仅以无代码变化自动移除）。标题含Merge release的09afef5ac7/60e83028e3现在为单parent，实际分别改locale引用/消息，不能当空merge删；c6cafed855有useTradeboxState真实适配及locale，不可按标题删除。
+
+建议仅在用户确实要继续整洁review历史时去重15个补丁副本，保留一份真实业务修复和必要merge；两个tree相等merge优先级较低，不建议为2条重写已稳定来源历史。不合并lint/docs到其他功能commit，除非获得用户单独授权。候选不代表能直接104减15减2，最终取决于重建后的适用merge和重复节点。本轮无业务/PR/部署修改，证据`/tmp/gmx-remaining-cleanup-candidates.json`。
+
 ## release已吸收实现与重复适配历史清理（2026-11-23）
 
 用户明确要求实施：对最新release已经覆盖的实现和重复历史统一清理，仅保留交易自身差异及必要适配；尚未吸收的master内容本轮不删除。实时release仍`c588a42b4c`，三个远端/现场head无他人新增且clean，操作前均创建本地和远端备份。使用交付skill，未委派Agent。
