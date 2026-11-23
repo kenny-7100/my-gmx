@@ -1,4 +1,24 @@
 # Solana 交易链路依赖审计
+## release已吸收实现与重复适配历史清理（2026-11-23）
+
+用户明确要求实施：对最新release已经覆盖的实现和重复历史统一清理，仅保留交易自身差异及必要适配；尚未吸收的master内容本轮不删除。实时release仍`c588a42b4c`，三个远端/现场head无他人新增且clean，操作前均创建本地和远端备份。使用交付skill，未委派Agent。
+
+重建以release树为基线，四交易源中仅保留当前PR最终仍有差异的路径；原路径中已经完整等于release的实现始终使用release版本，避免中间commit反复引入旧实现。混合文件composeGmsolOrdersInfo采用release的reader/类型结构，仅保留每个阶段真实存在的orderInfo.solana block，该block已在最初交易实现commit中，故后续纯reader迁移commit变空而删除。不将每个中间tree声称与旧版相同；这次有意清理已吸收的中间代码快照。保留业务commit message、原拆分、拓扑次序及适用merge关系，去除空单parent提交/冗余parent。
+
+本次3337减少27commit：fc52 SDK pin、三份TRD98 asset key、三份fee reader与三份order reader、精度常量、余额/RPC/configured-mint旧迁移、已吸收fee计算及变空同步/旧路径清理。对最终无差异的SDK/API/钱包路径使用release，不按作者删提交。交易metadata、确认slot floor、pending/retry、原子TP/SL与原生SOL等最终实现均保留。未被release吸收的25个master提交原SHA/历史/代码不变，含3307/3324/3329/3334/3331及发布同步，因此不是纯四需求最终diff；仍145files。
+
+| 目标 | 本次旧head | 新head | 相对release提交数 |
+| --- | --- | --- | --- |
+| #3337 | `4a85d23c7b` | `ee7ff037f27f424fbba8f761ebf464d8c5a72242` | 131 → 104 |
+| TRD136开发 | `1e5c1894dc` | `5933abb628e4eef5a2596dd299e7db6639608252` | 643 → 562 |
+| playground/#3318 | `3403b53969` | `e2e4caa656735b0698d0a67210649a939d970bdd` | 260 → 204 |
+
+三目标649个旧独有提交在映射中分为543个保留重建（显式GPG签名、全部G）、81个被吸收/空commit删除、25个master原提交保留。逐提交核对message、映射后的tree及parents；三目标最终完整tree与相对release的完整diff均逐字节相同，源/下游祖先关系通过。指定SDK/wallet/fee/order旧SHA不再是3337祖先；三目标SDK validation/referrals/orders API仍与release一致，metadata block实际保留在交易commit `d6a96fe333`。清理顺序与校验脚本/输出在本机`/tmp/gmx-absorbed-*`，完整映射保存`.git/agent-workflow/absorbed-cleanup-20261123.json`，SHA256 `6684ce775926e8c0c2650d2034ff36591bc903a65c498d88a02079c97dd5d8fd`。
+
+备份：origin `backup/trading-before-absorbed-cleanup-20261123`与`backup/playground-before-absorbed-cleanup-20261123`，my-gmx `backup/trd136-before-absorbed-cleanup-20261123`。三目标已按旧head绑定force-with-lease推送并用ls-remote复核；GitHub确认3337=104commit/145files、3318=204commit，两个Draft保留，正文已重写说明来源、清理、master边界及验证。业务目录均clean。新head CI已启动，不称通过；清理前同tree主checks/Audit/SDK standalone通过，组件289passed，仅报告gh-pages并发fetch-first失败。
+
+本次仅历史重建，源码、依赖、配置、tracked用户环境最终tree不变，复用原实际目录检查，不为SHA改变重复跑业务suite或重新部署。线上仍为固定部署5c1589d7/source509a63e910，源码与新playground完整tree相同；既有钱包未连接的只读验收边界保持，不新增签名广播、部署、Linear写入、Ready/reviewer/merge或队友消息。旧README来源SHA为历史证据，当前映射以本节为准；从新分支接续，旧四线不整支合回。
+
 ## 已吸收依赖历史清理（2026-11-23）
 
 用户明确授权：基于最新release清理已被squash吸收的旧依赖历史，保留未合业务提交的拆分、message、顺序和适用merge关系；本轮允许重建这三条分支并以旧head绑定force-with-lease更新。交付skill负责执行，未扩大为清理所有其他作者的改动。
