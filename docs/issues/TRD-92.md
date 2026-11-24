@@ -6,6 +6,20 @@
 
 2026-11-24 23:10，按用户授权完成 Linear 拆分：TRD-92 保留现有 Privy 外部钱包基础上的连接/恢复、资产展示、Receive、SOL/SPL Send 与交易反馈；Solana embedded 的创建/访问、会话和签名接入迁至 [TRD-210](https://linear.app/gmx-io/issue/TRD-210)，两单建立 related 关联。TRD-210 同属 Unification，Backlog / Sulliven / High。正文只写需求与验收，未发布讨论记录或评论。以下调研为拆分前范围的历史基线；embedded 不再属于当前 TRD-92 的验收范围。
 
+## 拆分后实施就绪核验（2026-11-24）
+
+结论：具备开始实施的代码基础，未发现必须等待其他负责人交付的硬前置；尚不能称完整交易验收条件全部满足。Receive 与连接行为可先实施，Send 的交易规则和签名/提交适配属于本单工作。
+
+本轮刷新确认 release 仍为 `993474e4377b75f919e587bc4f30e6adc24cecd1`；TRD-92 无 blockedBy、无评论。TRD-93/95/97/98 均 Done；#3110/#3195 均 approved 并已 merged 到 release，当前源码仍保留 connector/session、配置 token、RPC 和余额能力。无需重复刷新本阶段未变化的完整依赖树。
+
+- RPC 的 `getSolanaRpc()` 已暴露 kit 客户端；源码提供主网检查、健康探测和账户读取。但本轮没有对当前配置 endpoint 的 fee/blockhash/simulation/status 方法做实时请求或发送交易，不能将读余额通过扩展为发送链路已验证。
+- 当前 session 暴露 address/disconnect/restoration，没有通用 signer；实现 Send 时需从 Privy Solana wallets 按选中地址取得签名钱包，避免取列表第一项。不是另一个需求必须先交付的 signer 依赖。
+- #3337 仍 OPEN，head `be9ca46ecba8031467bc13a7a771e1368d7aeccd`；订单 sender 可参考但不是通用 transfer，TRD-92 不必等待整条交易 PR 合并。若复用其中代码，需要明确最小来源与接口边界。
+- TRD-158 仍 In Progress；发送必须包含足额 SOL、fee/rent/Max 校验，但不能直接假设订单 fee helper 适用于转账，也不将 TRD-158 整单完成视为硬前置。先对齐可共用接口，避免重复实现。
+- 开工时收口支持 mint/Token-2022 范围、收款钱包地址到 ATA 的处理、创建费用和 SOL Max 保留额。这些是本单设计/验收规则，当前不要求为所有规则另等外部交付。
+- 真实验收还需有四种外部钱包、Solana 开关、可用 mainnet RPC、有少量 SOL/测试代币的自有发送/接收地址，并获得实际签名/广播授权。本轮未重新核验这些运行资源，不声称它们缺失或已全部具备。
+- 负责人仍 Sulliven；公开 PR 查询没有确认存在 TRD-92 实现线。按其实际分支接续，不能据搜索结果假设尚未开工。GitHub 编号搜索返回的 #3243 是旧 FESOL-92（SDK 单位换算），不是本需求。
+
 ## 拆分前调研结论
 
 TRD-92 不是从零建设钱包，也不是只补两个按钮。外部钱包连接、恢复、地址和资产展示已有正式 release 交付；剩余范围是连接行为的验收差异、Receive、通用 SOL/SPL Send，以及 Solana Privy embedded wallet。标准转账主要通过现有 RPC 与钱包完成，未发现必须新增 gmx-api/SQD 接口的前置；embedded 配置与签名尚未核验，不能写成已通或必需购买第二份 Privy 订阅。
