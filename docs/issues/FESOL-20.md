@@ -1,5 +1,9 @@
 # FESOL-20 — 订单发送与成交状态
 
+## Allowlist 发布复定位（2026-11-25）
+
+角色：只读排障。private#5已合并，但发布workflow等待cloudflare-workers环境审批，线上四路仍为11-20旧Worker版本。新DOGE单4秒已成交，真实回执重放executed/closed；原页面三个历史方法仍403。责任/版本/签名及后续入口见[完整证据](../solana-trading-dependencies.md#allowlist-已合并但发布待审批的复定位2026-11-25)。未审批、部署或新发交易。
+
 ## 状态与增量核验（2026-11-25）
 
 实时 Linear 仍 In Review；统一 #3337 已 Ready，head `be9ca46ecb`，六项 CI 全绿、尚无正式 review。相对上轮审查仅 RPC 配置变量重命名，历史方法 403 与终态关闭缺口仍未消除；本轮未重跑业务测试或交易验收。版本、责任与范围见[统一现状复核](../solana-trading-dependencies.md#pr-与关联需求现状复核2026-11-25)。

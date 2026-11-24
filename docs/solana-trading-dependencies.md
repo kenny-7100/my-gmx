@@ -1,5 +1,17 @@
 # Solana 交易链路依赖审计
 
+## Allowlist 已合并但发布待审批的复定位（2026-11-25）
+
+用户提供仍未确认成交的截图及Divhead“published rpc.proxy allowlist”消息后重新定位，补齐此前只确认线上方法拒绝、未核对代理发布流水线的边界。已在kenny原生Chrome当前3337分支预览观察到新DOGE仓位及通知，建单签名`5oyZPWVMaDxZR42pFtxgRHSHameTo1EENq68XCYS1TZtM1KQVvStm8a84PMt8JKrDaaTCh7pL4uj32QLSuvXMRzU`。原页面只读fetch重发：getSlot 200；getTransaction/getSignaturesForAddress/getBlock均403/-32004 Method is not supported。未刷新页面或关闭通知，收尾关闭本轮Console恢复布局。
+
+**直接根因进一步收窄为修复未部署：** Tim的[private PR #5](https://github.com/gmx-io/gmx-interface-private/pull/5)确实已于11-24 18:08:41北京时间合并main `49e492be0f`，config.ts确实增加三个所需方法。合并后[push工作流45371934572](https://github.com/gmx-io/gmx-interface-private/actions/runs/45371934572)的check成功，但worker/deploy仍waiting，steps为空；pending_deployments明确cloudflare-workers环境等待GMX Interface Devs团队review，wait_timer=0、current_user_can_approve=false。不是PR检查失败，也不是已完成部署后浏览器未更新。未操作审批/重跑/部署。
+
+独立curl核验dev/fallback/largeAccount/express四路getTransaction均同样拒绝，X-Worker-Version均为`fe06c1ef-e469-4ecc-9f4b-8008e607c215`（HKG节点）。该版本与[11-20最后成功部署44778792510](https://github.com/gmx-io/gmx-interface-private/actions/runs/44778792510)的deploy日志中最终100%版本完全一致，证明当前命中旧Worker；不能把前端3337同步release或Pages成功部署当作独立RPC Worker发布。
+
+新单链上只读取证：建单slot473404266、执行slot473404286，两笔finalized/err=null，blockTime相差4秒；order `4wJjWRJmqQ39wXs6j2xQnLdqUbdZtD5fpz5LfmqAhezk`，actionId243271。执行签名`3riqsvxxBnqqDxewK5gqiiwoc3pdv1A8rr7dFzm4GPUipFeFqskGL5EW9qgY9nMKFrnvqAbHAfZX8skdk1Ra6ySm`。复用当前未变decoder/getCreatedOrderActions/reducer回放，TradeEvent与OrderRemoved得到executed/closed、reason=executed。本轮公共主网RPC只用于只读取证，未加入产品兜底。回执及重放文件`/tmp/doge-new-*`已复制到Git共享目录`agent-workflow/pr3337-allowlist-recheck-20261125/`。
+
+下一步为具备权限的环境reviewer批准既有发布，待deploy/smoke完成后按实际新Worker版本复测三个历史方法及v0回执字段，再验收新交易通知。现有超时通知没有自动恢复机制，代理修复后也不能期待已结束的watcher自行重启；不能用旧toast状态判断新部署失败。前端永久拒绝与索引延迟未区分的问题仍保留，未改业务代码或新发交易。
+
 ## PR 与关联需求现状复核（2026-11-25）
 
 角色：只读状态与增量核验。实时 GitHub #3337 为 OPEN / Ready（非 Draft）、MERGEABLE / BLOCKED、REVIEW_REQUIRED，正式 reviews 与 inline comments 均为空；head `be9ca46ecba8031467bc13a7a771e1368d7aeccd`，六项 checks 全部成功（Audit、Component Tests、Linting/Type Checking/Tests、SDK standalone、两项 Pages）。最新 app 固定预览为 `https://4000b295.gmx-interface.pages.dev`。release `993474e437` 已是 head 祖先，当前对 release 有 61 条提交；相对上轮审查 `3435c1fe75` 仅同步 release/#3342，最终源码只改 `src/config/rpc.ts` 的局部变量名，路由语义与交易源码不变。因此复用此前源码审查结论，不声称本轮重新跑过测试或钱包验收。

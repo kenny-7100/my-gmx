@@ -4,6 +4,8 @@
 
 3337真实DOGE市价单回执重放正常，线上代理却允许getSlot、拒绝getTransaction/getSignaturesForAddress/getBlock，导致已成交但toast未确认。RPC接入或切代理后，按真实消费者验证每个方法/参数/响应字段及对应路由；mock suite、探活成功、仓位API可读都不能替代。永久method/权限拒绝须与索引延迟分开诊断，不能静默重试到超时，也不以仓位出现代替同一订单成交证据。见[取证与范围](solana-trading-dependencies.md#市价单已成交但通知未确认的线上定位2026-11-24)。
 
+2026-11-25补充：allowlist PR合并不等于Worker已上线。核对合并后push部署job、环境pending approval及线上X-Worker-Version；本例private#5合并后部署仍待审批，线上版本对应11-20成功发布。前端Pages更新不能替代独立Worker部署。见[发布复定位](solana-trading-dependencies.md#allowlist-已合并但发布待审批的复定位2026-11-25)。
+
 ## 订单终态不等于账户已关闭（2026-11-24）
 
 3337复审核对TRD-78、gmx-api与固定程序：keeper执行成功但关闭失败时，completed/cancelled账户仍可能持有escrow/rent，owner close负责补建ATA并完成归还。update的pending限制不能不加区分地复用于close/cancel；mapper/按钮即使正确拒绝“修改已成交订单”，也须保留协议支持的终态账户清理入口。检查API筛选→compose→操作guard→builder，而非把终态视为可直接从列表丢弃。既有过滤与本次新加守卫分别归因，静态契约证明与真实链上验收区分。见[复审证据](solana-trading-dependencies.md#最新head复审2026-11-24-晚间)。
