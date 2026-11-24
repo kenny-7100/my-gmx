@@ -33,7 +33,7 @@
 | 1 | [TRD-91](https://linear.app/gmx-io/issue/TRD-91) Net Rate；Backlog / Rainer | 在同一张图查看 Solana 多空资金费、借贷费和净费率 | **最接近收敛。** API 已合并且生产有真实历史；前端网络路由缺口可定位。先和 Rainer 对齐剩余范围，确认历史不足的验收口径。优先于钱包是因为只读、复用路径短、无新增签名动作。 |
 | 2 | [TRD-92](https://linear.app/gmx-io/issue/TRD-92) 钱包与转账；Backlog / Sulliven | 连接/恢复钱包、查看资产、接收和发送 SOL/SPL，支持 embedded wallet | **可收敛但必须拆清剩余工作。** 连接和余额已有，不重做；Receive/Send 和 Solana embedded 并未完成。转账可以使用 RPC，与历史索引依赖较少；embedded 的 Privy 配置/签名适配单列验证。 |
 | 3 | [TRD-110](https://linear.app/gmx-io/issue/TRD-110) Swap；Backlog / 未分配 | 换币，及在生产入口转换 SOL/WSOL | **可做完整技术方案。** 共享报价已有 gmsol 分支，旧站有真实 Swap/wrap/unwrap；但当前订单 sender 明确拒绝 swap routes，不能只接按钮。比钱包多路由、费用、执行生命周期，故靠后。 |
-| 4 | [TRD-151](https://linear.app/gmx-io/issue/TRD-151) 客服；Refining / 未分配 | Solana 钱包可用客服，客服知道用户交易和错误上下文 | **可开始前端实施（本条深挖更新）。** 总量/30d SQD 已实测可读，同一数据源已被 gmx-api 引用，未发现必须等 Divhead 新接口的硬阻塞。完整验收需结合未合并 #3337 和真实 Intercom；不止恢复按钮。 |
+| 4 | [TRD-151](https://linear.app/gmx-io/issue/TRD-151) 客服；Refining / 未分配 | Solana 钱包可用客服，客服知道用户交易和错误上下文 | **独立前端可实施；完整数据前置待明确。** 用户重申不引入 GMTrade 后端，旧站 SQD 可用不证明它已获 GMX 正式接入认可；须确认认可的总量/30d 来源，Tier 同样受影响。完整验收另需 #3337 与真实 Intercom。 |
 | 5 | [TRD-89](https://linear.app/gmx-io/issue/TRD-89) 个人 Trades 历史；Backlog / 未分配 | 查订单、成交、调保证金、清算，过滤/分页/导出并追踪一次仓位的全过程 | **先补事件与数据契约。** 重要、能帮助交易后核对；索引已有较丰富事件，但 GMX 完整历史模型尚未接上，PnL、折扣、生命周期不能照搬。较客服涉及更广的历史数据对齐。 |
 | 6 | [TRD-90](https://linear.app/gmx-io/issue/TRD-90) Claims；Backlog / 未分配 | 看资金费结算与价格冲击返还，领取真正可领取的金额 | **先确认执行与部署契约。** SQD 返还支持已合并，较旧调查更成熟；但 Keeper PR 不可读、统一服务未证明就绪，资金费与返还是两条经济路径。涉及资产领取，不能凭时间或状态猜。 |
 | 7 | [TRD-116](https://linear.app/gmx-io/issue/TRD-116) Pools；Backlog / 未分配 | 浏览 GM/GLV 池、看详情、存入和取出流动性 | **先拆读数据/预览/GM/GLV 交易。** 无需等新 UI；已有组件、协议能力、旧站参考，但收益/持仓/GLV 数据与交易接入面大，整体就绪度低于前六项。它是 Earn 的重要数据基础。 |
@@ -80,6 +80,8 @@ refining 输出 token/路径范围、market/limit 支持边界、报价到 SDK �
 证据：[共享 swap math](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/sdk/src/utils/swap/swapStats.ts)、[#3337 sender 支持契约](https://github.com/gmx-io/gmx-interface/blob/be9ca46ecba8031467bc13a7a771e1368d7aeccd/src/domain/gmsol/transactions/README.md)、[旧站 Swap](https://github.com/gmsol-labs/gmx-solana-interface/blob/0e863b8dae7e1d9bef2cf28efe168b16c0992d20/app/src/hooks/triggerHooks/useTriggerCreateSwapMarketOrder.ts)、[旧站 unwrap](https://github.com/gmsol-labs/gmx-solana-interface/blob/0e863b8dae7e1d9bef2cf28efe168b16c0992d20/app/src/hooks/initializeHooks/useUnwrapNativeToken.ts)。
 
 ## 4. TRD-151：按完整客服能力收口
+
+**最新边界修正：** 用户明确 GMX 不应引入 GMTrade 后端。下述 SQD 方案仍有旧站索引服务运行时依赖，不能以 gmx-api 已引用它证明新前端接入已获认可。完整实施需先明确该 SQD 是否是 GMX 接受的共享服务；若不接受，需 GMX 正式的用户总量/30d 数据能力，不能仅代理旧服务来宣称消除依赖。Tier 间接受影响。独立前端可先做，完整范围就绪判断以 [最新 issue 边界记录](issues/TRD-151.md#不引入-gmtrade-后端的边界修正2026-11-24) 为准。
 
 范围与过去“只恢复入口”推荐不同，见[当前 issue 记录](issues/TRD-151.md)。release 的 `useShowSupportChat` 仍隐藏 Solana，`useSupportChat` 的指标组件仅 EVM 挂载。旧站已用同一 Intercom app，并有钱包、总量、30d、资产和 Tier；本轮核对其 `useUserTotalVolume` 查询 `users.volume`，30d 对 `volumeRecords` 做时间窗口/分页。总量/30d 是真实来源线索，不能因 gmx-api 没有对应 controller 就宣称数据不存在，也不能运行时照搬旧站服务。
 
