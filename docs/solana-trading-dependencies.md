@@ -22,6 +22,23 @@
 
 ## gmx-prompts审查3337（2026-11-24）
 
+### 最新head复审（2026-11-24 晚间）
+
+用户再次要求使用gmx-prompts review。审查head `3435c1fe759c619b7c7994468dc63d48b6d488a9`，base仍`92c658ddfe`，147文件。新建独立现场`/Volumes/kenny/gmx/gmx-interface-review-3337-current`，以release执行无提交merge，结果与PR head相同；未覆盖旧review或业务现场。gmx-prompts仍与官方HEAD `0bb4da72`一致；按其interface-review、Solana及四类专项顺序审查，当前没有可调用的独立/code-review、/security-review执行器。
+
+旧P2多扩展链冲突已由本head修复：共享helper按networkId识别Solana并返回空错误，EVM冲突保护保留；新增两例通过。本轮不再把旧缺陷列为未修复。
+
+当前结论 **NEEDS CHANGES**：
+
+- P1，部署契约阻断：本轮以最新生产预览Origin只读复核GMX Solana dev/fallback两路，getSlot均200，getTransaction/getSignaturesForAddress/getBlock均403、-32004 Method is not supported。watchSubmittedOrders.ts:40必须先读创建回执；捕获永久拒绝后仍重试至60秒，readOrderLifecycle后续历史查询也依赖这些方法。普通预览的市价开仓和平仓无法确认执行状态或触发执行slot刷新。历史真实回执重放证据见上节；本轮没有新交易。需proxy部署开放实际方法/参数/回执字段后复验，或明确阻止依赖未就绪的生命周期功能发布，不能用playground直连成功替代。
+- P2，终态未关闭账户缺少用户关闭入口：orderContext.ts:12新增pending-only守卫同时用于update和cancel，OrderActionsProvider.ts:34对所有操作也复用pending-only判断。TRD-78当前正文明确keeper已执行但未关闭订单由owner关闭；固定程序7fe40082的utils/internal/action.rs Close.preprocess对owner直接允许，exchange/order.rs CloseOrderV2按终态处理escrow转账，并在owner close时初始化缺失ATA。最新gmx-api origin/main=f1a271e1的selectServedOrders保留completed/cancelled账户。当前UI compose预先过滤终态（该过滤为既有代码，不声称本PR新增），新增cancel mapper又拒绝终态，实际没有清理入口；已有buildOrderActions测试甚至明确要求completed cancel抛错。后果是keeper因接收ATA未初始化等原因未能关闭时，用户无法在GMX取回残留escrow及rent。建议区分update的pending约束和owner close/cancel的允许状态，并接续列表中的真实账户与escrow字段。尚未构造真实链上未关闭账户；这是需求、API、固定程序及真实前端路径的静态契约证明。
+
+局部验证：两个action/tradebox文件16例通过；另6文件43例通过（多扩展helper、真实WASM交易构建/发送、account slot刷新、通知、reader/reducer），合计8文件59例。独立目录最初软链依赖导致Vitest /@fs错误，复制同锁文件依赖至本目录后暴露缺少sdk依赖，再复制SDK依赖后上述6文件全部通过；这些环境失败不计业务缺陷。未跑全量。最新head六项GitHub checks全部成功。复用上轮未变源文件的IDL/计算/生命周期证据，未把历史测试计入本轮59例。
+
+runtime边界：确认kenny原生Chrome窗口，独立打开最新生产预览8a399560，flag-off Arbitrum Trade/图表/表单可见。尝试通过原生设置切flag时Computer Use返回noWindowsAvailable，未完成flag-on/reload/网络切换、请求计数或四钱包验收；不使用其他profile或独立浏览器替代。四需求实时正文已重读；72四钱包/atomic落链，70完整数学对照/payment conversion，78真实proxy成交通知，84真实改单/终态关闭仍不得标已验收。未修改业务、Linear、PR或发布评论。
+
+### 首轮head审查（aa9d17d129）
+
 角色：只读review；使用gmx-prompts `gmx-interface-review`及`gmx-solana`，T3，按skill进行计算、操作与生命周期专项检查及主审签名安全检查。审查head `aa9d17d12937ce5542e7b08824a4a1016a19d4d8`，release `92c658ddfe02e9493f018412e7e493251cbfd5f4`，145文件；release为head祖先，独立detached合并结果与head相同。包含既有master25条，未把已披露范围/AC缺口重报为新bug。当前环境没有独立`/code-review`或`/security-review`执行器，执行的是相应方向的代码审查，不声称调用了这些命令或完成全面安全审计。
 
 结论：**NEEDS CHANGES；确认一条P2，尚未修复。** Solana平仓/改单被无关EVM多扩展链冲突阻断。`PositionSeller.tsx:596`把`multipleWalletExtensionsChainError`纳入validation，`:1076`再次禁用按钮；`OrderEditor.tsx:814`同样无条件阻断。helper只读wagmi账户和Privy ethereum钱包，未按networkId区分。当有效Solana session与同地址、不同EVM chainId的两个扩展会话共存，返回Transaction blocked并要求切Arbitrum。WalletProvider同时保留独立Wagmi/Solana session，切Solana不自动断开EVM，故可达。实际helper经esbuild转译隔离复现（mock retained EVM session及networkId=solana），输出上述错误；主审复跑成功。未在浏览器实际制造该钱包组合，不把隔离证明描述为真实钱包验收。建议helper对Solana返回空validation，或在两个组件的全部消费点按网络门控；只改PositionSeller按钮不足，提交validation仍阻断。

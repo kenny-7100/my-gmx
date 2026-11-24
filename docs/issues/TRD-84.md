@@ -1,5 +1,9 @@
 # TRD-84 — Solana 平仓、编辑和撤单
 
+## 最新head复审（2026-11-24 晚间）
+
+角色：只读review。#3337最新`3435c1fe75`已修复旧EVM多扩展误拦截；当前仍有RPC历史方法403部署阻断，并确认pending-only守卫使已执行未关闭订单缺少owner关闭路径。8个定向文件59例通过，未跑全量/新交易。证据、源码归因及runtime边界见[本轮复审](../solana-trading-dependencies.md#最新head复审2026-11-24-晚间)。
+
 ## 真实平仓通知排障（2026-11-24）
 
 角色：只读排障。核实用户平仓约3秒已链上执行，两笔真实回执经当前decoder/reducer回放executed/closed；通知仍转圈由同一GMX RPC getTransaction方法拒绝引起。与此前多EVM扩展阻断是不同问题。详见[线上通知定位及平仓补充](../solana-trading-dependencies.md#市价单已成交但通知未确认的线上定位2026-11-24)。未改业务/代理、未再发单。

@@ -1,5 +1,9 @@
 # FESOL-20 — 订单发送与成交状态
 
+## 最新head复审（2026-11-24 晚间）
+
+角色：只读review。#3337最新`3435c1fe75`已修复旧EVM多扩展误拦截；当前仍有RPC历史方法403部署阻断，并确认pending-only守卫使已执行未关闭订单缺少owner关闭路径。8个定向文件59例通过，未跑全量/新交易。证据、源码归因及runtime边界见[本轮复审](../solana-trading-dependencies.md#最新head复审2026-11-24-晚间)。
+
 ## 统一交易交付（2026-11-23）
 
 参与角色：统一整合实施。现已纳入[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，共享分支`solana-trading-integration-trd-72`，后续Kenny/Sulliven整合修改在该分支继续；原PR由用户手动关闭，TRD-83独立。来源、保留的历史/保护行为、实际验证与钱包验收边界统一维护在[整合交付记录](../solana-trading-dependencies.md#四交易pr统一交付2026-11-23)。本记录不表示原需求全部AC已通过。

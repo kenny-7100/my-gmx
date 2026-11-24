@@ -4,9 +4,13 @@
 
 3337真实DOGE市价单回执重放正常，线上代理却允许getSlot、拒绝getTransaction/getSignaturesForAddress/getBlock，导致已成交但toast未确认。RPC接入或切代理后，按真实消费者验证每个方法/参数/响应字段及对应路由；mock suite、探活成功、仓位API可读都不能替代。永久method/权限拒绝须与索引延迟分开诊断，不能静默重试到超时，也不以仓位出现代替同一订单成交证据。见[取证与范围](solana-trading-dependencies.md#市价单已成交但通知未确认的线上定位2026-11-24)。
 
+## 订单终态不等于账户已关闭（2026-11-24）
+
+3337复审核对TRD-78、gmx-api与固定程序：keeper执行成功但关闭失败时，completed/cancelled账户仍可能持有escrow/rent，owner close负责补建ATA并完成归还。update的pending限制不能不加区分地复用于close/cancel；mapper/按钮即使正确拒绝“修改已成交订单”，也须保留协议支持的终态账户清理入口。检查API筛选→compose→操作guard→builder，而非把终态视为可直接从列表丢弃。既有过滤与本次新加守卫分别归因，静态契约证明与真实链上验收区分。见[复审证据](solana-trading-dependencies.md#最新head复审2026-11-24-晚间)。
+
 ## 跨网络共用表单须核对validation消费点（2026-11-24）
 
-#3337审查确认：新增Solana分支虽然已门控allowance/Express/approval，PositionSeller和OrderEditor仍无条件消费只基于wagmi/Privy ethereum会话的多扩展网络冲突错误。独立Solana session不会自动清除EVM会话，因此可错误阻断Solana操作。共享表单迁移须同时追踪button state、validation汇总和submit guard；只改按钮会留下提交阻断。可用真实helper转译及受控双会话输入证明分支，但与真实钱包runtime验收分开记录。见[具体发现及验证边界](solana-trading-dependencies.md#gmx-prompts审查33372026-11-24)。
+#3337审查确认：新增Solana分支虽然已门控allowance/Express/approval，PositionSeller和OrderEditor仍无条件消费只基于wagmi/Privy ethereum会话的多扩展网络冲突错误。独立Solana session不会自动清除EVM会话，因此可错误阻断Solana操作。共享表单迁移须同时追踪button state、validation汇总和submit guard；只改按钮会留下提交阻断。可用真实helper转译及受控双会话输入证明分支，但与真实钱包runtime验收分开记录。见[具体发现及验证边界](solana-trading-dependencies.md#gmx-prompts审查33372026-11-24)。 最新head `3435c1fe75`已在共享helper按Solana网络豁免并保留EVM保护，本轮两例通过；此条继续用于防回归，不再表示当前缺陷未修复。
 
 ## 重建签名与GitHub身份关联（2026-11-24）
 
