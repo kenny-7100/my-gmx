@@ -1039,3 +1039,7 @@ release 仍为 `e4714280749c00a90468abdde3060aae619717e7`。五项已经有组�
 ## 证据入口
 
 [56 PR](https://github.com/gmx-io/gmx-interface/pull/3258)、[57 PR](https://github.com/gmx-io/gmx-interface/pull/3242)、[72 PR](https://github.com/gmx-io/gmx-interface/pull/3259)；[52 PR](https://github.com/gmx-io/gmx-interface/pull/3193)、[51 PR](https://github.com/gmx-io/gmx-interface/pull/3195)、[92 PR](https://github.com/gmx-io/gmx-interface/pull/3243)、[fee fields](https://github.com/gmx-io/gmx-interface/pull/3205)、[order fields](https://github.com/gmx-io/gmx-interface/pull/3207)、[15 PR](https://github.com/gmx-io/gmx-interface/pull/3201)、[25 PR](https://github.com/gmx-io/gmx-interface/pull/3238)。历史验证范围见各[issue记录](issues/README.md)，本审计不重跑业务测试、不重新证明部署或签名落链。
+## #3337 冲突定位（2026-11-24）
+
+只读fetch核实release `92c658ddfe`与统一交易head `c957c1be02`，使用merge-tree分析，唯一冲突为`src/config/__tests__/rpc.getProviderNameFromUrl.spec.ts`的modify/delete：release的`2be53fc03a`仅给旧测试添加`// @vitest-shared-worker`，交易线继承的`1298b42c2d`清理旧Alchemy路由时删除该文件。交易线仍保留函数及新文件`src/config/__tests__/getProviderNameFromUrl.spec.ts`，故应保留旧文件删除，并按当前worker规则审查新测试的适用标记，不恢复重复旧测试。另三个sidecar/trade-validation/TP-SL测试文件自动合并，无文本冲突；不代表组合测试通过。本轮未执行实际merge、修改业务、推送PR或部署。
+
