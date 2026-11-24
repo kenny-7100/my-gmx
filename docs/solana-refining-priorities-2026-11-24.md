@@ -33,7 +33,7 @@
 | 1 | [TRD-91](https://linear.app/gmx-io/issue/TRD-91) Net Rate；Backlog / Rainer | 在同一张图查看 Solana 多空资金费、借贷费和净费率 | **最接近收敛。** API 已合并且生产有真实历史；前端网络路由缺口可定位。先和 Rainer 对齐剩余范围，确认历史不足的验收口径。优先于钱包是因为只读、复用路径短、无新增签名动作。 |
 | 2 | [TRD-92](https://linear.app/gmx-io/issue/TRD-92) 钱包与转账；Backlog / Sulliven | 连接/恢复钱包、查看资产、接收和发送 SOL/SPL，支持 embedded wallet | **可收敛但必须拆清剩余工作。** 连接和余额已有，不重做；Receive/Send 和 Solana embedded 并未完成。转账可以使用 RPC，与历史索引依赖较少；embedded 的 Privy 配置/签名适配单列验证。 |
 | 3 | [TRD-110](https://linear.app/gmx-io/issue/TRD-110) Swap；Backlog / 未分配 | 换币，及在生产入口转换 SOL/WSOL | **可做完整技术方案。** 共享报价已有 gmsol 分支，旧站有真实 Swap/wrap/unwrap；但当前订单 sender 明确拒绝 swap routes，不能只接按钮。比钱包多路由、费用、执行生命周期，故靠后。 |
-| 4 | [TRD-151](https://linear.app/gmx-io/issue/TRD-151) 客服；Refining / 未分配 | Solana 钱包可用客服，客服知道用户交易和错误上下文 | **继续收口现有 refining。** 同一 Intercom、共享生命周期和 Tier 规则可复用；资产已有共享来源。仍缺总量/30d量接入与真实 Intercom 验收，不是恢复按钮便完成。较历史小，但不是无阻塞。 |
+| 4 | [TRD-151](https://linear.app/gmx-io/issue/TRD-151) 客服；Refining / 未分配 | Solana 钱包可用客服，客服知道用户交易和错误上下文 | **可开始前端实施（本条深挖更新）。** 总量/30d SQD 已实测可读，同一数据源已被 gmx-api 引用，未发现必须等 Divhead 新接口的硬阻塞。完整验收需结合未合并 #3337 和真实 Intercom；不止恢复按钮。 |
 | 5 | [TRD-89](https://linear.app/gmx-io/issue/TRD-89) 个人 Trades 历史；Backlog / 未分配 | 查订单、成交、调保证金、清算，过滤/分页/导出并追踪一次仓位的全过程 | **先补事件与数据契约。** 重要、能帮助交易后核对；索引已有较丰富事件，但 GMX 完整历史模型尚未接上，PnL、折扣、生命周期不能照搬。较客服涉及更广的历史数据对齐。 |
 | 6 | [TRD-90](https://linear.app/gmx-io/issue/TRD-90) Claims；Backlog / 未分配 | 看资金费结算与价格冲击返还，领取真正可领取的金额 | **先确认执行与部署契约。** SQD 返还支持已合并，较旧调查更成熟；但 Keeper PR 不可读、统一服务未证明就绪，资金费与返还是两条经济路径。涉及资产领取，不能凭时间或状态猜。 |
 | 7 | [TRD-116](https://linear.app/gmx-io/issue/TRD-116) Pools；Backlog / 未分配 | 浏览 GM/GLV 池、看详情、存入和取出流动性 | **先拆读数据/预览/GM/GLV 交易。** 无需等新 UI；已有组件、协议能力、旧站参考，但收益/持仓/GLV 数据与交易接入面大，整体就绪度低于前六项。它是 Earn 的重要数据基础。 |
@@ -85,7 +85,9 @@ refining 输出 token/路径范围、market/limit 支持边界、报价到 SDK �
 
 共享前端已有独立 Solana asset totalUsd；旧 GMTrade Tier 使用 30d/总量/钱包资产任一超过相应阈值分层，GMX 也已有近似共享 Tier 函数，但含 GMX Account 维度，Solana 不应误读 EVM 指标。refining 明确可接受的统一查询入口、20→30 位精度、索引不可用语义、Tier 规则、钱包切换清理及 Intercom 测试环境。
 
-错误入口要接 #3337 的真实状态链：捕获失败时上下文、去重、排除拒签，未知广播结果不算确定失败；不能只接任意 catch。完成这些才是整条 ready。跨域旧站聊天身份迁移是另一个问题，不能顺带承诺。
+错误入口要接 #3337 的真实状态链：捕获失败时上下文、去重、排除拒签，未知广播结果不算确定失败；不能只接任意 catch。跨域旧站聊天身份迁移是另一个问题，不能顺带承诺。
+
+**本条深挖更新（不重排全表）：** 生产 SQD 已实测 owner 总量、30d 时间窗口/游标和状态高度可读；小样本 13 条 volumeRecords 总和与 users.volume 一致。gmx-api 当前 protocolStats 配置已引用相同 SQD，不能认定只能依赖旧站后台，也不能因暂无 owner-volume API 就要求 Divhead 先提供接口。实际旧站口径包括合约、swap 和 LP 存取；接入时保留口径、20→30 位精度与未知值语义。共享前端查询适配属于可独立实施的工作；强制 API 中转尚未核实为架构要求，不凭空列为硬阻塞。可开工，完整验收需结合仍 open/unmerged 的 #3337 `be9ca46ecb`（专用通知尚无客服接入）及真实 Intercom。后台权限未验证不等于缺失；若既有测试环境可用，前端验证不列外部依赖。详见 [TRD-151 深挖](issues/TRD-151.md#当前深挖结论2026-11-24)。
 
 ## 5. TRD-89：先拿事件覆盖表和真实样例
 
