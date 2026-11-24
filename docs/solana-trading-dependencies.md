@@ -1,4 +1,14 @@
 # Solana 交易链路依赖审计
+## Phantom剩余等价补丁共享化（2026-11-24）
+
+用户明确授权处理a4c488f912/a7174bd3af这一组。两份新增/删除相同但上下文不同，已用后者补丁在共同前置安排一份实现，移除两份旧节点；净减1。三条新head：统一3337 `9320cf7c9f096f043c7f49c97ca040be64ad4fa5`（88→87）、136开发`464826f74e2189e42c0593920ff81b6fdda29368`（546→545）、playground`36d025574b6c0cbfb0c740712005d827ce186a5d`（188→187）。保留原message及适用merge关系，25条master保持原SHA；525保留节点与1共享节点显式GPG签名并验证。
+
+预演中sender import/测试上下文冲突，未接受无上下文按行号应用的结果；最终采用三方合并，冲突处以唯一原文上下文定位替换，文件末尾新增测试按EOF处理。两个被删副本各自tree均与映射后parent相同才删除，三目标最终完整tree与旧head逐字相同，对旧release c588及最新release的完整diff也相同，交易源仍为两下游祖先。中间共享修复前移，不声称中间tree逐个等于原版；没有业务/配置变化。
+
+本轮fetch发现release更新至`92c658ddfe`（CI及移动弹层），未混入这一零代码变化整理；后续需要时另行同步。操作前旧head已有本地/远端`backup/{trading,trd136,playground}-before-phantom-dedup-20261124`，使用显式旧SHA lease更新三远端。两个PR仍Draft，正文/登记已接续；新head CI重新运行，不声称通过。既有playground部署2b141ae5/source8bdeab3148的完整源码与新head相同，本轮未重部署或新增钱包验收。
+
+映射`.git/agent-workflow/phantom-dedup-20261124.json`，预演/执行/独立校验`/tmp/gmx-phantom-dedup-{plan,execute}.log`、`/tmp/gmx-phantom-verification.log`。此前88条复审中的旧候选SHA作为历史快照保留，后续从新统一分支继续。
+
 ## 88commit全量历史与整理工作复审（2026-11-24）
 
 用户要求检查全部commit和此前整理过程，本轮只读业务/PR，不继续重写。实时release仍`c588a42b4c`、3337仍`5734a74943`，Draft、88commit/145files。逐条检查88提交的parent/tree/签名/patch及所属范围：63条交易/整合提交均GPG=G，25条固定master历史保持原SHA，其中1条未签名、24条本机不可完整验证（含SSH verifier未配置）；不称全部88条签名通过。没有空单parent提交、没有相同稳定patch-id组、git cherry无release等价单条补丁。
