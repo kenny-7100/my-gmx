@@ -1,5 +1,9 @@
 # Review 经验与开发判断
 
+## 重建签名与GitHub身份关联（2026-11-24）
+
+保留原author，以实际重建者作为committer并使用匹配的签名key。不能照抄他人committer再用自己的key签名。3337三条原Verified提交重建后本地GPG=G、GitHub却unknown_key，说明密码学有效性不等于托管平台身份验证；交付须另核验GitHub verification。父节点变化后原签名不能复制复用。见[调查记录](solana-trading-dependencies.md#重建提交github签名身份问题2026-11-24)。
+
 2026-11-15 启用。本文是个人 Agent 协作的当前经验入口，服务 Kenny/Sulliven/Rainer 的 Solana 前端迁移；优先吸收四位作者 Kenny（`kenny-7100`）、Sulliven（`sulliven2700-lgtm`）、Rainer（`rainer-vivi`）、Divhead（`divhead`）的 PR、讨论、修复和直接提交。相关成员经验按组件与契约关联吸收。详细取证见[历史调查](review-learning-investigation-2026-11-15.md)，具体任务经历留在 [issue 记录](issues/README.md)。
 
 本地经验补充判断条件和反例；通用编码、测试与自审规范仍从 [gmx-prompts 入口](coding-and-self-review.md#查阅入口)读取。这里的项目倾向不等于 reviewer 对所有场景的永久要求，历史源码不等于当前部署，文档记忆也不等于模型持续训练。

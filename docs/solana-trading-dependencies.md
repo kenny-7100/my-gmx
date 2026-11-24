@@ -1,4 +1,9 @@
 # Solana 交易链路依赖审计
+
+## 重建提交GitHub签名身份问题（2026-11-24）
+
+用户截图指出三条Unverified。GitHub API确认原始0891747ffc、fac83d15bd、5fa8d01ce8均verified=true/reason=valid；当前映射1b4c70a8、93765725、4c8a3a7b均有签名，但verified=false/reason=unknown_key。本机三者GPG=G，签名者为Kenny key9FB76150CFDA2294，committer却保留Divhead/Sulliven身份。这是重建签名与身份关联验证不匹配，非原作者未正确签名。此前仅核验本地GPG，未充分核验GitHub验证状态，是整理遗漏。parent变化后原签名不能复用；正确重建应保留author，以实际重建者作为committer并使用其匹配key签名，再核验GitHub verification。当前仅调查，未继续改写。修复仍须备份、保留tree/message/顺序及merge关系并核验下游，不修改author伪装归属或把他人邮箱加入Kenny key。
+
 ## 原四PR关闭（2026-11-24）
 
 用户明确授权在GitHub关闭原四PR。实时核对3315/fac83d15bd、3316/aa6660fcb0、3317/3213ee6e0c、3293/5fa8d01ce8均未新增head，与统一整合固定来源相同，随后关闭四PR并复查为CLOSED；原分支保留，未发送评论或通知。后续统一使用[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，未改其Draft状态或Linear需求状态。
