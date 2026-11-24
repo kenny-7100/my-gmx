@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 真实市价单通知超时定位（2026-11-24）
+
+以排障角色核实3337预览DOGE long：链上约4秒完成，实际回执经当前decoder/reducer回放为executed/closed；线上GMX Solana RPC历史查询方法被403/-32004拒绝，阻断成交跟踪，仓位API则独立更新。已在用户原页面复核。详见[线上定位](../solana-trading-dependencies.md#市价单已成交但通知未确认的线上定位2026-11-24)。未改业务/代理或发布；需要RPC方法契约修复与前端永久错误诊断，不能延长超时或按仓位存在猜成交。
+
 ## 统一PR审查（2026-11-24）
 
 参与角色：review。按gmx-prompts审查#3337 `aa9d17d129`，确认Solana平仓/改单被无关EVM多扩展链冲突阻断的P2；未改业务。79项定向测试通过，固定IDL/线上API局部核验与未验收边界见[审查记录](../solana-trading-dependencies.md#gmx-prompts审查33372026-11-24)。未发布外部review，不表示本issue全部AC完成。

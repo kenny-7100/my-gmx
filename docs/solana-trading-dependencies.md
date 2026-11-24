@@ -1,5 +1,19 @@
 # Solana 交易链路依赖审计
 
+## 市价单已成交但通知未确认的线上定位（2026-11-24）
+
+用户提供DOGE long通知截图并授权结合已打开的3337预览定位。通过kenny原生Chrome读取`solana-trading-integration-t.gmx-interface.pages.dev/trade`：仓位10 USD/2 USDC、5x long已显示，通知第一阶段submitted，第二阶段outcome not confirmed。未刷新/关闭通知，未发新单或签名；临时打开原生Console后恢复页面布局。当前远端3337 head `3435c1fe759c619b7c7994468dc63d48b6d488a9`，相对上轮aa9仅新增EVM多扩展检查修复两个文件，成交跟踪代码未变。
+
+**根因已确认：当前GMX Solana RPC代理未支持成交跟踪所需历史方法。** 页面已有约60条`rpc.gmx.io/solana/dev` 403报错；在原页面只读重发相同建单getTransaction，明确返回HTTP403/JSON-RPC -32004 `Method is not supported`。独立带同Origin探测dev路由：getSlot正常，getTransaction/getSignaturesForAddress/getBlock均拒绝；fallback路由的getTransaction也拒绝，不可仅切production routes就声称修复。该错误不同于不带Origin探测时的Forbidden origin。
+
+实际建单签名`2B1eX3q6NNxgDQWT8HxCEZ8rENb8B9jtpM8LTULYzbMiFstY4jTpGErTtEimcFM6yoShgBuwGJqrrA23GabrMEv5`，slot473291292，链上成功；order `2tkSxDSs4jWsJs8gczrefxBrr4tQYKB31QGt1yfpwviy`、actionId243263。公开主网只读取证获取建单及执行回执，执行签名`5K1HcsSSFsXq2t2fzeqgM4JyTMiPMYMtQimPTuBwNxfvy4MhECrG64mVLTYeCKcoCyaHtCwbnmSDkKh3SDb7FhvW`，slot473291313，blockTime相差4秒；两笔均finalized/err=null。将两份真实回执交给当前实际decodeOrderEvents/getCreatedOrderActions/reduceOrderLifecycle回放，识别MarketIncrease，执行回执含TradeEvent+OrderRemoved，结果executed/closed、reason=executed。由此证实这笔不是keeper长时间未执行，也不是这些回执的decoder/身份关联失败。公开RPC仅用于本轮只读取证，没有写进产品兜底配置。
+
+路径：send确认后watchSubmittedOrders先用getTransaction识别订单，失败按2秒重试、60秒上限，catch不区分永久method拒绝与短暂索引延迟；到期return undefined，通知finally设置isTracking=false，显示用户截图中的未确认文案。即使预先识别订单，readOrderLifecycle后续getSignaturesForAddress/getTransaction及同slot的getBlock仍被代理挡住；该阶段上限5分钟。仓位则通过solana.gmxapi.io的positions周期刷新，与前端RPC回执跟踪独立，所以可先成功展示。未声称已测出截图实际等待时长；当前故障首先足以阻断60秒识别阶段。
+
+修复方向：RPC侧核对并开放上述三个只读方法及其参数、限额和v0回执字段（含innerInstructions/loadedAddresses），确保dev/fallback都与前端契约一致；前端区分永久method/权限拒绝和可重试索引延迟，保留未知成交状态、提供具体诊断，避免静默重试到超时。不能依据已有仓位直接判定本次成交，也不能用随意公共RPC兜底掩盖代理缺口。功能归属TRD-78/#3316的生命周期跟踪与RPC接入契约；当前Solana默认proxy配置由Divhead合并提交`f718f71868`引入，该分支同时带入#3334代理hotfix，不能仅凭合流把代理服务器维护者推定为某人。未修改业务、代理、Linear、PR或部署。
+
+证据与真实回执重放脚本保存在Git共享目录`agent-workflow/pr3337-doge-notification-20261124/`，临时源`/tmp/doge-*`。本发现补充上轮review中明确未完成的真实成交runtime边界；mock单测和getSlot探活均不足以证明历史查询契约已上线。
+
 ## gmx-prompts审查3337（2026-11-24）
 
 角色：只读review；使用gmx-prompts `gmx-interface-review`及`gmx-solana`，T3，按skill进行计算、操作与生命周期专项检查及主审签名安全检查。审查head `aa9d17d12937ce5542e7b08824a4a1016a19d4d8`，release `92c658ddfe02e9493f018412e7e493251cbfd5f4`，145文件；release为head祖先，独立detached合并结果与head相同。包含既有master25条，未把已披露范围/AC缺口重报为新bug。当前环境没有独立`/code-review`或`/security-review`执行器，执行的是相应方向的代码审查，不声称调用了这些命令或完成全面安全审计。

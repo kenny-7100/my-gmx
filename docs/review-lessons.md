@@ -1,5 +1,9 @@
 # Review 经验与开发判断
 
+## RPC探活不等于成交证据方法可用（2026-11-24）
+
+3337真实DOGE市价单回执重放正常，线上代理却允许getSlot、拒绝getTransaction/getSignaturesForAddress/getBlock，导致已成交但toast未确认。RPC接入或切代理后，按真实消费者验证每个方法/参数/响应字段及对应路由；mock suite、探活成功、仓位API可读都不能替代。永久method/权限拒绝须与索引延迟分开诊断，不能静默重试到超时，也不以仓位出现代替同一订单成交证据。见[取证与范围](solana-trading-dependencies.md#市价单已成交但通知未确认的线上定位2026-11-24)。
+
 ## 跨网络共用表单须核对validation消费点（2026-11-24）
 
 #3337审查确认：新增Solana分支虽然已门控allowance/Express/approval，PositionSeller和OrderEditor仍无条件消费只基于wagmi/Privy ethereum会话的多扩展网络冲突错误。独立Solana session不会自动清除EVM会话，因此可错误阻断Solana操作。共享表单迁移须同时追踪button state、validation汇总和submit guard；只改按钮会留下提交阻断。可用真实helper转译及受控双会话输入证明分支，但与真实钱包runtime验收分开记录。见[具体发现及验证边界](solana-trading-dependencies.md#gmx-prompts审查33372026-11-24)。
