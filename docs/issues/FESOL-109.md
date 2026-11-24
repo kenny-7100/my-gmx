@@ -2,6 +2,8 @@
 
 ## Frontend Task Organization 只读核对（2026-11-24 14:12 北京时间）
 
+后续用户明确授权更新；于14:21更新同一线上文档并回读确认15行、9灰/6绿、负责人排序与历史周期列完整保留。更新7项Linear状态、统一#3337/独立#3335链接、当前冲突与checks范围及报告手测边界；未修改issue、PR或发布评论。
+
 角色：协调表状态审计。用户要求核对是否需要更新；读取原线上文档（11月23日14:08版）、15项实时Linear正文/关系/附件及全部评论（均无下一页）、文档空评论、Trading周期及16条新旧PR的状态、head、review、返回checks和相关正文。未修改线上文档、issue或PR，未执行产品测试。
 
 - 7项Linear字段需更新：75 In Review→Done；85 In Test→Done；80、63 In Review→In Test；100 In Review→Done；83 In Progress→In Review；72 In Progress→In Review。负责人及周期均不变（70/83/84为Cycle2，其余Cycle1）。
