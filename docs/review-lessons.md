@@ -1,5 +1,9 @@
 # Review 经验与开发判断
 
+## 跨网络共用表单须核对validation消费点（2026-11-24）
+
+#3337审查确认：新增Solana分支虽然已门控allowance/Express/approval，PositionSeller和OrderEditor仍无条件消费只基于wagmi/Privy ethereum会话的多扩展网络冲突错误。独立Solana session不会自动清除EVM会话，因此可错误阻断Solana操作。共享表单迁移须同时追踪button state、validation汇总和submit guard；只改按钮会留下提交阻断。可用真实helper转译及受控双会话输入证明分支，但与真实钱包runtime验收分开记录。见[具体发现及验证边界](solana-trading-dependencies.md#gmx-prompts审查33372026-11-24)。
+
 ## 重建签名与GitHub身份关联（2026-11-24）
 
 保留原author，以实际重建者作为committer并使用匹配的签名key。不能照抄他人committer再用自己的key签名。3337三条原Verified提交重建后本地GPG=G、GitHub却unknown_key，说明密码学有效性不等于托管平台身份验证；交付须另核验GitHub verification。父节点变化后原签名不能复制复用。见[调查记录](solana-trading-dependencies.md#重建提交github签名身份问题2026-11-24)。

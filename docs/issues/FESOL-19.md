@@ -1,5 +1,9 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## 统一PR审查（2026-11-24）
+
+参与角色：review。按gmx-prompts审查#3337 `aa9d17d129`，确认Solana平仓/改单被无关EVM多扩展链冲突阻断的P2；未改业务。79项定向测试通过，固定IDL/线上API局部核验与未验收边界见[审查记录](../solana-trading-dependencies.md#gmx-prompts审查33372026-11-24)。未发布外部review，不表示本issue全部AC完成。
+
 ## 统一交易交付（2026-11-23）
 
 参与角色：统一整合实施。现已纳入[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，共享分支`solana-trading-integration-trd-72`，后续Kenny/Sulliven整合修改在该分支继续；原PR由用户手动关闭，TRD-83独立。来源、保留的历史/保护行为、实际验证与钱包验收边界统一维护在[整合交付记录](../solana-trading-dependencies.md#四交易pr统一交付2026-11-23)。本记录不表示原需求全部AC已通过。

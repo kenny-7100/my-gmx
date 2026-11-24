@@ -1,5 +1,28 @@
 # Solana 交易链路依赖审计
 
+## gmx-prompts审查3337（2026-11-24）
+
+角色：只读review；使用gmx-prompts `gmx-interface-review`及`gmx-solana`，T3，按skill进行计算、操作与生命周期专项检查及主审签名安全检查。审查head `aa9d17d12937ce5542e7b08824a4a1016a19d4d8`，release `92c658ddfe02e9493f018412e7e493251cbfd5f4`，145文件；release为head祖先，独立detached合并结果与head相同。包含既有master25条，未把已披露范围/AC缺口重报为新bug。当前环境没有独立`/code-review`或`/security-review`执行器，执行的是相应方向的代码审查，不声称调用了这些命令或完成全面安全审计。
+
+结论：**NEEDS CHANGES；确认一条P2，尚未修复。** Solana平仓/改单被无关EVM多扩展链冲突阻断。`PositionSeller.tsx:596`把`multipleWalletExtensionsChainError`纳入validation，`:1076`再次禁用按钮；`OrderEditor.tsx:814`同样无条件阻断。helper只读wagmi账户和Privy ethereum钱包，未按networkId区分。当有效Solana session与同地址、不同EVM chainId的两个扩展会话共存，返回Transaction blocked并要求切Arbitrum。WalletProvider同时保留独立Wagmi/Solana session，切Solana不自动断开EVM，故可达。实际helper经esbuild转译隔离复现（mock retained EVM session及networkId=solana），输出上述错误；主审复跑成功。未在浏览器实际制造该钱包组合，不把隔离证明描述为真实钱包验收。建议helper对Solana返回空validation，或在两个组件的全部消费点按网络门控；只改PositionSeller按钮不足，提交validation仍阻断。
+
+验证：10个定向文件/79测试通过（交易构建发送22，生命周期/账户刷新/通知26，SDK liquidationImpact/increase/decrease31）；另核对固定`7fe40082`IDL，orderAbi全部5条指令discriminator和账户顺序一致。未重跑全量。source最终tree与上轮不变，既有类型/lint/全量报告仅作为先前证据。收尾刷新确认当前head全部6项远端checks成功：Audit、SDK standalone、Component、Linting/Type Checking/Tests及两项Pages。GitHub inline comments为0，未发布review/评论、修改Linear或业务代码。
+
+跨仓库：gmx-prompts main=origin/main `0bb4da72`，gmx-solana main=origin/main `3e0a4115`；gmx-api固定checkout `90df09fd`、origin/main `f1a271e1`，orders/fee-discount controller在两版间未变。线上`solana.gmxapi.io`以公开WSOL mint作为无订单地址只读探测，orders返回200/空数组及`X-Solana-Slot=473280150`，fee-discount返回200且含SDK所需字段；未证明非空订单callback/referrer等内容。未移动子仓库checkout/gitlink。
+
+待人工优先核验：共享EVM liquidation impact新截断顺序与gmx-synthetics `release_2.2.1@95d5edda`一致，但main/固定`23c9d160`仍旧顺序。公共Arbitrum RPC部署核对HTTP403，实际合约版本尚未证实；作为已知master发布协调的版本问题，不列已确认bug。资金链路优先核实LUT/部署兼容、四钱包真实签名、原子TP/SL及失败恢复；通知链路优先核实真实执行/CPI证据与slot驱动列表刷新；共享组件优先核实EVM与Solana会话共存。
+
+| 需求/AC分组 | 本轮已验证范围 | 仍未可验收/已失败范围 |
+| --- | --- | --- |
+| TRD-72：build/check/sign/send | 静态及定向测试覆盖create/update/cancel白名单、钱包修改检查、native funding、fresh flag/session/pending保护；固定IDL对应 | 四钱包真实签名、可信LUT/部署兼容及各类真实落链未在当前head全验 |
+| TRD-78：发送/成交两阶段及刷新 | reader/reducer/事件匹配、失败tx排除、owner/unmount隔离、超时不伪造成交、slot floor测试 | 真实keeper成交及列表即时刷新未复验；limit/trigger创建按README仅跟踪提交，不据此声称未来成交通知或reload持久恢复已交付 |
+| TRD-70：入口/TP-SL/计算 | 共享入口及计算路径审查，专项计算测试 | 真实TP/SL触发、simulate_order完整对照、payment conversion、最大杠杆一致性及Rewards既有边界未解除 |
+| TRD-84：close/edit/cancel | 构建/账户归属/receive token保护审查 | 多EVM扩展冲突下Solana close/edit失败（本轮P2）；真实改单及钱包矩阵未全验 |
+
+运行边界：通过已打开的kenny原生Chrome窗口打开当前head生产预览`https://2cc4e4ec.gmx-interface.pages.dev/trade`，与merge-result同tree，Arbitrum页面及图表可加载，初始solanaNetwork=false。自定义toggle的原生操作未完成切换；没有完成flag-on、reload后Solana、EVM↔Solana或RPC/telemetry/storage计数，不把此页面观察称完整runtime pass。未签名/广播；旧playground部署不作为本head验收证据。
+
+证据副本保存在Git共享目录`agent-workflow/pr3337-review-20261124/`（proof、定向测试日志及线上响应）；独立review worktree `/Volumes/kenny/gmx/gmx-interface-review-3337-20261124`保持detached同head。其他未证实候选已反驳：外部账户update/cancel被builder/validator限制；钱包返回后第二次pending检查同步persist后才broadcast；缺receipt重试不会先接受空身份；旧owner controller在切换/unmount时abort。上述审查不代表全量AC通过。
+
 ## 88→84正式实施与下游接续（2026-11-24）
 
 用户授权实施88→84并同步TRD-136/playground。本轮采用精确84方案：ce255/a637/a04在早期保留release行为或ABI注释后变空；b045/4df两份locale改为0a350共同前置的一份完整共享提交，净减4。保留740/6fb/719及其他所有现有merge拓扑、原业务拆分/message/author/author date，固定master25条原SHA不变；不实施此前81方案的merge删除。

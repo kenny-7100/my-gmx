@@ -1,5 +1,9 @@
 # FESOL-72 — 最终 WASM 产物与 56 的顺序
 
+## 统一PR审查（2026-11-24）
+
+参与角色：review。按gmx-prompts审查#3337 `aa9d17d129`，确认Solana平仓/改单被无关EVM多扩展链冲突阻断的P2；未改业务。79项定向测试通过，固定IDL/线上API局部核验与未验收边界见[审查记录](../solana-trading-dependencies.md#gmx-prompts审查33372026-11-24)。未发布外部review，不表示本issue全部AC完成。
+
 ## 五需求晚间核查（2026-11-23）
 
 参与角色：只读依赖调研。TRD-77现Done、#3314已merged/approved；不再待Linear状态同步，不扩大72完整交易验收。 版本、证据与验证边界见[统一增量核查](../solana-trading-dependencies.md#五需求晚间增量核查2026-11-23-2130-cst)。本轮未修改业务或外部状态。
