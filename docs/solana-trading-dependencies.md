@@ -1,5 +1,9 @@
 # Solana 交易链路依赖审计
 
+## 用户交易流程反馈（2026-11-24）
+
+用户报告playground已手工测试市价/限价及各自附带TP/SL、成交、平仓、撤单，暂未发现问题。具体证据边界及仍未报告范围见[TRD136测试反馈](issues/TRD-136.md#用户交易主流程实测反馈2026-11-24)。这为四合一PR提供用户交易主流程测试反馈，不等于改单、失败恢复、多钱包、TP/SL触发和完整执行后刷新矩阵均完成；本轮不改PR/Linear状态或发送外部消息。
+
 ## 签名修正正式采用（2026-11-24）
 
 用户确认3340效果并授权关闭对比PR、正式更新3337。统一3337采用已验证head `c957c1be02013700c490d861bc2b40c47121f67e`，136接续`6af9c8ae39e8549f9914ad35bfc673442e02e044`，playground接续`1a16e19552472d927fa3576d00e749dadd61aacf`；87/545/187提交数不变。三条线每条受影响提交的author/author date、message、tree及有序parent映射核验，三最终完整tree及release diff与修改前一致。统一线20条新commit已由GitHub verified=true/valid确认；下游额外33条重签，本地GPG通过并另核验GitHub。原25master提交保留，三线旧head本地及远端backup/*-before-signature-fix-20261124保留，推送采用旧SHA lease。
