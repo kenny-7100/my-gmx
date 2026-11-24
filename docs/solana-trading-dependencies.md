@@ -1,5 +1,13 @@
 # Solana 交易链路依赖审计
 
+## #3337 release冲突处理与下游同步（2026-11-24）
+
+用户授权正确处理冲突。统一线merge最新release `92c658ddfe`，保留旧重复RPC测试删除，canonical测试自动接入shared-worker标记；原三个交易测试断言保留。新签名merge `d51c6c984e`已推origin/#3337，GitHub MERGEABLE，六项checks全部成功，仍Ready/REVIEW_REQUIRED，未合入release，原commit历史未重写。
+
+下游TRD136 `31c98eb45d`、playground `93a242362b`分别merge统一线并推my-gmx/origin；两者包含d51c，3318仍Draft且MERGEABLE。SWR重试测试会mock时间/渲染组件，保留隔离且原内容不变。初轮完整测试暴露父级全量include与shared项目数组合并，导致重复收集及mock污染；将下游全量include移入isolated项目，两目录分别list核验363文件（145shared/218isolated、无重复），正式完整suite各362文件/3574测试passed、1文件/1测试skipped；两目录类型检查passed，配置Prettier及diff检查passed。统一线types/lint/full3555测试passed、1skip。三个新merge均GPG本地验证通过，3337/3318新增提交GitHub verified/valid。任务登记已接续。
+
+本轮未重新部署或签名广播。既有线上固定1932baa9仍是旧source1a16e19552，不能声称测试页面已采用本轮release移动sheet变更。日志`/tmp/gmx-{3337,136,playground}-merge-*`。继承master前置的release协调和需求完整AC仍待处理。
+
 ## PR说明精简（2026-11-24）
 
 用户要求精简3337 Summary，已将正文改为当前整合范围、必要验证与剩余review范围，删除逐轮重建日志、旧SHA映射及重复部署记录；保留用户实测反馈和继承master发布边界。编辑前查询3337已非Draft，本轮保留其现有Ready状态，不推断由谁切换；head仍c957c1be02，无业务/历史/部署修改。详细过程继续保留本文件，不再逐轮堆入PR正文。
@@ -1042,4 +1050,3 @@ release 仍为 `e4714280749c00a90468abdde3060aae619717e7`。五项已经有组�
 ## #3337 冲突定位（2026-11-24）
 
 只读fetch核实release `92c658ddfe`与统一交易head `c957c1be02`，使用merge-tree分析，唯一冲突为`src/config/__tests__/rpc.getProviderNameFromUrl.spec.ts`的modify/delete：release的`2be53fc03a`仅给旧测试添加`// @vitest-shared-worker`，交易线继承的`1298b42c2d`清理旧Alchemy路由时删除该文件。交易线仍保留函数及新文件`src/config/__tests__/getProviderNameFromUrl.spec.ts`，故应保留旧文件删除，并按当前worker规则审查新测试的适用标记，不恢复重复旧测试。另三个sidecar/trade-validation/TP-SL测试文件自动合并，无文本冲突；不代表组合测试通过。本轮未执行实际merge、修改业务、推送PR或部署。
-

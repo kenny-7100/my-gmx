@@ -146,6 +146,8 @@
 
 ## 日常增量维护
 
+2026-11-24 TRD-136/playground接入TRD-166测试分组：Vitest项目`extends: true`会合并父级`include`数组；父级已有全量include时，给shared项目单独配置标记文件列表仍会收集全量测试，造成mock跨文件污染。应将全量include放入isolated项目，shared项目仅列显式标记文件，并用`vitest list --filesOnly --json`确认每文件仅归属一个项目。新增mock/组件/时间状态的下游测试须重新判断隔离要求，不能机械继承纯函数版本的共享标记。详见[冲突处理记录](solana-trading-dependencies.md#3337-冲突定位2026-11-24)。
+
 2026-11-17 #3201补充：不能把“未获reviewer最终批准”推导成“缺少产品选择”。先读reviewer原话并核对既有合并规则：Divhead明确解释GMX公式较旧版低且要求写字段表；表已补后应收敛为普通review验收。旧前端还同时保留不同selector/helper，追当前消费者再找后端公式，避免用同名helper或数值巧合解释历史行为。[证据与对先前阻塞判断的修正](issues/FESOL-15.md#ac2-口径调查结论2026-11-17)。
 
 以下信号触发 Agent 主动判断是否更新：新 review/作者回复/reviewer 直接提交；用户纠正；自审发现；调试确认的根因；与既有规则冲突；后续修改撤销历史修复；新消费者使旧结论失效。发现依赖查询或收到信号，没有后台监听，不承诺实时吸收所有 PR。
