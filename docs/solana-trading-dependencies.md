@@ -1,5 +1,11 @@
 # Solana 交易链路依赖审计
 
+## 签名修正正式采用（2026-11-24）
+
+用户确认3340效果并授权关闭对比PR、正式更新3337。统一3337采用已验证head `c957c1be02013700c490d861bc2b40c47121f67e`，136接续`6af9c8ae39e8549f9914ad35bfc673442e02e044`，playground接续`1a16e19552472d927fa3576d00e749dadd61aacf`；87/545/187提交数不变。三条线每条受影响提交的author/author date、message、tree及有序parent映射核验，三最终完整tree及release diff与修改前一致。统一线20条新commit已由GitHub verified=true/valid确认；下游额外33条重签，本地GPG通过并另核验GitHub。原25master提交保留，三线旧head本地及远端backup/*-before-signature-fix-20261124保留，推送采用旧SHA lease。
+
+3340关闭而非合并，3337及3318保持Draft，登记/正文接续。没有业务改动、部署或新增钱包验收；现有869c0a37部署完整源码一致。映射`.git/agent-workflow/signature-adoption-20261124.json`，日志`/tmp/gmx-{adopt,publish}-signatures.log`，GitHub新增下游签名证据`/tmp/gmx-signature-adopt-github.json`。
+
 ## 独立签名修正对比PR（2026-11-24）
 
 用户明确要求新建PR看效果，已创建[Draft #3340](https://github.com/gmx-io/gmx-interface/pull/3340)，分支solana-trading-signature-preview-trd-72，head `c957c1be02013700c490d861bc2b40c47121f67e`，目标release。以3337当前9320cf7c9f为源，仅修正4条使用Kenny key却保留他人committer的节点（含截图外LUT-backed orders atomic），共20条受影响节点重建并签名，67条SHA不变。保留每条author及author date、message、tree与有序parent映射；最终完整tree、对当前release diff均相同，87条commit。20条新提交逐条GitHub API核验verified=true/reason=valid，本地GPG亦G。25条原master来源不修改，不将全部87条宣称新验签通过。
