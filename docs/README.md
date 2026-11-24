@@ -21,7 +21,7 @@
 | [Solana 交易链路依赖审计](solana-trading-dependencies.md) | FESOL-56/57/19/20/72 的开发集成、PR 堆叠、API rollout、真实验收依赖及协调顺序（2026-11-13 观察） |
 | [Issue 知识入口](issues/README.md) | 每个经手 issue 的工作、问题、处理与依据；开发、调研和 review 使用同一固定入口，与本机任务状态及通用经验互相链接 |
 | [开发、知识回流与 PR 交付](linear-development-workflow.md) | 当前日常路径、主动上游/Linear 更新、基础设施选择性回流、最新 release 的纯业务交付及 PR 后开发验证→交付流程 |
-| [Agent 分工与成果接收](agent-collaboration.md) | 按需协作的协调入口、工作区/路径归属、子任务返回约定和整合结果验证；默认单 Agent，无额外调度服务 |
+| [Agent 分工与成果接收](agent-collaboration.md) | Unification UI 代码交接、正式 PR/Tester 区分、前端接续与 cycle refining；按需 Agent 分工、公共基础写入、资源隔离和最终整合验证 |
 | [可选的严格交付证据](agent-delivery-evidence.md) | 复杂资金/交易或明确需要移交时使用；保留已有身份、结果与来源绑定接口和历史验收 |
 | [Linear 需求查阅与复盘](linear-requirements.md) | FESOL 实时查询、全量快照、项目筛选和进度差异工具的配置、命令与验收记录 |
 | [需求推荐与就绪核验](solana-next-task.md) | 综合 Linear、GitHub PR、最新上游代码和实际前置，推荐下一条迁移需求 |

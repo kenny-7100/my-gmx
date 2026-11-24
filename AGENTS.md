@@ -7,6 +7,7 @@
 - 用户近期说“5个需求”“五个需求”或“这五条”时，默认指 TRD-72（原 FESOL-56）、TRD-70（原 FESOL-19）、TRD-78（原 FESOL-20）、TRD-77（原 FESOL-72），加上用户自行提出、用于提前走通真实交易流程的 TRD-136；按当次上下文或后续明确调整识别范围（用户于 2026-11-17 明确）。
 
 - kenny 当前负责 Solana 前端侧的 lead 与推进协调；不与整体集成/验收负责人混同（用户于 2026-11-13 明确）。
+- Unification 的 UI 可由设计师直接以代码交付；前端先核对并承接正式 UI PR，再补真实数据、业务规则、交易及验收，不从零重复实现，也不把 Tester/设计认可当成功能完成。当前 cycle 进入收尾时同步梳理后续需求，不等下一 cycle 才 refining；职责、证据和边界见[UI 与前端协作](docs/agent-collaboration.md#unification-的-ui-与前端协作)（用户于 2026-11-24 要求沉淀）。
 - Review 经验学习优先关注 Kenny（用户本人）、Sulliven、Rainer、Divhead 四人提交的 PR 及其相关讨论、修复和最终取舍，服务 Kenny/Sulliven/Rainer 的 Solana 前端迁移协作；其他成员的相关经验按关联性吸收。将可复用判断用于后续开发与自审，开发/恢复时检索相关经验，review 修复、用户纠正或自审确认可复用判断时主动更新[当前经验](docs/review-lessons.md)，在最终 diff 再核对历史保护行为；具体范围见[编码与自审](docs/coding-and-self-review.md#review-经验的学习范围)（用户于 2026-11-15 明确）。
 - 当前 Linear 需求统一使用 Trading 团队的 `TRD-*` 编号；历史 `FESOL-*` 编号、分支、任务登记和知识记录保留，按已核实的 issue 对应关系接续，不按数字推算映射或为改编号重建开发线（用户于 2026-11-16 明确）。
 - 中文沟通和协作文档；代码、注释、日志、commit、PR 和 review 内容使用英文，产品文案遵循既有本地化规范。

@@ -41,6 +41,8 @@
 
 ## RL-01 共享接缝与删减
 
+**设计代码的正式成果承接（2026-11-24）：** Unification 的 Pasha 已为 Earn、GT/Stake、Referrals 提供正式 UI PR 与独立 Do not merge Tester。前端先核对并复用已有组件、交互、校验和计算，沿数据 Hook 与确认处理判断剩余范围；UI 类型不等于可用 API，空 Hook 不证明后端未实现，toast 不证明真实交易。产品/体验认可与技术 review、合入、真实功能验收分开报告；正式组合须核对共享路由、菜单、跨页链接和 EVM 消费者。协作方式见[交接入口](agent-collaboration.md#unification-的-ui-与前端协作)，固定版本证据见 [DES-88](issues/DES-88.md)、[DES-89](issues/DES-89.md)、[DES-90](issues/DES-90.md)。不重复实现设计师成果，也不擅自修改其开发线。
+
 **项目倾向：** 新网络优先在既有数据流的正确边界适配。新增类、包装、状态、slot 或字段保留需要具体消费者与不能复用的理由；真实来源可用后撤去临时 fixture。删减的目标是减少维护面，不能只按行数判断，也不授权顺手全面重构。
 
 **证据与应用：** [#3193 总评](https://github.com/gmx-io/gmx-interface/pull/3193#pullrequestreview-5789044554)要求清理 fixture、无人使用的机制及复制 mapper；[Divhead 的 #3197](https://github.com/gmx-io/gmx-interface/pull/3197)把 API 客户端纳入 SDK，[直接提交 4f62a4eacf](https://github.com/gmx-io/gmx-interface/commit/4f62a4eacfc0a18381c218488049de766b93dc58)将 ctx 类改为普通对象，并在真实 EVM 操作边界验证。图标扩展沿用[既有 SVG 命名机制](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355252)。上述为历史 review/提交证据。
