@@ -10,6 +10,7 @@ description: 实施明确的 GMX Solana 需求、回流个人基础设施经验�
 - 新任务先实时核对目标 Linear、关键依赖 PR 和当前代码。按任务节点更新，不轮询、不每轮全量复盘；语义变化影响当前实现时才调整或澄清。
 - 已授权开发包含适时同步 `origin/release` 到 `solana-integration`、创建需求 worktree 和普通提交。从个人基础调用最新版工具管理现场，status 恢复当前目标/决策/阻碍和权威目录、按需读取新知识；阶段变化时 note 简记，冲突经原生 Git 恢复后 recover 登记，见[上下文与恢复](../../../docs/linear-development-workflow.md#任务上下文与恢复)；保护未提交工作，冲突按语义处理，不自动 stash/reset/强推。
 - 编码按 [gmx-interface-dev](../../../gmx-prompts/skills/gmx-interface-dev/SKILL.md)、[gmx-solana](../../../gmx-prompts/skills/gmx-solana/SKILL.md)，测试及自审按相关规范。个人基础不新增业务能力，保持统一数据流及 EVM 行为。
+- 验证先按[测试范围与执行确认](../../../docs/coding-and-self-review.md#测试范围与执行确认)选择单个用例或相关集合；主动全量前说明必要性/范围/成本/替代方案并获用户确认，已有本轮同范围授权沿用。上游通用tscheck/test:ci要求不覆盖本仓库约定；跨目录同步复用共同结果、验证目标差异，不逐目录默认全量。真实门禁保留，自动CI与主动重跑的边界见该入口。
 - 开始/恢复、选方案和最终自审按组件与契约读取个人基础的[相关 review 经验](../../../docs/review-lessons.md#按改动检索)，核对真实消费者、有效反例及历史修复保护的行为；review 修复、用户纠正、自审或排障确认新判断时，按[日常维护](../../../docs/review-lessons.md#日常增量维护)主动更新原经验与 issue，不等用户提醒、不全量扫描历史 PR。
 - 每个经手 issue 先检索既有知识，阶段性记录工作/问题/处理与结论，包含关联及他人 issue 的重要调研，按[固定 issue 入口](../../../docs/issues/README.md)更新并在暂停/交付/结束前检查遗漏与回流，不能只留在本机 note。业务与基础设施独立提交，通用知识更新已有 docs/skill，选择性 backflow 到个人基础；混合配置按内容拆分。禁止整支业务分支合入个人基础。
 - 所有新 commit（包括本地、个人基础及 merge/cherry-pick）显式使用 GPG 签名并核验；签名失败保留现场排查，不免签、不关闭签名。交付前核对 PR 全部提交的 GPG 验证状态。

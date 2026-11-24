@@ -185,7 +185,7 @@ Linear: <actual Linear issue URL containing TRD-123>
 1. 核对 development、delivery 的实际目录、分支、HEAD 与 dirty 状态，以及远端 PR head；检查两处相关源码/依赖差异，保护未提交现场。
 2. 在原 development 实施和验证修复，提交只包含该修复的业务代码及必要测试。个人知识在基础单独沉淀，不夹入业务提交。
 3. 通过后精确 cherry-pick 修复提交到登记 delivery；不整支合入个人基础或 delivery。冲突按语义解决，尤其不能将开发侧个人基础差异带入 PR。
-4. 在实际 delivery 按源码、依赖和配置差异复验适用检查；开发侧通过不代替交付侧通过。通过后推送 `origin`，更新同一 Draft PR；开发分支备份用 `my-gmx`，保持两角色 HEAD/验证证据登记。
+4. 在实际 delivery 核对源码、依赖和配置差异，复用仍有效的共同结果，针对差异及组合执行必要检查；按[测试范围与执行确认](coding-and-self-review.md#测试范围与执行确认)选择，不逐目录默认全量。复用结果与目标实际执行分开记录。通过后推送 `origin`，更新同一 Draft PR；开发分支备份用 `my-gmx`，保持两角色 HEAD/验证证据登记。
 
 不在 development 与 delivery 独立实现两份修复；delivery 保留 PR 发布版本的权威身份，development 是默认修复现场。工具 status 的 authority 和 note 的 verification 在已有 delivery 时指 PR 发布版本；开发验证单独记录 issue 与 context acceptance，不把开发 HEAD 填作交付 verification。仅有 delivery 的旧任务沿用已核实现场，不为套流程重建不存在的分支；有歧义再确认。新会话发现远端 head 与登记不同，先以远端事实核对差异再更新记录。普通修复不重新创建一套交付分支。
 
