@@ -173,3 +173,5 @@ refining 建议分列表/详情与估值、GM 存取、GLV 存取及执行反馈
 2026-11-24 23:10 范围调整：已按用户授权将 TRD-92 的 Solana embedded 扩展拆为 [TRD-210](https://linear.app/gmx-io/issue/TRD-210) 并关联；TRD-92 保留现有外部钱包基础上的完善与资产收发。上表是拆分前排序基线，embedded 的未知项不再作为 TRD-92 当前验收项。
 
 2026-11-24 TRD-110 单项跟踪：当前已为 Refining，未指定实施 assignee。release 的 Solana swap feature 仍关闭；共享报价和 vendor SDK 有基础，#3337 明确排除 swap，独立 wrap executor 仍为 EVM。API 已适配 Swap 订单，不预设后端从零缺失；Market/Limit 范围与报价到执行契约需先收口。详细证据见 [TRD-110 当前记录](issues/TRD-110.md)，未重排全量候选。
+
+TRD-110 二次核验补充：以用户明确的“GMX 框架内承接 GMTrade，前端自身验证不算依赖”判断，可开始实施。固定真实 WASM 8 组 swap 构造及 update/close 构造成功；生产 API/RPC 核实四币对池链上 disabled，另有 GMTrade 默认 BOME/MELANIA/TON 三个 enabled 的 WSOL/USDC 池未纳入统一 API，完全同池覆盖需协调数据服务范围。具体版本、slot、样本和验证边界见 [TRD-110](issues/TRD-110.md)，不无条件承诺全部 GMTrade 路径等价可用。
