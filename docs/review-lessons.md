@@ -41,6 +41,8 @@
 
 ## RL-01 共享接缝与删减
 
+**按完整需求评价就绪（2026-11-24）：** refining 不能把 TRD-151 的聊天按钮、TRD-110 的 wrap 或 TRD-116 的列表切片当作整条需求 ready。按消费者追踪网络身份与真实能力：Solana provider 保留 EVM `globals.chainId`，共享 Hook 若用该值选 SDK，页面显示 Solana 不代表查询已走 Solana；`isSameAddress` 已支持 base58，避免重复修已解决问题。API merged、生产可请求、历史覆盖完整各自取证；本轮 rates 查询成功但30d只有126小时点。旧项目 SQD rebate 已合并也不证明新框架可直接调用或已部署。具体版本与可复核路径见 [refining 调研](solana-refining-priorities-2026-11-24.md)。
+
 **设计代码的正式成果承接（2026-11-24）：** Unification 的 Pasha 已为 Earn、GT/Stake、Referrals 提供正式 UI PR 与独立 Do not merge Tester。前端先核对并复用已有组件、交互、校验和计算，沿数据 Hook 与确认处理判断剩余范围；UI 类型不等于可用 API，空 Hook 不证明后端未实现，toast 不证明真实交易。产品/体验认可与技术 review、合入、真实功能验收分开报告；正式组合须核对共享路由、菜单、跨页链接和 EVM 消费者。协作方式见[交接入口](agent-collaboration.md#unification-的-ui-与前端协作)，固定版本证据见 [DES-88](issues/DES-88.md)、[DES-89](issues/DES-89.md)、[DES-90](issues/DES-90.md)。不重复实现设计师成果，也不擅自修改其开发线。
 
 **项目倾向：** 新网络优先在既有数据流的正确边界适配。新增类、包装、状态、slot 或字段保留需要具体消费者与不能复用的理由；真实来源可用后撤去临时 fixture。删减的目标是减少维护面，不能只按行数判断，也不授权顺手全面重构。

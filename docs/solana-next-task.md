@@ -61,6 +61,6 @@ Unification 进入 cycle 收尾时，按[UI 与前端协作](agent-collaboration
 
 ## 验证状态
 
-2026-11-23 扩大到全迁移项目、跨工作区关键词与交易后阶段的推荐见[全范围候选评估](solana-next-task-2026-11-23.md)。新增独立候选首选 TRD-151；现有交易链路收口为 TRD-158 订单切片。推荐不自动认领或实施，后续按变化刷新证据。
+2026-11-24 按用户的 Unification 前端范围、完整需求和可实施性优先重新排序，见 [refining 优先级调研](solana-refining-priorities-2026-11-24.md)。当前首轮为 Net Rate、钱包剩余范围、Swap；客服按完整指标/错误支持范围评估，不能沿用仅恢复入口的首选理由。Earn、Referrals、GT 按 Chloe 倾向适当后移。2026-11-23 的[旧候选评估](solana-next-task-2026-11-23.md)保留历史证据，不作当前排名；TRD-158 仍属于现有交易线收口，与本轮 Backlog refining 排序区分。
 
 2026-11-13 已按全量 Linear、在线 PR、release 与实际调用路径完成一轮推荐，见 [Cycle 3 任务评估](solana-next-task-2026-11-13.md)。这是推荐流程执行证据，不代表候选需求实现或主网验收通过；此前未经 GitHub 核验的 FESOL-91 建议仍不作为有效验收证据。
