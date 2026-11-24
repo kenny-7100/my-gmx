@@ -1,7 +1,58 @@
 # TRD-92 — Solana 钱包与转账
 
-2026-11-24，参与角色：只读 refining 调研，未认领实现。[Linear](https://linear.app/gmx-io/issue/TRD-92)。
+2026-11-24，参与角色：只读现状与 refining 调研，未认领实现。[Linear](https://linear.app/gmx-io/issue/TRD-92)。
 
-调研 Sulliven 的剩余范围，未认领。连接/恢复/资产已有；release WalletProvider 只配置 Ethereum embedded，不能称 Solana embedded 已通。Receive/Send 与 Privy 配置/签名分别梳理，确认 ATA、rent、SOL fee、Max、pending 跟踪。订单 sender 非通用转账 sender，Vite system package stub 也需考虑；未验证真实 embedded 签名。
+## 当前结论
 
-完整固定版本、代码/PR/生产查询证据及排序理由见 [11 月 24 日 refining 调研](../solana-refining-priorities-2026-11-24.md)。本文未完成业务实现或验收；恢复时刷新受影响依赖。
+TRD-92 不是从零建设钱包，也不是只补两个按钮。外部钱包连接、恢复、地址和资产展示已有正式 release 交付；剩余范围是连接行为的验收差异、Receive、通用 SOL/SPL Send，以及 Solana Privy embedded wallet。标准转账主要通过现有 RPC 与钱包完成，未发现必须新增 gmx-api/SQD 接口的前置；embedded 配置与签名尚未核验，不能写成已通或必需购买第二份 Privy 订阅。
+
+本轮 Linear：Backlog / Sulliven An / High，正文最后更新 2026-11-17，无评论、附件和显式 blockedBy。没有找到关联 TRD-92 的公开 PR；不能由此判断 Sulliven 没有本地或未关联工作。继续推进先和现负责人核对其实际分支与剩余交付。
+
+本轮主项目源码固定为官方 release `993474e4377b75f919e587bc4f30e6adc24cecd1`，不是个人 integration 分支；以下“已有”是代码及合并证据，不代表本轮浏览器/钱包验收通过。
+
+## 能力矩阵
+
+| 范围 | 当前实际状态 | 剩余工作或证据边界 |
+| --- | --- | --- |
+| 外部钱包连接 | TRD-97 Done；[#3110](https://github.com/gmx-io/gmx-interface/pull/3110) 2026-10-28 合入 release，支持 Phantom、Solflare、OKX、TokenPocket，复用同一 Privy 入口 | 旧 preview 的通过记录不能代替当前四钱包、网络切换和真实签名验收；TRD-97 明确首发不包含 embedded |
+| 恢复与显式断开 | session 保存 walletId；恢复有 4 秒占位超时；主动断开先清本地记忆；连接失败保留原网络上下文；有 EVM session 保护 | walletId 来自钱包名称，未单独持久化选定地址；同一扩展多账户切换/恢复需验收，不宣称已保证精确地址恢复 |
+| 切网且目标网络没有记忆钱包 | 当前 Solana 下拉仅调用 selectSolanaNetworkInApp，Header 展示 Connect wallet 按钮，点击才打开连接 | 与正文“自动打开对应连接流程”存在代码行为差异，需 Chloe/Sulliven 确认是否补齐，不能算已完全覆盖 |
+| 地址及资产展示 | 复用地址、复制、Solana explorer、wallet-only 模式；TRD-98 Done，Rainer 的 [#3195](https://github.com/gmx-io/gmx-interface/pull/3195) 2026-11-20 合入 release；原始余额来自 RPC，USD 来自 keeper 价格映射 | 覆盖 native SOL 和配置 token 的 ATA，并非扫描所有钱包 token account；loading/error 不应视为零；原始余额不是可转出额度 |
+| Receive 收款 | MainView 对 Solana 隐藏 Receive；现有 WalletReceiveView 用 wagmi EVM 地址和 EVM 网络，尚未适配 Solana | 接当前 Solana session 地址、QR/复制/网络提示；绕过 EVM funding options，调整桌面/移动返回路径；确认后资产刷新 |
+| Send 转账 | MainView 对 Solana 隐藏 Send；WalletSendView 是 EVM/viem/gas/跨链路径；没有正文提议的 SolanaWalletSendView 或通用转账状态实现 | 新增 SOL/SPL 交易构造、费用和账户校验、所选钱包签名、确认跟踪与余额失效；不能直接显示 EVM 页面代替 |
+| Privy Solana embedded | WalletProvider 的 embeddedWallets 只配置 ethereum.createOnLogin；连接入口为外部 Solana 钱包专用流程 | 核验现有 Privy app 能力、登录/创建/选择、会话恢复和真实签名；未查看 dashboard，不确定是否有服务侧配置门槛 |
+| 转账反馈与关闭后的跟踪 | 钱包资产 provider 随 modal 开关挂卸；普通余额查询按共享 5 秒节奏刷新，隐藏/离线不轮询 | pending 跟踪不能只放在 modal 内；未知超时继续查询，明确失败/拒签才允许检查后重试；确认后按 owner/network 刷新余额 |
+
+## 与当前交易阶段的关系
+
+[TRD-101](https://linear.app/gmx-io/issue/TRD-101) 把“钱包/网络切换、拒签、失败/pending、不影响 EVM 或在旧上下文提交”等列入当前交易验收，引用 TRD-92；同时把“Swap, transfers and embedded wallets”列在交易之后，引用 TRD-110/TRD-92。
+
+因此要分别跟踪当前交易必需的钱包行为，以及后续通用转账/embedded 扩展，不能把整张 TRD-92 Backlog 当成当前交易的统一硬阻塞，也不能因 TRD-97/98 Done 就认为 TRD-92 全部通过。Pools 等历史阻塞关系同样不代表必须先实现全部 embedded 范围。
+
+## Refining 入口与建议顺序
+
+1. **先收口现有钱包行为。** 和 Sulliven 对照 TRD-97/98 交付，确认当前四钱包、EVM/Solana 独立恢复、失败/取消、主动断开、同扩展多账户、切网无记忆的验收矩阵。先识别已完成项和明确差异，避免重做。
+2. **Receive 是最短独立交付。** 当前地址和 QR 等 UI 可以复用，但要改地址/网络来源与路由。接收本身无需用户签名，也无需新增后端历史接口。Received assets 用确认后的余额刷新体现。
+3. **Send 按真实交易契约细化。** 明确 SOL 与配置 SPL 的首批范围、Token/Token-2022、收款地址是钱包地址还是 token account、目标 ATA 不存在的创建与 rent、SOL fee 与 Max 保留额、费用变化及预检查失效。当前 balance reader 接受 frozen 状态并只验证 Token-2022 扩展封装，不能拿显示余额直接当 spendable；发送必须校验实际可转出条件。
+4. **Embedded 单独核验入口。** 先验证同一 Privy app 的 Solana 创建/访问和选中钱包签名，确定与 external session 的身份选择方式，再估算 UI/状态整合。此项未知不自动阻塞 external Receive/Send 的 refining，但不能从原验收范围中删除。
+
+这不是重新排整个 backlog，也不是修改 TRD-101 的阶段安排。Receive 较易落地；Send 的范围与实现工作明显更多，不能因为“不依赖历史 API”就评为小改动。
+
+## 技术接线与复用边界
+
+- 当前 API 是 `isSolanaNetwork(networkId)`、`useSolanaWalletSession`、`useSolanaWalletAssets` 及 `useGmsolWalletBalances`；正文 `useChainId().isSolana`、`useSolanaWallet`、`useSolanaAssets`、`refreshSolanaAssets` 是设计建议或旧命名，不能按现成函数直接引用。
+- `getSolanaBalancesKey(networkId, owner)` 是可复用的余额失效入口；转账的 owner/network/signature 要保留在提交上下文，切网、换钱包或关闭 modal 不应把结果归到当前新钱包。
+- 更正此前宽泛判断：`GmxAccountModal` 本身没有“Solana 只准 main view”的硬限制。当前缺口是 MainView 隐藏入口、Receive/Send 实现仍为 EVM，以及各端路由/返回行为尚未适配。
+- Vite stub `@solana-program/system`，不能仅因依赖存在就直接 import 转账 helper；设计交易构造时需兼容现有构建边界。
+- 现有订单 sender 的签名审查、未知状态处理和余额刷新原则可参考；其 owner→自有 WSOL ATA 转账/SyncNative 是下单准备，不能据此认定任意收款人 SOL/SPL 转账已实现。通用转账需要自己的已审查交易契约。
+- 旧站 `gmx-solana-interface` main `0e863b8dae7e1d9bef2cf28efe168b16c0992d20` 的 `app/src/components/TradeBoxNew/utils/wraporUnwrap.ts`、`client/src/exchange/instructions/utils.ts` 命中的是自有 WSOL wrap。它们不是新项目通用转账完成证据，也不能直接搬旧 wallet-adapter/web3.js 页面进入当前 Privy/kit 架构。本轮未对旧站所有路径做通用 sender 不存在的断言。
+
+## 固定版本证据与验证边界
+
+- [WalletProvider](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/lib/wallets/WalletProvider.tsx)、[SessionState](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/lib/solana/SolanaWalletSessionState.tsx)、[SessionSync](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/lib/solana/SolanaWalletSessionSync.tsx)。
+- [NetworkDropdown](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/components/NetworkDropdown/NetworkDropdown.tsx)、[AppHeaderUser](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/components/AppHeader/AppHeaderUser.tsx)、[ConnectModalContext](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/context/ConnectModalContext/ConnectModalContext.tsx)。
+- [MainView](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/components/GmxAccountModal/MainView.tsx)、[WalletReceiveView](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/components/GmxAccountModal/WalletReceiveView.tsx)、[WalletSendView](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/components/GmxAccountModal/WalletSendView.tsx)。
+- [余额原始读取](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/lib/solana/balances.ts)、[余额 hook/cache key](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/domain/gmsol/useGmsolWalletBalances.ts)、[估值](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/domain/gmsol/useGmsolWalletAssets.ts)、[modal provider 生命周期](https://github.com/gmx-io/gmx-interface/blob/993474e4377b75f919e587bc4f30e6adc24cecd1/src/components/GmxAccountModal/GmxAccountModal.tsx)。
+- [TRD-97](https://linear.app/gmx-io/issue/TRD-97)、[TRD-98](https://linear.app/gmx-io/issue/TRD-98) 正文与评论、#3110/#3195 合并/review/checks 是历史交付证据。本轮没有运行构建、测试或钱包实测，没有查看 Privy dashboard，也没有重新验收这些历史截图；未修改 Linear。
+
+原始全量排序与背景见 [11 月 24 日 refining 调研](../solana-refining-priorities-2026-11-24.md)。恢复时刷新受影响来源，不把本文的日期状态当作长期事实。

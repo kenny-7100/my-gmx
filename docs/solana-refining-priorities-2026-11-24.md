@@ -61,7 +61,7 @@
 
 release 已有 Privy Solana external connectors、session/恢复、`SolanaWalletAssetsContext`、地址/浏览器/资产列表及 Solana wallet-only modal；余额和价格错误有独立状态。TRD-97/98 的已有工作是前置，不能因总任务 Backlog 而按“钱包还没做”估算。
 
-`src/lib/wallets/WalletProvider.tsx` 当前 `embeddedWallets` 只配置 `ethereum.createOnLogin`，不是 Solana embedded 已通。`MainView` 与 `GmxAccountModal` 对 Solana 的菜单/视图有限制，Receive 路由仍需绕过 EVM funding-options，Send 需 Solana 实现。现成接收地址不等于带 QR、网络识别和确认刷新的一整条 Receive。
+`src/lib/wallets/WalletProvider.tsx` 当前 `embeddedWallets` 只配置 `ethereum.createOnLogin`，不是 Solana embedded 已通。`MainView` 对 Solana 隐藏 Receive/Send 按钮；`GmxAccountModal` 本身没有仅限 main view 的硬限制，但 Receive/Send 视图仍走 EVM 来源/交易，Receive 路由需绕过 EVM funding-options，Send 需 Solana 实现。现成接收地址不等于带 QR、网络识别和确认刷新的一整条 Receive。
 
 refining 分成连接/恢复回归、Receive、SOL/SPL Send、Solana embedded 四组，逐项标“已有/待做/待配置验证”；不擅自从原需求删除 embedded。发送需明确支持 mint/token program、收款 ATA 创建与租金、保留 SOL 支付网络费、Max、签名所用当前钱包、拒签/失败/未知结果、关闭 modal 后 pending 跟踪。构建还 stub `@solana-program/system`，不能仅因库安装便假设可以直接 import 原生转账 API。优先复用现有 session、RPC 与反馈，不能把订单专用 sender 当通用转账 sender。
 
@@ -167,3 +167,5 @@ refining 建议分列表/详情与估值、GM 存取、GLV 存取及执行反馈
 - **影响范围：** Divhead/明显后端工作不列候选，但核对必要依赖；UI 三项的后移是本批产品安排，后续依据最新产品决定、正式代码和真实业务前置重新判断。排名、负责人和状态都是观察结果，不是永久规则。
 
 本次仅补充知识库接续与维护方式，12 项排名及业务核验结论未变。维护记录以本文件说明和 Git 历史为准。
+
+2026-11-24 单项跟踪：TRD-92 仍为 Backlog / Sulliven。深入核对确认连接和余额已有 release 交付，切网无记忆时自动打开连接流程仍有行为差异；Receive/Send 和 embedded 仍需实现或核验。TRD-101 将钱包切换/失败恢复列入当前交易验收，将转账/embedded 放在交易之后，不应把整张 TRD-92 当成当前交易硬阻塞。能力矩阵、具体接线和边界见 [TRD-92 当前记录](issues/TRD-92.md)；未重排全量候选。
