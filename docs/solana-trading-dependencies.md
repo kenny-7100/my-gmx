@@ -37,6 +37,10 @@
 
 runtime边界：确认kenny原生Chrome窗口，独立打开最新生产预览8a399560，flag-off Arbitrum Trade/图表/表单可见。尝试通过原生设置切flag时Computer Use返回noWindowsAvailable，未完成flag-on/reload/网络切换、请求计数或四钱包验收；不使用其他profile或独立浏览器替代。四需求实时正文已重读；72四钱包/atomic落链，70完整数学对照/payment conversion，78真实proxy成交通知，84真实改单/终态关闭仍不得标已验收。未修改业务、Linear、PR或发布评论。
 
+同日21时补查：远端head/base仍为上述版本，release是head祖先，独立detached源码tree与既有merge-result一致（`f77666e1e7abf7dfc0a84e84d420c6915b6fdef9`）；gmx-prompts官方main仍`0bb4da7`。重读四条实时Linear正文/关系及评论（均无评论），复核签名/发送/validator、订单操作和通知/slot刷新路径，结论仍为上述两项；已修复的EVM多扩展误拦截不重报。curl按生产预览Origin复核dev/fallback：getSlot均200，其余三个历史方法均403/-32004；Python默认客户端连getSlot也被边缘1010拦截，该结果不用于方法支持判断。六项GitHub checks仍全部成功，inline评论仍为空。未改源码/依赖/配置，复用上轮8文件59例及未变源码的既有检查，本次未重新执行业务套件。
+
+本次补齐此前受Computer Use阻碍的无钱包runtime范围：在标题含kenny的原生Chrome窗口新开固定预览`8a399560`，确认flag-off Arbitrum行情/图表/表单；通过设置开启solanaNetwork后切入Solana，DOGE行情/图表及共享Market/Limit/TP-SL入口可见，Swap/More未显示；刷新仍保留Solana，切回Arbitrum后BTC行情/图表及Swap/More恢复。结束时恢复原有关闭开关并关闭本次新增标签。该页未连接钱包，未签名/广播、注入假钱包、统计RPC/telemetry/storage或验证真实订单；不将页面可见性扩大为交易或完整AC验收。新证据补充原记录，保留此前运行失败的历史边界。
+
 ### 首轮head审查（aa9d17d129）
 
 角色：只读review；使用gmx-prompts `gmx-interface-review`及`gmx-solana`，T3，按skill进行计算、操作与生命周期专项检查及主审签名安全检查。审查head `aa9d17d12937ce5542e7b08824a4a1016a19d4d8`，release `92c658ddfe02e9493f018412e7e493251cbfd5f4`，145文件；release为head祖先，独立detached合并结果与head相同。包含既有master25条，未把已披露范围/AC缺口重报为新bug。当前环境没有独立`/code-review`或`/security-review`执行器，执行的是相应方向的代码审查，不声称调用了这些命令或完成全面安全审计。
