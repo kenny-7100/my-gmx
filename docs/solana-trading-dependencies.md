@@ -1,5 +1,23 @@
 # Solana 交易链路依赖审计
 
+## 88→84正式实施与下游接续（2026-11-24）
+
+用户授权实施88→84并同步TRD-136/playground。本轮采用精确84方案：ce255/a637/a04在早期保留release行为或ABI注释后变空；b045/4df两份locale改为0a350共同前置的一份完整共享提交，净减4。保留740/6fb/719及其他所有现有merge拓扑、原业务拆分/message/author/author date，固定master25条原SHA不变；不实施此前81方案的merge删除。
+
+| 目标 | 原head / 对release提交数 | 新head / 对release提交数 |
+| --- | --- | --- |
+| #3337统一交易 | `d51c6c984e` / 88 | `aa9d17d12937ce5542e7b08824a4a1016a19d4d8` / 84 |
+| TRD-136开发 | `31c98eb45d` / 547 | `7089ddc1b359da3940bffc244cfa904dc617247f` / 543 |
+| playground / #3318 | `93a242362b` / 189 | `c71a99a0ad21ddc020c923382668720812e573ce` / 185 |
+
+基线release仍`92c658ddfe`。555条记录含5个变空原节点、1个共享locale节点；116条新commit显式GPG签名并逐条本地验G，434条原节点保持SHA。独立复核每个保留节点的message、author完整行、tree和有序parent映射；各merge保留原parent数。新116条分别在上游/个人GitHub仓库逐条核验signature.isValid=true/state=VALID/signer=kenny-7100；不将保留的旧历史签名一并声称新验通过。
+
+三条线最终完整tree分别仍为`9a88b27b9a8c18b99695f2f9e555ab31691c8c2c`、`deb469c6da8d3186a710a7e8395389ae259a4195`、`99a3d76ac08d932adc70afcfa15d02cfe28a0bd6`，对release完整二进制diff逐字节相同，old/new直接diff为空。新3337是两个下游祖先；共享locale十文件各精确新增40行/0删除，额外RPC文案保留。源码/配置/env/依赖最终均无变化，未重跑业务suite或构建，复用对应同tree验证；新head hosted CI自动运行，初次回读仍进行中，不冒充已全绿。
+
+操作前现场clean、三个远端head均未新增，已分别备份本地及对应远端`backup/{solana-trading-integration-trd-72,local-real-solana-trades-trd-136,solana-playground}-before-final-tree-cleanup-20261124`。原生update-ref采用旧SHA比较交换，个人dev推my-gmx，origin两个PR分支atomic推送，均绑定明确旧head lease；回读远端与三个clean checkout一致。3337保持现有Ready、MERGEABLE/REVIEW_REQUIRED，3318保持Draft；更新3318顶部当前来源、六个登记角色及三份任务note，3337精简正文原本无过期head，无需再堆历史。未修改Linear、reviewer或发送队友消息。
+
+本轮未部署/新增钱包验收；固定playground部署1932baa9仍为旧source1a16e19552，与本轮含新release的源码不能声称一致。新旧playground分支tree一致无需因历史SHA本身部署，但此前release同步尚未部署的边界仍保留。master发布协调与剩余交易AC不变。完整映射/本地与GitHub签名证据：`.git/agent-workflow/pr3337-84-{execution,verification,github-verification,published}-20261124.json`；预演、执行及复验脚本/日志在`/tmp/pr3337-84-*`，副本另保存在Git共享目录。
+
 ## 以最终代码不变为准的清理预演（2026-11-24）
 
 用户进一步明确以最终代码不变为评判标准。本轮只做tree与父链映射预演，不创建业务commit、不移动分支、不更新PR。远端3337/release仍为d51c6c984e/92c658ddfe，下游136/playground仍31c98eb45d/93a242362b。按保留真实业务提交拆分及固定master25条的约束，组合预演可将3337由88降至81，净减7；这是已通过tree级预演的方案，不是已正式执行/重签的历史。
