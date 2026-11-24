@@ -1,5 +1,11 @@
 # Solana 交易链路依赖审计
 
+## 独立签名修正对比PR（2026-11-24）
+
+用户明确要求新建PR看效果，已创建[Draft #3340](https://github.com/gmx-io/gmx-interface/pull/3340)，分支solana-trading-signature-preview-trd-72，head `c957c1be02013700c490d861bc2b40c47121f67e`，目标release。以3337当前9320cf7c9f为源，仅修正4条使用Kenny key却保留他人committer的节点（含截图外LUT-backed orders atomic），共20条受影响节点重建并签名，67条SHA不变。保留每条author及author date、message、tree与有序parent映射；最终完整tree、对当前release diff均相同，87条commit。20条新提交逐条GitHub API核验verified=true/reason=valid，本地GPG亦G。25条原master来源不修改，不将全部87条宣称新验签通过。
+
+原3337、136、playground及部署均未改动，3340是用于比较签名效果的替代交付线，不能与3337重复合并。未改业务源码或重跑同tree业务检查；CI新PR运行，未宣称全绿，未新增钱包/部署操作。映射`.git/agent-workflow/signature-preview-20261124.json`，GitHub逐条证据`/tmp/gmx-signature-preview-github.json`。原作者归属保留，实际重建者Kenny作为committer。
+
 ## 重建提交GitHub签名身份问题（2026-11-24）
 
 用户截图指出三条Unverified。GitHub API确认原始0891747ffc、fac83d15bd、5fa8d01ce8均verified=true/reason=valid；当前映射1b4c70a8、93765725、4c8a3a7b均有签名，但verified=false/reason=unknown_key。本机三者GPG=G，签名者为Kenny key9FB76150CFDA2294，committer却保留Divhead/Sulliven身份。这是重建签名与身份关联验证不匹配，非原作者未正确签名。此前仅核验本地GPG，未充分核验GitHub验证状态，是整理遗漏。parent变化后原签名不能复用；正确重建应保留author，以实际重建者作为committer并使用其匹配key签名，再核验GitHub verification。当前仅调查，未继续改写。修复仍须备份、保留tree/message/顺序及merge关系并核验下游，不修改author伪装归属或把他人邮箱加入Kenny key。
