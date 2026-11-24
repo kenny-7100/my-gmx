@@ -1,5 +1,18 @@
 # Solana 交易链路依赖审计
 
+## 以最终代码不变为准的清理预演（2026-11-24）
+
+用户进一步明确以最终代码不变为评判标准。本轮只做tree与父链映射预演，不创建业务commit、不移动分支、不更新PR。远端3337/release仍为d51c6c984e/92c658ddfe，下游136/playground仍31c98eb45d/93a242362b。按保留真实业务提交拆分及固定master25条的约束，组合预演可将3337由88降至81，净减7；这是已通过tree级预演的方案，不是已正式执行/重签的历史。
+
+1. `ce255693fc`、`a63722eb2d`、`a04ae016bb`分别单独及组合预演均变空，组合88→85。source历史中对旧trade-state blob保留release保护；positions在83e19ac整合master前保持release已有完整公式、从83e起保留各原始金融快照；ABI旧来源注释统一使用已安装版本的现有最终注释。43个中间快照受影响，仅这三个路径变化；不存在新增最终补偿commit。
+2. `740e8d626e`tree等第二parent且第一parent已被第二parent包含，可去掉冗余起始merge，85→84。
+3. `6fbda6e7ab`tree等第一parent，其第二parent相对第一parent独有集合只有merge `719db2cd98`；719的两个parent651089/83e19ac均已在第一侧祖先中。因此绕过6fb会同时让719退出PR差集，不丢任何独有业务提交，84→82。此前仅凭“第二侧有独有历史”建议必须保留过于保守；应区分独有merge节点与独有业务/冲突结果。这里移除的是无最终代码增量的重复整合拓扑，原图仍有旧head可追溯。
+4. locale `b045ce2ae6`的每文件35行是`4dfbd9077a`每文件40行的子集。以两者parent共同祖先`0a350fa22f`为锚点，将后者完整40行/十文件的原提交前移为一份共享locale提交；三方合并投影全部干净，较小副本缺的5行亦保留。两个原位置均变空，两份换一份、净减1，82→81。共享提交独立保留原message，不并入其他业务提交。
+
+三最终完整tree均不变：3337 `9a88b27b9a8c18b99695f2f9e555ab31691c8c2c`，136 `deb469c6da8d3186a710a7e8395389ae259a4195`，playground `99a3d76ac08d932adc70afcfa15d02cfe28a0bd6`；各自对release二进制diff相同。独立检查master25条仍全部可达、source仍为两个下游祖先、被移除lifecycle节点的业务祖先保留、共享locale精确每文件40行新增/0删除，所有中间差异只限上述三路径和十个locale。下游非source历史保留原tree；没有承诺所有中间快照不变或逐个可构建。
+
+source原节点退出8条：ce255/a637/a04/740/6fb/719/b045/4df，其中4df以同message的共享前置替代，故净减7。02f3027c45、3e15292923的真实整合保护和最新release merge d51c保留，不动master发布范围。正式实施仍需备份、逐提交签名及GitHub身份验证、真实有序parent映射与三目标完整tree/diff再核验；本轮没有重跑业务测试、部署或钱包操作。预演脚本、完整映射与SHA256 manifest保存在`.git/agent-workflow/pr3337-cleanup-preview-20261124/`，临时入口`/tmp/pr3337-{final-tree-plan-v2,locale-tree-plan}.py`。以下“尚未预演”的段落是此前阶段记录，以本节为当前结论。
+
 ## 当前88commit清理潜力复查（2026-11-24）
 
 用户仅要求分析候选，未授权本轮重写。刷新origin后，3337仍`d51c6c984e`、release仍`92c658ddfe`，差集88条（固定master25条、自有63条）。逐条核对parent/tree、单parent稳定patch-id与按路径新增/删除内容：无单parent空提交、无整条重复补丁组；git cherry无release等价单条补丁。补充文件级与子集检查，发现以下值得继续预演的候选，不能把本轮识别等同于已验证可直接drop：
