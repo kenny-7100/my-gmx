@@ -1,4 +1,8 @@
 # Solana 交易链路依赖审计
+## 原四PR关闭（2026-11-24）
+
+用户明确授权在GitHub关闭原四PR。实时核对3315/fac83d15bd、3316/aa6660fcb0、3317/3213ee6e0c、3293/5fa8d01ce8均未新增head，与统一整合固定来源相同，随后关闭四PR并复查为CLOSED；原分支保留，未发送评论或通知。后续统一使用[Draft #3337](https://github.com/gmx-io/gmx-interface/pull/3337)，未改其Draft状态或Linear需求状态。
+
 ## Phantom剩余等价补丁共享化（2026-11-24）
 
 用户明确授权处理a4c488f912/a7174bd3af这一组。两份新增/删除相同但上下文不同，已用后者补丁在共同前置安排一份实现，移除两份旧节点；净减1。三条新head：统一3337 `9320cf7c9f096f043c7f49c97ca040be64ad4fa5`（88→87）、136开发`464826f74e2189e42c0593920ff81b6fdda29368`（546→545）、playground`36d025574b6c0cbfb0c740712005d827ce186a5d`（188→187）。保留原message及适用merge关系，25条master保持原SHA；525保留节点与1共享节点显式GPG签名并验证。
