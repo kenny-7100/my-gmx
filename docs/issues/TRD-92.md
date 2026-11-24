@@ -2,7 +2,11 @@
 
 2026-11-24，参与角色：只读现状与 refining 调研，未认领实现。[Linear](https://linear.app/gmx-io/issue/TRD-92)。
 
-## 当前结论
+## 当前范围（拆分后）
+
+2026-11-24 23:10，按用户授权完成 Linear 拆分：TRD-92 保留现有 Privy 外部钱包基础上的连接/恢复、资产展示、Receive、SOL/SPL Send 与交易反馈；Solana embedded 的创建/访问、会话和签名接入迁至 [TRD-210](https://linear.app/gmx-io/issue/TRD-210)，两单建立 related 关联。TRD-210 同属 Unification，Backlog / Sulliven / High。正文只写需求与验收，未发布讨论记录或评论。以下调研为拆分前范围的历史基线；embedded 不再属于当前 TRD-92 的验收范围。
+
+## 拆分前调研结论
 
 TRD-92 不是从零建设钱包，也不是只补两个按钮。外部钱包连接、恢复、地址和资产展示已有正式 release 交付；剩余范围是连接行为的验收差异、Receive、通用 SOL/SPL Send，以及 Solana Privy embedded wallet。标准转账主要通过现有 RPC 与钱包完成，未发现必须新增 gmx-api/SQD 接口的前置；embedded 配置与签名尚未核验，不能写成已通或必需购买第二份 Privy 订阅。
 
