@@ -1,5 +1,9 @@
 # FESOL-19 — 共享 TradeBox 的 Solana 下单入口
 
+## 状态与增量核验（2026-11-25）
+
+实时 Linear 仍 In Review；统一 #3337 已 Ready，head `be9ca46ecb`，六项 CI 全绿、尚无正式 review。相对上轮审查仅 RPC 配置变量重命名，历史方法 403 与终态关闭缺口仍未消除；本轮未重跑业务测试或交易验收。版本、责任与范围见[统一现状复核](../solana-trading-dependencies.md#pr-与关联需求现状复核2026-11-25)。
+
 ## 统一PR审查（2026-11-24）
 
 参与角色：review。按gmx-prompts审查#3337 `aa9d17d129`，确认Solana平仓/改单被无关EVM多扩展链冲突阻断的P2；未改业务。79项定向测试通过，固定IDL/线上API局部核验与未验收边界见[审查记录](../solana-trading-dependencies.md#gmx-prompts审查33372026-11-24)。未发布外部review，不表示本issue全部AC完成。

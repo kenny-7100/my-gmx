@@ -1,5 +1,9 @@
 # TRD-84 — Solana 平仓、编辑和撤单
 
+## 状态与增量核验（2026-11-25）
+
+实时 Linear 仍 In Review；统一 #3337 已 Ready，head `be9ca46ecb`，六项 CI 全绿、尚无正式 review。相对上轮审查仅 RPC 配置变量重命名，历史方法 403 与终态关闭缺口仍未消除；本轮未重跑业务测试或交易验收。版本、责任与范围见[统一现状复核](../solana-trading-dependencies.md#pr-与关联需求现状复核2026-11-25)。
+
 ## 最新head复审（2026-11-24 晚间）
 
 角色：只读review。#3337最新`3435c1fe75`已修复旧EVM多扩展误拦截；当前仍有RPC历史方法403部署阻断，并确认pending-only守卫使已执行未关闭订单缺少owner关闭路径。8个定向文件59例通过，未跑全量/新交易。证据、源码归因及runtime边界见[本轮复审](../solana-trading-dependencies.md#最新head复审2026-11-24-晚间)。

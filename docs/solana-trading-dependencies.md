@@ -1,5 +1,15 @@
 # Solana 交易链路依赖审计
 
+## PR 与关联需求现状复核（2026-11-25）
+
+角色：只读状态与增量核验。实时 GitHub #3337 为 OPEN / Ready（非 Draft）、MERGEABLE / BLOCKED、REVIEW_REQUIRED，正式 reviews 与 inline comments 均为空；head `be9ca46ecba8031467bc13a7a771e1368d7aeccd`，六项 checks 全部成功（Audit、Component Tests、Linting/Type Checking/Tests、SDK standalone、两项 Pages）。最新 app 固定预览为 `https://4000b295.gmx-interface.pages.dev`。release `993474e437` 已是 head 祖先，当前对 release 有 61 条提交；相对上轮审查 `3435c1fe75` 仅同步 release/#3342，最终源码只改 `src/config/rpc.ts` 的局部变量名，路由语义与交易源码不变。因此复用此前源码审查结论，不声称本轮重新跑过测试或钱包验收。
+
+实时 Linear：TRD-72、TRD-78、TRD-70 均为 Kenny / In Review，TRD-84 为 Sulliven An / In Review，四条评论均为空。72 最近更新 11-23，78/70 为 11-24，84 为 11-20（原始时间按 UTC）；没有 Done 或完整 AC 通过的新证据。TRD-77、TRD-136 实时状态为 Done；仅作范围补查，前者 SDK 构建、后者实验环境，不与本 PR 四条交易需求混为一组。保证金 TRD-83/#3335 仍独立，#3335 OPEN / Ready / REVIEW_REQUIRED。
+
+本轮带正式分支预览 Origin，只读并行复核 GMX Solana dev/fallback 两路：getSlot 均 HTTP200；getTransaction、getSignaturesForAddress、getBlock 均 HTTP403 / -32004 Method is not supported。复用上文真实 DOGE 开/平仓回执与 parser 回放证据，正式 proxy 成交通知阻断仍存在；playground 的 Alchemy 直连成功不能替代该路径验收。终态账户 owner close 的 pending-only guard/列表路径未有源码变化，仍保留上轮 P2；本轮未再构造链上终态账户。
+
+#3318 仍 OPEN / Draft，head `c71a99a0ad`，正文登记来源仍 `aa9d17d129`；没有接续新 EVM 多扩展修复和最新 release 的证据。此前固定 playground 部署 `1932baa9` / source `1a16e19552` 为历史登记，本轮未访问部署产物，不声称稳定 URL 当前版本已重新核验。剩余四钱包、真实改单、TP/SL 触发、失败恢复、数学对照与执行驱动刷新 AC 仍须逐项验收。未修改业务、Linear、PR、代理或部署，未发消息、签名或广播交易。
+
 ## 市价单已成交但通知未确认的线上定位（2026-11-24）
 
 用户提供DOGE long通知截图并授权结合已打开的3337预览定位。通过kenny原生Chrome读取`solana-trading-integration-t.gmx-interface.pages.dev/trade`：仓位10 USD/2 USDC、5x long已显示，通知第一阶段submitted，第二阶段outcome not confirmed。未刷新/关闭通知，未发新单或签名；临时打开原生Console后恢复页面布局。当前远端3337 head `3435c1fe759c619b7c7994468dc63d48b6d488a9`，相对上轮aa9仅新增EVM多扩展检查修复两个文件，成交跟踪代码未变。
