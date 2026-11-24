@@ -14,6 +14,8 @@
 
 补充playground对照：用户在稳定playground同类市价开仓成功，原生页面显示Order filled及独立执行链接。只读performance采样42条Solana Alchemy请求status200，未输出URL key。playground构建插件tools/local-solana-trades/playgroundConfiguration.mjs在编译阶段把rpc.gmx.io替换为Alchemy直连，同时应用于app/worker；配置来自PLAYGROUND_ALCHEMY_*环境项。4份当前线上JS（入口/应用/bootstrap/Solana provider）hash与登记source1a16e19552部署一致，HTML hash未匹配，未宣称全产物逐字一致。该source与当前3337的orderTracking、solanaOrderTracking及通知组件源码diff为空。决定性差异为运行时RPC路由：playground直连Alchemy可取得成交证据，普通PR preview走GMX proxy遭方法拒绝。playground成功不能替代正式proxy路径验收；源码相同不等于构建/环境行为相同。未改配置或部署。
 
+实时Linear责任核对（同日）：TRD-29 Hide the RPC provider keys behind a proxy，assignee Tim（timgmxio@gmail.com），Done。最新历史评论明确Worker实现gmx-interface-private#1为Tim，前端切换#3334为Divhead；QA Reflectiv的92项报告仅列Solana各路由getSlot，不含本次三个历史方法。相关TRD-127 provider/key选择负责人Divhead，Done；其评论确认使用既有Alchemy keys。故当前方法拒绝建议先询问Tim、必要时抄Divhead，不再仅凭前端合流推断归属。已读两issue完整正文/关系及全部评论，仅起草用户询问文本，未发送。
+
 修复方向：RPC侧核对并开放上述三个只读方法及其参数、限额和v0回执字段（含innerInstructions/loadedAddresses），确保dev/fallback都与前端契约一致；前端区分永久method/权限拒绝和可重试索引延迟，保留未知成交状态、提供具体诊断，避免静默重试到超时。不能依据已有仓位直接判定本次成交，也不能用随意公共RPC兜底掩盖代理缺口。功能归属TRD-78/#3316的生命周期跟踪与RPC接入契约；当前Solana默认proxy配置由Divhead合并提交`f718f71868`引入，该分支同时带入#3334代理hotfix，不能仅凭合流把代理服务器维护者推定为某人。未修改业务、代理、Linear、PR或部署。
 
 证据与真实回执重放脚本保存在Git共享目录`agent-workflow/pr3337-doge-notification-20261124/`，临时源`/tmp/doge-*`。本发现补充上轮review中明确未完成的真实成交runtime边界；mock单测和getSlot探活均不足以证明历史查询契约已上线。
