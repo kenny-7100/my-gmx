@@ -171,3 +171,5 @@ refining 建议分列表/详情与估值、GM 存取、GLV 存取及执行反馈
 2026-11-24 单项跟踪：TRD-92 仍为 Backlog / Sulliven。深入核对确认连接和余额已有 release 交付，切网无记忆时自动打开连接流程仍有行为差异；Receive/Send 和 embedded 仍需实现或核验。TRD-101 将钱包切换/失败恢复列入当前交易验收，将转账/embedded 放在交易之后，不应把整张 TRD-92 当成当前交易硬阻塞。能力矩阵、具体接线和边界见 [TRD-92 当前记录](issues/TRD-92.md)；未重排全量候选。
 
 2026-11-24 23:10 范围调整：已按用户授权将 TRD-92 的 Solana embedded 扩展拆为 [TRD-210](https://linear.app/gmx-io/issue/TRD-210) 并关联；TRD-92 保留现有外部钱包基础上的完善与资产收发。上表是拆分前排序基线，embedded 的未知项不再作为 TRD-92 当前验收项。
+
+2026-11-24 TRD-110 单项跟踪：当前已为 Refining，未指定实施 assignee。release 的 Solana swap feature 仍关闭；共享报价和 vendor SDK 有基础，#3337 明确排除 swap，独立 wrap executor 仍为 EVM。API 已适配 Swap 订单，不预设后端从零缺失；Market/Limit 范围与报价到执行契约需先收口。详细证据见 [TRD-110 当前记录](issues/TRD-110.md)，未重排全量候选。
