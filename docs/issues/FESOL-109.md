@@ -1,5 +1,17 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## Frontend Task Organization 只读核对（2026-11-24 14:12 北京时间）
+
+角色：协调表状态审计。用户要求核对是否需要更新；读取原线上文档（11月23日14:08版）、15项实时Linear正文/关系/附件及全部评论（均无下一页）、文档空评论、Trading周期及16条新旧PR的状态、head、review、返回checks和相关正文。未修改线上文档、issue或PR，未执行产品测试。
+
+- 7项Linear字段需更新：75 In Review→Done；85 In Test→Done；80、63 In Review→In Test；100 In Review→Done；83 In Progress→In Review；72 In Progress→In Review。负责人及周期均不变（70/83/84为Cycle2，其余Cycle1）。
+- 72/78/70/84的原#3315/#3316/#3317/#3293均CLOSED且未合并，统一由[交易整合#3337](https://github.com/gmx-io/gmx-interface/pull/3337)继续，当前OPEN/Ready、待approval、CONFLICTING，head `c957c1be02`。删除原PR仍开放及旧串联合并顺序的描述；保留各需求独立AC和原负责人。
+- 83已有独立[PR #3335](https://github.com/gmx-io/gmx-interface/pull/3335)，OPEN/Ready、待approval、CONFLICTING，head `371253f08d`；正文报告preview手测通过，不能写成独立复验或完整父任务AC通过。
+- 85/#3223虽Linear Done且Reflectiv于11月23日21:44评论feature branch verified，PR仍OPEN/Ready、待approval、CONFLICTING，head `019069b7ed`；返回六项checks成功，仍保留绿色。
+- 136/#3318仍OPEN/Draft、CONFLICTING，head `1a16e19552`，保留Done灰色例外。当前正文记录采用#3337并部署固定版本1932baa9；同时#3337正文新增Kenny报告市价/限价含TP-SL、成交/平仓/撤单测试暂未发现问题。此为报告证据，不扩大为当前签名修正head的四钱包、改单、TP-SL触发、失败恢复及金融对照完整验收。
+- #3337/#3335/#3318当前head返回仅两项Pages SUCCESS；旧head的主测试成功不能冒充当前head完整CI。#3337仍包含需协调进入release的master前置。应撤掉“所有开放PR均mergeable、checks全通过”的统一措辞，逐PR注明证据范围。
+- 原8项已合并PR仍为MERGED/APPROVED；无新增合并，颜色仍9灰/6绿。70既定暂缓范围及78生命周期验收要求继续保留；本轮未重新审查代码或验收。
+
 ## Frontend Task Organization 刷新（2026-11-23 14:08 北京时间）
 
 角色：任务协调状态核验与文档维护。用户授权刷新原15行[线上文档](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)并在聊天列中文全表。逐条实时读取15项Linear正文、关系、附件及全部评论，核对Trading周期列表和14条当前PR的状态、review、mergeability与返回checks；修改同一文档并回读确认15行、负责人排序与颜色保留。未改issue/PR状态、未发评论、未执行产品验收。
