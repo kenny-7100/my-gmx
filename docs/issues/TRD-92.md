@@ -1,5 +1,9 @@
 # TRD-92 — Solana 钱包与转账
 
+## 排除旧 SQD/后端后的复核（2026-11-24）
+
+用户明确不引入 GMTrade SQD/后端。按当前拆分后的外部钱包、Receive、SOL/SPL Send 范围，现有 session、RPC 余额/转账和 GMX Arbitrum oracle keeper 估值可以承接，不需旧站的 SQD、ticker 或钱包资产聚合服务。前端可实施结论不变；不把旧站转账历史列表顺带纳入本单。TRD-210 embedded 的 Privy 服务/配置是另项验证，不属于旧 GMTrade 业务后端。仅依赖边界复核，未重新验收签名、广播或权限。
+
 2026-11-24，参与角色：只读现状与 refining 调研，未认领实现。[Linear](https://linear.app/gmx-io/issue/TRD-92)。
 
 ## 当前范围（拆分后）

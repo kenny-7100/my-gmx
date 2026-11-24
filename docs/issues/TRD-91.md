@@ -1,5 +1,9 @@
 # TRD-91 — Solana Net Rate
 
+## 排除旧 SQD/后端后的复核（2026-11-24）
+
+用户明确不引入 GMTrade SQD/后端。本轮只复核数据路径，不刷新已查过的状态或重测 API。正式 gmx-api 的 `indexWorker → readSharedMarketSnapshot` 由 Solana RPC 读取市场/库存等账户，`tokens/tickers.ts` 经 `gmsolConfig.tickerUrls` 读取 GMX Arbitrum oracle keeper 价格；`indexStore → saveRateSample` 写入自身 `solanaRates`，`getRateHistory` 从该表查询。此 rates 链路未使用旧 SQD 或旧 keeper GraphQL，不能把 gmx-api 中独立 protocolStats 模块引用旧服务扩大成 rates 也依赖它。原前端实施判断成立，约 5 天历史不足、network SDK/cache 接线等边界不变；不建议新增旧 SQD 查询或用旧 SQD 回填规避正式来源要求。
+
 2026-11-24 22:56（北京时间），按用户明确指令，将本轮后端调研结论以英文发布到本单评论，作者显示Kenny，comment ID `6ea3cc50-6761-44da-94f3-b36b648b7d45`；已回读核对正文。评论包含#341合并/生产接口可用、SOL/USDC历史样本及不足7/30天的边界、release前端network SDK/cache接线方向，建议先核对既有接口的具体缺口再新增SQD入口。仅新增评论，未更改需求正文、状态、负责人或验收结论。评论链接：[后端现状调研](https://linear.app/gmx-io/issue/TRD-91#comment-6ea3cc50)。
 
 ## 当前现状复核（2026-11-24 22:45，北京时间）
