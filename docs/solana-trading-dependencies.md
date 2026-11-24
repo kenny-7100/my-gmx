@@ -1,5 +1,17 @@
 # Solana 交易链路依赖审计
 
+## 当前88commit清理潜力复查（2026-11-24）
+
+用户仅要求分析候选，未授权本轮重写。刷新origin后，3337仍`d51c6c984e`、release仍`92c658ddfe`，差集88条（固定master25条、自有63条）。逐条核对parent/tree、单parent稳定patch-id与按路径新增/删除内容：无单parent空提交、无整条重复补丁组；git cherry无release等价单条补丁。补充文件级与子集检查，发现以下值得继续预演的候选，不能把本轮识别等同于已验证可直接drop：
+
+- `ce255693fc`仅恢复useTradeboxState的normalizeTradeOptions与unsupported Swap保护，文件blob完全等于release。历史为35c8移除release保护、ce255恢复；fb796在另一父链再次移除、1ada657再次恢复同一补丁。可考虑在早期快照保留release保护并去掉往返，使ce255变空；1ada另有locale差异，不能整条删除。后续492783的真实Solana接线须保留。
+- `a63722eb2d`虽标题为merge，当前实际单parent，仅恢复positions/utils的同抵押token funding/liquidation公式，完整文件等于release。35c8/fb796/feb93此前分阶段移除/恢复上游公式。可考虑从前期保留已吸收的release公式，使该提交变空；后续master fd7ed及83e整合的金融差异不在此删除范围，须按hunk处理，不能将最终文件整份替换为release。
+- `a04ae016bb`仅修改decodeInstruction的一行ABI来源注释；与d94d04a79b中该文件的注释补丁新增/删除完全相同，后者另有真实生命周期实现。可考虑将此注释放到共同前置，再去掉重复hunk/空节点；保留283839的compactCreateOrderData真实演进。不将d94整体当重复提交。
+- `b045ce2ae6`与`4dfbd9077a`同名locale提交：十个文件中前者各新增35行，均为后者各40行的逐行子集；后者多5行RPC tracker消息/引用。可共享重复部分，但后者独有内容必须保留，不能宣称可直接净减1。另1411a503ce/fb796的sidecar feeDiscountFactor接线逐文件补丁一致，但两条均有其他实现，优先级低，仅适合作为共享hunk候选。
+- `740e8d626e`完整tree等第二parent，第一parent release已是第二parent祖先，属于低收益起始merge壳；`6fbda6e7ab`tree等第一parent，但第二parent719db2独有历史仍需追溯。两者与此前候选一致，默认保留；02f3027c45与3e15292923虽有冗余祖先parent，仍有真实冲突处理/保护恢复，不能因parent可达就整条删。d51c本轮release同步有实际差异，同样保留。
+
+固定master25条的发布协调边界不变，不属于自动历史去重。前三条为优先预演目标，不承诺88直接减3；尚未做三线拓扑重建或最终tree预演。若后续授权实施，需旧head备份、逐提交拆分/适用merge保留、3337/136/playground最终tree及release diff一致、签名与GitHub verification、下游祖先关系核验。本轮无业务/PR/部署修改、无业务测试重跑。全量盘点在`/tmp/pr3337-cleanup-audit-20261124.json`，分析脚本`/tmp/pr3337-{cleanup,partial}-audit.py`；关键结论已保存在本节。
+
 ## #3337 release冲突处理与下游同步（2026-11-24）
 
 用户授权正确处理冲突。统一线merge最新release `92c658ddfe`，保留旧重复RPC测试删除，canonical测试自动接入shared-worker标记；原三个交易测试断言保留。新签名merge `d51c6c984e`已推origin/#3337，GitHub MERGEABLE，六项checks全部成功，仍Ready/REVIEW_REQUIRED，未合入release，原commit历史未重写。
