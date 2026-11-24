@@ -24,6 +24,14 @@ API main本轮已到 `f067594d40724a6116531d16d352f09c070cde2e`；相对上轮 `
 
 ## 首轮 refining 记录（2026-11-24，较早观察）
 
+### 后端依赖说法核对（2026-11-24）
+
+用户转述 Rainer：“这个需求依赖于后端，但我们的后端 gmx-api 是 divhead 在管理，如果我单独写个 SQD 的接口，是能满足需求，但可能不满足 divhead。”这反映了历史数据需要后端及正式数据入口的协作顾虑；不能当作已证明 Divhead 反对某方案或当前接口缺失。未获知该话原始发送时间及其针对的具体字段缺口。
+
+本次再次读取 Linear 评论、#341 状态和生产7d指定市场查询：#341仍已于11/19合并，接口HTTP200、126点且有funding/borrowing/net双向字段。Divhead自己在11/11评论明确由Solana host的`/v1/rates`供应共享SDK格式，前端剩余为请求路由及启用图表。故若这句话意味着“现在需要先等Divhead新增接口，或另写SQD才能推进”，与已观察现状不符；更合适先接入现有正式接口并核实具体缺口。
+
+不宣称现有接口满足全部验收：仍只有约5天历史；若Rainer指更早历史、特定市场缺数据、粒度或另有未说明需求，需逐项核实。SQD另建查询不自动产生采集前的历史，也没有本轮证据证明其已有等价完整数据。正式入口/计算口径/长期维护是架构契约问题，不宜归因为某人主观“满意”。本轮没有联系Rainer或Divhead、没有代写接口。
+
 2026-11-24，参与角色：只读 refining 调研，未认领实现。[Linear](https://linear.app/gmx-io/issue/TRD-91)。
 
 与 Rainer 协作的 refining 首选。API #341 已 merged，生产 rates 三个 period 查询均 200；SOL/USDC 30d 样本仅 126 个小时点，UTC 11/19 09:00–11/24 14:00。release useRateSnapshots 读 globals.chainId，而 Solana provider 保留 EVM chainId；需按实际 network 选 SDK/cache。地址比较已支持 base58 精确比较，无需重复修。先确认历史不足验收、符号/精度/投影；未做 UI 验收。
