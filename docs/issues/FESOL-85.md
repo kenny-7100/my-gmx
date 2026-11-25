@@ -1,5 +1,7 @@
 # FESOL-85 — GT Buyback 独立 rent receiver
 
+2026-11-25已再次实质解释当前需求及合约关联，后续当前记录从[ECO-41](ECO-41.md)接续；本文件保留历史映射。
+
 ## 当前入口：ECO-41（2026-11-23 核验）
 
 用户查询迁移对应编号。实时通过 Linear MCP 查询 `FESOL-85`，旧项仍为 Duplicate，duplicateOf 已指向 [ECO-41](https://linear.app/gmx-io/issue/ECO-41)；查询 `TRD-157` 也直接解析到同一 ECO-41（UUID `94ff875e-f14d-4543-b7f9-78a4550d2e1c`）。因此可检索链为 **FESOL-85 → TRD-157 → ECO-41**。当前团队 Ecosystem、状态 Triage、未设置实际 assignee，标签 Needs Response / Frontend / GMTrade。正文 Owner Orion 与 triage 建议 Sulliven 均不等于已分配负责人；实际关联为 SCSOL-29、ECO-32。只读核验编号/正文/元数据，未改 Linear 或核验实现；以下保留历史迁移记录。
