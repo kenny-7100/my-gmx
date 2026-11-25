@@ -1,5 +1,11 @@
 # TRD-91 — Solana Net Rate
 
+## 四条需求跟踪（2026-11-25 14:05，北京时间）
+
+角色：只读跟踪。仍为 In Progress / Rainer / Low，正文与评论无新增变化。生产 SOL/USDC 30d rates 返回142个小时点，覆盖 UTC 11/19 09:00–11/25 06:00，仍不足完整7/30天。
+
+本轮刷新四条Linear正文、关系和全部评论，并检查公开PR及release差异。按编号和开放PR关键词未确认这四条专属实现PR；不据此判断没有本地工作。release已到`a20f68913d`，较昨日基线新增价格REST/SDK类型改动，未改这四条核心接线；#3337仍OPEN、head `be9ca46ecb`。未运行UI/交易验收或修改Linear。
+
 ## 排除旧 SQD/后端后的复核（2026-11-24）
 
 用户明确不引入 GMTrade SQD/后端。本轮只复核数据路径，不刷新已查过的状态或重测 API。正式 gmx-api 的 `indexWorker → readSharedMarketSnapshot` 由 Solana RPC 读取市场/库存等账户，`tokens/tickers.ts` 经 `gmsolConfig.tickerUrls` 读取 GMX Arbitrum oracle keeper 价格；`indexStore → saveRateSample` 写入自身 `solanaRates`，`getRateHistory` 从该表查询。此 rates 链路未使用旧 SQD 或旧 keeper GraphQL，不能把 gmx-api 中独立 protocolStats 模块引用旧服务扩大成 rates 也依赖它。原前端实施判断成立，约 5 天历史不足、network SDK/cache 接线等边界不变；不建议新增旧 SQD 查询或用旧 SQD 回填规避正式来源要求。

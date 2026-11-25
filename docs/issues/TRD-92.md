@@ -1,5 +1,11 @@
 # TRD-92 — Solana 钱包与转账
 
+## 四条需求跟踪（2026-11-25 14:05，北京时间）
+
+角色：只读跟踪。今天北京时间09:25由 Backlog 进入 In Progress，负责人仍 Sulliven；无评论、无 blockedBy。拆分后的外部钱包与资产收发范围不变，embedded仍由TRD-210承接。
+
+本轮刷新四条Linear正文、关系和全部评论，并检查公开PR及release差异。按编号和开放PR关键词未确认这四条专属实现PR；不据此判断没有本地工作。release已到`a20f68913d`，较昨日基线新增价格REST/SDK类型改动，未改这四条核心接线；#3337仍OPEN、head `be9ca46ecb`。未运行UI/交易验收或修改Linear。
+
 ## 排除旧 SQD/后端后的复核（2026-11-24）
 
 用户明确不引入 GMTrade SQD/后端。按当前拆分后的外部钱包、Receive、SOL/SPL Send 范围，现有 session、RPC 余额/转账和 GMX Arbitrum oracle keeper 估值可以承接，不需旧站的 SQD、ticker 或钱包资产聚合服务。前端可实施结论不变；不把旧站转账历史列表顺带纳入本单。TRD-210 embedded 的 Privy 服务/配置是另项验证，不属于旧 GMTrade 业务后端。仅依赖边界复核，未重新验收签名、广播或权限。
