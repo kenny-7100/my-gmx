@@ -1,5 +1,9 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 提前讨论需求表追加（2026-11-25 14:08，北京时间）
+
+按用户明确授权，在[Frontend Task Organization](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)末尾追加独立英文表格“Requirements available for early discussion”，包含TRD-91/92/110/151的链接、负责人、当前状态及简介/讨论重点，声明当前cycle收尾期间可提前讨论。使用本轮已核验状态；保留客服GMX自有总量/30d数据及Tier依赖，注明embedded另归TRD-210。通过Linear skill/MCP执行append并回读确认四行完整、原15行表仍保留；没有刷新原表或修改issue/PR状态。
+
 ## Frontend Task Organization 只读核对（2026-11-24 14:12 北京时间）
 
 后续用户明确授权更新；于14:21更新同一线上文档并回读确认15行、9灰/6绿、负责人排序与历史周期列完整保留。更新7项Linear状态、统一#3337/独立#3335链接、当前冲突与checks范围及报告手测边界；未修改issue、PR或发布评论。
