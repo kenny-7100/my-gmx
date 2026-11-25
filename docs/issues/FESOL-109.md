@@ -1,5 +1,17 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 两张协调表完整刷新（2026-11-25 14:24，北京时间）
+
+按用户授权刷新[Frontend Task Organization](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)两张表并在聊天完整列中文。已读全部20项Linear正文、关系、附件、全部评论（均无下一页）、文档空评论、Trading cycles和12条当前PR的metadata/checks/reviews/正文；另核对新转账子项TRD-213。线上保存后回读确认原15行+提前讨论5行完整，负责人排序/历史周期/9灰6绿保留。未改issue/PR状态、未测试/部署/签名广播。
+
+- TRD-65/80/63由In Test变Done，Reflectiv已报告feature branch verified；TRD-78/70由In Progress变In Review。原负责人和周期不变。
+- #3223 `db43a01119`、#3337 `be9ca46ecb`均OPEN/Ready、MERGEABLE、待approval，各返回6项SUCCESS（Audit、component、general、SDK、两Pages）。撤掉旧冲突和仅Pages检查的结论；不等同完整验收。
+- #3335 `371253f08d`仍CONFLICTING/待approval，仅两Pages成功；#3318 `c71a99a0ad`仍Draft/CONFLICTING，general/component/SDK/WASM/Audit/Pages有成功，另两重复job为SKIPPED，不记通过。固定playground部署仍1932baa9/源码1a16e19552，不能当最新PR已部署。
+- 主表8条PR仍merged/approved，无新主表PR合并。#3337保留master前置的release协调、四条需求独立验收；70暂缓范围、78生命周期要求仍在。
+- 第二表91/92/158为Cycle1，110/151无cycle。新TRD-213是92子项，Cycle1/In Progress/Sulliven；Send按正文等待72签名能力进入release，Receive独立推进。父项未移除收发AC，不称范围已从92删除。客服GMX正式volume/Tier前置仍未闭合。
+
+原始GitHub快照在忽略目录`.local/table-refresh-20261125/`。本轮沿用此前同阶段rates142点/约6天观察，没有再次请求接口、重验SDK构造或生产部署。
+
 ## 提前讨论需求表追加（2026-11-25 14:08，北京时间）
 
 按用户明确授权，在[Frontend Task Organization](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)末尾追加独立英文表格“Requirements available for early discussion”，包含TRD-91/92/110/151的链接、负责人、当前状态及简介/讨论重点，声明当前cycle收尾期间可提前讨论。使用本轮已核验状态；保留客服GMX自有总量/30d数据及Tier依赖，注明embedded另归TRD-210。通过Linear skill/MCP执行append并回读确认四行完整、原15行表仍保留；没有刷新原表或修改issue/PR状态。

@@ -1,5 +1,9 @@
 # TRD-92 — Solana 钱包与转账
 
+## 转账子项与协调表刷新（2026-11-25 14:24，北京时间）
+
+实时父项仍Sulliven/In Progress/Cycle1，收发AC仍在正文；新增[TRD-213](https://linear.app/gmx-io/issue/TRD-213)是其正式子项，已于今天09:29进入In Progress，负责人Sulliven/Cycle1。子项正文明确Send依赖TRD-72的钱包session签名能力合入release；Receive独立推进，不依赖gmsol SDK/gmx-api新接口。此为当前交付契约，优先于下面昨日“未发现硬前置”的旧判断；不据此断言技术上无法在需求分支集成前置。已将关系、依赖补入线上提前讨论表，未修改需求本身。TRD-210 embedded继续单独跟踪。未确认专属公开实现PR，未重验代码或真实转账。
+
 ## 四条需求跟踪（2026-11-25 14:05，北京时间）
 
 角色：只读跟踪。今天北京时间09:25由 Backlog 进入 In Progress，负责人仍 Sulliven；无评论、无 blockedBy。拆分后的外部钱包与资产收发范围不变，embedded仍由TRD-210承接。
