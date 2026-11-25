@@ -1,5 +1,11 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 两表 Done 与合并状态专项核对（2026-11-25 22:53，北京时间）
+
+角色：只读协调审计。实时回读 Frontend Task Organization（现为主表15项、提前讨论表6项），查询全部21项当前Linear状态，并逐一核对10项Done需求的当前交付PR。结果为8项已合入release，另2项Done但未合并：TRD-85/Rainer的[#3223](https://github.com/gmx-io/gmx-interface/pull/3223)仍OPEN/非Draft/REVIEW_REQUIRED，head `db43a01119`；TRD-136/Kenny的[#3318](https://github.com/gmx-io/gmx-interface/pull/3318)仍OPEN/Draft/REVIEW_REQUIRED，head `c71a99a0ad`。两者mergedAt均为空；本次mergeable返回UNKNOWN，不沿用旧冲突结论。
+
+重读85/136正文、关系及全部评论：85于11月23日21:44标Done，同一分钟Reflectiv评论“Verified on feature branch - looks good”；该证据限于功能分支验证，不能代替合并。136于11月18日14:17标Done，无评论，属于已有持续playground灰色例外。文档已经分别注明85绿色未合并及136灰色例外，不能把9灰理解为9项已合并。第二表没有Done项；另发现TRD-110现已分配Sulliven、仍Todo，线上表仍写Unassigned。本次未改线上文档、issue、PR或执行产品验收。
+
 ## 两张协调表完整刷新（2026-11-25 14:24，北京时间）
 
 按用户授权刷新[Frontend Task Organization](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)两张表并在聊天完整列中文。已读全部20项Linear正文、关系、附件、全部评论（均无下一页）、文档空评论、Trading cycles和12条当前PR的metadata/checks/reviews/正文；另核对新转账子项TRD-213。线上保存后回读确认原15行+提前讨论5行完整，负责人排序/历史周期/9灰6绿保留。未改issue/PR状态、未测试/部署/签名广播。
