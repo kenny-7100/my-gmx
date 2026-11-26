@@ -124,6 +124,8 @@
 
 ## RL-05 验证必须能区分错误
 
+**2026-11-26 只读样本与验收边界：** [TRD-157](issues/TRD-157.md#测试协作经验2026-11-26) 中，可实施不等于已验收；单测证明 fixture 下的逻辑，真实 RPC 数据回放证明该样本的数据链路，均不能自动扩大为页面、钱包或未取得的特殊账户验收。缺少罕见样本时，先明确现有证据与缺口，再由验收负责人决定是否接受当前测试依据，不自行宣称“单测就够”。公共 owner 地址可用于只读校验，不代表能连接或控制该钱包。挑选样本须确认它经过实际 Store/season/索引/vault 等筛选后能到达目标分支；程序扫描的零结果仅覆盖所记录网络、布局、slot 和现存账户，不能推断历史或其他部署不存在该状态。
+
 **要保护的判断：** 通过的测试要能说明目标行为。先问“旧实现或缺少该 guard 时，这个输入是否仍通过？”对关键保护可定向做反例验证，不要求普遍 mutation testing，不以 mock 调用次数或样例数量代替业务结果。
 
 **证据：** [#3201 guard 缺失仍通过](https://github.com/gmx-io/gmx-interface/pull/3201#discussion_r4483355273)；[#3110 旧会话没有 picked 记录](https://github.com/gmx-io/gmx-interface/pull/3110#discussion_r4324738579)，新 preview 会话无法覆盖；[#3138 NEAR 两链精度不同](https://github.com/gmx-io/gmx-interface/pull/3138#discussion_r4375833519)，可区分精度来源。#3068 的 [worker 入口](https://github.com/gmx-io/gmx-interface/pull/3068#discussion_r4259921377)与 [bootstrap 缺失](https://github.com/gmx-io/gmx-interface/pull/3068#discussion_r4259921402)说明保护工具也要有失败反例。
