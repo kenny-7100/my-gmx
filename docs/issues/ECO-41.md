@@ -2,7 +2,7 @@
 
 ## 当前编号与协调表入口（2026-11-26）
 
-实时按同一 UUID `94ff875e-f14d-4543-b7f9-78a4550d2e1c` 查询，当前已移回 Trading，编号为 [TRD-157](https://linear.app/gmx-io/issue/TRD-157)，状态 In Progress，未设置实际 assignee；正文仍标 Owner Orion。完整历史链为 FESOL-85 → TRD-157 → ECO-41 → TRD-157。本文件保留此前代码调研，以下 Triage/ECO 归属为历史状态。
+实时按同一 UUID `94ff875e-f14d-4543-b7f9-78a4550d2e1c` 查询，当前已移回 Trading，编号为 [TRD-157](https://linear.app/gmx-io/issue/TRD-157)，最新状态为 Refining（2026-11-26 14:54 北京时间），未设置实际 assignee；正文仍标 Owner Orion。完整历史链为 FESOL-85 → TRD-157 → ECO-41 → TRD-157。本文件保留此前代码调研，以下 Triage/ECO 归属为历史状态。当前编号入口见 [TRD-157](TRD-157.md)。
 
 按用户授权，已在 [Frontend Task Organization](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15) 末尾新增第三张英文表格“GMTrade requirements”，录入本单当前编号、负责人边界、状态、租金归属及旧 completion 防护范围。保存后回读确认三张表存在、原两表正文完整保留。未改 issue 属性或重新核验代码/PR/部署，未实施业务。
 
