@@ -92,6 +92,8 @@
 
 ## RL-03 资格条件属于具体用途
 
+**租金接收人与资产所有者分开判断（2026-11-26，自审）：** [TRD-157](issues/TRD-157.md) 旧站修复中，exchange owner 拥有 GT Bank payout，不代表账户 rent 也归 owner。资格判断应覆盖统计金额/count 和实际交易构造；只隐藏按钮或提交前刷新同一缺失筛选均不足。旧 IDL 将新 receiver 暴露为 reserved 时，先核实协议保留布局及零值语义，再用 shipped IDL 的真实 coder 配合固定字节 fixture 验证；未知/解码错误不得默认可领取。共享 builder 的所有调用方一并接续，并保留 owner 的合法收益。此为旧 GMTrade 修复经验，不授权新 GMX 引入旧 SQD/后端；离线验证与真实链上验收分开。
+
 **要保护的行为：** 钱包能持有某 mint，与它可作抵押或 pay token 是不同资格。`isSynthetic` 等标签不能未经消费者语义核对就复用于余额过滤；读取后的展示筛选也需要单独确认。ATA 的合法零余额与损坏数据要区分，不能全部吞成零。
 
 **证据与回归风险：** [#3195 评论](https://github.com/gmx-io/gmx-interface/pull/3195#discussion_r4483348370)明确指出当时 WIF/BONK/PUMP 等真实资产仍能持有，PUMP 涉及 Token-2022；修复 `ae69b848ca` 后有 [11 月 6 日 reviewer 确认](https://github.com/gmx-io/gmx-interface/pull/3195#pullrequestreview-5800286122)。[11 月 9 日提交](https://github.com/gmx-io/gmx-interface/commit/2ad57a5c3bc21ced95528290c976ff757004cd8e)又引入 `!token.isSynthetic`，调查读取的 head `2495be234e` 仍有该过滤。不能推断作者动机，也未在本轮运行余额复现。另见[预充值、system-owned 空 ATA](https://github.com/gmx-io/gmx-interface/pull/3195#discussion_r4492569684)的合法状态判断。
