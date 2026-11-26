@@ -87,6 +87,20 @@
 
 ## 验证状态
 
+### 2026-11-26 项目现状有限核对
+
+北京时间21:22，角色：只读现状分析。当前为基础已合入、交易实现待审与组合验收阶段。在线 release=`d733f8956d6b590c04bfd96d586e3a4bfcc08a27`，API main=`04e2dafb2d399d0cb224e0d0197a2aef2e02c460`。本地主目录为干净的 `solana-integration`，HEAD=`4d976cd5fb`，与当时个人远端一致；个人基础不代表最新 release 或交易PR。release 已消费 `file:vendor/gmsol-sdk`，不能从个人基础的 npm pin 推断当前交付版本。
+
+- 已合并基础：市场/header #3201、余额 #3195、共享状态 #3193、SDK数学 #3242、单位转换 #3287、持仓订单展示 #3286、自建WASM #3314、Price/Depth #3223。重新读取 #3314/#3223 head/checks/改动清单，未重新验收页面。
+- [#3337](https://github.com/gmx-io/gmx-interface/pull/3337) OPEN、非Draft、REVIEW_REQUIRED，head=`32dde58aa76a173f3ecefb71b0dd11975b36e51b`，承接TRD-72/70/78/84，旧 #3315/#3316/#3317/#3293 已关闭。指定head的sender仍在签名前做RPC模拟/余额检查。当前仅两个Pages SUCCESS；正文报告的历史全量测试不等于当前head全量CI。正文明确仍缺改单、TP/SL触发、失败恢复、执行后刷新及更多钱包覆盖，并需协调携带的master改动。
+- 保证金 [#3335](https://github.com/gmx-io/gmx-interface/pull/3335) OPEN、REVIEW_REQUIRED，head=`4359c0682fc96959ee9a70745bfa7ce449dc4c34`，所见lint/types/tests、组件、SDK build、Audit及Pages成功；未验证与3337的组合。
+- Net Rate [#3362](https://github.com/gmx-io/gmx-interface/pull/3362) OPEN、REVIEW_REQUIRED，head=`b5a2d2e7b34d6965f963f27aef6b5462c990e054`。指定head的useRateSnapshots已按Solana networkId选SDK/cache，修复11月24日识别的路由缺口；所见检查含成功/跳过，未合并，不证明完整历史已验收。
+- 实时TRD-101仍以12月10日为验收后的公开目标，11月30日复核开仓/执行/刷新/平仓组合，12月4日必需实现、7–9日验收修复。TRD-107/108仍In Progress：受控开仓附TP/SL→改单→平仓及每步minContextSlot消费者验收、负载/新鲜度/恢复尚未收口；四钱包和flags准备仍需完成。API #373冷快照优化已合并、#380积压重放仍OPEN，故107正文的“本地尚无PR”属于旧阶段，优化合并也不等于验收完成。
+- TRD-158已缩至永续订单/保证金，其他发送动作检查移入TRD-222，见[原记录](issues/TRD-158.md)。TRD-213收发、TRD-110 Swap为Sulliven/In Progress，210 embedded为Backlog。历史/Claims/客服Refining，Pools/Earn/Referrals/GT Backlog。总计划仍将这些放在交易之后；设计/Tester不代表功能完成。新[TRD-223](issues/TRD-223.md)是交易主线及后续重构合并后的SDK迁移技术债。
+- [TRD-157](issues/TRD-157.md)属于旧GMTrade前端，沿当日记录保留合并/部署与真实第三方样本缺口，不计新GMX迁移成果。
+
+覆盖：官方MCP实时枚举Unification项目88项、hasNextPage=false（含历史/重复/取消/设计及非迁移项，不作为完成率分母），补读72/70/78/77/101/107/108/109/223完整正文与关系；72/101/107/108/223评论均空。GitHub检查前端最近180个PR、API最近60个PR及上述关键head/checks/四个源码文件。未补查全部其他项目、穷举仓库/分支/历史PR或读取全部需求正文，未重新执行生产API、链上、测试、构建或浏览器验收。因此不计算两个工作量百分比，不更新完整评估latest；原始证据在忽略目录 `.local/solana-progress/20261126T132214Z/`。
+
 2026-11-15 已执行[有限覆盖的项目现状核对](solana-progress-2026-11-15.md)：确认数学 #3242 已合并、四条交易相关 Draft 的当前 HEAD/checks 与 release 占位路由；线上 67 市场仍缺 tradeMath。当前 Linear 仅可见 40 条且关键 issue 连稳定 UUID 也不可读，原因未明，故本轮不更新工作量百分比或完整评估 latest 指针。
 
 2026-11-13 已执行一轮[带工作包权重的进度粗估](solana-progress-2026-11-13.md)：交易首发约 55%，当前有效需求及确认完整迁移均约 40%。包含在线 Linear、GitHub、当前源码和本地未提交实现；infra 权限、部署验收与部分历史代码覆盖仍有限，未更新完整成功评估的最新指针。这些数字只作该日期的工程估计，不作为当前验收或后续轮次的默认进度。
