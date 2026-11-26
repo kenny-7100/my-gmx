@@ -1,5 +1,9 @@
 # FESOL-20 — 订单发送与成交状态
 
+## Divhead 后续改动归因（2026-11-26）
+
+角色：只读增量分析。统一 #3337 从 `be9ca46ecb` 至 `32dde58aa7` 新增 Divhead 14条非 merge 和4条 merge，涉及限价 TP/SL 限制、发送恢复、共享通知/提交器、输入/改单撤单及索引追赶；对应行为、证据和验证边界见[统一归因记录](../solana-trading-dependencies.md#divhead-后续改动归因2026-11-26)。未运行新测试/钱包验收，不能沿用旧 head 的全绿结论。
+
 ## Allowlist 发布复定位（2026-11-25）
 
 角色：只读排障。private#5已合并，但发布workflow等待cloudflare-workers环境审批，线上四路仍为11-20旧Worker版本。新DOGE单4秒已成交，真实回执重放executed/closed；原页面三个历史方法仍403。责任/版本/签名及后续入口见[完整证据](../solana-trading-dependencies.md#allowlist-已合并但发布待审批的复定位2026-11-25)。未审批、部署或新发交易。

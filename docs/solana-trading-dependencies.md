@@ -1,5 +1,19 @@
 # Solana 交易链路依赖审计
 
+## Divhead 后续改动归因（2026-11-26）
+
+角色：只读提交与源码增量分析，回答 Kenny/Sulliven 开发后 Divhead 补了什么。[PR #3337](https://github.com/gmx-io/gmx-interface/pull/3337) 当前 OPEN / Ready、head `32dde58aa76a173f3ecefb71b0dd11975b36e51b`、无正式 reviews/inline comments。以此前 `be9ca46ecb` 为基线，新增18条提交均由 Divhead authored：14条非 merge、4条 merge；净改84文件（含测试/十份locale），+4192/-1941。不将此前已有的 shared SDK、LUT atomic 和 native SOL funding 提交算成本轮新增。时间归属依据 author date 与父链，不用历史重签的 committed date 推断开发顺序。
+
+- `f3db53c6a8`：decrease 不再 prepare 已不存在的 position；限价 increase 禁止附带 TP/SL（UI 隐藏、adapter/builder 拒绝），原因是 trigger 先触发可能使 keeper 关闭限价单依赖的空 position。市价附带 TP/SL 上限纳入已有仓位加本次 increase。
+- `0bcff1fb7c`、`aeda7f1299`、`799ef324bf`：pending 过期按 finalized 高度/slot 与状态核对；状态轮询失败继续核对；RPC 接受后每2秒重发同一签名字节，最多等待90秒；未广播且钱包签名期间过期可更新 blockhash 并仅再请求签名一次；钱包无响应120秒释放提交器，迟到签名忽略。后续 group 更新 blockhash，相关读取绑定确认 slot/minContextSlot，保留消息/指令校验。
+- `aa2165811f`、`3ded93847e`、`c9ff8f55fc`、`09060d8865`：RPC 403 立即结束跟踪并上报；共享 owner/session 通知和提交器，remount/路由变化保留跟踪，切 owner/network 才终止；关闭 toast 不取消刷新。通知逐订单对齐 EVM 标题、区分 owner cancel/keeper 未执行，失败纯函数分类及本地化，原始错误按需展示。此代码不证明独立 proxy allowlist 已部署。
+- `89feb19f2c`：Pay 跟随抵押 token，改变 token 时清空金额；已有 TP/SL 在 TradeBox 只读、从 positions list 编辑；清空新 trigger 行不再构建；native SOL 撤单 refund unwrap；部分市场价格覆盖缺失只阻断受影响市场，fee discount 请求失败不再直接阻断交易。缺失条件仍须按源码范围判断，非全局吞错。
+- `a924bf78e0`：图表撤单接入 Solana；cancel 与 edit 分开账户上下文，允许 swap order cancel；批量跳过不可撤项并告知；TP/SL 返回已确认 entries，部分成功清空对应输入，避免重复创建；修正 unlimited price sentinel 判断。pending-only 终态 guard 仍在，不能据此宣布此前 terminal owner-close 缺口已修复。
+- `4cfb0af940`：确认后60秒内 API 503 SLOT_NOT_REACHED /429 BUSY 视为 index syncing，保留已接受数据；过期窗口及其他错误仍报错，处理新 floor 超过在途旧读的竞态。
+- `02a77416ab`：预加载 SDK，冻结 LUT 会话缓存，可变 LUT 继续重读。`9932aeb1df`、`32dde58aa7`：Max/slider 为 native SOL 保留 network/keeper/rent 预算；准备已确认但订单未落链时携带 wrapped lamports/pending 证据，TradeBox 可切 Pay 到 WSOL 保留金额并解释；末条修正 error constructor options 传参。
+
+本轮未修改业务、PR/Linear 或运行测试/钱包验收，只核对提交、最终差异、关键实现和 README。当前 head 的 `gh pr checks` 仅返回两项 Pages pass，不能沿用 be9 的六项 CI 全绿或旧 PR 正文的全量测试作为本 head 验证。未复测代理线上状态。上述为代码行为归因，非完整安全 review/AC 完成结论。
+
 ## Allowlist 已合并但发布待审批的复定位（2026-11-25）
 
 用户提供仍未确认成交的截图及Divhead“published rpc.proxy allowlist”消息后重新定位，补齐此前只确认线上方法拒绝、未核对代理发布流水线的边界。已在kenny原生Chrome当前3337分支预览观察到新DOGE仓位及通知，建单签名`5oyZPWVMaDxZR42pFtxgRHSHameTo1EENq68XCYS1TZtM1KQVvStm8a84PMt8JKrDaaTCh7pL4uj32QLSuvXMRzU`。原页面只读fetch重发：getSlot 200；getTransaction/getSignaturesForAddress/getBlock均403/-32004 Method is not supported。未刷新页面或关闭通知，收尾关闭本轮Console恢复布局。

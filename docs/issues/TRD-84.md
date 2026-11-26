@@ -1,5 +1,9 @@
 # TRD-84 — Solana 平仓、编辑和撤单
 
+## Divhead 后续改动归因（2026-11-26）
+
+角色：只读增量分析。统一 #3337 从 `be9ca46ecb` 至 `32dde58aa7` 新增 Divhead 14条非 merge 和4条 merge，涉及限价 TP/SL 限制、发送恢复、共享通知/提交器、输入/改单撤单及索引追赶；对应行为、证据和验证边界见[统一归因记录](../solana-trading-dependencies.md#divhead-后续改动归因2026-11-26)。未运行新测试/钱包验收，不能沿用旧 head 的全绿结论。
+
 ## 状态与增量核验（2026-11-25）
 
 实时 Linear 仍 In Review；统一 #3337 已 Ready，head `be9ca46ecb`，六项 CI 全绿、尚无正式 review。相对上轮审查仅 RPC 配置变量重命名，历史方法 403 与终态关闭缺口仍未消除；本轮未重跑业务测试或交易验收。版本、责任与范围见[统一现状复核](../solana-trading-dependencies.md#pr-与关联需求现状复核2026-11-25)。
