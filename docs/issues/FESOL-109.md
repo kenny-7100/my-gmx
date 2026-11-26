@@ -1,5 +1,22 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 三表完整刷新（2026-11-26 14:11，北京时间）
+
+按用户授权更新 [Frontend Task Organization](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)。实时读取全部22项（15+6+1）正文/负责人/cycle/关系/附件及全部评论，文档评论为空、各评论无下一页；查询Trading cycles、12条当前主表PR、API #341、8条已替换PR和5条master前置PR，检索提前讨论/GMTrade专属PR并查看两仓库全部open列表。未查代码diff或执行产品测试；不把PR作者的测试声明当本轮独立验收。
+
+- TRD-85/#3223于北京时间11月26日02:30合入release，APPROVED，head `e10845c5a4`六项checks成功。主表现9行实际合并，加136灰色例外，共10灰/5绿；撤掉85未合并描述。
+- TRD-70/83/84实时cycleId均为Cycle1，修正表中旧Cycle2；全部15项现在Cycle1。状态未变，不将当前归属误写为改动issue或重新制定排期。
+- #3337现`c9ff8f55fc`，OPEN/Ready/CONFLICTING/REVIEW_REQUIRED，仅两项Pages checks成功；旧head六项通过不得复用于当前head。#3335现`4359c0682f`，OPEN/Ready/CONFLICTING/REVIEW_REQUIRED，六项checks成功，仍独立交付。#3318现`c71a99a0ad`，Draft/CONFLICTING/REVIEW_REQUIRED，八项checks成功、两项重复job跳过；一次UNKNOWN后再次查询确认冲突。
+- TRD-110已分配Sulliven，Todo、无cycle；补当前Swap例外。TRD-213的Send仍按正文等待72签名能力进入release，Receive可独立；TRD-210为Sulliven/Backlog，仍独立。
+- SOL/USDC正式30d rates GET为200，166小时点、UTC 11/19 09:00–11/26 06:00，跨度165小时、样本内部无缺口，仍不足完整7/30天。未扩大为全市场覆盖；API #341仍merged/main。
+- TRD-157仍未实际分配/In Progress/Cycle1，正文Owner Orion；未找到专属前端PR。SCSOL-29 Done、ECO-32 In Review，关联不自动变硬阻塞或部署完成。
+
+保存后回读核对22项、三表、10灰5绿、全部主表Cycle1及新head，旧head/旧cycle/旧计数描述已撤掉。保留原排序、历史周期列、产品验收边界与136例外。#3318所述固定部署仍1932baa9/源码1a16e19552，本轮未重验部署；master前置已合master不等于核实进入release。原始GitHub/生产rates响应保存在忽略目录`.local/table-refresh-20261126/`。本轮未改issue/PR属性、发评论、部署或签名广播。
+
+## 协调文档新增 GMTrade 表（2026-11-26）
+
+按用户授权，在 [Frontend Task Organization](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15) 末尾新增第三表“GMTrade requirements”，先收录 [TRD-157](https://linear.app/gmx-io/issue/TRD-157)（原 ECO-41）的 Buyback 独立 rent receiver 需求。实时核对为 Trading / In Progress / 未分配，正文 Owner Orion；表内区分实际 assignee 与正文 Owner，写明归属、金额/账户数排除、阻止旧 completion 及保留同 owner Claim Rent 的范围。保存回读确认原主表15项、提前讨论表6项完整保留，新表1项；未刷新原两表状态或改 issue/PR 属性。历史代码调查沿用 [ECO-41 记录](ECO-41.md)。
+
 ## 两表 Done 与合并状态专项核对（2026-11-25 22:53，北京时间）
 
 角色：只读协调审计。实时回读 Frontend Task Organization（现为主表15项、提前讨论表6项），查询全部21项当前Linear状态，并逐一核对10项Done需求的当前交付PR。结果为8项已合入release，另2项Done但未合并：TRD-85/Rainer的[#3223](https://github.com/gmx-io/gmx-interface/pull/3223)仍OPEN/非Draft/REVIEW_REQUIRED，head `db43a01119`；TRD-136/Kenny的[#3318](https://github.com/gmx-io/gmx-interface/pull/3318)仍OPEN/Draft/REVIEW_REQUIRED，head `c71a99a0ad`。两者mergedAt均为空；本次mergeable返回UNKNOWN，不沿用旧冲突结论。

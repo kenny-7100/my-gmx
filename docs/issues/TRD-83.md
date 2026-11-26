@@ -1,5 +1,9 @@
 # TRD-83 — Solana 仓位操作与保证金存取
 
+## 协调表状态刷新（2026-11-26）
+
+只读核对仍Sulliven/In Review，实时cycle为Cycle1，修正协调表旧Cycle2。#3335当前`4359c0682f`，OPEN/Ready/CONFLICTING/REVIEW_REQUIRED，六项checks成功；作者仍报告preview手测，不作为本轮独立验收。保证金交付与#3337分开，未改他人业务/PR或验证完整父任务AC。见[三表核验](FESOL-109.md#三表完整刷新2026-11-26-1411北京时间)。
+
 ## 与统一交易PR的关系核查（2026-11-23）
 
 本轮只读核验：Linear仍Sulliven/In Review；#3335仍OPEN/Ready、44580914b7、MERGEABLE/REVIEW_REQUIRED、checks成功、无reviews。GitHub compare明确TRD-83当前head在TRD-84 5fa8d01ce8上仅多一笔44580914b7（26文件），不是独立于84的平行实现。新增保证金存取、SOL/WSOL和Price impact接线，修改共享GmsolOrderActionsProvider/buildOrderActions/solanaOrderActions及orderInputs等，后续整合基础改变时需要接续。作者PR记录types/lint/format、19+23定向测试、3559全量测试及manual test通过；本轮未复跑，不据此确认需求全部AC或真实落链/刷新/关闭市场限制通过。

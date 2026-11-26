@@ -1,5 +1,9 @@
 # TRD-85 — Solana 共享图表与个人成交
 
+## 协调表合并状态刷新（2026-11-26）
+
+只读核对Linear/评论及GitHub：仍Rainer/Done/Cycle1，#3223已于北京时间11月26日02:30合入release，APPROVED，head `e10845c5a4`六项checks成功。线上协调表已改灰；Reflectiv的历史feature-branch verified不扩大为生产发布或完整验收。未重新审源码/测试，见[本轮三表核验](FESOL-109.md#三表完整刷新2026-11-26-1411北京时间)。
+
 ## 五需求晚间核查（2026-11-23）
 
 参与角色：只读依赖调研。#3223更新019069b7ed，相对已集成head仅新增locale并同步release，未发现新增chart runtime；Reflectiv新评论要求修正label，本轮未查看图片/聊天，不推断具体内容。 版本、证据与验证边界见[统一增量核查](../solana-trading-dependencies.md#五需求晚间增量核查2026-11-23-2130-cst)。本轮未修改业务或外部状态。
