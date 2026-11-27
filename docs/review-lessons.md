@@ -94,7 +94,7 @@
 
 **隐藏消费者重新启用（2026-11-16）：** [GMTrade #1096 / FESOL-115](issues/FESOL-115.md)恢复 FEES 列时，旧 formatter 将接口 null 显示为 `$0.00`。已有函数也须按新启用场景核对未知、不适用与真实零的显示契约；区分旧逻辑存在与本次首次暴露。移除提现 PDA 聚合则应核实当前接口 owner 已是钱包，不能用旧注释推定回归。
 
-**Solana LP 容量不是 EVM 储备公式的同义字段（2026-11-27）：** TRD-116 对照固定 SDK `7fe4008292ff` 发现，提取上限还受 MaxAfterWithdrawal 正向 trader PnL、储备值向上取整影响；用共享 EVM 可用抵押流动性只能得到部分约束。保持共享页面，在 PoolsData 边界提供协议SDK容量结果；错误/缺数据保持未知，不用旧公式回退。GLV配置的零值也须按协议判定“零cap”还是“无限制”，不能按字段名机械搬运。 TRD-116实现中amount/value零cap独立不限制，禁用组成池不计入容量，每池先clamp再求和以免超限池抵消其他池容量；vault cap估算不能当作含费用/价格影响的执行报价。见 [TRD-116 协议核验](issues/TRD-116.md#协议可卖出量与异步确认回归2026-11-27)。
+**Solana LP 容量不是 EVM 储备公式的同义字段（2026-11-27）：** TRD-116 对照固定 SDK `7fe4008292ff` 发现，提取上限还受 MaxAfterWithdrawal 正向 trader PnL、储备值向上取整影响；用共享 EVM 可用抵押流动性只能得到部分约束。保持共享页面，在 PoolsData 边界提供协议SDK容量结果；错误/缺数据保持未知，不用旧公式回退。GLV配置的零值也须按协议判定“零cap”还是“无限制”，不能按字段名机械搬运。 TRD-116实现中amount/value零cap独立不限制，禁用组成池不计入容量，每池先clamp再求和以免超限池抵消其他池容量；vault cap估算不能当作含费用/价格影响的执行报价。 GM的USD存入上限也须核对price端点：固定协议按collateral maxPrice校验，Solana展示显式opt-in maxPrice并用适配后的deposit LP价格换算，EVM保留midPrice默认；tooltip与headline使用同一口径。见 [TRD-116 协议核验](issues/TRD-116.md#协议可卖出量与异步确认回归2026-11-27)。
 
 **同地址也可能换了钱包连接器（2026-11-27）：** TRD-116自审发现，地址/网络/金额相同不代表签名会话相同；Phantom与Solflare可暴露同一owner。把明确选中的walletId发布到session，并作为review、异步结果与发送guard的依赖；不要用每render变化的sign函数identity代替业务会话identity。受控测试应覆盖同地址切连接器后旧review失效，以及签名等待期间guard变false。见[TRD-116回归](issues/TRD-116.md#同地址钱包切换保护与共享回归2026-11-27)。
 
