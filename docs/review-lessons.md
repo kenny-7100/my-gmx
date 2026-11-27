@@ -84,6 +84,8 @@
 
 **有区分力的核验：** 按影响选择“持仓存在但缺一项价格”“已有仓位的市场 disabled”“刷新失败后恢复”“切换 owner”。追踪原始列表、compose、selector、计数、展示与可操作性，不能只断言数组非空。新鲜度/禁止操作策略须按当前契约决定，历史缓存做法不能自动推广。
 
+2026-11-27 TRD-116：SDK/WASM要按固定binding核实所有权和输入契约。MarketGraph必须先插入market再更新token price；虚拟库存参与LP价格影响时须读取正式RPC账户，不能关闭该影响来让preview通过。`insert_glv(model)`借用/复制，调用方free；`CreateGlvWithdrawalsBuilder.build_with_options()`通过`__destroy_into_raw`消耗builder，调用方再free会抛null pointer。估值和预览每次独立模拟器，避免模拟变更累积。历史价格fixture须固定JS Date到参考时间；GLV按poolValue*balance/supply估值，与先截断whole GM price再乘余额的差异须按原子余额推导界限，不能随意放宽容差。详见[TRD-116](issues/TRD-116.md#glv-与流动性预览实施切片2026-11-27)。
+
 **真实消费者反例（2026-11-16）：** [TRD-70 本地联调](issues/FESOL-19.md#trd-136-真实钱包联调发现的余额接线修复2026-11-16)中余额 Hook 成功但共享 TokensData 未合并 balance/walletBalance，TradeBox按未知余额显示不足。核验必须走到共享验证/展示消费者及 loaded flags；合并时按当前 owner/network，未知与错误保留 undefined，合法0保持0，并验证 funded→切换/错误→zero，不能用一次 RPC 成功代替业务接线验收。
 
 **验收保护补充（2026-11-17）：** 同一余额接线修复在本地类型/行为测试通过后，远端零warning lint仍因import顺序及回归用例的JSX临时对象失败。相关修复/接缝除行为验证外须运行既有适用lint；测试文件同样受规则约束，不能以“只改测试”跳过。该次最小清理保留funded→undefined→zero断言及owner/network余额清除语义，不删除测试或放宽规则消除失败。
