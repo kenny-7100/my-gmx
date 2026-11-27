@@ -74,6 +74,8 @@
 
 **Solana 共享币种组件接缝（2026-11-18，实际页面复现）：** 集成 [TRD-84 #3293](issues/TRD-84.md) 后，平仓按钮已不再等待 EVM allowance，但接收行仍为空。TokenSelector 未传 tokenInfo 时回查 EVM getToken，未知 Solana mint 会直接返回 null；接收列表仍查 EVM reachable graph。修复应向既有组件传真实 token metadata，selector 只列正式 builder 支持的抵押币及 WSOL 对应 native SOL，保留 EVM 原路由；不要扩容 EVM 静态币种表或伪造 swap route。按钮可用、builder 模拟通过不足以证明表单完整，必须走到币种名称、金额、选择列表这些实际消费者。 后续接入TRD-142时，同类路径在TradeBox/MarginField再次出现，向调用方传真实fromToken；因此检查应覆盖所有由MultichainTokenSelector切换回TokenSelector的可达分支，不能只修当次弹窗。
 
+**Pools 共享页面的网络接缝（2026-11-27，TRD-116 原生页面复现）：** 列表数据 adapter 正确仍可能在 GmAssetDropdown 的 `getIcon(-501, "network")` 崩溃；网络图标使用既有 `getChainIcon(networkId)`，header 的链身份也必须取 networkId，不能继续显示兼容保留的 Arbitrum chainId。`selectTokensData` 只有价格，表单需沿实际 Solana wallet balance hook 组合余额，查询失败保持 unknown。同币抵押池（如 USDC/USDC）不能把一个可见输入同时赋给 long/short 金额。以上静态检查和单测不足以代替桌面/移动页面及真实交易验收，具体版本与边界见 [TRD-116 检查点](issues/TRD-116.md#交易提交与页面接通检查点2026-11-27)。
+
 ## RL-02 数据含义与完整性
 
 **要保护的行为：** 资产仍存在时，缺价格、请求失败或市场禁止新开仓不能被表示为零资产。区分零、空、未知、部分、过期；首次失败和带缓存刷新失败应分别处理。保留缓存需核对 owner、来源和本次列表，不能跨钱包复用或无限沿用过期值。
