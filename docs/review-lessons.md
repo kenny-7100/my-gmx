@@ -94,6 +94,8 @@
 
 **隐藏消费者重新启用（2026-11-16）：** [GMTrade #1096 / FESOL-115](issues/FESOL-115.md)恢复 FEES 列时，旧 formatter 将接口 null 显示为 `$0.00`。已有函数也须按新启用场景核对未知、不适用与真实零的显示契约；区分旧逻辑存在与本次首次暴露。移除提现 PDA 聚合则应核实当前接口 owner 已是钱包，不能用旧注释推定回归。
 
+**Solana LP 容量不是 EVM 储备公式的同义字段（2026-11-27）：** TRD-116 对照固定 SDK `7fe4008292ff` 发现，提取上限还受 MaxAfterWithdrawal 正向 trader PnL、储备值向上取整影响；用共享 EVM 可用抵押流动性只能得到部分约束。保持共享页面，在 PoolsData 边界提供协议SDK容量结果；错误/缺数据保持未知，不用旧公式回退。GLV配置的零值也须按协议判定“零cap”还是“无限制”，不能按字段名机械搬运。见 [TRD-116 协议核验](issues/TRD-116.md#协议可卖出量与异步确认回归2026-11-27)。
+
 ## RL-03 资格条件属于具体用途
 
 **租金接收人与资产所有者分开判断（2026-11-26，自审）：** [TRD-157](issues/TRD-157.md) 旧站修复中，exchange owner 拥有 GT Bank payout，不代表账户 rent 也归 owner。资格判断应覆盖统计金额/count 和实际交易构造；只隐藏按钮或提交前刷新同一缺失筛选均不足。旧 IDL 将新 receiver 暴露为 reserved 时，先核实协议保留布局及零值语义，再用 shipped IDL 的真实 coder 配合固定字节 fixture 验证；未知/解码错误不得默认可领取。共享 builder 的所有调用方一并接续，并保留 owner 的合法收益。此为旧 GMTrade 修复经验，不授权新 GMX 引入旧 SQD/后端；离线验证与真实链上验收分开。
