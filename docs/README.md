@@ -25,6 +25,7 @@
 | [可选的严格交付证据](agent-delivery-evidence.md) | 复杂资金/交易或明确需要移交时使用；保留已有身份、结果与来源绑定接口和历史验收 |
 | [Linear 需求查阅与复盘](linear-requirements.md) | FESOL 实时查询、全量快照、项目筛选和进度差异工具的配置、命令与验收记录 |
 | [需求推荐与就绪核验](solana-next-task.md) | 综合 Linear、GitHub PR、最新上游代码和实际前置，推荐下一条迁移需求 |
+| [Solana 实施候选（2026-11-27）](solana-readiness-2026-11-27.md) | 全项目扫描，区分可开工与完整交付；Kenny首选158、既有负责人队列及正式数据缺口，更新Net Rate/Pools状态 |
 | [Unification 前端 refining 优先级（2026-11-24）](solana-refining-priorities-2026-11-24.md) | 首轮12项排序及证据、排除旧SQD/后端后的修正、四条已深挖需求的阶段结论/下次讨论入口；后续跟踪/重评从[固定入口](solana-next-task.md#unification-持续跟踪与重复评估)接续 |
 | [Solana 迁移实际进度评估](solana-progress.md) | 跨仓库取证、去重与工作量估算，输出两个进度口径及中英文简述 |
 | [Agent 验收基础设施当前入口](agent-acceptance-infrastructure.md) | 当前能力、限制、执行授权和 A03 资源协调门槛；旧章节保留导航，按日期的调研与验收正文另见历史归档 |

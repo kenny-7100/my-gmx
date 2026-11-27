@@ -5,3 +5,7 @@
 已核对 release 共享 tradeActions 字段、旧站 tradeEvents/orderRemoveds 与最新 SQD schema。原始事件丰富但尚未证明有可供 GMX 全历史消费的完整接口。下一步事件覆盖/费用/PnL/折扣/lifecycle/分页矩阵和真实样例；DES-65 市场面板争议与个人历史区别处理，GT rewards 不进入 Trades。
 
 完整固定版本、代码/PR/生产查询证据及排序理由见 [11 月 24 日 refining 调研](../solana-refining-priorities-2026-11-24.md)。本文未完成业务实现或验收；恢复时刷新受影响依赖。
+
+## 全局实施候选复核（2026-11-27）
+
+角色：只读就绪调查。仍 Refining / 未分配；核对正式API与release历史调用路径，未证明有Solana完整历史接口，快照不替代事件索引。 完整证据、优先顺序和验证边界见 [本轮报告](../solana-readiness-2026-11-27.md)。未开发、运行页面/交易或修改 Linear。

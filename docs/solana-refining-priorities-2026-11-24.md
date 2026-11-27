@@ -1,5 +1,7 @@
 # Unification 前端 refining 优先级 — 2026-11-24
 
+后继评估：[2026-11-27 实施候选](solana-readiness-2026-11-27.md)。Net Rate已有前端PR，Pools/Swap/收发已有负责人；本页保留11月24日历史依据，当前选择以新报告为准。
+
 知识库归属：本仓库 `docs/` 的 Unification 需求评估。事实核验日期：2026-11-24；本次整理沿用该轮证据，没有重新查询线上状态。持续跟踪及再次排序的固定入口见[需求推荐与就绪核验](solana-next-task.md#unification-持续跟踪与重复评估)。本文保存本轮完整表格、说明及证据，作为下一轮比较的基线。
 
 本轮建议先 refining **TRD-91 Net Rate → TRD-92 钱包剩余范围 → TRD-110 Swap**。随后是客服、个人历史、Claims、Pools；TradFi 提前协调关键外部条件，但不把其后端工作列为前端候选。按用户与 Chloe 的讨论，Referrals、GT/Stake、Earn 放在正式 UI 代码合入后推进实现的后续批次。

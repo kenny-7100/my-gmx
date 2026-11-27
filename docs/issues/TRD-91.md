@@ -53,3 +53,7 @@ API main本轮已到 `f067594d40724a6116531d16d352f09c070cde2e`；相对上轮 `
 与 Rainer 协作的 refining 首选。API #341 已 merged，生产 rates 三个 period 查询均 200；SOL/USDC 30d 样本仅 126 个小时点，UTC 11/19 09:00–11/24 14:00。release useRateSnapshots 读 globals.chainId，而 Solana provider 保留 EVM chainId；需按实际 network 选 SDK/cache。地址比较已支持 base58 精确比较，无需重复修。先确认历史不足验收、符号/精度/投影；未做 UI 验收。
 
 完整固定版本、代码/PR/生产查询证据及排序理由见 [11 月 24 日 refining 调研](../solana-refining-priorities-2026-11-24.md)。本文未完成业务实现或验收；恢复时刷新受影响依赖。
+
+## 全局实施候选复核（2026-11-27）
+
+角色：只读就绪调查。发现正式前端 PR #3362，head d278ca5d51d5170c683f7dc8e726ad2e408477b2，OPEN/release/REVIEW_REQUIRED，当前CI成功、无review/未解决线程；实际diff有network/cache与缺口处理。生产指定市场30d为190小时点、跨度189小时，不足30天。接续现有PR，不重开实现。 完整证据、优先顺序和验证边界见 [本轮报告](../solana-readiness-2026-11-27.md)。未开发、运行页面/交易或修改 Linear。
