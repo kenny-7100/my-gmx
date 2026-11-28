@@ -87,6 +87,14 @@ Information 明确所有等级均需 PoC；Web & App 需代码，并呈现对范
 
 当前缺口：11 条关联编号均由工程记录还原，未取得这些 SEC 原始报告的完整正文、最终赏金接纳/支付明细，也未还原产品经理所述 17 条的完整集合。已有 5 条团队确认与上线、2 条 Medium 评定证据可用于校准，但不推断其余状态。另读到一份历史附件报告，其当前路径已被替换，不能算当前有效或已支付样本。
 
+## 2026-11-28 `origin/master` 只读审查增量
+
+本次以 `origin/master` commit `2aa7dd524088c41eb706de060133b23a8a12ad77` 为基线，重点检查交易入口、钱包网络、Permit/relay、URL 参数、localStorage、重定向和危险 HTML sink。已确认交易发送层的实时钱包网络校验仍存在，`src/lib/rpc/UncheckedJsonRpcSigner.ts` 与 `src/lib/transactions/walletChainSafety.spec.ts` 覆盖错误网络阻断，因此没有把“调用方传入 chainId”单独报告为跨链发送问题。
+
+发现一个待验证候选：`src/domain/synthetics/orders/useSetOrdersAutoCancelByQueryParams.ts` 在 URL 含非空 `setOrdersAutoCancel`、订单数据加载完成且钱包已连接时，会直接调用 `setAutoCancelOrdersTxn`，批量把符合条件的 TP/SL 订单更新为 `autoCancel: true`；`setAutoCancelOrdersTxn` 随后构造 `ExchangeRouter.multicall`。调用发生在 `useEffect`，没有页面内显式确认按钮，URL 参数在调用后立即清理。钱包仍要求用户批准，代码审查尚未证明无交互广播、跨用户影响或确定的资金不可追回结果；因此状态为 **待验证安全候选**，不标记为已确认 Critical/High，也不写入私密报告结论。
+
+后续验证应在本地 fork/受控测试环境中确认：访问 deep link 是否仅弹出交易请求、是否会重复触发、订单刷新或钱包/网络切换是否会发送旧集合，以及 `autoCancel` 对仓位关闭和后续订单执行的实际合约影响。若保留该入口，建议改为只打开说明/预览状态，由用户明确点击后重新读取订单并显示数量、订单、费用和当前网络，再构造交易；拒签、失败和提交未知状态应分别处理。此次审查未启动浏览器、钱包签名、交易广播、DoS 测试或外部报告。
+
 ## 私下报告与验证边界
 
 用户提供的产品经理建议明确：可利用信息先私下报告给 **Zeke 或 Orion**，不要直接放入 Linear。用户当前授权是理解公开/获准报告和沉淀筛选方法，尚未要求开始扫描当前业务代码。

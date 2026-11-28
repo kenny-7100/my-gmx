@@ -6,6 +6,8 @@
 
 公开 review 的防回归判断：[#3136 保留用户已选 limits](https://github.com/gmx-io/gmx-interface/pull/3136#discussion_r4666974113)不能在 Re-sign 时换成更宽默认值；[#3209 旧合约撤销历史](https://github.com/gmx-io/gmx-interface/pull/3209#discussion_r4680014558)不能只认新 counter，最终已补旧 action-limit 痕迹；[#3292 quote 刷新](https://github.com/gmx-io/gmx-interface/pull/3292#discussion_r4615490315)按影响交易的语义判断失效，不能用整个对象 identity 取消等价签名。以上为已读讨论及最终修复，不代表本次重跑测试或当前生产复测。
 
+**URL 参数不得直接成为交易触发器（2026-11-28，origin/master 只读审查）：** `src/domain/synthetics/orders/useSetOrdersAutoCancelByQueryParams.ts` 在读取非空 `setOrdersAutoCancel` 后，会等待订单数据和 signer，然后直接调用 `setAutoCancelOrdersTxn`，批量把现有 TP/SL 订单编码为 `autoCancel: true`；它没有页面内显式确认步骤，且在调用后立即删除 URL 参数。当前代码仍需要用户在钱包中批准，尚未证明可无交互广播或必然造成资金损失，因此记录为待验证安全候选，不作已确认赏金漏洞。后续审查 URL/deep link 时，应区分“预填页面状态”和“启动签名/交易”；后者必须有明确用户动作、当前状态复核、订单/费用摘要和错误终态处理。验证应覆盖已连接钱包打开链接、订单刷新/钱包切换、重复渲染及拒签/失败路径。代码基线为 `origin/master` `2aa7dd524088c41eb706de060133b23a8a12ad77`，未启动浏览器、钱包或交易。
+
 ## RPC探活不等于成交证据方法可用（2026-11-24）
 
 3337真实DOGE市价单回执重放正常，线上代理却允许getSlot、拒绝getTransaction/getSignaturesForAddress/getBlock，导致已成交但toast未确认。RPC接入或切代理后，按真实消费者验证每个方法/参数/响应字段及对应路由；mock suite、探活成功、仓位API可读都不能替代。永久method/权限拒绝须与索引延迟分开诊断，不能静默重试到超时，也不以仓位出现代替同一订单成交证据。见[取证与范围](solana-trading-dependencies.md#市价单已成交但通知未确认的线上定位2026-11-24)。
