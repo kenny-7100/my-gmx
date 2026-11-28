@@ -8,6 +8,8 @@
 
 **URL 参数不得直接成为交易触发器（2026-11-28，origin/master 只读审查）：** `src/domain/synthetics/orders/useSetOrdersAutoCancelByQueryParams.ts` 在读取非空 `setOrdersAutoCancel` 后，会等待订单数据和 signer，然后直接调用 `setAutoCancelOrdersTxn`，批量把现有 TP/SL 订单编码为 `autoCancel: true`；它没有页面内显式确认步骤，且在调用后立即删除 URL 参数。当前代码仍需要用户在钱包中批准，尚未证明可无交互广播或必然造成资金损失，因此记录为待验证安全候选，不作已确认赏金漏洞。后续审查 URL/deep link 时，应区分“预填页面状态”和“启动签名/交易”；后者必须有明确用户动作、当前状态复核、订单/费用摘要和错误终态处理。验证应覆盖已连接钱包打开链接、订单刷新/钱包切换、重复渲染及拒签/失败路径。代码基线为 `origin/master` `2aa7dd524088c41eb706de060133b23a8a12ad77`，未启动浏览器、钱包或交易。
 
+**审查目标必须与实际读取的源码版本对应（2026-11-28）：** 本次 master 安全接续中，个人基础的 Permit 检查已包含 PRO-4561 的后续保护，而目标 master 仍有不同的异常处理。跨分支 review 直接读取目标 ref，或先核对相关 blob/diff；当前工作区的防护与测试不能证明目标已修复。已有修复提交属于去重线索，分别核对目标包含、上游合入和生产部署，不重新包装为新发现。接续范围与缺口见[安全审查增量](gmx-frontend-security-triage.md#express--external-swap-接续检查)。
+
 ## RPC探活不等于成交证据方法可用（2026-11-24）
 
 3337真实DOGE市价单回执重放正常，线上代理却允许getSlot、拒绝getTransaction/getSignaturesForAddress/getBlock，导致已成交但toast未确认。RPC接入或切代理后，按真实消费者验证每个方法/参数/响应字段及对应路由；mock suite、探活成功、仓位API可读都不能替代。永久method/权限拒绝须与索引延迟分开诊断，不能静默重试到超时，也不以仓位出现代替同一订单成交证据。见[取证与范围](solana-trading-dependencies.md#市价单已成交但通知未确认的线上定位2026-11-24)。
