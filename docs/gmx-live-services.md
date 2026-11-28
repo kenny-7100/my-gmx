@@ -6,6 +6,18 @@
 
 GMTrade 的独立服务见[GMTrade 当前线上服务地址](gmtrade-live-services.md)；后续核验顺序见[线上行为与数据核验](agent-acceptance-workflow.md#线上行为与数据核验)。两项目的服务不可混作新 GMX Solana API 的已部署证明。
 
+## 生产发布分支
+
+2026-11-28 独立核验：正式交易站点 https://app.gmx.io/ 当前发布源码对应 `master`，不要将 GitHub 默认分支 `release` 当作生产发布分支。
+
+- 远端 `master` HEAD 为 `8d0a5f66c2305dac66022dd257cde88f9b962afb`；线上 HTML 引用 `/assets/index-bHPWr5ul.js`，其加载的 `/assets/bootstrap-x4Y4QDIC.js` 中，`window.getAppVersion` 返回同一完整 SHA。通过 HTTP 只读获取脚本，未操作页面或钱包。
+- [Release 137 PR #3368](https://github.com/gmx-io/gmx-interface/pull/3368) 从 `release-137` 合入 `master`；该 HEAD 来自随后合入的 [Hotfix PR #3376](https://github.com/gmx-io/gmx-interface/pull/3376)。
+- 上游 [PR Naming Conventions](https://github.com/gmx-io/gmx-interface/blob/master/.github/workflows/pr-rules.yml) 对目标 `master` 的 PR 检查 `release-*` / `hotfix-*` 来源与相应标题；这是配置意图，不代表历史上没有其他来源的合并。
+- 该 SHA 的 GitHub checks 显示 `Cloudflare Pages: gmx-interface` 和 `Cloudflare Pages: gmx-interface-home` 部署成功。应用 check 同时给出 `test.gmx-interface.pages.dev` 分支预览地址，因此不能只凭部署成功或预览地址判断生产；上述线上构建 SHA 对齐才是本次生产版本证据。
+- 上游 `update-testing.yml` 在 `master` push 后将其合入 `test`；`test` 是另一个同步目标，不应据此当作正式发布源码入口。GitHub 默认分支查询结果为 `release`，其 HEAD 为 `700fa44a16381eb76d29abce6ab5caf45dd8d580`，与本次线上构建不同。
+
+本次未读取 Cloudflare 控制台的 production branch 设置；结论基于实际线上产物、远端提交和发布 PR 的交叉核验。版本 SHA 和资源文件名仅代表本次观察，后续排障应重新对齐目标站点与远端提交。
+
 ## 核心业务服务：浏览器已实际请求
 
 下列三条链的市场配置/数值 API、价格 ticker 和 SQD 均观察到 HTTP 200；Avalanche/MegaETH 部分请求在 Stats 聚合页也已出现。
