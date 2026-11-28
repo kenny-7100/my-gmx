@@ -87,6 +87,17 @@
 
 ## 验证状态
 
+### 2026-11-28 周报事实核对
+
+北京时间18:22，角色：只读团队周报整理。以实时项目更新（11月23日）为上期基线，枚举Unification项目88项（hasNextPage=false），补读101/107/108/109/72/83/91/110/213正文及关系、101/107空评论，并核对前端最近150个PR、API最近70个PR及关键PR当前head/checks。仅形成周报，不作全量迁移工作量评估、不更新完整评估latest。
+
+- 交易[#3337](https://github.com/gmx-io/gmx-interface/pull/3337) `8b7dbfc26ce8a104a5385308ba903d29137cc467`、保证金[#3335](https://github.com/gmx-io/gmx-interface/pull/3335) `664fa1ac5c6b334f12d8af6afe8c8a3d41ee0bdc`、Net Rate[#3362](https://github.com/gmx-io/gmx-interface/pull/3362) `d278ca5d51d5170c683f7dc8e726ad2e408477b2`均OPEN / REVIEW_REQUIRED，所见六项检查均SUCCESS。3335已接续3337；11月26日记录中的旧head/检查缺口不能当作当前结论。3337正文保留的master协调事项被实时101的新记录说明已完成，剩余为继续同步release及review/真实钱包验收。CI通过不等于组合交易验收通过。
+- Price/Depth[#3223](https://github.com/gmx-io/gmx-interface/pull/3223)于UTC11月25日18:30（北京时间26日02:30）合并；TRD-85早于实际合并已标Done，周报按GitHub合并时间记本周成果。3362说明历史从11月19日起采集，不能称已有完整30天历史。
+- API[#366](https://github.com/gmx-io/gmx-api/pull/366)延迟/真实payload新鲜度观测、[#373](https://github.com/gmx-io/gmx-api/pull/373)gzip冷快照、[#380](https://github.com/gmx-io/gmx-api/pull/380)扩大有界积压重放均于本周合并；[#384](https://github.com/gmx-io/gmx-api/pull/384)RPC slot落后观测仍OPEN。107正文的“373优化尚无PR”已过时。23日960/960受控读取与12持仓/28订单参考比对为负责人记录的有限证据，不代表生产容量、受控交易序列或持续恢复验收完成；本轮未独立复跑部署/负载。
+- 101实时正文明确11月30日开仓→执行→刷新→平仓目标在11月27日仍有风险；12月10日公开目标以验收为前提。剩余含改单、TP/SL触发、失败恢复、执行驱动刷新、四钱包、保证金与SOL不足保护、API负载/恢复和108消费者/受控交易验收。158保留永续/保证金，222承接其他动作；Swap/收发在研、Privy embedded Backlog，Pools/历史/Claims等仍须后续交付，不能把设计Tester视作功能完成。
+
+本轮未运行测试、构建、浏览器、链上或线上部署检查，未修改Linear或发布周报；只读证据支持团队周报，不能据此新增验收结论或上线承诺。
+
 ### 2026-11-26 项目现状有限核对
 
 北京时间21:22，角色：只读现状分析。当前为基础已合入、交易实现待审与组合验收阶段。在线 release=`d733f8956d6b590c04bfd96d586e3a4bfcc08a27`，API main=`04e2dafb2d399d0cb224e0d0197a2aef2e02c460`。本地主目录为干净的 `solana-integration`，HEAD=`4d976cd5fb`，与当时个人远端一致；个人基础不代表最新 release 或交易PR。release 已消费 `file:vendor/gmsol-sdk`，不能从个人基础的 npm pin 推断当前交付版本。
