@@ -1,5 +1,9 @@
 # TRD-91 — Solana Net Rate
 
+## 公开前端 PR 已确认（2026-11-27）
+
+协调表审计：实时仍Rainer/In Progress/Cycle1，现有前端 [#3362](https://github.com/gmx-io/gmx-interface/pull/3362)，head `d278ca5d51d5170c683f7dc8e726ad2e408477b2`，OPEN/Ready/MERGEABLE/REVIEW_REQUIRED，六项返回checks成功。正文报告按network/API环境/market/timeframe隔离请求缓存、复用共享图表、历史缺口/错误/缓存提示及本地浏览器验证；branch preview验证仍pending。本文未审diff或独立验收，不能据PR报告称完整范围完成。撤销当前无公开PR的判断；下文保留为历史观察。API #341仍merged；本轮未请求rates，166点仅为11月26日样本。线上协调表已更新，完整证据见[FESOL-109本轮记录](FESOL-109.md)。
+
 ## 协调表历史覆盖刷新（2026-11-26）
 
 实时仍Rainer/In Progress/Cycle1，评论无新增；API #341仍merged/main。正式接口SOL/USDC的30d查询HTTP200、166小时点，UTC11/19 09:00–11/26 06:00，跨度165小时，内部相邻点均1小时；不足完整7/30天，不扩大为全市场结论。协调表已更新；按编号/历史编号及当前open列表未找到专属前端PR，未重新查release接线或执行UI验收。见[三表核验](FESOL-109.md#三表完整刷新2026-11-26-1411北京时间)。

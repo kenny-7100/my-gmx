@@ -1,5 +1,17 @@
 # FESOL-109 — Solana 交易范围与时间节点
 
+## 三表刷新（2026-11-27 14:22，北京时间）
+
+按用户授权更新 [Frontend Task Organization](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)，保留英文正文，在聊天用中文列出结果。实时读取原22项及TRD-210正文、关系、附件和全部评论，新增读取TRD-222及评论；各评论无下一页，文档评论为空。核对Trading cycles、12条主表PR、Net Rate #3362、API #341、旧前端#1108，两前端完整open列表及110/213/151/158/222全状态编号搜索。只做协调状态核验，未审代码diff或独立运行产品测试。
+
+- #3337现`8b7dbfc26c`，#3335现`664fa1ac5c`；两者OPEN/Ready/MERGEABLE/REVIEW_REQUIRED，各返回六项SUCCESS。撤掉旧冲突及3337仅Pages检查结论；报告的手测不扩大为本轮验收。#3318仍`c71a99a0ad`、Draft/CONFLICTING，八项成功、两项跳过，部署声明仍1932baa9/源码1a16e19552，未重验部署。
+- TRD-91仍Rainer/In Progress/Cycle1，新增公开前端[#3362](https://github.com/gmx-io/gmx-interface/pull/3362)，`d278ca5d51`、OPEN/Ready/MERGEABLE/REVIEW_REQUIRED，六项checks成功。正文报告本地浏览器验证，branch preview待验证；不冒充独立复验。11月26日rates166小时点保留明确历史日期，本轮未请求接口，不能当当前覆盖。
+- TRD-110现Sulliven/In Progress/Cycle1，撤掉Todo/无cycle；未找到专属公开实现PR，不证明没有本地工作。
+- TRD-158限定永续订单与保证金；其他动作已移TRD-222/Kenny/Todo/Cycle2，追加同一后续表，保留GLV 0.01/0.03专项及产品链路边界。范围依据沿两单既有记录。
+- TRD-157现Kenny/Refining/无cycle，正文Owner Orion仍单列。旧前端[#1108](https://github.com/gmsol-labs/gmx-solana-interface/pull/1108)于11月26日20:52合main，head `9df133bdc0`；评论报告vscode检查主网682/Devnet21账户均无独立receiver，request_gt_exchange_v2未发布、日期未定，真实V2账户验证仍待。此为评论证据，不宣称本轮重扫账户、验收或部署。
+
+保存回读确认三表15+7+1项、10灰5绿、原排序/历史cycle/136例外保留，旧head已撤掉。主表9行实际合并，其他状态/负责人未变。原始GitHub响应在忽略目录`.local/table-refresh-20261127/`；未改issue/PR属性、评论或部署，未签名广播。前置master PR是否已进入release本轮未独立核验，旧状态注明沿用。
+
 ## 三表完整刷新（2026-11-26 14:11，北京时间）
 
 按用户授权更新 [Frontend Task Organization](https://linear.app/gmx-io/document/frontend-task-organization-8b65bab92d15)。实时读取全部22项（15+6+1）正文/负责人/cycle/关系/附件及全部评论，文档评论为空、各评论无下一页；查询Trading cycles、12条当前主表PR、API #341、8条已替换PR和5条master前置PR，检索提前讨论/GMTrade专属PR并查看两仓库全部open列表。未查代码diff或执行产品测试；不把PR作者的测试声明当本轮独立验收。
