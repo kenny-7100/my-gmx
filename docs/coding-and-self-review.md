@@ -8,6 +8,7 @@
 
 | 工作 | 必读资料 |
 | --- | --- |
+| GMX 前端安全专项检查 | [安全问题筛选与案例校准](gmx-frontend-security-triage.md)：先匹配实际影响与公开规则，复核 PoC、排除项及私下报告边界；不把规则基线当作已接纳案例统计 |
 | 前端及 SDK 开发 | [gmx-interface-dev](../gmx-prompts/skills/gmx-interface-dev/SKILL.md)、[项目概览](../gmx-prompts/docs/gmx-interface/main.md)、[编码规范](../gmx-prompts/docs/gmx-interface/code-guidelines.md)、[UI 风格](../gmx-prompts/docs/gmx-interface/style-guidlines.md) |
 | 前端及 SDK 自审 | [gmx-interface-review](../gmx-prompts/skills/gmx-interface-review/SKILL.md)、[审查标准与实例](../gmx-prompts/skills/gmx-interface-review/references/review-rules.md) |
 | Solana 集成 | [gmx-solana](../gmx-prompts/skills/gmx-solana/SKILL.md)，结合开发、自审规范及 ADR-0015 |

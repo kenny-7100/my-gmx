@@ -1,5 +1,11 @@
 # Review 经验与开发判断
 
+## 前端安全报告按完整影响链筛选（2026-11-28）
+
+已还原 11 个 Immunefi 编号关联的前端修复，结合公开条款形成[筛选标准](gmx-frontend-security-triage.md)与[案例证据](gmx-frontend-security-cases-2026-11.md)。优先追踪用户意图→表单/异步估算→签名/转账→合约结果的一致性；无攻击者的界面逻辑财务损失也在 GMX 范围内。真实 bug、工程确认、已合并、已上线、赏金接纳/支付分开判断，特别保留 PRO-4596“参数错已复现，但报告交易/损失与重复尚未确认”的反例。候选可利用细节先私下交 Kenny→Zeke/Orion，不进入自动推送的普通 issue/docs。
+
+公开 review 的防回归判断：[#3136 保留用户已选 limits](https://github.com/gmx-io/gmx-interface/pull/3136#discussion_r4666974113)不能在 Re-sign 时换成更宽默认值；[#3209 旧合约撤销历史](https://github.com/gmx-io/gmx-interface/pull/3209#discussion_r4680014558)不能只认新 counter，最终已补旧 action-limit 痕迹；[#3292 quote 刷新](https://github.com/gmx-io/gmx-interface/pull/3292#discussion_r4615490315)按影响交易的语义判断失效，不能用整个对象 identity 取消等价签名。以上为已读讨论及最终修复，不代表本次重跑测试或当前生产复测。
+
 ## RPC探活不等于成交证据方法可用（2026-11-24）
 
 3337真实DOGE市价单回执重放正常，线上代理却允许getSlot、拒绝getTransaction/getSignaturesForAddress/getBlock，导致已成交但toast未确认。RPC接入或切代理后，按真实消费者验证每个方法/参数/响应字段及对应路由；mock suite、探活成功、仓位API可读都不能替代。永久method/权限拒绝须与索引延迟分开诊断，不能静默重试到超时，也不以仓位出现代替同一订单成交证据。见[取证与范围](solana-trading-dependencies.md#市价单已成交但通知未确认的线上定位2026-11-24)。
